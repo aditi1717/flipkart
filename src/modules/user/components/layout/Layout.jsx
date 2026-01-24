@@ -1,0 +1,56 @@
+import { Outlet, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import Header from './Header';
+import BottomNav from './BottomNav';
+
+const Layout = () => {
+    const location = useLocation();
+    const isPDP = location.pathname.includes('/product/');
+    const isCategory = location.pathname.includes('/category/');
+    const isSpecialPage = isPDP || isCategory;
+
+    // Pages that provide their own header/navigation and should hide the global header
+    const isStandalonePage = [
+        '/cart',
+        '/checkout',
+        '/order-success',
+        '/my-orders',
+        '/track-order',
+        '/deals',
+        '/notification-settings',
+        '/select-language',
+        '/coupons',
+        '/help-center',
+        '/addresses',
+        '/login',
+        '/signup'
+    ].some(path => location.pathname.includes(path));
+
+    return (
+        <div className="w-full min-h-screen flex flex-col relative bg-background-light dark:bg-background-dark overflow-x-hidden">
+            {!isStandalonePage && <Header />}
+            <main className={`flex-1 ${!isPDP && 'pb-20'} md:pb-0 w-full mx-auto md:max-w-7xl transition-all duration-300 
+                ${isStandalonePage ? 'pt-0' : isSpecialPage ? 'pt-[64px]' : 'pt-[176px]'} md:pt-[100px]`}>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={location.pathname}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <Outlet />
+                    </motion.div>
+                </AnimatePresence>
+            </main>
+            {!location.pathname.includes('/product/') &&
+
+                !location.pathname.includes('/checkout') &&
+                !location.pathname.includes('/login') &&
+                !location.pathname.includes('/signup') &&
+                !location.pathname.includes('/track-order') && <BottomNav />}
+        </div>
+    );
+};
+
+export default Layout;
