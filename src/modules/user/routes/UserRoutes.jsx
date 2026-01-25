@@ -23,6 +23,8 @@ import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import ProtectedRoute from './ProtectedRoute';
 import ProductListingPage from '../pages/ProductListingPage';
+import SellerRegistration from '../pages/SellerRegistration';
+import AllCategories from '../pages/AllCategories';
 
 const UserRoutes = () => {
     return (
@@ -49,10 +51,12 @@ const UserRoutes = () => {
                 <Route path="my-orders/:orderId/return" element={<ProtectedRoute><ReturnOrder /></ProtectedRoute>} />
                 <Route path="my-orders/:orderId/return/:productId" element={<ProtectedRoute><ReturnOrder /></ProtectedRoute>} />
                 <Route path="deals" element={<TopDeals />} />
+                <Route path="categories" element={<AllCategories />} />
                 <Route path="category/:categoryName/*" element={<CategoryPage />} />
                 <Route path="product/:id" element={<ProductDetails />} />
                 <Route path="login" element={<Login />} />
                 <Route path="signup" element={<Signup />} />
+                <Route path="seller-registration" element={<SellerRegistration />} />
             </Route>
         </Routes>
     );

@@ -199,19 +199,17 @@ const Cart = () => {
 
             {/* Bottom Actions */}
             {cart.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex flex-col z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-                    <div className="flex items-center justify-between mb-2 px-1">
-                        <div className="flex flex-col">
-                            <span className="text-lg font-bold">₹{(price + delivery).toLocaleString()}</span>
-                            <span className="text-[10px] text-blue-600 font-bold">View price details</span>
-                        </div>
-                        <button
-                            onClick={() => navigate('/checkout')}
-                            className="bg-[#fb641b] text-white px-10 py-3 rounded font-bold uppercase text-sm"
-                        >
-                            Place Order
-                        </button>
+                <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-3 flex items-center justify-between z-[100] shadow-[0_-4px_6px_rgba(0,0,0,0.1)]">
+                    <div className="flex flex-col">
+                        <span className="text-xl font-bold">₹{(price + delivery).toLocaleString()}</span>
+                        <span className="text-xs text-blue-600 font-bold cursor-pointer" onClick={() => document.getElementById('price-details')?.scrollIntoView({ behavior: 'smooth' })}>View price details</span>
                     </div>
+                    <button
+                        onClick={() => navigate('/checkout')}
+                        className="bg-[#fb641b] text-white px-8 py-3 rounded-md font-bold text-sm shadow-sm hover:bg-[#e65a17] transition w-1/2 ml-4"
+                    >
+                        Place Order
+                    </button>
                 </div>
             )}
         </div>

@@ -1,0 +1,187 @@
+import React, { useState } from 'react';
+import { MdAdd, MdEdit, MdDelete, MdExpandMore, MdChevronRight, MdCheckCircle, MdCancel } from 'react-icons/md';
+import useCategoryStore from '../../store/categoryStore';
+import CategoryForm from './CategoryForm';
+
+const CategoryList = () => {
+    const { categories, deleteCategory, toggleCategoryStatus } = useCategoryStore();
+    const [expandedIds, setExpandedIds] = useState(new Set());
+    const [showForm, setShowForm] = useState(false);
+    const [editingCategory, setEditingCategory] = useState(null);
+
+    const toggleExpand = (id) => {
+        const newExpanded = new Set(expandedIds);
+        if (newExpanded.has(id)) {
+            newExpanded.delete(id);
+        } else {
+            newExpanded.add(id);
+        }
+        setExpandedIds(newExpanded);
+    };
+
+    const handleEdit = (category) => {
+        setEditingCategory(category);
+        setShowForm(true);
+    };
+
+    const handleDelete = (id, name) => {
+        if (window.confirm(`Are you sure you want to delete "${name}"? All subcategories will also be deleted.`)) {
+            deleteCategory(id);
+        }
+    };
+
+    const handleCloseForm = () => {
+        setShowForm(false);
+        setEditingCategory(null);
+    };
+
+    const renderCategory = (category, level = 0) => {
+        const hasChildren = category.children && category.children.length > 0;
+        const isExpanded = expandedIds.has(category.id);
+        const indent = level * 32;
+
+        return (
+            <div key={category.id}>
+                <div
+                    className="flex items-center justify-between p-4 hover:bg-gray-50 border-b border-gray-100 transition"
+                    style={{ paddingLeft: `${indent + 16}px` }}
+                >
+                    <div className="flex items-center gap-3 flex-1">
+                        {hasChildren ? (
+                            <button
+                                onClick={() => toggleExpand(category.id)}
+                                className="p-1 hover:bg-gray-200 rounded transition"
+                            >
+                                {isExpanded ? (
+                                    <MdExpandMore size={20} className="text-gray-600" />
+                                ) : (
+                                    <MdChevronRight size={20} className="text-gray-600" />
+                                )}
+                            </button>
+                        ) : (
+                            <div className="w-7" />
+                        )}
+
+                        {category.image ? (
+                            <img
+                                src={category.image}
+                                alt={category.name}
+                                className="w-10 h-10 rounded-lg object-cover bg-gray-100"
+                            />
+                        ) : (
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xs uppercase">
+                                {category.name.substring(0, 2)}
+                            </div>
+                        )}
+
+                        <div>
+                            <h4 className="font-semibold text-gray-800">{category.name}</h4>
+                            {category.parentId && (
+                                <p className="text-xs text-gray-500">Level {level + 1}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => toggleCategoryStatus(category.id)}
+                            className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${category.active
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-600'
+                                }`}
+                        >
+                            {category.active ? (
+                                <>
+                                    <MdCheckCircle size={14} /> Active
+                                </>
+                            ) : (
+                                <>
+                                    <MdCancel size={14} /> Inactive
+                                </>
+                            )}
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setEditingCategory({ parentId: category.id });
+                                setShowForm(true);
+                            }}
+                            className="p-2 hover:bg-green-50 rounded-lg text-green-600 transition"
+                            title="Add Subcategory"
+                        >
+                            <MdAdd size={18} />
+                        </button>
+
+                        <button
+                            onClick={() => handleEdit(category)}
+                            className="p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition"
+                            title="Edit"
+                        >
+                            <MdEdit size={18} />
+                        </button>
+
+                        <button
+                            onClick={() => handleDelete(category.id, category.name)}
+                            className="p-2 hover:bg-red-50 rounded-lg text-red-600 transition"
+                            title="Delete"
+                        >
+                            <MdDelete size={18} />
+                        </button>
+                    </div>
+                </div>
+
+                {hasChildren && isExpanded && (
+                    <div>
+                        {category.children.map(child => renderCategory(child, level + 1))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-800">Category Management</h1>
+                    <p className="text-gray-500 mt-1">Manage product categories and subcategories</p>
+                </div>
+                <button
+                    onClick={() => setShowForm(true)}
+                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                    <MdAdd size={20} />
+                    Add Category
+                </button>
+            </div>
+
+            {/* Category Tree */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div className="p-6 border-b border-gray-100">
+                    <h2 className="text-xl font-bold text-gray-800">Category Hierarchy</h2>
+                </div>
+
+                {categories.length === 0 ? (
+                    <div className="p-12 text-center text-gray-500">
+                        <p>No categories found. Create your first category.</p>
+                    </div>
+                ) : (
+                    <div>
+                        {categories.map(category => renderCategory(category))}
+                    </div>
+                )}
+            </div>
+
+            {/* Add/Edit Form Modal */}
+            {showForm && (
+                <CategoryForm
+                    category={editingCategory}
+                    onClose={handleCloseForm}
+                />
+            )}
+        </div>
+    );
+};
+
+export default CategoryList;

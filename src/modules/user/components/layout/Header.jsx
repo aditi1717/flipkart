@@ -57,7 +57,7 @@ const Header = () => {
     const navItems = [
         { name: 'Home', icon: 'home', path: '/' },
         { name: 'Play', icon: 'play_circle_outline', path: '/play' },
-        { name: 'Top Deals', icon: 'local_offer', path: '/deals' },
+        { name: 'Categories', icon: 'grid_view', path: '/categories' },
         { name: 'Account', icon: 'person_outline', path: '/account' },
         { name: 'Cart', icon: 'shopping_cart', path: '/cart', badge: totalItems },
     ];
@@ -69,7 +69,8 @@ const Header = () => {
     return (
         <header className={`bg-gradient-to-b from-white to-blue-100 px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-sm border-b border-blue-100 ${isSpecialPage ? 'py-2' : 'py-0.5'}`}>
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:gap-8">
-                {/* Mobile Top Row / Desktop Logo Area */}
+
+                {/* Mobile Top Row: Logo (Left) + Seller Button (Right) */}
                 <div className="flex items-center justify-between mb-0 md:mb-0 w-full md:w-auto">
                     {/* Mobile Logo */}
                     {!isSpecialPage && (
@@ -78,18 +79,15 @@ const Header = () => {
                         </div>
                     )}
 
-                    {/* Mobile Address */}
+                    {/* Beome a Seller Button (Right) */}
                     {!isSpecialPage && (
-                        <div className="flex items-center gap-1 md:hidden overflow-hidden justify-end">
-                            <div className="flex items-center gap-1">
-                                <MdLocationPin className="text-sm text-blue-600 shrink-0" />
-                                <div className="flex items-center gap-1 min-w-0">
-                                    <span className="text-gray-900 text-xs font-bold whitespace-nowrap">452001</span>
-                                    <span className="text-gray-600 text-xs font-medium truncate">Select location</span>
-                                    <MdKeyboardArrowRight className="text-sm text-gray-500 shrink-0" />
-                                </div>
-                            </div>
-                        </div>
+                        <button
+                            onClick={() => navigate('/seller-registration')}
+                            className="md:hidden flex items-center gap-1 bg-yellow-500 text-white px-3 py-1.5 rounded-md text-[10px] font-bold shadow-sm whitespace-nowrap"
+                        >
+                            <MdStars className="text-sm" />
+                            Become a Seller
+                        </button>
                     )}
 
                     {/* Desktop Logo */}
@@ -97,6 +95,18 @@ const Header = () => {
                         <img src={logo} alt="IndianKart" className="h-14 object-contain rounded-md" />
                     </div>
                 </div>
+
+                {/* Mobile Address - Moved Above Search */}
+                {!isSpecialPage && (
+                    <div className="flex md:hidden w-full mb-2 items-center gap-1 bg-blue-50/50 p-1.5 rounded-lg border border-blue-100">
+                        <MdLocationPin className="text-sm text-blue-600 shrink-0" />
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                            <span className="text-gray-900 text-xs font-bold whitespace-nowrap">Delivering to 452001</span>
+                            <span className="text-gray-500 text-[10px] font-medium truncate">- Update location</span>
+                        </div>
+                        <MdKeyboardArrowRight className="text-sm text-gray-400 shrink-0" />
+                    </div>
+                )}
 
                 {/* Search Bar Row */}
                 <div className="flex items-center gap-3 flex-1 mt-0 md:mt-0">

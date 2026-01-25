@@ -1,94 +1,206 @@
-import React from 'react';
-import { videos } from '../data/mockData';
+import React, { useRef, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { MdFavorite, MdFavoriteBorder, MdShare, MdArrowBack, MdArrowForward, MdVolumeOff, MdVolumeUp } from 'react-icons/md';
+
+const VIDEO_SRC = "/video.mp4";
+
+const reelsData = [
+    {
+        id: 1,
+        video: VIDEO_SRC,
+        user: "Nike Official",
+        avatar: "https://ui-avatars.com/api/?name=Nike&background=0D8ABC&color=fff",
+        description: "New Air Max Request. Feel the air.",
+        likes: "12.5k",
+        comments: "845",
+        productId: 101, // Mock Product ID
+        productName: "Nike Air Max 90",
+        price: "₹7,999"
+    },
+    {
+        id: 2,
+        video: VIDEO_SRC,
+        user: "Adidas Originals",
+        avatar: "https://ui-avatars.com/api/?name=Adidas&background=000&color=fff",
+        description: "Street style redefined. #adidas #originals",
+        likes: "8.2k",
+        comments: "320",
+        productId: 102,
+        productName: "Adidas Superstar",
+        price: "₹6,599"
+    },
+    {
+        id: 3,
+        video: VIDEO_SRC,
+        user: "Puma India",
+        avatar: "https://ui-avatars.com/api/?name=Puma&background=D12323&color=fff",
+        description: "Run fast, run free. Forever Faster.",
+        likes: "15k",
+        comments: "1.2k",
+        productId: 103,
+        productName: "Puma Nitro",
+        price: "₹9,999"
+    },
+];
+
+const VideoItem = ({ data, isActive }) => {
+    const videoRef = useRef(null);
+    const navigate = useNavigate();
+    const [isLiked, setIsLiked] = useState(false);
+    const [isMuted, setIsMuted] = useState(true); // Default muted for autoplay
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    useEffect(() => {
+        if (isActive) {
+            videoRef.current.currentTime = 0;
+            const playPromise = videoRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    setIsPlaying(true);
+                }).catch((error) => {
+                    console.log("Autoplay prevented:", error);
+                    setIsPlaying(false);
+                });
+            }
+        } else {
+            videoRef.current.pause();
+            setIsPlaying(false);
+        }
+    }, [isActive]);
+
+    const togglePlay = () => {
+        if (isPlaying) {
+            videoRef.current.pause();
+        } else {
+            videoRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
+    };
+
+    const toggleMute = (e) => {
+        e.stopPropagation();
+        setIsMuted(!isMuted);
+        videoRef.current.muted = !isMuted;
+    };
+
+    const handleProductClick = () => {
+        // Redirect to product details
+        navigate(`/product/${data.productId}`);
+    };
+
+    return (
+        <div className="h-full w-full snap-start relative bg-black flex items-center justify-center">
+            {/* Video Player */}
+            <video
+                ref={videoRef}
+                src={data.video}
+                loop
+                playsInline
+                muted={true}
+                className="h-full w-full object-cover"
+                onClick={togglePlay}
+            />
+
+            {/* Mute Toggle Overlay */}
+            <button
+                onClick={toggleMute}
+                className="absolute top-20 right-4 p-2 bg-black/50 rounded-full text-white backdrop-blur-sm z-20"
+            >
+                {isMuted ? <MdVolumeOff size={24} /> : <MdVolumeUp size={24} />}
+            </button>
+
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/20 via-transparent to-black/80"></div>
+
+            {/* Right Side Actions */}
+            <div className="absolute right-4 bottom-28 flex flex-col items-center space-y-8 z-20">
+                <div className="flex flex-col items-center">
+                    <button onClick={() => setIsLiked(!isLiked)} className="p-2 active:scale-90 transition-transform">
+                        {isLiked ? (
+                            <MdFavorite size={32} className="text-red-500 drop-shadow-md" />
+                        ) : (
+                            <MdFavoriteBorder size={32} className="text-white drop-shadow-md" />
+                        )}
+                    </button>
+                    <span className="text-white text-xs font-medium drop-shadow-md">{data.likes}</span>
+                </div>
+
+                <div className="flex flex-col items-center">
+                    <button className="p-2">
+                        <MdShare size={30} className="text-white drop-shadow-md" />
+                    </button>
+                    <span className="text-white text-xs font-medium drop-shadow-md">Share</span>
+                </div>
+            </div>
+
+            {/* Bottom Product CTA */}
+            <div className="absolute bottom-6 left-4 right-4 z-20">
+                <div
+                    onClick={handleProductClick}
+                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 flex items-center justify-between cursor-pointer hover:bg-white/20 transition-all"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="flex flex-col">
+                            <span className="text-white font-bold text-sm">View Product</span>
+                            <span className="text-gray-300 text-xs">Tap to see details</span>
+                        </div>
+                    </div>
+                    <div className="bg-primary p-2 rounded-full text-white shadow-lg shadow-primary/30 animate-pulse">
+                        <MdArrowForward size={20} />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const Play = () => {
+    const navigate = useNavigate();
+    const [activeVideoId, setActiveVideoId] = useState(1);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const options = {
+            root: containerRef.current,
+            threshold: 0.6,
+        };
+
+        const handleIntersection = (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const id = Number(entry.target.getAttribute('data-id'));
+                    setActiveVideoId(id);
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(handleIntersection, options);
+
+        const elements = document.querySelectorAll('.reel-section');
+        elements.forEach((el) => observer.observe(el));
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
-        <div className="h-[calc(100vh-64px)] w-full overflow-hidden bg-black relative">
-            <div className="h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar">
-                {videos.map((video) => (
-                    <section key={video.id} className="h-full w-full snap-start relative flex flex-col">
-                        {/* Video Background Placeholder */}
-                        <img
-                            alt={video.title}
-                            className="absolute inset-0 w-full h-full object-cover"
-                            src={video.image}
-                        />
-                        {/* Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
-
-                        {/* Top Bar Info */}
-                        <div className="absolute top-4 left-0 right-0 px-4 flex justify-between items-center z-10">
-                            <div className="flex items-center space-x-3">
-                                <img
-                                    alt={video.user}
-                                    className="w-10 h-10 rounded-full border border-white/50"
-                                    src={video.avatar}
-                                />
-                                <div>
-                                    <p className="text-white font-semibold text-sm">{video.user}</p>
-                                    <span className="text-[10px] text-white/70">{video.type}</span>
-                                </div>
-                                <button className="bg-transparent border border-white text-white px-3 py-1 rounded-md text-xs font-medium ml-2">
-                                    Follow
-                                </button>
-                            </div>
-                            <div className="bg-black/30 backdrop-blur-md px-2 py-1 rounded-full flex items-center space-x-1">
-                                <span className="material-icons-round text-white text-xs">visibility</span>
-                                <span className="text-white text-[10px] font-medium">{video.views}</span>
-                            </div>
-                        </div>
-
-                        {/* Center Content */}
-                        <div className="absolute inset-0 flex flex-col justify-center items-center pointer-events-none px-10 text-center">
-                            <span className="bg-primary text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase mb-2">Popular</span>
-                            <h2 className="text-white text-2xl font-black leading-tight drop-shadow-lg uppercase">
-                                {video.title.split(' ').map((word, i) => (
-                                    <React.Fragment key={i}>
-                                        {word === 'GIFT' || word === 'Nike' ? <span className="text-yellow-400">{word} </span> : word + ' '}
-                                        {i === 3 && <br />}
-                                    </React.Fragment>
-                                ))}
-                            </h2>
-                        </div>
-
-                        {/* Right Side Actions */}
-                        <div className="absolute right-4 bottom-32 flex flex-col items-center space-y-6 z-10">
-                            <div className="flex flex-col items-center text-white">
-                                <button className="p-2"><span className="material-icons-round text-3xl">favorite_border</span></button>
-                                <span className="text-xs font-medium">{video.likes}</span>
-                            </div>
-                            <div className="flex flex-col items-center text-white">
-                                <button className="p-2"><span className="material-icons-round text-3xl">reply</span></button>
-                                <span className="text-xs font-medium">Share</span>
-                            </div>
-                            <div className="flex flex-col items-center text-white">
-                                <button className="p-2"><span className="material-icons-round text-3xl">chat_bubble_outline</span></button>
-                                <span className="text-xs font-medium">{video.comments}</span>
-                            </div>
-                        </div>
-
-                        {/* Bottom Product Info */}
-                        <div className="absolute bottom-4 left-4 right-16 z-10">
-                            {video.id === 2 ? (
-                                <div className="bg-white/95 p-3 rounded-2xl flex items-center space-x-3">
-                                    <img alt="Product" className="w-12 h-12 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoFpmZSRcIdkdtxynRzuu5PKjL_X3xWOKBFczlVHoMMFv9oDO2qKEQ1E0QWssaikfPfhtH-aLhvuKmP3RM-OQHSeNOAO1YRxZtpAMIO-RCHvLXEDGd49fFQjVPfmWkEZvmIbGrMj8eGxJMmoUTt0cTes1xD3EgLQ4jFmnbQRgZvLm6AF1hCF2KctDfRXr10CJswAgkFk6PTuthptHlDzT_vDeN2mBSPQMtIiP2DNUwr255ZIalsl63VsgwZLAOVGAzk_m42pNzPXU7" />
-                                    <div className="flex-1">
-                                        <p className="text-slate-900 text-xs font-bold line-clamp-1">Nike Air Max Premium Edition</p>
-                                        <p className="text-slate-500 text-[10px]">Special Offer Price</p>
-                                        <p className="text-primary text-sm font-bold">₹7,999 <span className="text-slate-400 line-through text-[10px]">₹12,999</span></p>
-                                    </div>
-                                    <button className="bg-primary text-white text-[10px] px-3 py-2 rounded-lg font-bold">BUY NOW</button>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col space-y-3">
-                                    <p className="text-white text-sm font-medium">Top Picks for Men</p>
-                                    <div className="bg-black/40 backdrop-blur-xl border border-white/20 p-2 rounded-xl flex items-center space-x-3 w-fit">
-                                        <span className="material-icons-round text-white text-sm">shopping_bag</span>
-                                        <span className="text-white text-xs font-semibold">5 Products</span>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+        <div className="h-screen w-full bg-black relative">
+            <button
+                onClick={() => navigate('/')}
+                className="absolute top-4 left-4 z-50 p-2 bg-black/50 rounded-full text-white backdrop-blur-sm active:scale-95 transition-all"
+            >
+                <MdArrowBack size={24} />
+            </button>
+            <div
+                ref={containerRef}
+                className="h-full w-full overflow-y-scroll snap-y snap-mandatory no-scrollbar"
+            >
+                {reelsData.map((data) => (
+                    <section
+                        key={data.id}
+                        data-id={data.id}
+                        className="reel-section h-full w-full snap-start"
+                    >
+                        <VideoItem data={data} isActive={activeVideoId === data.id} />
                     </section>
                 ))}
             </div>
@@ -97,3 +209,4 @@ const Play = () => {
 };
 
 export default Play;
+

@@ -36,65 +36,118 @@ const Coupons = () => {
     ];
 
     return (
-        <div className="bg-[#f1f3f6] min-h-screen">
+        <div className="p-4 bg-[#f1f3f6] min-h-screen">
             {/* Header */}
-            <div className="bg-white px-4 py-4 flex items-center gap-4 border-b sticky top-0 z-10">
-                <button onClick={() => navigate(-1)} className="material-icons text-gray-700">arrow_back</button>
+            <div className="bg-white px-4 py-4 flex items-center gap-4 border-b sticky top-0 z-10 shadow-sm -mx-4 -mt-4 mb-4">
+                <button onClick={() => navigate(-1)} className="p-1 -ml-2 rounded-full hover:bg-gray-100">
+                    <span className="material-icons text-gray-700">arrow_back</span>
+                </button>
                 <h1 className="text-lg font-bold text-gray-800">My Coupons</h1>
             </div>
 
-            <div className="p-4">
-                {/* Apply Coupon Box */}
-                <div className="bg-white p-4 rounded-sm shadow-sm flex gap-3 mb-6 border border-gray-100">
-                    <input
-                        type="text"
-                        placeholder="Enter Coupon Code"
-                        className="flex-1 border-b-2 border-gray-200 outline-none focus:border-blue-600 px-1 py-1 text-sm font-bold uppercase tracking-wider"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    />
-                    <button className="text-blue-600 font-bold text-sm uppercase px-2 hover:bg-blue-50 transition-colors">Apply</button>
-                </div>
+            {/* Apply Coupon Box */}
+            <div className="bg-white p-4 rounded-xl shadow-sm flex gap-3 mb-6 border border-gray-100">
+                <input
+                    type="text"
+                    placeholder="Enter Coupon Code"
+                    className="flex-1 border-b-2 border-gray-200 outline-none focus:border-blue-600 px-2 py-2 text-sm font-bold uppercase tracking-wider transition-colors placeholder-gray-400"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                />
+                <button className="text-blue-600 font-bold text-sm uppercase px-4 hover:bg-blue-50 rounded-lg transition-colors">Apply</button>
+            </div>
 
-                {/* Coupons List */}
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-1">Available Coupons</h3>
-                <div className="space-y-4">
-                    {activeCoupons.map((coupon) => (
-                        <div key={coupon.id} className="bg-white rounded-lg shadow-sm overflow-hidden flex relative border border-gray-100 group">
-                            {/* Left Design edge */}
-                            <div className={`w-2 ${coupon.color}`}></div>
+            {/* Coupons List */}
+            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 px-1">Available for you</h3>
+            <div className="space-y-4">
+                {/* Using the updated data structure matching Admin */}
+                {[
+                    {
+                        id: 'C001',
+                        code: 'WELCOME50',
+                        title: 'New User Offer',
+                        description: 'Get 50% off on your first order above ₹500. Max discount ₹100.',
+                        type: 'percentage',
+                        value: 50,
+                        expiryDate: '2024-12-31',
+                        minPurchase: 500,
+                        active: true
+                    },
+                    {
+                        id: 'C002',
+                        code: 'FLAT200',
+                        title: 'Flat ₹200 OFF',
+                        description: 'Flat Rs. 200 off on all orders above ₹1000. Limited time offer.',
+                        type: 'flat',
+                        value: 200,
+                        expiryDate: '2024-10-15',
+                        minPurchase: 1000,
+                        active: true
+                    },
+                    {
+                        id: 'C003',
+                        code: 'FESTIVE30',
+                        title: 'Festive Delight',
+                        description: 'Get 30% off on Fashion & Accessories. No minimum purchase required.',
+                        type: 'percentage',
+                        value: 30,
+                        expiryDate: '2024-11-20',
+                        minPurchase: 0,
+                        active: true
+                    }
+                ].map((coupon) => (
+                    <div key={coupon.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group transition-transform active:scale-[0.99]">
+                        {/* Left Decoration Border (Green for Active) */}
+                        <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-green-500"></div>
 
-                            <div className="flex-1 p-4">
-                                <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                        <span className={`text-[10px] text-white px-2 py-0.5 rounded-full font-bold uppercase ${coupon.color}`}>
-                                            {coupon.type}
+                        <div className="p-5 pl-7">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-mono text-xl font-black text-gray-800 tracking-wider border-2 border-dashed border-gray-300 px-2 py-0.5 rounded bg-gray-50 select-text">
+                                            {coupon.code}
                                         </span>
-                                        <h4 className="text-lg font-black text-gray-800 mt-2">{coupon.title}</h4>
                                     </div>
-                                    <div className="bg-gray-50 border-2 border-dashed border-gray-200 px-3 py-1 text-sm font-bold text-gray-700 select-all">
-                                        {coupon.code}
-                                    </div>
+                                    <p className="text-xs text-green-600 font-bold uppercase mt-1.5 ml-1">
+                                        {coupon.type === 'percentage' ? `${coupon.value}% OFF` : `₹${coupon.value} FLAT OFF`}
+                                    </p>
                                 </div>
-                                <p className="text-sm text-gray-500 mb-3">{coupon.desc}</p>
-                                <div className="flex items-center gap-1 text-[11px] text-red-500 font-bold">
-                                    <span className="material-icons text-[14px]">history</span>
-                                    {coupon.expiry}
-                                </div>
+                                <button
+                                    className="text-blue-600 text-xs font-bold uppercase px-3 py-1.5 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                                    onClick={() => {
+                                        setCouponCode(coupon.code);
+                                        // Optional: Scroll to top
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                >
+                                    Apply
+                                </button>
                             </div>
 
-                            {/* Ticket cutouts */}
-                            <div className="absolute left-[-8px] top-1/2 -translate-y-1/2 w-4 h-4 bg-[#f1f3f6] rounded-full border border-gray-100"></div>
-                            <div className="absolute right-[-8px] top-1/2 -translate-y-1/2 w-4 h-4 bg-[#f1f3f6] rounded-full border border-gray-100"></div>
-                        </div>
-                    ))}
-                </div>
+                            <div className="mb-3 border-b border-dashed border-gray-100 pb-3">
+                                <h3 className="font-bold text-gray-800 text-base">{coupon.title}</h3>
+                                <p className="text-xs text-gray-500 mt-1 leading-relaxed">{coupon.description}</p>
+                            </div>
 
-                <div className="mt-8 text-center bg-blue-50/50 p-6 rounded-xl border border-blue-100">
-                    <span className="material-icons text-blue-300 text-4xl mb-2">auto_awesome</span>
-                    <p className="text-blue-800 font-bold text-sm">Want more deals?</p>
-                    <p className="text-blue-400 text-xs mt-1">Check back later for personalized rewards.</p>
+                            <div className="flex justify-between items-center text-xs text-gray-400 font-medium">
+                                <span>Min. Purchase: <span className="text-gray-600">₹{coupon.minPurchase}</span></span>
+                                <span className="text-red-400">Exp: {coupon.expiryDate}</span>
+                            </div>
+                        </div>
+
+                        {/* Ticket Circles Decoration (Cutouts) */}
+                        <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-[#f1f3f6] rounded-full border-r border-gray-200 shadow-[inset_-2px_0_2px_rgba(0,0,0,0.05)]"></div>
+                        <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-[#f1f3f6] rounded-full border-l border-gray-200 shadow-[inset_2px_0_2px_rgba(0,0,0,0.05)]"></div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="mt-8 text-center bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="material-icons text-blue-500">redeem</span>
                 </div>
+                <p className="text-gray-800 font-bold text-sm">Have a Gift Card?</p>
+                <button className="text-blue-600 text-xs font-bold uppercase mt-2 hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors">Redeem Here</button>
             </div>
         </div>
     );

@@ -44,30 +44,59 @@ const ProductDetails = () => {
     const [selectedDetailTab, setSelectedDetailTab] = useState('Description');
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [selectedColor, setSelectedColor] = useState('Black');
-    const [selectedSize, setSelectedSize] = useState('M');
 
-    const colors = [
-        { name: 'Black', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/v/h/t/na-s-short-gown-z-atkins-original-imagp8m8zgzgzgze.jpeg' },
-        { name: 'Green', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/i/a/e/na-s-short-gown-z-atkins-original-imagp8m8vfsxhv6f.jpeg' },
-        { name: 'Purple', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/m/3/g/na-s-short-gown-z-atkins-original-imagp8m8yghyyzgz.jpeg' },
-        { name: 'Wine', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/y/f/v/na-s-short-gown-z-atkins-original-imagp8m8xghfgyvz.jpeg' }
-    ];
+    // Dynamic Variants Logic
+    const variantLabel = product ? (product.variantLabel || 'Size') : 'Size';
 
-    const sizes = [
-        { label: 'XS', available: false },
-        { label: 'S', available: false },
-        { label: 'M', available: true },
-        { label: 'L', available: false },
-        { label: 'XL', available: false },
-        { label: 'XXL', available: true }
-    ];
+    // Size availability should depend on the selected color if SKUs exist
+    const variantOptions = product && product.sizes && product.sizes.length > 0
+        ? product.sizes.map(s => {
+            const label = typeof s === 'string' ? s : s.label;
+            let available = true;
+            let stock = null;
+
+            if (product.skus && product.skus.length > 0) {
+                const sku = product.skus.find(sku => sku.color === selectedColor && sku.size === label);
+                available = sku ? Number(sku.stock) > 0 : false;
+                stock = sku ? Number(sku.stock) : 0;
+            } else {
+                available = typeof s === 'string' ? true : (Number(s.stock) > 0);
+                stock = typeof s === 'string' ? null : Number(s.stock);
+            }
+
+            return { label, available, stock };
+        })
+        : [
+            { label: 'S', available: true },
+            { label: 'M', available: true },
+            { label: 'L', available: true },
+            { label: 'XL', available: false }
+        ];
+
+    const [selectedSize, setSelectedSize] = useState(variantOptions.find(o => o.available)?.label || variantOptions[0]?.label);
+
+    // Current SKU/Combination Stock Calculation
+    const currentCombination = product?.skus?.find(s => s.color === selectedColor && s.size === selectedSize);
+    const currentStock = currentCombination
+        ? Number(currentCombination.stock)
+        : (product?.skus?.length > 0 ? 0 : (product?.stock || 0));
+
+    const colors = product && product.colors && product.colors.length > 0
+        ? product.colors
+        : [
+            { name: 'Black', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/v/h/t/na-s-short-gown-z-atkins-original-imagp8m8zgzgzgze.jpeg' },
+            { name: 'Green', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/i/a/e/na-s-short-gown-z-atkins-original-imagp8m8vfsxhv6f.jpeg' },
+            { name: 'Purple', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/m/3/g/na-s-short-gown-z-atkins-original-imagp8m8yghyyzgz.jpeg' },
+            { name: 'Wine', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/y/f/v/na-s-short-gown-z-atkins-original-imagp8m8xghfgyvz.jpeg' }
+        ];
+
+    const [selectedColor, setSelectedColor] = useState(colors[0]?.name || 'Black');
 
     const productImages = product ? [
         product.image,
-        'https://rukminim2.flixcart.com/image/832/832/xif0q/earring/y/t/z/na-er-2023-455-p4-shining-diva-fashion-original-imagrvv4hfyhywhm.jpeg',
-        'https://rukminim2.flixcart.com/image/832/832/xif0q/earring/e/n/z/na-er-2023-455-p4-shining-diva-fashion-original-imagrvv4gy8nzmqy.jpeg'
-    ] : [];
+        ...(product.images || []),
+        'https://rukminim2.flixcart.com/image/832/832/xif0q/earring/y/t/z/na-er-2023-455-p4-shining-diva-fashion-original-imagrvv4hfyhywhm.jpeg'
+    ].filter(Boolean) : [];
 
     const toggleSection = (section) => {
         setExpandedSections(prev => ({
@@ -82,6 +111,11 @@ const ProductDetails = () => {
         const found = products.find(p => p.id === pid);
         if (found) {
             setProduct(found);
+            // Default select first size if available
+            if (found.sizes && found.sizes.length > 0) {
+                setSelectedSize(found.sizes[0]);
+            }
+
             // Find similar products
             const similar = products.filter(p => p.category === found.category && p.id !== pid);
             setSimilarProducts(similar);
@@ -92,8 +126,6 @@ const ProductDetails = () => {
     }, [id]);
 
     if (!product) return <div className="p-10 text-center">Loading...</div>;
-
-    const discountPercentage = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
 
     return (
         <div className="bg-white min-h-screen pb-24 font-sans text-gray-900">
@@ -213,30 +245,60 @@ const ProductDetails = () => {
                 </div>
             </div>
 
-            {/* Select Size Section */}
+            {/* Dynamic Variant Section (Sizes, Storage, etc) */}
             <div className="px-4 mt-6">
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                        <span className="text-[14px] font-bold text-gray-900 uppercase tracking-tight">Select Size</span>
-                        <button className="text-[13px] font-bold text-blue-600">Size Chart</button>
+                        <span className="text-[14px] font-bold text-gray-900 uppercase tracking-tight">Select {variantLabel}</span>
+                        <button className="text-[13px] font-bold text-blue-600">{variantLabel} Chart</button>
                     </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    {sizes.map((size) => (
-                        <button
-                            key={size.label}
-                            onClick={() => size.available && setSelectedSize(size.label)}
-                            className={`min-w-[48px] h-[36px] px-2 rounded-lg flex items-center justify-center text-[12px] font-bold border transition-all ${!size.available
-                                ? 'border-dashed border-gray-200 text-gray-300 cursor-not-allowed opacity-60'
-                                : selectedSize === size.label
-                                    ? 'border-black bg-white text-gray-900 shadow-sm'
-                                    : 'border-gray-200 text-gray-900'
-                                }`}
-                        >
-                            {size.label}
-                        </button>
+                    {variantOptions.map((opt) => (
+                        <div key={opt.label} className="relative">
+                            <button
+                                onClick={() => opt.available && setSelectedSize(opt.label)}
+                                className={`min-w-[48px] h-[36px] px-2 rounded-lg flex flex-col items-center justify-center text-[12px] font-bold border transition-all ${!opt.available
+                                    ? 'border-dashed border-gray-200 text-gray-300 cursor-not-allowed opacity-60 bg-gray-50'
+                                    : selectedSize === opt.label
+                                        ? 'border-black bg-white text-gray-900 shadow-sm'
+                                        : 'border-gray-200 text-gray-900'
+                                    }`}
+                            >
+                                <span>{opt.label}</span>
+                                {opt.stock !== null && opt.stock > 0 && opt.stock <= 5 && (
+                                    <span className="text-[8px] text-red-500 -mt-1">{opt.stock} left</span>
+                                )}
+                            </button>
+                            {!opt.available && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="w-full h-[1px] bg-gray-300 rotate-[25deg]"></div>
+                                </div>
+                            )}
+                        </div>
                     ))}
                 </div>
+            </div>
+
+            {/* Price & Stock Status Section */}
+            <div className="px-4 mt-2">
+                {currentStock <= 5 && currentStock > 0 && (
+                    <p className="text-red-600 text-[12px] font-bold mt-1">Hurry, only {currentStock} left for this combination!</p>
+                )}
+                {currentStock === 0 && (
+                    <div className="mt-2 bg-red-50 border border-red-100 rounded-xl p-3 flex items-center gap-2">
+                        <span className="material-icons text-red-500 text-sm">error_outline</span>
+                        <p className="text-red-500 text-[13px] font-bold italic underline decoration-red-200">
+                            {selectedColor} - {selectedSize} is currently Out of Stock
+                        </p>
+                    </div>
+                )}
+                {currentStock > 5 && (
+                    <p className="text-green-600 text-[12px] font-bold mt-1 flex items-center gap-1">
+                        <span className="material-icons text-[14px]">check_circle</span>
+                        In Stock ({currentStock} available)
+                    </p>
+                )}
             </div>
 
             {/* Offers Section */}
@@ -259,48 +321,8 @@ const ProductDetails = () => {
                 </div>
             </div>
 
-            {/* Delivery Details Section - More compact */}
+            {/* Service Icons */}
             <div className="px-4 mt-6">
-                <h3 className="text-[15px] font-bold text-gray-900 mb-4">Delivery details</h3>
-
-                <div className="rounded-2xl overflow-hidden border border-gray-50 shadow-sm">
-                    {/* Location Bar */}
-                    <div className="bg-[#f0f7ff] p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                            <span className="material-icons-outlined text-gray-800 text-[20px]">location_on</span>
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-[14px] font-bold text-gray-900">{product.pincode || '364515'}</span>
-                                <button className="text-[14px] font-bold text-blue-600 flex items-center">
-                                    Select delivery location
-                                    <span className="material-icons text-[14px] ml-0.5">chevron_right</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Delivery Date */}
-                    <div className="bg-[#f5f5f5] p-4 border-t border-white flex items-center gap-3">
-                        <span className="material-icons-outlined text-gray-500 text-[20px]">local_shipping</span>
-                        <span className="text-[14px] font-bold text-gray-800">Delivery by {product.deliveryDate || '30 Jan, Fri'}</span>
-                    </div>
-
-                    {/* Seller Info */}
-                    <div className="bg-[#f5f5f5] p-4 border-t border-white flex items-start gap-3">
-                        <span className="material-icons-outlined text-gray-500 text-[20px] mt-0.5">storefront</span>
-                        <div className="flex-1">
-                            <p className="text-[14px] font-bold text-gray-800 mb-0.5">Fulfilled by {product.sellerName || 'RetailNet'}</p>
-                            <div className="flex items-center gap-1.5 text-gray-500 font-medium">
-                                <span className="text-[12px] flex items-center gap-0.5">
-                                    {product.rating || '4.3'} <span className="material-icons text-[12px]">star</span>
-                                </span>
-                                <span className="text-[10px]">•</span>
-                                <span className="text-[12px]">{product.sellerYears || '9 years with Flipkart'}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Service Icons - More compact */}
                 <div className="flex justify-between mt-6 mb-4 border-t border-gray-100 pt-4">
                     <div className="flex flex-col items-center gap-2.5 w-1/3 group">
                         <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800">
@@ -334,7 +356,7 @@ const ProductDetails = () => {
                 </div>
             </div>
 
-            {/* Similar Products Section - Added as requested */}
+            {/* Similar Products Section */}
             <ProductSection
                 title="Similar Products"
                 products={similarProducts}
@@ -360,24 +382,31 @@ const ProductDetails = () => {
                 {expandedSections.highlights && (
                     <div className="px-4 pb-6 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="grid grid-cols-2 gap-x-8 gap-y-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
-                            <div>
-                                <p className="text-[13px] text-gray-400 mb-0.5 font-medium">Base Material</p>
-                                <p className="text-[15px] text-gray-800 font-bold">Alloy</p>
-                            </div>
-                            <div>
-                                <p className="text-[13px] text-gray-400 mb-0.5 font-medium">Plating</p>
-                                <p className="text-[15px] text-gray-800 font-bold">Gold-plated</p>
-                            </div>
-                            <div>
-                                <p className="text-[13px] text-gray-400 mb-0.5 font-medium">Color</p>
-                                <p className="text-[15px] text-gray-800 font-bold">White</p>
-                            </div>
+                            {product.highlights && product.highlights.length > 0 ? (
+                                product.highlights.map((h, i) => (
+                                    <div key={i}>
+                                        <p className="text-[13px] text-gray-400 mb-0.5 font-medium">{h.key}</p>
+                                        <p className="text-[15px] text-gray-800 font-bold">{h.value}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <>
+                                    <div>
+                                        <p className="text-[13px] text-gray-400 mb-0.5 font-medium">Base Material</p>
+                                        <p className="text-[15px] text-gray-800 font-bold">Alloy</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[13px] text-gray-400 mb-0.5 font-medium">Plating</p>
+                                        <p className="text-[15px] text-gray-800 font-bold">Gold-plated</p>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* All Details Section - Tabbed Interface with Main Dropdown */}
+            {/* All Details Section */}
             <div className="border-t border-gray-100 mt-2">
                 <div
                     className="px-4 py-4 flex items-center justify-between cursor-pointer"
@@ -426,12 +455,21 @@ const ProductDetails = () => {
                                 <div className="text-[14px] text-gray-600 leading-relaxed">
                                     {selectedDetailTab === 'Features' && (
                                         <ul className="space-y-3">
-                                            {['Premium quality base material', 'Skin friendly and anti-allergic', 'Handcrafted by expert artisans', 'Perfect for weddings and parties'].map((f, i) => (
-                                                <li key={i} className="flex items-start gap-2">
-                                                    <span className="text-blue-400 mt-1">•</span>
-                                                    {f}
-                                                </li>
-                                            ))}
+                                            {product.features && product.features.length > 0 ? (
+                                                product.features.map((f, i) => (
+                                                    <li key={i} className="flex items-start gap-2">
+                                                        <span className="text-blue-400 mt-1">•</span>
+                                                        {f}
+                                                    </li>
+                                                ))
+                                            ) : (
+                                                ['Premium quality base material', 'Skin friendly and anti-allergic', 'Handcrafted by expert artisans', 'Perfect for weddings and parties'].map((f, i) => (
+                                                    <li key={i} className="flex items-start gap-2">
+                                                        <span className="text-blue-400 mt-1">•</span>
+                                                        {f}
+                                                    </li>
+                                                ))
+                                            )}
                                         </ul>
                                     )}
                                     {selectedDetailTab === 'Specifications' && (
@@ -450,7 +488,7 @@ const ProductDetails = () => {
                                     )}
                                     {selectedDetailTab === 'Description' && (
                                         <p className="italic">
-                                            This exquisite piece of jewelry is designed to reflect the elegance of traditional Indian heritage. Crafted with precision, it features intricate details that make it stand out. Whether it's a festive occasion or a formal event, these earrings provide a touch of grace and sophistication to your ensemble.
+                                            {product.longDescription || "This exquisite piece of jewelry is designed to reflect the elegance of traditional Indian heritage. Crafted with precision, it features intricate details that make it stand out. Whether it's a festive occasion or a formal event, these earrings provide a touch of grace and sophistication to your ensemble."}
                                         </p>
                                     )}
                                     {selectedDetailTab === 'Manufacturer' && (
@@ -468,139 +506,6 @@ const ProductDetails = () => {
                 )}
             </div>
 
-            {/* Similar Oversized Studs Section */}
-            <div className="border-t border-gray-100 mt-4">
-                <ProductSection
-                    title={`Similar ${product.brand || ''} Styles`}
-                    products={similarProducts.slice(0, 6)}
-                    containerClass="mt-2 pb-4"
-                    onViewAll={() => console.log('View all similar styles')}
-                />
-            </div>
-
-            {/* Top Rated Section */}
-            <div className="border-t border-gray-100">
-                <ProductSection
-                    title="Earrings rated 4 stars and above"
-                    products={highRatedProducts}
-                    containerClass="mt-2 pb-8"
-                    onViewAll={() => console.log('View all top rated')}
-                />
-            </div>
-
-            {/* Ratings and Reviews Section */}
-            <div className="border-t border-gray-100 mt-2">
-                <div
-                    className="px-4 py-5 flex items-center justify-between cursor-pointer"
-                    onClick={() => toggleSection('reviews')}
-                >
-                    <div>
-                        <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Ratings and reviews</h3>
-                        <p className="text-[13px] text-gray-400 mt-0.5">
-                            {reviews.length > 0 ? `${reviews.length} ratings and reviews` : 'No ratings for this product yet'}
-                        </p>
-                    </div>
-                    <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.reviews ? 'rotate-180' : ''}`}>
-                        <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
-                    </div>
-                </div>
-
-                {expandedSections.reviews && (
-                    <div className="pb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                        {/* Horizontal Reviews Slide - Narrower cards */}
-                        <div className="flex overflow-x-auto gap-3 no-scrollbar px-4 mb-6">
-                            {reviews.map(rev => (
-                                <div key={rev.id} className="min-w-[220px] w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex-shrink-0">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className="bg-[#388e3c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                                            {rev.rating} <span className="material-icons text-[9px]">star</span>
-                                        </div>
-                                        <span className="text-[13px] font-bold text-gray-800 line-clamp-1">{rev.user}</span>
-                                    </div>
-                                    <p className="text-[13px] text-gray-600 mb-2 line-clamp-3 leading-relaxed">{rev.comment}</p>
-                                    <span className="text-[10px] text-gray-400 font-medium">{rev.date}</span>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Post Review Form - Smaller Stars */}
-                        <div className="mx-4 p-5 bg-gray-50/50 rounded-3xl border border-gray-100 shadow-sm">
-                            <h4 className="text-[14px] font-bold text-gray-800 mb-4">Rate this product</h4>
-                            <div className="flex gap-2 mb-5">
-                                {[1, 2, 3, 4, 5].map(star => (
-                                    <button
-                                        key={star}
-                                        onClick={() => setNewReview(prev => ({ ...prev, rating: star }))}
-                                        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-sm ${newReview.rating >= star
-                                            ? 'bg-[#388e3c] text-white'
-                                            : 'bg-white text-gray-300 border border-gray-100'
-                                            }`}
-                                    >
-                                        <span className="material-icons text-[20px]">star</span>
-                                    </button>
-                                ))}
-                            </div>
-                            <textarea
-                                placeholder="What did you like or dislike?"
-                                value={newReview.comment}
-                                onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
-                                className="w-full bg-white border border-gray-100 rounded-2xl p-4 text-[13px] focus:ring-2 focus:ring-green-100 outline-none resize-none min-h-[90px] mb-4 shadow-inner"
-                            />
-                            <button
-                                onClick={() => {
-                                    if (!newReview.comment) return;
-                                    setReviews([{ id: Date.now(), user: 'You', rating: newReview.rating, comment: newReview.comment, date: 'Just now' }, ...reviews]);
-                                    setNewReview({ rating: 5, comment: '' });
-                                }}
-                                className="w-full bg-[#1084ea] text-white font-bold py-3 rounded-2xl text-[13px] active:scale-95 transition-all shadow-md"
-                            >
-                                Post Review
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Questions and Answers Section - Input Only */}
-            <div className="border-t border-gray-100 pb-2">
-                <div
-                    className="px-4 py-5 flex items-center justify-between cursor-pointer"
-                    onClick={() => toggleSection('questions')}
-                >
-                    <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Questions and Answers</h3>
-                    <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.questions ? 'rotate-180' : ''}`}>
-                        <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
-                    </div>
-                </div>
-
-                {expandedSections.questions && (
-                    <div className="px-4 pb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div className="bg-blue-50/40 rounded-3xl p-5 border border-blue-50 shadow-sm">
-                            <h4 className="text-[15px] font-bold text-blue-900 mb-4">Post a question</h4>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Is it waterproof?"
-                                    value={newQuestion}
-                                    onChange={(e) => setNewQuestion(e.target.value)}
-                                    className="flex-1 bg-white border border-blue-100 rounded-2xl px-5 py-3.5 text-sm outline-none focus:ring-2 focus:ring-blue-200 shadow-inner"
-                                />
-                                <button
-                                    onClick={() => {
-                                        if (!newQuestion) return;
-                                        setNewQuestion('');
-                                    }}
-                                    className="bg-[#1084ea] text-white w-12 h-12 rounded-2xl flex items-center justify-center active:scale-95 transition-all shadow-lg"
-                                >
-                                    <span className="material-icons text-[24px]">send</span>
-                                </button>
-                            </div>
-                            <p className="text-[12px] text-blue-600 mt-3 font-medium">Get answer from experts and other customers.</p>
-                        </div>
-                    </div>
-                )}
-            </div>
-
             {/* Recently Viewed Section */}
             <div className="border-t border-gray-100 mt-2">
                 <ProductSection
@@ -611,7 +516,7 @@ const ProductDetails = () => {
                 />
             </div>
 
-            {/* You may also like Section - Tighter padding */}
+            {/* You may also like Section */}
             <div className="border-t border-gray-100">
                 <ProductSection
                     title="You may also like"
@@ -626,13 +531,21 @@ const ProductDetails = () => {
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-2 flex gap-2 z-[100] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                 <button
                     onClick={handleAddToCart}
-                    className="flex-1 bg-white border border-gray-300 text-gray-900 font-bold py-3.5 rounded-xl text-sm hover:bg-gray-50 active:scale-[0.98] transition-all"
+                    disabled={currentStock === 0}
+                    className={`flex-1 font-bold py-3.5 rounded-xl text-sm transition-all ${currentStock === 0
+                        ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
+                        : 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 active:scale-[0.98]'
+                        }`}
                 >
-                    Add to cart
+                    {currentStock === 0 ? 'Out of Stock' : 'Add to cart'}
                 </button>
                 <button
                     onClick={handleBuyNow}
-                    className="flex-1 bg-[#ffc200] text-black font-bold py-3.5 rounded-xl text-sm shadow-sm hover:bg-[#ffb300] active:scale-[0.98] transition-all"
+                    disabled={currentStock === 0}
+                    className={`flex-1 font-bold py-3.5 rounded-xl text-sm shadow-sm transition-all ${currentStock === 0
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#ffc200] text-black hover:bg-[#ffb300] active:scale-[0.98]'
+                        }`}
                 >
                     Buy now
                 </button>

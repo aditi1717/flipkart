@@ -8,7 +8,7 @@ const BottomNav = () => {
     const navItems = [
         { name: 'Home', icon: 'home', path: '/' },
         { name: 'Play', icon: 'play_circle_outline', path: '/play' },
-        { name: 'Top Deals', icon: 'local_offer', path: '/deals' },
+        { name: 'Categories', icon: 'grid_view', path: '/categories' },
         { name: 'Account', icon: 'person_outline', path: '/account' },
         { name: 'Cart', icon: 'shopping_cart', path: '/cart', badge: totalItems },
     ];

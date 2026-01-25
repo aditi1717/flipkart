@@ -19,6 +19,10 @@ export const useCartStore = create()(
                 gender: 'Female'
             },
             isAuthenticated: true,
+            appliedCoupon: null, // { code, discount, type }
+
+            applyCoupon: (coupon) => set({ appliedCoupon: coupon }),
+            removeCoupon: () => set({ appliedCoupon: null }),
 
             updateUserProfile: (profile) => set((state) => ({
                 userProfile: { ...state.userProfile, ...profile }

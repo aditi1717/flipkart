@@ -151,6 +151,21 @@ const Account = () => {
                 </button>
             </div>
 
+            {/* Finance Options */}
+            <section className="mt-2 bg-white dark:bg-zinc-900 border-t border-b border-gray-100 dark:border-zinc-800">
+                <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-800">
+                    <h3 className="font-bold text-base">Finance Options</h3>
+                </div>
+                <div className="p-4 flex items-start gap-3">
+                    <span className="material-icons-outlined text-green-600 text-2xl mt-1">account_balance_wallet</span>
+                    <div>
+                        <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">Upto 15% discount</p>
+                        <p className="text-xs text-gray-500 mt-0.5">On every PhonePe transaction</p>
+                    </div>
+                    <span className="material-icons-outlined text-gray-400 ml-auto self-center">chevron_right</span>
+                </div>
+            </section>
+
             {/* Account Settings */}
             <section className="mt-2 bg-white dark:bg-zinc-900">
                 <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-800">

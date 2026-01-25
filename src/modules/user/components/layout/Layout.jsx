@@ -23,14 +23,17 @@ const Layout = () => {
         '/help-center',
         '/addresses',
         '/login',
-        '/signup'
+        '/signup',
+        '/play',
+        '/seller-registration',
+        '/categories'
     ].some(path => location.pathname.includes(path));
 
     return (
         <div className="w-full min-h-screen flex flex-col relative bg-background-light dark:bg-background-dark overflow-x-hidden">
             {!isStandalonePage && <Header />}
             <main className={`flex-1 ${!isPDP && 'pb-20'} md:pb-0 w-full mx-auto md:max-w-7xl transition-all duration-300 
-                ${isStandalonePage ? 'pt-0' : isSpecialPage ? 'pt-[64px]' : 'pt-[176px]'} md:pt-[100px]`}>
+                ${isStandalonePage ? 'pt-0' : isSpecialPage ? 'pt-[64px]' : 'pt-[220px]'} md:pt-[100px]`}>
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={location.pathname}
@@ -48,7 +51,8 @@ const Layout = () => {
                 !location.pathname.includes('/checkout') &&
                 !location.pathname.includes('/login') &&
                 !location.pathname.includes('/signup') &&
-                !location.pathname.includes('/track-order') && <BottomNav />}
+                !location.pathname.includes('/track-order') &&
+                !location.pathname.includes('/play') && <BottomNav />}
         </div>
     );
 };
