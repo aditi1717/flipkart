@@ -28,18 +28,39 @@ const HelpCenter = () => {
         { title: 'Flipkart Plus', icon: 'stars', desc: 'Benefits & coin management' }
     ];
 
+    const [expandedFaq, setExpandedFaq] = useState(null);
+
+    const toggleFaq = (index) => {
+        setExpandedFaq(expandedFaq === index ? null : index);
+    };
+
     const faqs = [
-        'I want to track my order',
-        'How do I return my product?',
-        'I want to manage my address',
-        'What is Flipkart Plus?',
-        'I want to change my phone number'
+        {
+            question: 'I want to track my order',
+            answer: 'You can track your order by visiting the "My Orders" section. Select the specific order you want to track to see its current status and estimated delivery date.'
+        },
+        {
+            question: 'How do I return my product?',
+            answer: 'Go to "My Orders", select the item you wish to return, and click on the "Return" button. Follow the on-screen instructions to schedule a pickup.'
+        },
+        {
+            question: 'I want to manage my address',
+            answer: 'You can add, edit, or remove addresses from the "My Account" section under "Account Settings > Saved Addresses".'
+        },
+        {
+            question: 'What is Flipkart Plus?',
+            answer: 'Flipkart Plus is a loyalty program that offers benefits like free delivery, early access to sales, and the ability to earn SuperCoins on every purchase.'
+        },
+        {
+            question: 'I want to change my phone number',
+            answer: 'To change your phone number, go to "My Account" settings. Click on the edit icon next to your mobile number and verify via OTP.'
+        }
     ];
 
     return (
-        <div className="bg-[#f1f3f6] min-h-screen">
-            {/* Header */}
-            <div className="bg-blue-600 px-4 pt-4 pb-16 sticky top-0 z-10">
+        <div className="bg-[#f1f3f6] min-h-screen pb-10">
+            {/* Mobile Header - Hidden on Desktop */}
+            <div className="bg-blue-600 px-4 pt-4 pb-16 sticky top-0 z-10 md:hidden">
                 <div className="flex items-center gap-4 text-white mb-6">
                     <button onClick={() => navigate(-1)} className="material-icons">arrow_back</button>
                     <h1 className="text-lg font-bold">Help Center</h1>
@@ -58,46 +79,99 @@ const HelpCenter = () => {
                 </div>
             </div>
 
-            <div className="-mt-10 px-4 space-y-4 pb-10 relative z-20">
-                {/* Quick Help Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                    {categories.map((cat, idx) => (
-                        <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-95 transition-all cursor-pointer">
-                            <span className="material-icons text-blue-600 mb-2">{cat.icon}</span>
-                            <h3 className="font-bold text-sm text-gray-800">{cat.title}</h3>
-                            <p className="text-[10px] text-gray-500 mt-1 leading-tight">{cat.desc}</p>
-                        </div>
-                    ))}
+            {/* Desktop Header & Container */}
+            <div className="md:max-w-4xl md:mx-auto md:pt-6 md:px-4">
+
+                {/* Desktop Breadcrumbs */}
+                <div className="hidden md:flex items-center gap-2 text-xs text-gray-500 mb-6">
+                    <span onClick={() => navigate('/')} className="cursor-pointer hover:text-blue-600">Home</span>
+                    <span className="material-icons text-[10px]">chevron_right</span>
+                    <span onClick={() => navigate('/account')} className="cursor-pointer hover:text-blue-600">My Account</span>
+                    <span className="material-icons text-[10px]">chevron_right</span>
+                    <span className="text-gray-800 font-bold">Help Center</span>
                 </div>
 
-                {/* Popular Topics */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-4 border-b border-gray-50">
-                        <h3 className="text-sm font-bold text-gray-800">Popular Topics</h3>
+                {/* Desktop Title & Search */}
+                <div className="hidden md:flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-800">Help Center</h1>
+                        <p className="text-sm text-gray-500 mt-1">We are here to help you</p>
                     </div>
-                    <div className="divide-y divide-gray-50">
-                        {faqs.map((faq, idx) => (
-                            <button key={idx} className="w-full text-left p-4 flex items-center justify-between group active:bg-gray-50">
-                                <span className="text-sm text-gray-600 font-medium group-hover:text-blue-600 transition-colors">{faq}</span>
-                                <span className="material-icons text-gray-400 text-lg">chevron_right</span>
-                            </button>
+                    <div className="relative w-96">
+                        <span className="material-icons absolute left-3 top-2.5 text-gray-400">search</span>
+                        <input
+                            type="text"
+                            placeholder="Search for help topics..."
+                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-sm focus:border-blue-500 outline-none text-sm"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                <div className="-mt-10 px-4 space-y-4 relative z-20 md:mt-0 md:px-0 md:space-y-6">
+                    {/* Quick Help Grid */}
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+                        {categories.map((cat, idx) => (
+                            <div key={idx} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:scale-95 transition-all cursor-pointer md:hover:shadow-md md:rounded-lg md:text-center md:py-6">
+                                <span className="material-icons text-blue-600 mb-2 md:text-3xl md:mb-3">{cat.icon}</span>
+                                <h3 className="font-bold text-sm text-gray-800 md:text-base">{cat.title}</h3>
+                                <p className="text-[10px] text-gray-500 mt-1 leading-tight md:text-xs">{cat.desc}</p>
+                            </div>
                         ))}
                     </div>
-                </div>
 
-                {/* Contact Banner */}
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-5 text-white flex items-center justify-between shadow-blue-200 shadow-xl overflow-hidden relative">
-                    <div className="relative z-10">
-                        <h4 className="font-black text-lg">Still need help?</h4>
-                        <p className="text-blue-100 text-xs mt-1">Chat with us or call our support team</p>
-                        <button
-                            onClick={() => setShowContactForm(true)}
-                            className="mt-4 bg-white text-blue-600 px-6 py-2 rounded-full font-bold text-xs uppercase shadow-lg shadow-black/10 active:scale-95 transition-all"
-                        >
-                            Contact Support
-                        </button>
+                    <div className="md:grid md:grid-cols-3 md:gap-6">
+                        {/* Popular Topics */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden md:col-span-2 md:rounded-lg">
+                            <div className="p-4 border-b border-gray-50 md:p-5">
+                                <h3 className="text-sm font-bold text-gray-800 md:text-base">Popular Topics</h3>
+                            </div>
+                            <div className="divide-y divide-gray-50">
+                                {faqs.map((faq, idx) => (
+                                    <div key={idx} className="group border-b border-gray-50 last:border-0">
+                                        <button
+                                            onClick={() => toggleFaq(idx)}
+                                            className="w-full text-left p-4 flex items-center justify-between active:bg-gray-50 md:hover:bg-gray-50 md:p-5 cursor-pointer outline-none"
+                                        >
+                                            <span className={`text-sm font-medium transition-colors md:text-sm ${expandedFaq === idx ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-600'}`}>
+                                                {faq.question}
+                                            </span>
+                                            <span className={`material-icons text-gray-400 text-lg transition-transform duration-300 ${expandedFaq === idx ? 'rotate-180 text-blue-600' : ''}`}>
+                                                expand_more
+                                            </span>
+                                        </button>
+
+                                        {/* Accordion Content */}
+                                        <div
+                                            className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedFaq === idx ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
+                                        >
+                                            <div className="px-4 pb-4 md:px-5 md:pb-5 text-xs text-gray-500 leading-relaxed md:text-sm">
+                                                {faq.answer}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Contact Banner */}
+                        <div className="mt-4 md:mt-0">
+                            <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-5 text-white flex items-center justify-between shadow-blue-200 shadow-xl overflow-hidden relative md:flex-col md:items-start md:h-full md:justify-center md:rounded-lg md:text-left">
+                                <div className="relative z-10">
+                                    <h4 className="font-black text-lg md:text-xl">Still need help?</h4>
+                                    <p className="text-blue-100 text-xs mt-1 md:text-sm md:mt-2">Chat with us or call our support team anytime.</p>
+                                    <button
+                                        onClick={() => setShowContactForm(true)}
+                                        className="mt-4 bg-white text-blue-600 px-6 py-2 rounded-full font-bold text-xs uppercase shadow-lg shadow-black/10 active:scale-95 transition-all md:w-full md:mt-6 md:py-3"
+                                    >
+                                        Contact Support
+                                    </button>
+                                </div>
+                                <span className="material-icons text-[80px] opacity-20 absolute -right-4 -bottom-4 z-0 md:text-[120px] md:-right-8 md:-bottom-8">support_agent</span>
+                            </div>
+                        </div>
                     </div>
-                    <span className="material-icons text-[80px] opacity-20 absolute -right-4 -bottom-4 z-0">support_agent</span>
                 </div>
             </div>
 

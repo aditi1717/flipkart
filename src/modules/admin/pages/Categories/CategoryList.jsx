@@ -2,12 +2,19 @@ import React, { useState } from 'react';
 import { MdAdd, MdEdit, MdDelete, MdExpandMore, MdChevronRight, MdCheckCircle, MdCancel } from 'react-icons/md';
 import useCategoryStore from '../../store/categoryStore';
 import CategoryForm from './CategoryForm';
+import Pagination from '../../components/common/Pagination';
 
 const CategoryList = () => {
     const { categories, deleteCategory, toggleCategoryStatus } = useCategoryStore();
     const [expandedIds, setExpandedIds] = useState(new Set());
     const [showForm, setShowForm] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const totalPages = Math.ceil(categories.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedCategories = categories.slice(startIndex, startIndex + itemsPerPage);
 
     const toggleExpand = (id) => {
         const newExpanded = new Set(expandedIds);
@@ -168,10 +175,19 @@ const CategoryList = () => {
                     </div>
                 ) : (
                     <div>
-                        {categories.map(category => renderCategory(category))}
+                        {paginatedCategories.map(category => renderCategory(category))}
                     </div>
                 )}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+            )}
 
             {/* Add/Edit Form Modal */}
             {showForm && (

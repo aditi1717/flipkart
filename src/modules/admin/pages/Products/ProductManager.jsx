@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MdAdd, MdSearch, MdEdit, MdDelete, MdFilterList, MdImage, MdVisibility, MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import useProductStore from '../../store/productStore';
+import Pagination from '../../components/common/Pagination';
 
 const ProductManager = () => {
     const navigate = useNavigate();
@@ -190,58 +191,11 @@ const ProductManager = () => {
 
                     {/* Pagination UI */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-gray-100 shadow-sm">
-                            <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredProducts.length)} of {filteredProducts.length}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-100 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
-                                >
-                                    <MdChevronLeft size={24} />
-                                </button>
-
-                                <div className="flex items-center gap-1">
-                                    {[...Array(totalPages)].map((_, i) => {
-                                        const pageNum = i + 1;
-                                        if (
-                                            pageNum === 1 ||
-                                            pageNum === totalPages ||
-                                            (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                                        ) {
-                                            return (
-                                                <button
-                                                    key={pageNum}
-                                                    onClick={() => handlePageChange(pageNum)}
-                                                    className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${currentPage === pageNum
-                                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
-                                                            : 'hover:bg-gray-50 text-gray-500'
-                                                        }`}
-                                                >
-                                                    {pageNum}
-                                                </button>
-                                            );
-                                        } else if (
-                                            pageNum === currentPage - 2 ||
-                                            pageNum === currentPage + 2
-                                        ) {
-                                            return <span key={pageNum} className="text-gray-300 px-1">...</span>;
-                                        }
-                                        return null;
-                                    })}
-                                </div>
-
-                                <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-100 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
-                                >
-                                    <MdChevronRight size={24} />
-                                </button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
                     )}
                 </div>
             )}

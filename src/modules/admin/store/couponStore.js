@@ -34,6 +34,25 @@ const useCouponStore = create((set) => ({
         }
     ],
 
+    offers: [
+        {
+            id: 'OFF001',
+            type: 'Bank Offer',
+            title: '10% off on HDFC Bank Credit Card',
+            description: 'Get 10% instant discount on HDFC Bank Credit Card transactions. Min purchase value ₹5000.',
+            terms: 'Max discount up to ₹1500. TCA.',
+            active: true
+        },
+        {
+            id: 'OFF002',
+            type: 'Partner Offer',
+            title: 'Sign up for Flipkart Pay Later',
+            description: 'Get ₹500 Gift Card on signing up for Flipkart Pay Later.',
+            terms: 'Valid only for new signups.',
+            active: true
+        }
+    ],
+
     addCoupon: (couponData) => {
         set((state) => ({
             coupons: [
@@ -58,6 +77,33 @@ const useCouponStore = create((set) => ({
         set((state) => ({
             coupons: state.coupons.map(c =>
                 c.id === id ? { ...c, active: !c.active } : c
+            )
+        }));
+    },
+
+    addOffer: (offerData) => {
+        set((state) => ({
+            offers: [
+                {
+                    ...offerData,
+                    id: `OFF${Date.now()}`,
+                    active: true
+                },
+                ...state.offers
+            ]
+        }));
+    },
+
+    deleteOffer: (id) => {
+        set((state) => ({
+            offers: state.offers.filter(o => o.id !== id)
+        }));
+    },
+
+    toggleOfferStatus: (id) => {
+        set((state) => ({
+            offers: state.offers.map(o =>
+                o.id === id ? { ...o, active: !o.active } : o
             )
         }));
     }

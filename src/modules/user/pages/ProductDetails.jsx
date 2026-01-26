@@ -63,6 +63,13 @@ const ProductDetails = () => {
         { label: 'XXL', available: true }
     ];
 
+    const offers = [
+        { type: 'Bank Offer', text: '5% Unlimited Cashback on Flipkart Axis Bank Credit Card' },
+        { type: 'Bank Offer', text: '10% Off on Bank of Baroda Mastercard debit card first time transaction' },
+        { type: 'Special Price', text: 'Get extra 20% off (price inclusive of cashback/coupon)' },
+        { type: 'Partner Offer', text: 'Sign up for Flipkart Pay Later and get Flipkart Gift Card worth ₹100*' }
+    ];
+
     const productImages = product ? [
         product.image,
         'https://rukminim2.flixcart.com/image/832/832/xif0q/earring/y/t/z/na-er-2023-455-p4-shining-diva-fashion-original-imagrvv4hfyhywhm.jpeg',
@@ -154,6 +161,9 @@ const ProductDetails = () => {
                         <div className="mb-2">
                             <p className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-1 hover:text-blue-600 cursor-pointer w-fit">{product.brand || "Brand Name"}</p>
                             <h1 className="text-2xl font-medium text-gray-900 leading-snug hover:text-blue-600 cursor-pointer transition-colors inline-block">{product.name}</h1>
+                            <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+                                {product.description || "This premium product is crafted with high-quality materials to ensure durability and style. Perfect for daily wear or special occasions, it adds a touch of elegance to any outfit."}
+                            </p>
                         </div>
 
                         <div className="flex items-center gap-3 mb-4">
@@ -174,18 +184,16 @@ const ProductDetails = () => {
                         {/* Offers - Desktop */}
                         <div className="mb-6 space-y-2">
                             <p className="text-sm font-bold text-gray-900 mb-2">Available offers</p>
-                            <div className="flex items-center gap-2 text-sm text-gray-700">
-                                <span className="material-icons text-[#388e3c] text-[16px]">local_offer</span>
-                                <span className="font-bold text-gray-800">Bank Offer</span>
-                                <span>5% Unlimited Cashback on Flipkart Axis Bank Credit Card</span>
-                                <span className="text-blue-600 font-medium cursor-pointer ml-1">T&C</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-700">
-                                <span className="material-icons text-[#388e3c] text-[16px]">local_offer</span>
-                                <span className="font-bold text-gray-800">Bank Offer</span>
-                                <span>10% Off on Bank of Baroda Mastercard debit card first time transaction</span>
-                                <span className="text-blue-600 font-medium cursor-pointer ml-1">T&C</span>
-                            </div>
+                            {offers.map((offer, idx) => (
+                                <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                                    <span className="material-icons text-[#388e3c] text-[16px] mt-0.5">local_offer</span>
+                                    <div>
+                                        <span className="font-bold text-gray-800">{offer.type}</span>
+                                        <span className="ml-1">{offer.text}</span>
+                                        <span className="text-blue-600 font-medium cursor-pointer ml-1">T&C</span>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
 
                         {/* Variants Desktop */}
@@ -228,32 +236,69 @@ const ProductDetails = () => {
                             </div>
                         </div>
 
-                        {/* Highlights & Services */}
-                        <div className="flex gap-4">
-                            <div className="flex-1 flex gap-4">
-                                <span className="text-gray-500 font-medium text-sm w-12">Services</span>
-                                <ul className="text-sm text-gray-800 space-y-2">
-                                    <li className="flex items-center gap-2"><span className="material-icons text-[16px] text-blue-600">cached</span> 14 Days Return Policy</li>
-                                    <li className="flex items-center gap-2"><span className="material-icons text-[16px] text-blue-600">attach_money</span> Cash on Delivery available</li>
-                                </ul>
-                            </div>
-                            <div className="flex-1 flex gap-4">
-                                <span className="text-gray-500 font-medium text-sm w-16">Highlights</span>
-                                <ul className="text-sm text-gray-700 list-disc pl-4 space-y-1">
-                                    <li>Premium Quality Material</li>
-                                    <li>Genuine Product</li>
-                                    <li>Top Rated Seller</li>
-                                </ul>
+                        {/* Delivery & Seller - Desktop */}
+                        <div className="flex gap-16 mb-6">
+                            {/* Delivery */}
+                            <div className="flex gap-4">
+                                <span className="text-gray-500 font-medium text-sm w-12 pt-1">Delivery</span>
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2 border-b-2 border-blue-600 pb-0.5 max-w-[200px]">
+                                        <span className="material-icons text-[18px] text-gray-400">location_on</span>
+                                        <input
+                                            type="text"
+                                            value={product.pincode || '364515'}
+                                            readOnly
+                                            className="font-bold text-gray-900 text-sm outline-none w-full"
+                                        />
+                                        <button className="text-blue-600 text-[11px] font-bold uppercase whitespace-nowrap hover:text-blue-700">Check</button>
+                                    </div>
+                                    <div className="text-sm">
+                                        <span className="font-bold text-gray-900">Delivery by {product.deliveryDate || '30 Jan, Fri'}</span>
+                                        <span className="text-gray-400 mx-1">|</span>
+                                        <span className="text-green-600 font-bold">Free</span>
+                                        <span className="text-gray-400 line-through text-xs ml-1">₹40</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Desktop Description */}
-                        <div className="mt-8 border text-sm p-4 rounded-sm border-gray-100 bg-gray-50/30">
-                            <h3 className="font-bold text-gray-900 mb-2 uppercase tracking-wide">Product Description</h3>
-                            <p className="text-gray-700 leading-relaxed">
-                                {product.description || "This premium product is crafted with high-quality materials to ensure durability and style. Perfect for daily wear or special occasions, it adds a touch of elegance to any outfit. The design focuses on comfort without compromising on aesthetics."}
-                            </p>
+
+
+                        {/* Services */}
+                        {/* Services - Desktop (Replicating Mobile Style) */}
+                        <div className="flex gap-8 mb-8 mt-2">
+                            <div className="flex items-center gap-4 group cursor-pointer">
+                                <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800 transition-colors group-hover:bg-blue-50">
+                                    <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">autorenew</span>
+                                </div>
+                                <div className="text-gray-800">
+                                    <span className="text-[14px] font-bold leading-tight block">10-Day Return</span>
+                                    <span className="text-xs text-gray-500">Easy returns</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 group cursor-pointer">
+                                <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800 transition-colors group-hover:bg-blue-50">
+                                    <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">payments</span>
+                                </div>
+                                <div className="text-gray-800">
+                                    <span className="text-[14px] font-bold leading-tight block">Cash on Delivery</span>
+                                    <span className="text-xs text-gray-500">Pay at doorstep</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 group cursor-pointer">
+                                <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800 transition-colors group-hover:bg-blue-50">
+                                    <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">shield</span>
+                                </div>
+                                <div className="text-gray-800">
+                                    <span className="text-[14px] font-bold leading-tight block">Flipkart Assured</span>
+                                    <span className="text-xs text-gray-500">Quality checked</span>
+                                </div>
+                            </div>
                         </div>
+
+
 
 
                     </div>
@@ -408,21 +453,18 @@ const ProductDetails = () => {
 
                 {/* Offers Section */}
                 <div className="px-4 mt-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-[15px] font-bold text-gray-900">Offers for you</h3>
-                        <span className="text-blue-600 text-[12px] font-bold">View all</span>
-                    </div>
-                    <div className="bg-[#f0f7ff] border border-blue-50/50 rounded-2xl p-3 flex items-center justify-between">
-                        <div className="flex items-start gap-2.5">
-                            <span className="material-icons text-blue-600 text-[18px] mt-0.5">local_offer</span>
-                            <div>
-                                <p className="text-[12px] font-bold text-gray-900">10% instant discount on Bank of Baroda</p>
-                                <p className="text-[10px] text-gray-500 font-medium leading-tight">Use code: BOB10 | Min. purchase ₹2500</p>
+                    <h3 className="text-[15px] font-bold text-gray-900 mb-3">Available offers</h3>
+                    <div className="space-y-3">
+                        {offers.slice(0, 4).map((offer, idx) => (
+                            <div key={idx} className="flex gap-2 items-start text-sm text-gray-700">
+                                <span className="material-icons text-[#388e3c] text-[16px] mt-0.5 shrink-0">local_offer</span>
+                                <div>
+                                    <span className="font-bold text-gray-800">{offer.type}</span>
+                                    <span className="ml-1 leading-snug">{offer.text}</span>
+                                    <span className="text-blue-600 font-medium cursor-pointer ml-1 whitespace-nowrap">T&C</span>
+                                </div>
                             </div>
-                        </div>
-                        <button className="bg-white border border-blue-600/20 text-blue-600 px-3 py-1.5 rounded-lg text-[12px] font-bold whitespace-nowrap shadow-sm">
-                            Apply Now
-                        </button>
+                        ))}
                     </div>
                 </div>
 
@@ -451,20 +493,6 @@ const ProductDetails = () => {
                             <span className="text-[14px] font-bold text-gray-800">Delivery by {product.deliveryDate || '30 Jan, Fri'}</span>
                         </div>
 
-                        {/* Seller Info */}
-                        <div className="bg-[#f5f5f5] p-4 border-t border-white flex items-start gap-3">
-                            <span className="material-icons-outlined text-gray-500 text-[20px] mt-0.5">storefront</span>
-                            <div className="flex-1">
-                                <p className="text-[14px] font-bold text-gray-800 mb-0.5">Fulfilled by {product.sellerName || 'RetailNet'}</p>
-                                <div className="flex items-center gap-1.5 text-gray-500 font-medium">
-                                    <span className="text-[12px] flex items-center gap-0.5">
-                                        {product.rating || '4.3'} <span className="material-icons text-[12px]">star</span>
-                                    </span>
-                                    <span className="text-[10px]">•</span>
-                                    <span className="text-[12px]">{product.sellerYears || '9 years with Flipkart'}</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Service Icons - More compact */}
@@ -506,31 +534,36 @@ const ProductDetails = () => {
 
 
             {/* Similar Products Section - Added as requested */}
-            <ProductSection
-                title="Similar Products"
-                products={similarProducts}
-                containerClass="mt-4 pb-4 px-4"
-                onViewAll={() => console.log('View all similar products')}
-            />
+            <div className="md:max-w-[1600px] md:mx-auto md:px-6">
+                <ProductSection
+                    title="Similar Products"
+                    products={similarProducts}
+                    containerClass="mt-4 pb-4 px-4 md:px-0"
+                    onViewAll={() => console.log('View all similar products')}
+                />
 
-            {/* Product Highlights Section */}
-            <div className="border-t border-gray-100 mt-2">
-                <div
-                    className="px-4 py-4 flex items-center justify-between cursor-pointer md:hidden"
-                    onClick={() => toggleSection('highlights')}
-                >
-                    <div>
-                        <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Product highlights</h3>
-                        <p className="text-[13px] text-gray-400 mt-0.5">Key features and specifications</p>
+                {/* Product Highlights Section */}
+                <div className="border-t border-gray-100 mt-2">
+                    {/* Desktop Header */}
+                    <div className="hidden md:block px-4 md:px-0 py-4">
+                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900 leading-tight">Product highlights</h3>
                     </div>
-                    <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.highlights ? 'rotate-180' : ''}`}>
-                        <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
+                    {/* Mobile Header */}
+                    <div
+                        className="px-4 py-4 flex items-center justify-between cursor-pointer md:hidden"
+                        onClick={() => toggleSection('highlights')}
+                    >
+                        <div>
+                            <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Product highlights</h3>
+                            <p className="text-[13px] text-gray-400 mt-0.5">Key features and specifications</p>
+                        </div>
+                        <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.highlights ? 'rotate-180' : ''}`}>
+                            <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
+                        </div>
                     </div>
-                </div>
 
-                {expandedSections.highlights && (
-                    <div className="px-4 pb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                    <div className={`px-4 md:px-0 pb-6 animate-in fade-in slide-in-from-top-2 duration-300 ${expandedSections.highlights ? '' : 'hidden'} md:block`}>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
                             <div>
                                 <p className="text-[13px] text-gray-400 mb-0.5 font-medium">Base Material</p>
                                 <p className="text-[15px] text-gray-800 font-bold">Alloy</p>
@@ -545,29 +578,32 @@ const ProductDetails = () => {
                             </div>
                         </div>
                     </div>
-                )}
-            </div>
-
-            {/* All Details Section - Tabbed Interface with Main Dropdown */}
-            <div className="border-t border-gray-100 mt-2">
-                <div
-                    className="px-4 py-4 flex items-center justify-between cursor-pointer md:hidden"
-                    onClick={() => toggleSection('allDetails')}
-                >
-                    <div>
-                        <h3 className="text-[17px] font-bold text-gray-900 leading-tight">All details</h3>
-                        <p className="text-[13px] text-gray-400 mt-0.5">Tabs for features, specs and more</p>
-                    </div>
-                    <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.allDetails ? 'rotate-180' : ''}`}>
-                        <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
-                    </div>
                 </div>
 
-                {expandedSections.allDetails && (
-                    <div className="pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                {/* All Details Section - Tabbed Interface with Main Dropdown */}
+                <div className="border-t border-gray-100 mt-2">
+                    {/* Desktop Header */}
+                    <div className="hidden md:block px-4 md:px-0 py-4">
+                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900 leading-tight">All details</h3>
+                    </div>
+                    {/* Mobile Header */}
+                    <div
+                        className="px-4 py-4 flex items-center justify-between cursor-pointer md:hidden"
+                        onClick={() => toggleSection('allDetails')}
+                    >
+                        <div>
+                            <h3 className="text-[17px] font-bold text-gray-900 leading-tight">All details</h3>
+                            <p className="text-[13px] text-gray-400 mt-0.5">Tabs for features, specs and more</p>
+                        </div>
+                        <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.allDetails ? 'rotate-180' : ''}`}>
+                            <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div className={`pb-8 animate-in fade-in slide-in-from-top-2 duration-300 ${expandedSections.allDetails ? '' : 'hidden'} md:block`}>
                         {/* Tab Headers */}
-                        <div className="px-4 mb-4">
-                            <div className="flex overflow-x-auto gap-2.5 no-scrollbar -mx-4 px-4 pb-2">
+                        <div className="px-4 md:px-0 mb-4">
+                            <div className="flex overflow-x-auto gap-2.5 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0 pb-2">
                                 {[
                                     { id: 'Features', label: 'Features', icon: 'star_outline' },
                                     { id: 'Specifications', label: 'Specifications', icon: 'list_alt' },
@@ -592,7 +628,7 @@ const ProductDetails = () => {
                         </div>
 
                         {/* Content Card */}
-                        <div className="px-4 animate-in fade-in zoom-in-95 duration-200">
+                        <div className="px-4 md:px-0 animate-in fade-in zoom-in-95 duration-200">
                             <div className="bg-white rounded-3xl border border-blue-100 p-5 shadow-sm ring-1 ring-blue-50/50 min-h-[120px]">
                                 <div className="text-[14px] text-gray-600 leading-relaxed">
                                     {selectedDetailTab === 'Features' && (
@@ -636,50 +672,53 @@ const ProductDetails = () => {
                             </div>
                         </div>
                     </div>
-                )}
-            </div>
-
-            {/* Similar Oversized Studs Section */}
-            <div className="border-t border-gray-100 mt-4">
-                <ProductSection
-                    title={`Similar ${product.brand || ''} Styles`}
-                    products={similarProducts.slice(0, 6)}
-                    containerClass="mt-2 pb-4 px-4"
-                    onViewAll={() => console.log('View all similar styles')}
-                />
-            </div>
-
-            {/* Top Rated Section */}
-            <div className="border-t border-gray-100">
-                <ProductSection
-                    title="Earrings rated 4 stars and above"
-                    products={highRatedProducts}
-                    containerClass="mt-2 pb-8 px-4"
-                    onViewAll={() => console.log('View all top rated')}
-                />
-            </div>
-
-            {/* Ratings and Reviews Section */}
-            <div className="border-t border-gray-100 mt-2">
-                <div
-                    className="px-4 py-5 flex items-center justify-between cursor-pointer md:hidden"
-                    onClick={() => toggleSection('reviews')}
-                >
-                    <div>
-                        <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Ratings and reviews</h3>
-                        <p className="text-[13px] text-gray-400 mt-0.5">
-                            {reviews.length > 0 ? `${reviews.length} ratings and reviews` : 'No ratings for this product yet'}
-                        </p>
-                    </div>
-                    <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.reviews ? 'rotate-180' : ''}`}>
-                        <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
-                    </div>
                 </div>
 
-                {expandedSections.reviews && (
-                    <div className="pb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                {/* Similar Oversized Studs Section */}
+                <div className="border-t border-gray-100 mt-4">
+                    <ProductSection
+                        title={`Similar ${product.brand || ''} Styles`}
+                        products={similarProducts.slice(0, 6)}
+                        containerClass="mt-2 pb-4 px-4 md:px-0"
+                        onViewAll={() => console.log('View all similar styles')}
+                    />
+                </div>
+
+                {/* Top Rated Section */}
+                <div className="border-t border-gray-100">
+                    <ProductSection
+                        title="Earrings rated 4 stars and above"
+                        products={highRatedProducts}
+                        containerClass="mt-2 pb-8 px-4 md:px-0"
+                        onViewAll={() => console.log('View all top rated')}
+                    />
+                </div>
+
+                {/* Ratings and Reviews Section */}
+                <div className="border-t border-gray-100 mt-2">
+                    {/* Desktop Header */}
+                    <div className="hidden md:block px-4 md:px-0 py-4">
+                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900 leading-tight">Ratings and reviews</h3>
+                    </div>
+                    {/* Mobile Header */}
+                    <div
+                        className="px-4 py-5 flex items-center justify-between cursor-pointer md:hidden"
+                        onClick={() => toggleSection('reviews')}
+                    >
+                        <div>
+                            <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Ratings and reviews</h3>
+                            <p className="text-[13px] text-gray-400 mt-0.5">
+                                {reviews.length > 0 ? `${reviews.length} ratings and reviews` : 'No ratings for this product yet'}
+                            </p>
+                        </div>
+                        <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.reviews ? 'rotate-180' : ''}`}>
+                            <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div className={`pb-6 animate-in fade-in slide-in-from-top-2 duration-300 ${expandedSections.reviews ? '' : 'hidden'} md:block`}>
                         {/* Horizontal Reviews Slide - Narrower cards */}
-                        <div className="flex overflow-x-auto gap-3 no-scrollbar px-4 mb-6">
+                        <div className="flex overflow-x-auto gap-3 no-scrollbar px-4 md:px-0 mb-6">
                             {reviews.map(rev => (
                                 <div key={rev.id} className="min-w-[220px] w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex-shrink-0">
                                     <div className="flex items-center gap-2 mb-2">
@@ -695,7 +734,7 @@ const ProductDetails = () => {
                         </div>
 
                         {/* Post Review Form - Smaller Stars */}
-                        <div className="mx-4 p-5 bg-gray-50/50 rounded-3xl border border-gray-100 shadow-sm">
+                        <div className="mx-4 md:mx-0 p-5 bg-gray-50/50 rounded-3xl border border-gray-100 shadow-sm">
                             <h4 className="text-[14px] font-bold text-gray-800 mb-4">Rate this product</h4>
                             <div className="flex gap-2 mb-5">
                                 {[1, 2, 3, 4, 5].map(star => (
@@ -729,23 +768,26 @@ const ProductDetails = () => {
                             </button>
                         </div>
                     </div>
-                )}
-            </div>
-
-            {/* Questions and Answers Section - Input Only */}
-            <div className="border-t border-gray-100 pb-2">
-                <div
-                    className="px-4 py-5 flex items-center justify-between cursor-pointer md:hidden"
-                    onClick={() => toggleSection('questions')}
-                >
-                    <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Questions and Answers</h3>
-                    <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.questions ? 'rotate-180' : ''}`}>
-                        <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
-                    </div>
                 </div>
 
-                {expandedSections.questions && (
-                    <div className="px-4 pb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                {/* Questions and Answers Section - Input Only */}
+                <div className="border-t border-gray-100 pb-2">
+                    {/* Desktop Header */}
+                    <div className="hidden md:block px-4 md:px-0 py-4">
+                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900 leading-tight">Questions and Answers</h3>
+                    </div>
+                    {/* Mobile Header */}
+                    <div
+                        className="px-4 py-5 flex items-center justify-between cursor-pointer md:hidden"
+                        onClick={() => toggleSection('questions')}
+                    >
+                        <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Questions and Answers</h3>
+                        <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.questions ? 'rotate-180' : ''}`}>
+                            <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div className={`px-4 md:px-0 pb-6 animate-in fade-in slide-in-from-top-2 duration-300 ${expandedSections.questions ? '' : 'hidden'} md:block`}>
                         <div className="bg-blue-50/40 rounded-3xl p-5 border border-blue-50 shadow-sm">
                             <h4 className="text-[15px] font-bold text-blue-900 mb-4">Post a question</h4>
                             <div className="flex gap-2">
@@ -769,28 +811,28 @@ const ProductDetails = () => {
                             <p className="text-[12px] text-blue-600 mt-3 font-medium">Get answer from experts and other customers.</p>
                         </div>
                     </div>
-                )}
-            </div>
+                </div>
 
-            {/* Recently Viewed Section */}
-            <div className="border-t border-gray-100 mt-2">
-                <ProductSection
-                    title="Recently Viewed"
-                    products={products.slice(0, 6)}
-                    containerClass="mt-2 pb-4 px-4"
-                    onViewAll={() => console.log('View all recently viewed')}
-                />
-            </div>
+                {/* Recently Viewed Section */}
+                <div className="border-t border-gray-100 mt-2">
+                    <ProductSection
+                        title="Recently Viewed"
+                        products={products.slice(0, 6)}
+                        containerClass="mt-2 pb-4 px-4 md:px-0"
+                        onViewAll={() => console.log('View all recently viewed')}
+                    />
+                </div>
 
-            {/* You may also like Section - Tighter padding */}
-            <div className="border-t border-gray-100">
-                <ProductSection
-                    title="You may also like"
-                    titleBadge="AD"
-                    products={products.slice(6, 12)}
-                    containerClass="mt-2 pb-4 px-4"
-                    onViewAll={() => console.log('View all recommendations')}
-                />
+                {/* You may also like Section - Tighter padding */}
+                <div className="border-t border-gray-100">
+                    <ProductSection
+                        title="You may also like"
+                        titleBadge="AD"
+                        products={products.slice(6, 12)}
+                        containerClass="mt-2 pb-4 px-4 md:px-0"
+                        onViewAll={() => console.log('View all recommendations')}
+                    />
+                </div>
             </div>
 
             {/* Bottom Actions - Fixed Footer */}

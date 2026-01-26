@@ -76,8 +76,10 @@ const TrackOrder = () => {
     };
 
     return (
-        <div className="bg-white min-h-screen">
-            <div className="bg-blue-600 text-white px-4 py-4 flex items-center gap-4 sticky top-0 z-50 shadow-md">
+        <div className="bg-white min-h-screen md:bg-[#f1f3f6] md:py-6">
+
+            {/* Mobile Header - Hidden on Desktop */}
+            <div className="bg-blue-600 text-white px-4 py-4 flex items-center gap-4 sticky top-0 z-50 shadow-md md:hidden">
                 <button
                     onClick={() => {
                         // If it's a specific product track, go back to order details, otherwise go to my orders
@@ -98,125 +100,144 @@ const TrackOrder = () => {
                 </div>
             </div>
 
-            <div className="p-4 border-b">
-                <div className="flex gap-4">
-                    <div className="w-16 h-16 bg-gray-50 rounded border p-1">
-                        <img src={targetItem?.image} alt="" className="w-full h-full object-contain" />
-                    </div>
-                    <div className="flex-1">
-                        <h2 className="text-sm font-bold text-gray-800 line-clamp-1">{targetItem?.name}</h2>
-                        <p className="text-xs text-gray-500 mt-1">Status: <span className="text-blue-600 font-bold uppercase tracking-tighter">{currentStatus?.replace(/_/g, ' ')}</span></p>
-                    </div>
+            {/* Desktop Container */}
+            <div className="md:max-w-[800px] md:mx-auto">
+
+                {/* Desktop Breadcrumbs */}
+                <div className="hidden md:flex items-center gap-2 text-xs text-gray-500 mb-4 px-4">
+                    <span onClick={() => navigate('/')} className="cursor-pointer hover:text-blue-600">Home</span>
+                    <span className="material-icons text-[10px]">chevron_right</span>
+                    <span onClick={() => navigate('/my-orders')} className="cursor-pointer hover:text-blue-600">My Orders</span>
+                    <span className="material-icons text-[10px]">chevron_right</span>
+                    <span className="text-gray-800 font-bold">Track Order</span>
                 </div>
-            </div>
 
-            <div className="p-6">
-                <div className="relative">
-                    {/* Vertical Line Background */}
-                    <div className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-gray-100">
-                        {/* Dynamic Green Line */}
-                        {order.status !== 'CANCELLED' && (
-                            <div
-                                className="w-full bg-green-600 transition-all duration-1000 ease-in-out"
-                                style={{
-                                    height: `${currentStatusIdx <= 0 ? 0 : (currentStatusIdx / (steps.length - 1)) * 100}%`
-                                }}
-                            ></div>
-                        )}
+                {/* Main Card (Desktop) / Wrapper (Mobile) */}
+                <div className="md:bg-white md:rounded-lg md:shadow-sm md:overflow-hidden md:border md:border-gray-200">
+
+                    {/* Product Info Header */}
+                    <div className="p-4 border-b md:bg-gray-50">
+                        <div className="flex gap-4">
+                            <div className="w-16 h-16 bg-gray-50 rounded border p-1 md:bg-white">
+                                <img src={targetItem?.image} alt="" className="w-full h-full object-contain" />
+                            </div>
+                            <div className="flex-1">
+                                <h2 className="text-sm font-bold text-gray-800 line-clamp-1 md:text-base">{targetItem?.name}</h2>
+                                <p className="text-xs text-gray-500 mt-1 md:text-sm">Status: <span className="text-blue-600 font-bold uppercase tracking-tighter">{currentStatus?.replace(/_/g, ' ')}</span></p>
+                                <p className="text-[10px] text-gray-400 mt-1 hidden md:block">Order ID: {order.id}</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="space-y-10">
-                        {order.status === 'CANCELLED' ? (
-                            <div className="flex gap-6 relative">
-                                <div className="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center z-10">
-                                    <span className="material-icons text-white text-[12px]">close</span>
-                                </div>
-                                <div className="flex-1 -mt-1">
-                                    <h3 className="text-sm font-bold text-red-600">Order Cancelled</h3>
-                                    <p className="text-xs text-gray-500 mt-0.5">This order was cancelled.</p>
-                                    {order.tracking?.find(t => t.status === 'CANCELLED') && (
-                                        <p className="text-[10px] text-gray-400 mt-1">{new Date(order.tracking.find(t => t.status === 'CANCELLED').time).toLocaleString()}</p>
-                                    )}
-                                </div>
+                    <div className="p-6 md:p-8">
+                        <div className="relative md:pl-4">
+                            {/* Vertical Line Background */}
+                            <div className="absolute left-[9px] md:left-[25px] top-2 bottom-2 w-0.5 bg-gray-100">
+                                {/* Dynamic Green Line */}
+                                {order.status !== 'CANCELLED' && (
+                                    <div
+                                        className="w-full bg-green-600 transition-all duration-1000 ease-in-out"
+                                        style={{
+                                            height: `${currentStatusIdx <= 0 ? 0 : (currentStatusIdx / (steps.length - 1)) * 100}%`
+                                        }}
+                                    ></div>
+                                )}
                             </div>
-                        ) : (
-                            steps.map((step, idx) => {
-                                const isCompleted = idx < currentStatusIdx;
-                                const isCurrent = idx === currentStatusIdx;
-                                const trackingEntry = (productId && targetItem?.trackingHistory?.some(t => t.status === step.status))
-                                    ? targetItem.trackingHistory.find(t => t.status === step.status)
-                                    : order.tracking?.find(t => t.status === step.status);
 
-                                return (
-                                    <div key={idx} className="flex gap-6 relative">
-                                        <div className="relative">
-                                            {isCurrent && (
-                                                <div className="absolute -inset-1 bg-green-400 rounded-full animate-ping opacity-40"></div>
-                                            )}
-                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center z-10 relative ${isCompleted || isCurrent ? 'bg-green-600' : 'bg-gray-200'
-                                                }`}>
-                                                <span className="material-icons text-white text-[12px]">
-                                                    {isCompleted ? 'check' : isCurrent ? 'radio_button_checked' : 'radio_button_unchecked'}
-                                                </span>
-                                            </div>
+                            <div className="space-y-10">
+                                {order.status === 'CANCELLED' ? (
+                                    <div className="flex gap-6 relative">
+                                        <div className="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center z-10 md:w-6 md:h-6">
+                                            <span className="material-icons text-white text-[12px] md:text-[14px]">close</span>
                                         </div>
-                                        <div className="flex-1 -mt-1">
-                                            <h3 className={`text-sm font-bold transition-all duration-500 ${isCompleted || isCurrent ? 'text-gray-900' : 'text-gray-400'}`}>
-                                                {step.title}
-                                            </h3>
-                                            <p className="text-xs text-gray-500 mt-0.5">{step.desc}</p>
-                                            {trackingEntry ? (
-                                                <p className="text-[10px] text-gray-400 mt-1 animate-in fade-in duration-500">
-                                                    {new Date(trackingEntry.time).toLocaleString()}
-                                                </p>
-                                            ) : isCurrent ? (
-                                                <div className="flex items-center gap-1.5 mt-1">
-                                                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                                                    <p className="text-[10px] text-blue-500 font-bold uppercase tracking-wider">In Progress...</p>
-                                                </div>
-                                            ) : null}
+                                        <div className="flex-1 -mt-1 md:mt-0">
+                                            <h3 className="text-sm font-bold text-red-600 md:text-base">Order Cancelled</h3>
+                                            <p className="text-xs text-gray-500 mt-0.5 md:text-sm">This order was cancelled.</p>
+                                            {order.tracking?.find(t => t.status === 'CANCELLED') && (
+                                                <p className="text-[10px] text-gray-400 mt-1 md:text-xs">{new Date(order.tracking.find(t => t.status === 'CANCELLED').time).toLocaleString()}</p>
+                                            )}
                                         </div>
                                     </div>
-                                );
-                            })
+                                ) : (
+                                    steps.map((step, idx) => {
+                                        const isCompleted = idx < currentStatusIdx;
+                                        const isCurrent = idx === currentStatusIdx;
+                                        const trackingEntry = (productId && targetItem?.trackingHistory?.some(t => t.status === step.status))
+                                            ? targetItem.trackingHistory.find(t => t.status === step.status)
+                                            : order.tracking?.find(t => t.status === step.status);
+
+                                        return (
+                                            <div key={idx} className="flex gap-6 relative">
+                                                <div className="relative">
+                                                    {isCurrent && (
+                                                        <div className="absolute -inset-1 bg-green-400 rounded-full animate-ping opacity-40"></div>
+                                                    )}
+                                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center z-10 relative md:w-6 md:h-6 ${isCompleted || isCurrent ? 'bg-green-600' : 'bg-gray-200'
+                                                        }`}>
+                                                        <span className="material-icons text-white text-[12px] md:text-[14px]">
+                                                            {isCompleted ? 'check' : isCurrent ? 'radio_button_checked' : 'radio_button_unchecked'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1 -mt-1 md:mt-0">
+                                                    <h3 className={`text-sm font-bold transition-all duration-500 md:text-base ${isCompleted || isCurrent ? 'text-gray-900' : 'text-gray-400'}`}>
+                                                        {step.title}
+                                                    </h3>
+                                                    <p className="text-xs text-gray-500 mt-0.5 md:text-sm">{step.desc}</p>
+                                                    {trackingEntry ? (
+                                                        <p className="text-[10px] text-gray-400 mt-1 animate-in fade-in duration-500 md:text-xs">
+                                                            {new Date(trackingEntry.time).toLocaleString()}
+                                                        </p>
+                                                    ) : isCurrent ? (
+                                                        <div className="flex items-center gap-1.5 mt-1">
+                                                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                                                            <p className="text-[10px] text-blue-500 font-bold uppercase tracking-wider md:text-xs">In Progress...</p>
+                                                        </div>
+                                                    ) : null}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
+
+                        {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
+                            <div className="mt-10 pt-6 border-t md:hidden">
+                                <button
+                                    onClick={handleCancel}
+                                    className="w-full text-red-600 font-bold text-sm flex items-center justify-center gap-2 py-2 border border-red-100 rounded-lg active:bg-red-50"
+                                >
+                                    <span className="material-icons text-sm">cancel</span>
+                                    Cancel Order
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
 
-                {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
-                    <div className="mt-10 pt-6 border-t">
-                        <button
-                            onClick={handleCancel}
-                            className="w-full text-red-600 font-bold text-sm flex items-center justify-center gap-2 py-2 border border-red-100 rounded-lg active:bg-red-50"
-                        >
-                            <span className="material-icons text-sm">cancel</span>
-                            Cancel Order
-                        </button>
+                <div className="m-4 p-4 bg-blue-50 rounded-xl border border-blue-100 md:mx-0 md:mt-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm">
+                            <span className="material-icons">support_agent</span>
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-bold text-blue-900">Need help with tracking?</p>
+                            <p className="text-[11px] text-blue-700">Call our customer support at 1800-202-9898</p>
+                        </div>
+                        <button className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-blue-700 transition-colors">Call Now</button>
                     </div>
-                )}
-            </div>
-
-            <div className="m-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm">
-                        <span className="material-icons">support_agent</span>
-                    </div>
-                    <div className="flex-1">
-                        <p className="text-sm font-bold text-blue-900">Need help with tracking?</p>
-                        <p className="text-[11px] text-blue-700">Call our customer support at 1800-202-9898</p>
-                    </div>
-                    <button className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">Call Now</button>
                 </div>
-            </div>
 
-            <div className="px-6 py-4 mt-4 border-t">
-                <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Couriers details</h4>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-sm font-bold text-gray-800">Ekart Logistics</p>
-                        <p className="text-xs text-gray-500 uppercase mt-0.5">AWB: {order.id.slice(2)}</p>
+                <div className="px-6 py-4 mt-4 border-t md:bg-white md:rounded-lg md:shadow-sm md:border md:border-gray-200 md:px-6 md:py-6">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Couriers details</h4>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-bold text-gray-800">Ekart Logistics</p>
+                            <p className="text-xs text-gray-500 uppercase mt-0.5">AWB: {order.id.slice(2)}</p>
+                        </div>
+                        <span className="material-icons text-gray-400">chevron_right</span>
                     </div>
-                    <span className="material-icons text-gray-400">chevron_right</span>
                 </div>
             </div>
         </div>

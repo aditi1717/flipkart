@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MdSearch, MdFilterList, MdVisibility, MdChevronLeft, MdChevronRight, MdLocalShipping, MdCheckCircle, MdPendingActions, MdCancel } from 'react-icons/md';
 import useOrderStore from '../../store/orderStore';
+import Pagination from '../../components/common/Pagination';
 
 const OrderList = () => {
     const navigate = useNavigate();
@@ -179,27 +180,11 @@ const OrderList = () => {
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between bg-white px-8 py-4 rounded-3xl border border-gray-100 shadow-sm">
-                            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                PAGE {currentPage} OF {totalPages}
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 disabled:opacity-30 transition-all shadow-sm"
-                                >
-                                    <MdChevronLeft size={24} />
-                                </button>
-                                <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
-                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 disabled:opacity-30 transition-all shadow-sm"
-                                >
-                                    <MdChevronRight size={24} />
-                                </button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
                     )}
                 </div>
             )}

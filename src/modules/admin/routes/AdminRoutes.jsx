@@ -17,6 +17,7 @@ import ProductForm from '../pages/Products/ProductForm';
 import UserList from '../pages/Users/UserList';
 import UserDetail from '../pages/Users/UserDetail';
 import PageManager from '../pages/PageManager';
+import SupportRequests from '../pages/Support/SupportRequests';
 
 const AdminRoutes = () => {
     return (
@@ -49,6 +50,7 @@ const AdminRoutes = () => {
                 <Route path="users" element={<UserList />} />
                 <Route path="users/:id" element={<UserDetail />} />
                 <Route path="pages" element={<PageManager />} />
+                <Route path="support" element={<SupportRequests />} />
                 <Route path="settings" element={<div className="text-2xl font-bold">Settings Page - Coming Soon</div>} />
             </Route>
         </Routes>
