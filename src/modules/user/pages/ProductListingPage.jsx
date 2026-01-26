@@ -9,6 +9,7 @@ const ProductListingPage = () => {
     const navigate = useNavigate();
     const category = searchParams.get('category');
     const subcategory = searchParams.get('subcategory');
+    const title = searchParams.get('title'); // Support Custom Title via Query Param
     const [filteredProducts, setFilteredProducts] = useState([]);
 
     useEffect(() => {
@@ -42,7 +43,7 @@ const ProductListingPage = () => {
                 <MdArrowBack onClick={() => navigate(-1)} className="text-2xl text-gray-700 cursor-pointer" />
                 <div className="flex flex-col">
                     <h1 className="text-sm font-bold text-gray-800 capitalize leading-none">
-                        {subcategory || category || 'Products'}
+                        {title || subcategory || category || 'Products'}
                     </h1>
                     <span className="text-xs text-gray-500">{filteredProducts.length} items</span>
                 </div>

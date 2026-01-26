@@ -28,14 +28,14 @@ const ProductCard = ({ product, footerText }) => {
 
                 {/* Rating Badge - Bottom Left */}
                 {product.rating && (
-                    <div className="absolute bottom-2 left-2 bg-white dark:bg-gray-800 px-1.5 py-0.5 rounded-md flex items-center gap-0.5 text-[10px] font-bold shadow-sm border border-black/5 leading-none">
-                        {product.rating} <span className="material-icons text-green-700" style={{ fontSize: '10px' }}>star</span>
+                    <div className="absolute bottom-2 left-2 bg-white dark:bg-gray-800 px-1.5 py-0.5 rounded-md flex items-center gap-0.5 text-[10px] md:text-xs font-bold shadow-sm border border-black/5 leading-none">
+                        {product.rating} <span className="material-icons text-green-700 md:text-[12px]" style={{ fontSize: '10px' }}>star</span>
                     </div>
                 )}
 
                 {/* AD Badge - Top Right (Conditional or dynamic based on ID) */}
                 {(product.id % 4 === 0) && (
-                    <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-sm text-white text-[8px] font-bold px-1.5 py-0.5 rounded">
+                    <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-sm text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded">
                         AD
                     </div>
                 )}
@@ -43,13 +43,13 @@ const ProductCard = ({ product, footerText }) => {
 
             <div className="px-1 flex flex-col flex-1">
                 {/* Brand / Title */}
-                <h4 className="text-[12px] font-bold text-gray-900 dark:text-gray-100 line-clamp-1 mb-0.5">
+                <h4 className="text-[12px] md:text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1 mb-0.5">
                     {product.brand || product.name.split(' ')[0]} {product.name}
                 </h4>
 
                 {/* Discount Percentage */}
                 {discountPercent && (
-                    <p className="text-[11px] font-bold text-green-700 dark:text-green-500 mb-0.5 uppercase">
+                    <p className="text-[11px] md:text-xs font-bold text-green-700 dark:text-green-500 mb-0.5 uppercase">
                         {discountPercent}
                     </p>
                 )}
@@ -57,13 +57,13 @@ const ProductCard = ({ product, footerText }) => {
                 {/* Prices */}
                 <div className="flex items-center gap-1.5 mb-0.5">
                     {product.originalPrice && (
-                        <span className="text-[12px] text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
+                        <span className="text-[12px] md:text-sm text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
                     )}
-                    <span className="text-[14px] font-bold text-gray-900 dark:text-white">₹{product.price.toLocaleString()}</span>
+                    <span className="text-[14px] md:text-lg font-bold text-gray-900 dark:text-white">₹{product.price.toLocaleString()}</span>
                 </div>
 
                 {/* Offer/Footer Text */}
-                <p className="text-[11px] font-bold text-blue-600 dark:text-blue-400 line-clamp-1">
+                <p className="text-[11px] md:text-xs font-bold text-blue-600 dark:text-blue-400 line-clamp-1">
                     {displayFooterText}
                 </p>
             </div>

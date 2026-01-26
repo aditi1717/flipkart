@@ -188,6 +188,32 @@ export const categories = [
         ]
     },
     { id: 7, name: "Grocery", icon: "shopping_basket" },
+    {
+        id: 8,
+        name: "Appliances",
+        icon: "kitchen",
+        bannerImage: "https://images.unsplash.com/photo-1556910103-1c02745a30bf?q=80&w=600&auto=format&fit=crop",
+        bannerAlt: "Appliances Sale",
+        subCategories: [
+            { name: "TVs", image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=150" },
+            { name: "Washing Machines", image: "https://images.unsplash.com/photo-1626806819282-2c1dc01a5e0c?q=80&w=150" },
+            { name: "ACs", image: "https://images.unsplash.com/photo-1534033620953-e381d6d3765e?q=80&w=150" }
+        ]
+    },
+    {
+        id: 9,
+        name: "Toys",
+        icon: "sports_esports",
+        bannerImage: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=600",
+        subCategories: []
+    },
+    {
+        id: 10,
+        name: "Flights",
+        icon: "flight",
+        bannerImage: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=600",
+        subCategories: []
+    },
 ];
 
 export const secondaryCategories = [

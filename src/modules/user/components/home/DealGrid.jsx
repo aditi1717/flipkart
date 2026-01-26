@@ -12,7 +12,9 @@ const DealGrid = ({
     showArrow = true,
     showStamp = false,
     stampText = "NEW DELHI INDIA",
-    containerClass = "mt-4"
+    containerClass = "mt-4",
+    desktopGridCols = "md:grid-cols-6",
+    isScrollable = false
 }) => {
     const navigate = useNavigate();
 
@@ -26,7 +28,7 @@ const DealGrid = ({
     };
 
     return (
-        <section className={`${containerClass} px-4`}>
+        <section className={`${containerClass}`}>
             <div className={`${bgColor} ${darkBgColor} rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden`}>
 
                 {/* Optional Stamp Decoration */}
@@ -48,36 +50,102 @@ const DealGrid = ({
                     )}
                 </div>
 
-                {/* Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                    {items.map((item, idx) => (
-                        <div
-                            key={item.id || idx}
-                            onClick={() => handleItemClick(item)}
-                            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm cursor-pointer group hover:shadow-md transition-all overflow-hidden"
-                        >
-                            <div className="aspect-square bg-[#f8f8f8] dark:bg-gray-900 mb-2 overflow-hidden flex items-center justify-center">
-                                <img
-                                    src={item[imageKey]}
-                                    alt={item[titleKey]}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-                                    }}
-                                />
-                            </div>
-                            <div className="px-2 pb-2">
-                                <p className="text-[11px] md:text-sm text-gray-600 dark:text-gray-400 font-medium truncate mb-0.5">
-                                    {item[titleKey]}
-                                </p>
-                                <p className="text-xs md:text-base font-bold text-gray-900 dark:text-white">
-                                    {item[subtitleKey]}
-                                </p>
-                            </div>
+                {/* Content Container: Scrollable or Grid */}
+                {isScrollable ? (
+                    <>
+                        {/* Mobile: Grid Layout (2 cols) - Preserves original mobile design */}
+                        <div className="md:hidden grid grid-cols-2 gap-3">
+                            {items.slice(0, 4).map((item, idx) => (
+                                <div
+                                    key={item.id || idx}
+                                    onClick={() => handleItemClick(item)}
+                                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm cursor-pointer group hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
+                                >
+                                    <div className="aspect-square w-full bg-[#f8f8f8] dark:bg-gray-900 mb-2 overflow-hidden flex items-center justify-center relative">
+                                        <img
+                                            src={item[imageKey]}
+                                            alt={item[titleKey]}
+                                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="px-2 pb-2 flex-1 flex flex-col justify-end text-center">
+                                        <p className="text-[11px] md:text-sm text-gray-600 dark:text-gray-400 font-medium truncate mb-0.5">
+                                            {item[titleKey]}
+                                        </p>
+                                        <p className="text-xs md:text-base font-bold text-gray-900 dark:text-white truncate">
+                                            {item[subtitleKey]}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+
+                        {/* Desktop: Scrollable Layout (Row) - As requested for web view */}
+                        <div className="hidden md:flex overflow-x-auto gap-4 no-scrollbar pb-2 -mx-1 px-1">
+                            {items.map((item, idx) => (
+                                <div
+                                    key={item.id || idx}
+                                    onClick={() => handleItemClick(item)}
+                                    className="w-[280px] flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl shadow-sm cursor-pointer group hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
+                                >
+                                    <div className="aspect-square w-full bg-[#f8f8f8] dark:bg-gray-900 mb-2 overflow-hidden flex items-center justify-center relative">
+                                        <img
+                                            src={item[imageKey]}
+                                            alt={item[titleKey]}
+                                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="px-3 pb-3 flex-1 flex flex-col justify-end text-center">
+                                        <p className="text-[11px] md:text-sm text-gray-600 dark:text-gray-400 font-medium truncate mb-0.5">
+                                            {item[titleKey]}
+                                        </p>
+                                        <p className="text-xs md:text-base font-bold text-gray-900 dark:text-white truncate">
+                                            {item[subtitleKey]}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <div className={`grid grid-cols-2 gap-3 ${desktopGridCols} md:gap-6`}>
+                        {items.map((item, idx) => (
+                            <div
+                                key={item.id || idx}
+                                onClick={() => handleItemClick(item)}
+                                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm cursor-pointer group hover:shadow-md transition-all overflow-hidden flex flex-col h-full"
+                            >
+                                <div className="aspect-square w-full bg-[#f8f8f8] dark:bg-gray-900 mb-2 overflow-hidden flex items-center justify-center relative">
+                                    <img
+                                        src={item[imageKey]}
+                                        alt={item[titleKey]}
+                                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                                        }}
+                                    />
+                                </div>
+                                <div className="px-2 pb-2 flex-1 flex flex-col justify-end text-center">
+                                    <p className="text-[11px] md:text-sm text-gray-600 dark:text-gray-400 font-medium truncate mb-0.5">
+                                        {item[titleKey]}
+                                    </p>
+                                    <p className="text-xs md:text-base font-bold text-gray-900 dark:text-white truncate">
+                                        {item[subtitleKey]}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </section>
     );
