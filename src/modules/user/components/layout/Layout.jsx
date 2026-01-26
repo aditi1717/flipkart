@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Header from './Header';
 import BottomNav from './BottomNav';
+import Footer from './Footer';
 
 const Layout = () => {
     const location = useLocation();
@@ -39,7 +40,7 @@ const Layout = () => {
                 </div>
             )}
             <main className={`flex-1 ${!isPDP && 'pb-20'} md:pb-0 w-full mx-auto md:max-w-[1440px] transition-all duration-300
-                ${isStandalonePage ? 'pt-0' : isSpecialPage ? 'pt-[64px]' : 'pt-[220px]'} md:pt-[180px]`}>
+                ${isStandalonePage ? 'pt-0' : isSpecialPage ? 'pt-[64px] md:pt-[110px]' : 'pt-[220px] md:pt-[180px]'}`}>
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={location.pathname}
@@ -59,8 +60,10 @@ const Layout = () => {
                 !location.pathname.includes('/login') &&
                 !location.pathname.includes('/signup') &&
                 !location.pathname.includes('/track-order') &&
+                !location.pathname.includes('/category/') &&
                 !location.pathname.includes('/play') && <BottomNav />
             }
+            <Footer />
         </div >
     );
 };

@@ -11,6 +11,19 @@ const ProductSection = ({
 }) => {
     if (!products || products.length === 0) return null;
 
+    const scrollRef = React.useRef(null);
+
+    const scroll = (direction) => {
+        if (scrollRef.current) {
+            const { current } = scrollRef;
+            const scrollAmount = current.clientWidth / 2;
+            current.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     return (
         <section className={`${containerClass}`}>
             <div className="flex items-center justify-between mb-4">
@@ -31,12 +44,30 @@ const ProductSection = ({
             </div>
 
             {isScrollable ? (
-                <div className="flex overflow-x-auto gap-3 md:gap-6 no-scrollbar pb-2 -mx-1 px-1">
-                    {products.map((product) => (
-                        <div key={product.id} className="min-w-[140px] w-[140px] md:min-w-[240px] md:w-[240px] flex-shrink-0">
-                            <ProductCard product={product} />
-                        </div>
-                    ))}
+                <div className="relative group">
+                    {/* Left Scroll Button */}
+                    <button
+                        onClick={() => scroll('left')}
+                        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-zinc-800 rounded-full shadow-lg items-center justify-center border border-gray-100 dark:border-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 -ml-5"
+                    >
+                        <span className="material-icons text-gray-700 dark:text-gray-300">chevron_left</span>
+                    </button>
+
+                    <div ref={scrollRef} className="flex overflow-x-auto gap-3 md:gap-6 no-scrollbar pb-2 -mx-1 px-1 scroll-smooth">
+                        {products.map((product) => (
+                            <div key={product.id} className="min-w-[140px] w-[140px] md:min-w-[240px] md:w-[240px] flex-shrink-0">
+                                <ProductCard product={product} />
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Right Scroll Button */}
+                    <button
+                        onClick={() => scroll('right')}
+                        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-zinc-800 rounded-full shadow-lg items-center justify-center border border-gray-100 dark:border-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 -mr-5"
+                    >
+                        <span className="material-icons text-gray-700 dark:text-gray-300">chevron_right</span>
+                    </button>
                 </div>
             ) : (
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-6">

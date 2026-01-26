@@ -16,7 +16,7 @@ const AdminHeader = () => {
         <header className="h-16 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-opacity-95">
             <div className="flex items-center gap-4">
                 <h2 className="text-xl font-black text-white tracking-tight italic">
-                    DASHBOARD <span className="text-blue-500 not-italic text-sm font-bold ml-1 uppercase tracking-widest bg-blue-500/10 px-2 py-0.5 rounded">v2.0</span>
+                    ADMIN <span className="text-blue-500 not-italic">DASHBOARD</span>
                 </h2>
             </div>
 

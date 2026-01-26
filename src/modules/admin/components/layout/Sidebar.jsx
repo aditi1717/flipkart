@@ -13,7 +13,8 @@ import {
     MdPeople,
     MdSettings,
     MdMenu,
-    MdClose
+    MdClose,
+    MdDescription
 } from 'react-icons/md';
 
 import logo from '../../../../assets/indiankart-logo.png';
@@ -25,13 +26,14 @@ const Sidebar = () => {
         { name: 'Dashboard', icon: MdDashboard, path: '/admin/dashboard' },
         { name: 'Products', icon: MdInventory, path: '/admin/products' },
         { name: 'Categories', icon: MdCategory, path: '/admin/categories' },
+        { name: 'Users', icon: MdPeople, path: '/admin/users' },
         { name: 'Orders', icon: MdShoppingCart, path: '/admin/orders' },
         { name: 'Returns', icon: MdAssignmentReturn, path: '/admin/returns' },
-        { name: 'Coupons', icon: MdLocalOffer, path: '/admin/coupons' },
         { name: 'Sellers', icon: MdStorefront, path: '/admin/sellers' },
+        { name: 'Coupons', icon: MdLocalOffer, path: '/admin/coupons' },
         { name: 'Play (Reels)', icon: MdPlayCircle, path: '/admin/play' },
         { name: 'Banners', icon: MdHome, path: '/admin/homepage' },
-        { name: 'Users', icon: MdPeople, path: '/admin/users' },
+        { name: 'Content Pages', icon: MdDescription, path: '/admin/pages' },
         { name: 'Settings', icon: MdSettings, path: '/admin/settings' },
     ];
 

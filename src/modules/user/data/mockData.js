@@ -123,16 +123,11 @@ export const categories = [
             { name: "Gaming Mouse", offer: "From ₹899", image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?q=80&w=300&auto=format&fit=crop" },
             { name: "Keyboards", offer: "From ₹1299", image: "https://images.unsplash.com/photo-1587829741301-308231c8e052?q=80&w=300&auto=format&fit=crop" },
         ],
-        promoBanners: [
-            { id: 1, image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop", alt: "Level up your game" },
-            { id: 2, image: "https://images.unsplash.com/photo-1603481546238-487240415921?q=80&w=1200&auto=format&fit=crop", alt: "HyperX Launch" }
-        ],
         banners: [
             { id: 1, image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1000&auto=format&fit=crop", alt: "Republic Day Sale" },
             { id: 2, image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=600&auto=format&fit=crop", alt: "Tech Sale" },
             { id: 3, image: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=600&auto=format&fit=crop", alt: "Special Offer" }
         ],
-        secondaryBannerImage: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=600&auto=format&fit=crop",
         subCategories: [
             {
                 name: "Mobiles",

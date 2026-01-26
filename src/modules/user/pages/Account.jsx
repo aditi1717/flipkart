@@ -116,6 +116,22 @@ const Account = () => {
                                 </div>
                             </div>
 
+                            {/* LEGAL & POLICIES */}
+                            <div className="border-b border-gray-100 dark:border-zinc-800">
+                                <div className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 font-medium text-xs uppercase mt-2">
+                                    <span className="material-icons-outlined text-[18px]">policy</span>
+                                    <span>Legal & Policies</span>
+                                </div>
+                                <div className="text-sm">
+                                    <div onClick={() => navigate('/info?type=privacy')} className="px-12 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer">
+                                        Privacy Policy
+                                    </div>
+                                    <div onClick={() => navigate('/info?type=about')} className="px-12 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer">
+                                        About Us
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Logout */}
                             <div className="py-2">
                                 <div
@@ -283,6 +299,35 @@ const Account = () => {
                                     <p className="text-xs text-gray-500 mt-0.5">On every PhonePe transaction</p>
                                 </div>
                                 <span className="material-icons-outlined text-gray-400 ml-auto self-center">chevron_right</span>
+                            </div>
+                        </section>
+
+                        {/* Legal & Policies (Mobile) */}
+                        <section className="mt-2 bg-white dark:bg-zinc-900">
+                            <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-800">
+                                <h3 className="font-bold text-base">Legal & Policies</h3>
+                            </div>
+                            <div className="divide-y divide-gray-100 dark:divide-zinc-800">
+                                <div
+                                    onClick={() => navigate('/info?type=privacy')}
+                                    className="flex items-center justify-between px-4 py-4 active:bg-gray-50 dark:active:bg-zinc-800 transition-colors cursor-pointer"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-icons-outlined text-gray-500">privacy_tip</span>
+                                        <span className="font-medium">Privacy Policy</span>
+                                    </div>
+                                    <span className="material-icons-outlined text-gray-400">chevron_right</span>
+                                </div>
+                                <div
+                                    onClick={() => navigate('/info?type=about')}
+                                    className="flex items-center justify-between px-4 py-4 active:bg-gray-50 dark:active:bg-zinc-800 transition-colors cursor-pointer"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-icons-outlined text-gray-500">info</span>
+                                        <span className="font-medium">About Us</span>
+                                    </div>
+                                    <span className="material-icons-outlined text-gray-400">chevron_right</span>
+                                </div>
                             </div>
                         </section>
 

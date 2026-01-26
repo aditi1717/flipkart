@@ -25,6 +25,7 @@ import ProtectedRoute from './ProtectedRoute';
 import ProductListingPage from '../pages/ProductListingPage';
 import SellerRegistration from '../pages/SellerRegistration';
 import AllCategories from '../pages/AllCategories';
+import InfoPage from '../pages/InfoPage';
 
 const UserRoutes = () => {
     return (
@@ -57,6 +58,7 @@ const UserRoutes = () => {
                 <Route path="login" element={<Login />} />
                 <Route path="signup" element={<Signup />} />
                 <Route path="seller-registration" element={<SellerRegistration />} />
+                <Route path="info" element={<InfoPage />} />
             </Route>
         </Routes>
     );

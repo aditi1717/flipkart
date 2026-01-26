@@ -56,80 +56,190 @@ const CategoryPage = () => {
     }
 
     return (
-        <div className="bg-background-light dark:bg-background-dark min-h-screen pb-20 pt-2">
-            {/* Back Button Row */}
+        <div className="bg-background-light dark:bg-background-dark min-h-screen pb-20 md:pb-10 lg:bg-[#f1f3f6]">
+            {/* Back Button Row (Mobile) */}
             <div className="flex items-center gap-2 px-3 mb-2 md:hidden">
                 <MdArrowBack onClick={() => navigate(-1)} className="text-2xl text-gray-700 cursor-pointer" />
-                <span className="text-base font-semibold capitalize text-gray-800">{categoryName}</span>
+                <span className="text-base font-semibold capitalize text-gray-800 dark:text-white">{categoryData.name}</span>
             </div>
 
-            {/* 1. Main Banner */}
-            <CategoryBanner
-                image={categoryData.bannerImage}
-                alt={categoryData.bannerAlt}
-                banners={categoryData.banners}
-            />
-
-            {/* 2. Sub-Categories */}
-            <SubCategoryList subCategories={categoryData.subCategories} />
-
-            {/* 3. Deal Section (Grid) */}
-            <CategoryDeals deals={categoryData.deals} />
-
-            {/* 4. Scrollable Deals Section */}
-            <CategoryScrollDeals deals={categoryData.scrollDeals} title="Blockbuster deals" />
-
-            {/* 5. Promo Banners */}
-            {categoryData.promoBanners && categoryData.promoBanners.length > 0 && (
-                <div className="px-2 mb-2 space-y-2">
-                    {categoryData.promoBanners.map((banner, index) => (
-                        <div key={index} className="rounded-xl overflow-hidden shadow-sm">
-                            <img
-                                src={banner.image}
-                                alt={banner.alt}
-                                className="w-full h-32 object-cover"
-                            />
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {/* 6. Secondary Banner (Existing logic) */}
-            {categoryData.secondaryBannerImage && (
-                <div className="px-2 mt-2 mb-4">
-                    <div className="rounded-xl overflow-hidden shadow-sm">
-                        <img
-                            src={categoryData.secondaryBannerImage}
-                            alt="Special Offer"
-                            className="w-full h-auto object-cover"
-                        />
+            <div className="max-w-[1440px] mx-auto md:px-4 md:py-4">
+                {/* Desktop Heading & Back Arrow */}
+                <div className="hidden md:flex items-center gap-4 mb-4">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="bg-white dark:bg-zinc-900 p-2 rounded-full shadow-sm border border-gray-100 dark:border-zinc-800 hover:shadow-md transition-shadow group"
+                    >
+                        <MdArrowBack className="text-xl text-gray-600 dark:text-gray-400 group-hover:text-blue-600" />
+                    </button>
+                    <div>
+                        <h1 className="text-2xl font-black text-gray-800 dark:text-white capitalize tracking-tight flex items-center gap-2">
+                            {categoryData.name}
+                            <span className="text-sm font-medium text-gray-400">({sortedProducts.length} items)</span>
+                        </h1>
                     </div>
                 </div>
-            )}
 
-            {/* 4. Product Grid */}
-            <div className="px-2">
-                <h2 className="text-lg font-bold mb-3 px-1 border-l-4 border-primary pl-2 dark:text-white">
-                    Explore {categoryData.name}
-                </h2>
-                {/* Using grid-cols-2 to match standard category browsing, but using ProductCard for consistent styling */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {sortedProducts.map((product) => (
-                        <div key={product.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
-                            <ProductCard product={product} />
+                <div className="flex flex-col lg:flex-row gap-4">
+
+                    {/* LEFT SIDEBAR (Desktop Only) */}
+                    <aside className="hidden lg:block w-72 shrink-0 space-y-4">
+                        <div className="bg-white dark:bg-zinc-900 rounded shadow-sm border border-gray-100 dark:border-zinc-800 overflow-hidden sticky top-20">
+                            <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-800">
+                                <h3 className="font-bold text-gray-800 dark:text-white uppercase text-xs tracking-wider">Filters</h3>
+                            </div>
+
+                            {/* Price Filter */}
+                            <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
+                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Price</h4>
+                                <div className="space-y-3">
+                                    {[
+                                        { label: 'Under ₹500', range: [0, 500] },
+                                        { label: '₹500 - ₹2000', range: [500, 2000] },
+                                        { label: '₹2000 - ₹5000', range: [2000, 5000] },
+                                        { label: 'Above ₹5000', range: [5000, 1000000] },
+                                    ].map((r) => (
+                                        <label key={r.label} className="flex items-center gap-2 cursor-pointer group">
+                                            <input
+                                                type="radio"
+                                                name="priceFilter"
+                                                checked={JSON.stringify(filterRange) === JSON.stringify(r.range)}
+                                                onChange={() => setFilterRange(r.range)}
+                                                className="w-4 h-4 accent-blue-600"
+                                            />
+                                            <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
+                                                {r.label}
+                                            </span>
+                                        </label>
+                                    ))}
+                                    <button
+                                        onClick={() => setFilterRange([0, 1000000])}
+                                        className="text-xs text-blue-600 font-bold hover:underline pt-2"
+                                    >
+                                        Clear Price Filter
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Sort Filter */}
+                            <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
+                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Sort By</h4>
+                                <div className="space-y-3">
+                                    {[
+                                        { id: 'popularity', label: 'Popularity' },
+                                        { id: 'price-low', label: 'Price -- Low to High' },
+                                        { id: 'price-high', label: 'Price -- High to Low' },
+                                        { id: 'rating', label: 'Customer Ratings' },
+                                    ].map((option) => (
+                                        <label key={option.id} className="flex items-center gap-2 cursor-pointer group">
+                                            <input
+                                                type="radio"
+                                                name="sortBy"
+                                                checked={sortBy === option.id}
+                                                onChange={() => setSortBy(option.id)}
+                                                className="w-4 h-4 accent-blue-600"
+                                            />
+                                            <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
+                                                {option.label}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Ratings Filter */}
+                            <div className="p-4">
+                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Customer Ratings</h4>
+                                <div className="space-y-3">
+                                    {[4, 3, 2, 1].map((star) => (
+                                        <label key={star} className="flex items-center gap-2 cursor-pointer group">
+                                            <input type="checkbox" className="w-4 h-4 accent-blue-600" />
+                                            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
+                                                <span>{star}</span>
+                                                <span className="material-icons text-[14px] text-yellow-500">star</span>
+                                                <span>& above</span>
+                                            </div>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                    ))}
+                    </aside>
+
+                    {/* MAIN CONTENT AREA */}
+                    <main className="flex-1 min-w-0 space-y-4">
+
+                        {/* 1. Main Banner */}
+                        {(categoryData.bannerImage || (categoryData.banners && categoryData.banners.length > 0)) && (
+                            <div className="bg-white dark:bg-zinc-900 md:rounded md:shadow-sm overflow-hidden border border-gray-100 dark:border-zinc-800">
+                                <CategoryBanner
+                                    image={categoryData.bannerImage}
+                                    alt={categoryData.bannerAlt}
+                                    banners={categoryData.banners}
+                                />
+                            </div>
+                        )}
+
+                        {/* 2. Sub-Categories (Horizontal list) */}
+                        {categoryData.subCategories && categoryData.subCategories.length > 0 && (
+                            <div className="bg-white dark:bg-zinc-900 md:rounded md:shadow-sm py-2 px-1 border border-gray-100 dark:border-zinc-800">
+                                <SubCategoryList subCategories={categoryData.subCategories} />
+                            </div>
+                        )}
+
+
+
+                        {/* 5. Promo Banners */}
+                        {categoryData.promoBanners && categoryData.promoBanners.length > 0 && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {categoryData.promoBanners.map((banner, index) => (
+                                    <div key={index} className="rounded-lg overflow-hidden shadow-sm border border-gray-100 dark:border-zinc-800">
+                                        <img
+                                            src={banner.image}
+                                            alt={banner.alt}
+                                            className="w-full h-40 object-cover"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* 6. Product Section */}
+                        <div className="bg-white dark:bg-zinc-900 md:rounded md:shadow-sm border border-gray-100 dark:border-zinc-800 p-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-base md:text-xl font-bold dark:text-white uppercase tracking-tight">
+                                    Explore {categoryData.name}
+                                </h2>
+                                <span className="text-xs text-gray-400 font-medium">({sortedProducts.length} Products)</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 xxl:grid-cols-5 gap-3 md:gap-5">
+                                {sortedProducts.map((product) => (
+                                    <div key={product.id} className="transition-transform hover:scale-[1.02] duration-300">
+                                        <ProductCard product={product} />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {sortedProducts.length === 0 && (
+                                <div className="p-20 text-center text-gray-500 bg-gray-50 dark:bg-zinc-800 rounded-xl">
+                                    <span className="material-icons text-6xl mb-4 opacity-50">search_off</span>
+                                    <p className="text-lg font-bold">No products match your filters.</p>
+                                    <button
+                                        onClick={() => setFilterRange([0, 1000000])}
+                                        className="mt-4 bg-blue-600 text-white px-6 py-2 rounded font-bold uppercase text-xs"
+                                    >
+                                        Clear Filters
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </main>
                 </div>
-                {sortedProducts.length === 0 && (
-                    <div className="p-8 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl">
-                        <span className="material-icons text-4xl mb-2 opacity-50">search_off</span>
-                        <p>No products match your filters.</p>
-                    </div>
-                )}
             </div>
 
-            {/* Sticky Sort/Filter Bar */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 h-14 flex z-50">
+            {/* Sticky Sort/Filter Bar (MOBILE ONLY) */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 h-14 flex z-50">
                 <button
                     onClick={() => setShowSortModal(true)}
                     className="flex-1 flex items-center justify-center gap-2 border-r border-gray-100 dark:border-zinc-800 group active:bg-gray-50 dark:active:bg-zinc-800"
@@ -146,7 +256,7 @@ const CategoryPage = () => {
                 </button>
             </div>
 
-            {/* Sort Modal */}
+            {/* Sort Modal (MOBILE ONLY) */}
             {showSortModal && (
                 <div className="fixed inset-0 z-[100] flex items-end justify-center">
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSortModal(false)}></div>
@@ -180,7 +290,7 @@ const CategoryPage = () => {
                 </div>
             )}
 
-            {/* Filter Modal (Simplified for now) */}
+            {/* Filter Modal (MOBILE ONLY) */}
             {showFilterModal && (
                 <div className="fixed inset-0 z-[100] flex items-end justify-center">
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowFilterModal(false)}></div>
