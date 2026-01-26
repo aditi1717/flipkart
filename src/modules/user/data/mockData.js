@@ -781,6 +781,30 @@ export const fashionValueDeals = [
         image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=300&auto=format&fit=crop',
         category: 'Fashion',
         subcategory: 'Accessories'
+    },
+    {
+        id: 'fvd7',
+        name: 'Kurta Sets',
+        discount: 'Under ₹499',
+        image: 'https://images.unsplash.com/photo-1583391733958-e0295c29026.jpg?q=80&w=300',
+        category: 'Fashion',
+        subcategory: 'Ethnic'
+    },
+    {
+        id: 'fvd8',
+        name: 'Sports Shoes',
+        discount: 'Min. 40% Off',
+        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=300',
+        category: 'Fashion',
+        subcategory: 'Footwear'
+    },
+    {
+        id: 'fvd9',
+        name: 'Handbags',
+        discount: 'Flat 60% Off',
+        image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=300',
+        category: 'Fashion',
+        subcategory: 'Bags'
     }
 ];
 
@@ -798,6 +822,34 @@ export const interestingFinds = [
         image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=300&auto=format&fit=crop', // Underwear
         category: 'Fashion',
         subcategory: 'Innerwear'
+    },
+    {
+        title: 'Wedding Special',
+        tag: 'Grab Now',
+        image: 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=300&auto=format&fit=crop',
+        category: 'Fashion',
+        subcategory: 'Ethnic'
+    },
+    {
+        title: 'Designer Wear',
+        tag: 'New Arrivals',
+        image: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=300&auto=format&fit=crop',
+        category: 'Fashion',
+        subcategory: 'Dresses'
+    },
+    {
+        title: 'Party Essentials',
+        tag: 'Min 50% Off',
+        image: 'https://images.unsplash.com/photo-1627483262268-9c96d8e360c7?q=80&w=300&auto=format&fit=crop',
+        category: 'Electronics',
+        subcategory: 'Audio'
+    },
+    {
+        title: 'Gym Gear',
+        tag: 'Start at ₹299',
+        image: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=300&auto=format&fit=crop',
+        category: 'Sports',
+        subcategory: 'Tops'
     },
     {
         title: 'Top Collection',

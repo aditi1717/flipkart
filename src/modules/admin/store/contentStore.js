@@ -45,7 +45,42 @@ What Can You Buy From IndianKart?
 Mobile Phones
 From budget phones to state-of-the-art smartphones, we have a mobile for everybody out there. Whether you're looking for larger, fuller screens, power-packed batteries, blazing-fast processors, beautification apps, high-tech selfie cameras or just large internal space, we take care of all your essentials. Shop from Top Brands like Samsung, Apple, Oppo, Xiaomi, Realme, Vivo, and Honor to name a few. Rest assured, you're buying from only the most reliable names in the market. What's more, with IndianKart's Complete Mobile Protection Plan, you will never again find the need to worry about a broken screen. No matter what the issue is.
             `,
+            homeSections: [
+                { id: 'fashion-deals', title: 'Best Value Deals on Fashion', products: [], banners: [] },
+                { id: 'grocery-popular', title: 'Popular Grocery Products for You', products: [], banners: [] },
+                { id: 'suggested', title: 'Suggested For You', products: [], banners: [] },
+                { id: 'interesting-finds', title: 'Interesting finds', products: [], banners: [] },
+                { id: 'still-looking', title: 'Still looking for these?', products: [], banners: [] },
+                { id: 'recently-viewed', title: 'Recently Viewed', products: [], banners: [] }
+            ],
+            homeBanners: [],
             updateContent: (type, content) => set((state) => ({ [type]: content })),
+            updateSectionTitle: (id, title) => set((state) => ({
+                homeSections: state.homeSections.map(s => s.id === id ? { ...s, title } : s)
+            })),
+            addProductToSection: (sectionId, product) => set((state) => ({
+                homeSections: state.homeSections.map(s =>
+                    s.id === sectionId
+                        ? { ...s, products: [...s.products.filter(p => p.id !== product.id), product] }
+                        : s
+                )
+            })),
+            removeProductFromSection: (sectionId, productId) => set((state) => ({
+                homeSections: state.homeSections.map(s =>
+                    s.id === sectionId
+                        ? { ...s, products: s.products.filter(p => p.id !== productId) }
+                        : s
+                )
+            })),
+            addHomeBanner: (banner) => set((state) => ({
+                homeBanners: [...state.homeBanners, { ...banner, id: Date.now() }]
+            })),
+            updateHomeBanner: (id, updatedBanner) => set((state) => ({
+                homeBanners: state.homeBanners.map(b => b.id === id ? { ...b, ...updatedBanner } : b)
+            })),
+            deleteHomeBanner: (id) => set((state) => ({
+                homeBanners: state.homeBanners.filter(b => b.id !== id)
+            })),
         }),
         {
             name: 'admin-content-storage',

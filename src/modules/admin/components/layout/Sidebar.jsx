@@ -15,7 +15,10 @@ import {
     MdMenu,
     MdClose,
     MdDescription,
-    MdSupportAgent
+    MdSupportAgent,
+    MdLabel,
+    MdViewAgenda,
+    MdViewCarousel
 } from 'react-icons/md';
 
 import logo from '../../../../assets/indiankart-logo.png';
@@ -33,7 +36,8 @@ const Sidebar = () => {
         { name: 'Sellers', icon: MdStorefront, path: '/admin/sellers' },
         { name: 'Coupons & Offers', icon: MdLocalOffer, path: '/admin/coupons' },
         { name: 'Play (Reels)', icon: MdPlayCircle, path: '/admin/play' },
-        { name: 'Banners', icon: MdHome, path: '/admin/homepage' },
+        { name: 'Home Sections', icon: MdViewAgenda, path: '/admin/content/home' },
+        { name: 'Home Banners', icon: MdViewCarousel, path: '/admin/content/banners' },
         { name: 'Content Pages', icon: MdDescription, path: '/admin/pages' },
         { name: 'Support Requests', icon: MdSupportAgent, path: '/admin/support' },
         { name: 'Settings', icon: MdSettings, path: '/admin/settings' },

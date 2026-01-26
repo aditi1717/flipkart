@@ -1,148 +1,373 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     MdInventory,
     MdShoppingCart,
     MdLocalOffer,
     MdPeople,
+    MdCategory,
+    MdAttachMoney,
     MdTrendingUp,
-    MdAttachMoney
+    MdAddBox,
+    MdLocalShipping,
+    MdWarning,
+    MdAssignment,
+    MdPersonAdd,
+    MdAccessTime,
+    MdChevronRight
 } from 'react-icons/md';
+import useProductStore from '../store/productStore';
+import useOrderStore from '../store/orderStore';
+import useUserStore from '../store/userStore';
+import useCategoryStore from '../store/categoryStore';
+import useCouponStore from '../store/couponStore';
+import useReturnStore from '../store/returnStore';
+import useSupportStore from '../store/supportStore';
 
 const Dashboard = () => {
-    // Dummy data
-    const stats = [
-        {
-            title: 'Total Products',
-            value: '1,234',
-            change: '+12%',
-            icon: MdInventory,
-            color: 'blue'
-        },
-        {
-            title: 'Total Orders',
-            value: '856',
-            change: '+8%',
-            icon: MdShoppingCart,
-            color: 'green'
-        },
-        {
-            title: 'Active Coupons',
-            value: '45',
-            change: '+5',
-            icon: MdLocalOffer,
-            color: 'purple'
-        },
-        {
-            title: 'Total Users',
-            value: '12,567',
-            change: '+23%',
-            icon: MdPeople,
-            color: 'orange'
-        },
-    ];
+    const navigate = useNavigate();
+    const { products } = useProductStore();
+    const { orders } = useOrderStore();
+    const { users } = useUserStore();
+    const { categories } = useCategoryStore();
+    const { coupons } = useCouponStore();
+    const { returns } = useReturnStore();
+    const { supportRequests } = useSupportStore();
 
-    const recentOrders = [
-        { id: '#ORD001', customer: 'John Doe', total: '₹2,499', status: 'Delivered', date: '2024-01-24' },
-        { id: '#ORD002', customer: 'Jane Smith', total: '₹1,899', status: 'Shipped', date: '2024-01-24' },
-        { id: '#ORD003', customer: 'Mike Johnson', total: '₹3,299', status: 'Processing', date: '2024-01-23' },
-        { id: '#ORD004', customer: 'Sarah Williams', total: '₹999', status: 'Delivered', date: '2024-01-23' },
-        { id: '#ORD005', customer: 'Tom Brown', total: '₹4,599', status: 'Pending', date: '2024-01-22' },
-    ];
+    const activeCoupons = coupons.filter(c => c.active).length;
 
-    const topProducts = [
-        { name: 'iPhone 14 Pro', sales: 234, revenue: '₹2,34,000' },
-        { name: 'Samsung Galaxy S23', sales: 189, revenue: '₹1,89,000' },
-        { name: 'Nike Air Max', sales: 156, revenue: '₹1,24,800' },
-        { name: 'Sony Headphones', sales: 145, revenue: '₹87,000' },
-    ];
+    // --- Analytics Logic ---
 
-    const getStatusColor = (status) => {
-        const colors = {
-            'Delivered': 'bg-green-100 text-green-800',
-            'Shipped': 'bg-blue-100 text-blue-800',
-            'Processing': 'bg-yellow-100 text-yellow-800',
-            'Pending': 'bg-gray-100 text-gray-800'
+    // 1. Revenue Stats
+    const { todayRevenue, monthRevenue, totalRevenue, avgOrderValue } = useMemo(() => {
+        const today = new Date().toDateString();
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
+        let todayRev = 0;
+        let monthRev = 0;
+        let totalRev = 0;
+
+        orders.forEach(order => {
+            const orderDate = new Date(order.date);
+            const amount = typeof order.total === 'string'
+                ? parseFloat(order.total.replace(/[^0-9.-]+/g, ""))
+                : order.total;
+
+            if (orderDate.toDateString() === today) todayRev += amount;
+            if (orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) monthRev += amount;
+            totalRev += amount;
+        });
+
+        return {
+            todayRevenue: todayRev,
+            monthRevenue: monthRev,
+            totalRevenue: totalRev,
+            avgOrderValue: orders.length > 0 ? totalRev / orders.length : 0
         };
-        return colors[status] || 'bg-gray-100 text-gray-800';
-    };
+    }, [orders]);
+
+    // 2. Pending Tasks Counts
+    const pendingOrders = orders.filter(o => o.status === 'Pending').length;
+    const pendingReturns = returns.filter(r => r.status === 'Pending').length;
+    const openTickets = supportRequests.filter(r => r.status === 'OPEN').length;
+
+    // 3. Low Stock Alerts (Simulated as mock data doesn't have stock)
+    // We'll deterministically simulate stock based on product ID to keep it consistent
+    const lowStockProducts = useMemo(() => {
+        return products
+            .map(p => ({ ...p, stock: (p.id % 20) })) // Simulate stock: 0-19
+            .filter(p => p.stock < 5)
+            .slice(0, 5);
+    }, [products]);
+
+    // 4. Recent Activity (Combine Orders & Users)
+    const recentActivity = useMemo(() => {
+        const activity = [
+            ...orders.map(o => ({
+                type: 'order',
+                id: o.id,
+                text: `New order ${o.id} placed by ${o.user.name}`,
+                time: o.date,
+                icon: MdShoppingCart,
+                color: 'gray'
+            })),
+            ...users.map(u => ({
+                type: 'user',
+                id: u.id,
+                text: `New user ${u.name} registered`,
+                time: u.joinDate || new Date().toISOString(),
+                icon: MdPersonAdd,
+                color: 'gray'
+            })),
+            ...returns.map(r => ({
+                type: 'return',
+                id: r.id,
+                text: `Return requested for Order ${r.orderId}`,
+                time: r.date,
+                icon: MdAssignment,
+                color: 'gray'
+            }))
+        ];
+
+        // Sort by time descending and take top 10
+        return activity.sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 6);
+    }, [orders, users, returns]);
+
+    // 5. Top Customers
+    const topCustomers = useMemo(() => {
+        const customerSpend = {};
+        orders.forEach(order => {
+            const amount = typeof order.total === 'string'
+                ? parseFloat(order.total.replace(/[^0-9.-]+/g, ""))
+                : order.total;
+
+            if (!customerSpend[order.user.email]) {
+                customerSpend[order.user.email] = {
+                    name: order.user.name,
+                    email: order.user.email,
+                    spend: 0,
+                    orders: 0
+                };
+            }
+            customerSpend[order.user.email].spend += amount;
+            customerSpend[order.user.email].orders += 1;
+        });
+
+        return Object.values(customerSpend)
+            .sort((a, b) => b.spend - a.spend)
+            .slice(0, 5);
+    }, [orders]);
 
     return (
-        <div className="space-y-6">
-            {/* Welcome Section */}
+        <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold text-gray-800">Dashboard Overview</h1>
-                <p className="text-gray-500 mt-1">Welcome back! Here's what's happening today.</p>
+                <h1 className="text-3xl font-black text-gray-900 tracking-tight">Dashboard Overview</h1>
+                <p className="text-gray-500 mt-2 font-medium">Welcome back! Here's what's happening today.</p>
             </div>
 
-            {/* Stats Grid */}
+            {/* 1. Key Metrics Grid (Old Stats + Revenue) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, index) => {
-                    return (
-                        <div key={index} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                            <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-gray-500 text-sm font-medium">{stat.title}</h3>
-                                <span className="text-green-600 text-sm font-semibold">{stat.change}</span>
-                            </div>
-                            <p className="text-3xl font-bold text-gray-800 mt-1">{stat.value}</p>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Recent Orders & Top Products */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Recent Orders */}
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div className="p-6 border-b border-gray-100">
-                        <h2 className="text-xl font-bold text-gray-800">Recent Orders</h2>
+                {/* Standard Counts */}
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
+                    <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Products</p>
+                        <h3 className="text-2xl font-black text-gray-900">{products.length.toLocaleString()}</h3>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Order ID</th>
-                                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Customer</th>
-                                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Total</th>
-                                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Status</th>
-                                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {recentOrders.map((order, index) => (
-                                    <tr key={index} className="border-t border-gray-100 hover:bg-gray-50">
-                                        <td className="py-4 px-6 text-sm font-medium text-blue-600">{order.id}</td>
-                                        <td className="py-4 px-6 text-sm text-gray-800">{order.customer}</td>
-                                        <td className="py-4 px-6 text-sm font-semibold text-gray-800">{order.total}</td>
-                                        <td className="py-4 px-6">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                                                {order.status}
-                                            </span>
-                                        </td>
-                                        <td className="py-4 px-6 text-sm text-gray-500">{order.date}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                        <MdInventory size={24} />
                     </div>
                 </div>
 
-                {/* Top Products */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div className="p-6 border-b border-gray-100">
-                        <h2 className="text-xl font-bold text-gray-800">Top Products</h2>
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
+                    <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Orders</p>
+                        <h3 className="text-2xl font-black text-gray-900">{orders.length.toLocaleString()}</h3>
                     </div>
-                    <div className="p-6 space-y-4">
-                        {topProducts.map((product, index) => (
-                            <div key={index} className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0">
-                                <div className="flex-1">
-                                    <h4 className="font-semibold text-gray-800 text-sm">{product.name}</h4>
-                                    <p className="text-xs text-gray-500 mt-1">{product.sales} sales</p>
+                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                        <MdShoppingCart size={24} />
+                    </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
+                    <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Users</p>
+                        <h3 className="text-2xl font-black text-gray-900">{users.length.toLocaleString()}</h3>
+                    </div>
+                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                        <MdPeople size={24} />
+                    </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
+                    <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Active Coupons</p>
+                        <h3 className="text-2xl font-black text-gray-900">{activeCoupons}</h3>
+                    </div>
+                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                        <MdLocalOffer size={24} />
+                    </div>
+                </div>
+            </div>
+
+            {/* 2. Financial Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Revenue</p>
+                        <h3 className="text-2xl font-black text-gray-900">₹{totalRevenue.toLocaleString()}</h3>
+                        <p className="text-xs font-medium text-green-600 mt-1 flex items-center gap-1">
+                            <MdTrendingUp /> +12% from last month
+                        </p>
+                    </div>
+                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center">
+                        <MdAttachMoney size={24} />
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Today's Sales</p>
+                        <h3 className="text-2xl font-black text-gray-900">₹{todayRevenue.toLocaleString()}</h3>
+                        <p className="text-xs font-medium text-gray-500 mt-1">
+                            {orders.filter(o => new Date(o.date).toDateString() === new Date().toDateString()).length} orders today
+                        </p>
+                    </div>
+                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center">
+                        <MdAttachMoney size={24} />
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Avg. Order Value</p>
+                        <h3 className="text-2xl font-black text-gray-900">₹{Math.round(avgOrderValue).toLocaleString()}</h3>
+                    </div>
+                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center">
+                        <MdCategory size={24} />
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column (2/3) */}
+                <div className="lg:col-span-2 space-y-8">
+
+                    {/* 2. Quick Actions & Pending Tasks Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Quick Actions */}
+                        <div className="bg-gray-800 rounded-3xl p-6 text-white shadow-lg shadow-gray-200">
+                            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                                <MdAccessTime className="text-gray-300" /> Quick Actions
+                            </h3>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button onClick={() => navigate('/admin/products')} className="bg-white/10 hover:bg-white/20 transition p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
+                                    <MdAddBox size={24} className="text-gray-200" />
+                                    Add Product
+                                </button>
+                                <button onClick={() => navigate('/admin/coupons')} className="bg-white/10 hover:bg-white/20 transition p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
+                                    <MdLocalOffer size={24} className="text-gray-200" />
+                                    Create Coupon
+                                </button>
+                                <button onClick={() => navigate('/admin/categories')} className="bg-white/10 hover:bg-white/20 transition p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
+                                    <MdCategory size={24} className="text-gray-200" />
+                                    Add Category
+                                </button>
+                                <button onClick={() => navigate('/admin/support')} className="bg-white/10 hover:bg-white/20 transition p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
+                                    <MdPeople size={24} className="text-gray-200" />
+                                    View Users
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Pending Tasks */}
+                        <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                            <h3 className="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2">
+                                <MdAssignment className="text-gray-400" /> Pending Tasks
+                            </h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100 mb-2 cursor-pointer hover:bg-gray-100 transition" onClick={() => navigate('/admin/orders?status=Pending')}>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-xs ring-2 ring-white">
+                                            {pendingOrders}
+                                        </div>
+                                        <span className="text-sm font-bold text-gray-700">Orders to Process</span>
+                                    </div>
+                                    <MdChevronRight className="text-gray-400" />
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-bold text-gray-800">{product.revenue}</p>
+                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100 mb-2 cursor-pointer hover:bg-gray-100 transition" onClick={() => navigate('/admin/returns')}>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-xs ring-2 ring-white">
+                                            {pendingReturns}
+                                        </div>
+                                        <span className="text-sm font-bold text-gray-700">Returns Pending</span>
+                                    </div>
+                                    <MdChevronRight className="text-gray-400" />
+                                </div>
+                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition" onClick={() => navigate('/admin/support')}>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-xs ring-2 ring-white">
+                                            {openTickets}
+                                        </div>
+                                        <span className="text-sm font-bold text-gray-700">Support Tickets</span>
+                                    </div>
+                                    <MdChevronRight className="text-gray-400" />
                                 </div>
                             </div>
-                        ))}
+                        </div>
+                    </div>
+
+                    {/* 3. Recent Activity Feed */}
+                    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="font-bold text-lg text-gray-800">Recent Activity</h3>
+                            <button className="text-xs font-bold text-gray-600 hover:bg-gray-50 px-3 py-1 wrapped-full rounded-full transition">View All</button>
+                        </div>
+                        <div className="relative pl-2 space-y-6">
+                            {/* Timeline Line */}
+                            <div className="absolute top-2 left-[19px] bottom-2 w-0.5 bg-gray-100"></div>
+
+                            {recentActivity.map((activity, index) => (
+                                <div key={index} className="relative flex items-start gap-4 z-10">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ring-4 ring-white bg-gray-50 text-gray-600 shrink-0`}>
+                                        <activity.icon size={18} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-800">{activity.text}</p>
+                                        <p className="text-xs text-gray-400 font-medium mt-0.5">{new Date(activity.time).toLocaleString()}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column (1/3) */}
+                <div className="space-y-8">
+                    {/* 4. Low Stock Alerts */}
+                    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4">
+                            <MdWarning className="text-gray-500" size={20} />
+                            <h3 className="font-bold text-lg text-gray-800">Low Stock Alert</h3>
+                        </div>
+                        <div className="space-y-3">
+                            {lowStockProducts.length === 0 ? (
+                                <p className="text-sm text-gray-400 italic">No low stock items.</p>
+                            ) : (
+                                lowStockProducts.map(product => (
+                                    <div key={product.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                                        <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover bg-white" />
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="text-xs font-bold text-gray-800 truncate">{product.name}</h4>
+                                            <p className="text-[10px] text-gray-500">Stock: <span className="text-red-600 font-black">{product.stock} left</span></p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* 5. Top Customers */}
+                    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4">
+                            <MdPeople className="text-gray-500" size={20} />
+                            <h3 className="font-bold text-lg text-gray-800">Top Customers</h3>
+                        </div>
+                        <div className="space-y-4">
+                            {topCustomers.map((customer, idx) => (
+                                <div key={idx} className="flex items-center justify-between border-b border-gray-50 last:border-0 pb-3 last:pb-0">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-gray-50 text-gray-600 flex items-center justify-center font-bold text-xs uppercase">
+                                            {customer.name.substring(0, 2)}
+                                        </div>
+                                        <div>
+                                            <h4 className="text-xs font-bold text-gray-800">{customer.name}</h4>
+                                            <p className="text-[10px] text-gray-400">{customer.orders} orders</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-black text-gray-900">₹{customer.spend.toLocaleString()}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

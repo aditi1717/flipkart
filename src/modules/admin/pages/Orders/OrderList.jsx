@@ -120,8 +120,8 @@ const OrderList = () => {
                                 <thead>
                                     <tr className="bg-gray-50/50 border-b border-gray-100">
                                         <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Order ID & Date</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Total Amount</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">CustomerDetails</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Items & Price</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Payment</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-blue-500 uppercase tracking-widest text-right">Actions</th>
@@ -141,12 +141,37 @@ const OrderList = () => {
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
                                                     <span className="text-xs font-bold text-gray-800">{order.user.name}</span>
-                                                    <span className="text-[10px] text-gray-400 font-medium">{order.user.email}</span>
+                                                    <div className="flex flex-col mt-0.5 gap-0.5">
+                                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight hover:text-blue-500 transition-colors cursor-pointer">{order.user.email}</span>
+                                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight">{order.user.phone}</span>
+                                                    </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <span className="text-[13px] font-black text-gray-900">₹{order.total.toLocaleString()}</span>
-                                                <p className="text-[9px] font-bold text-gray-400 uppercase">{order.items.length} Items</p>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    {/* Product Thumbnails */}
+                                                    <div className="flex -space-x-2 overflow-hidden items-center">
+                                                        {order.items.slice(0, 3).map((item, idx) => (
+                                                            <div key={idx} className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-gray-100 flex-shrink-0">
+                                                                <img 
+                                                                    src={item.image} 
+                                                                    alt={item.name} 
+                                                                    className="h-full w-full object-cover rounded-full"
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                        {order.items.length > 3 && (
+                                                            <div className="h-8 w-8 rounded-full ring-2 ring-white bg-gray-50 flex items-center justify-center text-[9px] font-bold text-gray-500 z-10">
+                                                                +{order.items.length - 3}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[13px] font-black text-gray-900">₹{order.total.toLocaleString()}</span>
+                                                        <span className="text-[9px] font-bold text-gray-400 uppercase">{order.items.length} {order.items.length === 1 ? 'Item' : 'Items'}</span>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <div className="flex flex-col items-center gap-1">
