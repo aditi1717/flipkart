@@ -70,7 +70,7 @@ const ProductDetails = () => {
             { label: 'S', available: true },
             { label: 'M', available: true },
             { label: 'L', available: true },
-            { label: 'XL', available: false }
+            { label: 'XL', available: true }
         ];
 
     const [selectedSize, setSelectedSize] = useState(variantOptions.find(o => o.available)?.label || variantOptions[0]?.label);
@@ -79,7 +79,7 @@ const ProductDetails = () => {
     const currentCombination = product?.skus?.find(s => s.color === selectedColor && s.size === selectedSize);
     const currentStock = currentCombination
         ? Number(currentCombination.stock)
-        : (product?.skus?.length > 0 ? 0 : (product?.stock || 0));
+        : (product?.skus?.length > 0 ? 0 : (product?.stock !== undefined ? product.stock : 50));
 
     const colors = product && product.colors && product.colors.length > 0
         ? product.colors
