@@ -20,6 +20,7 @@ const CategoryPage = () => {
     const [filterRange, setFilterRange] = useState([0, 100000]);
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [selectedRam, setSelectedRam] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -50,6 +51,12 @@ const CategoryPage = () => {
             updated.sort((a, b) => b.rating - a.rating);
         }
 
+        // Apply Category Filter (now filtering by subcategories from tags)
+        if (selectedCategories.length > 0) {
+            updated = updated.filter(p =>
+                p.tags && p.tags.some(tag => selectedCategories.includes(tag))
+            );
+        }
 
         // Apply Brand Filter
         if (selectedBrands.length > 0) {
@@ -62,11 +69,19 @@ const CategoryPage = () => {
         }
 
         setSortedProducts(updated);
-    }, [sortBy, filterRange, selectedBrands, selectedRam, categoryProducts]);
+    }, [sortBy, filterRange, selectedBrands, selectedRam, selectedCategories, categoryProducts]);
 
-    // Unique Brands and RAM options
+    // Unique Brands, RAM, and Subcategories from tags
     const availableBrands = [...new Set(categoryProducts.map(p => p.brand).filter(Boolean))];
     const availableRam = [...new Set(categoryProducts.map(p => p.ram).filter(Boolean))];
+
+    // Extract subcategories from tags, excluding the main category name
+    const availableCategories = [...new Set(
+        categoryProducts
+            .flatMap(p => p.tags || [])
+            .filter(tag => tag !== categoryData?.name) // Exclude main category
+            .filter(Boolean)
+    )];
 
     const toggleBrand = (brand) => {
         setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
@@ -74,6 +89,10 @@ const CategoryPage = () => {
 
     const toggleRam = (ram) => {
         setSelectedRam(prev => prev.includes(ram) ? prev.filter(r => r !== ram) : [...prev, ram]);
+    };
+
+    const toggleCategory = (category) => {
+        setSelectedCategories(prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]);
     };
 
     if (!categoryData) {
@@ -145,6 +164,28 @@ const CategoryPage = () => {
                                     </button>
                                 </div>
                             </div>
+
+                            {/* Subcategory Filter */}
+                            {availableCategories.length > 0 && (
+                                <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Subcategory</h4>
+                                    <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+                                        {availableCategories.map((category) => (
+                                            <label key={category} className="flex items-center gap-2 cursor-pointer group">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedCategories.includes(category)}
+                                                    onChange={() => toggleCategory(category)}
+                                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                />
+                                                <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
+                                                    {category}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Brand Filter */}
                             {availableBrands.length > 0 && (
@@ -282,6 +323,7 @@ const CategoryPage = () => {
                                             setFilterRange([0, 1000000]);
                                             setSelectedBrands([]);
                                             setSelectedRam([]);
+                                            setSelectedCategories([]);
                                         }}
                                         className="mt-4 bg-blue-600 text-white px-6 py-2 rounded font-bold uppercase text-xs"
                                     >
@@ -350,18 +392,39 @@ const CategoryPage = () => {
 
 
 
-            {/* Filter Modal (MOBILE ONLY) */}
+            {/* Filter Modal (MOBILE ONLY) - Slides from Right */}
             {
                 showFilterModal && (
-                    <div className="fixed inset-0 z-[100] flex items-end justify-center">
+                    <div className="fixed inset-0 z-[100]">
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowFilterModal(false)}></div>
-                        <div className="relative w-full bg-white dark:bg-zinc-900 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden h-[70vh] flex flex-col">
+                        <div className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white dark:bg-zinc-900 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
                             <div className="px-6 py-4 border-b dark:border-zinc-800 flex items-center justify-between">
                                 <h3 className="font-bold text-gray-800 dark:text-white uppercase text-xs tracking-widest">Filters</h3>
                                 <button onClick={() => setShowFilterModal(false)} className="material-icons text-gray-400">close</button>
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-6 space-y-8">
+
+                                {/* Subcategory Filter Mobile */}
+                                {availableCategories.length > 0 && (
+                                    <div>
+                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-4">Subcategory</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {availableCategories.map((category) => (
+                                                <button
+                                                    key={category}
+                                                    onClick={() => toggleCategory(category)}
+                                                    className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all ${selectedCategories.includes(category)
+                                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
+                                                        : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
+                                                        }`}
+                                                >
+                                                    {category}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Brand Filter Mobile */}
                                 {availableBrands.length > 0 && (
@@ -450,6 +513,7 @@ const CategoryPage = () => {
                                         setFilterRange([0, 100000]);
                                         setSelectedBrands([]);
                                         setSelectedRam([]);
+                                        setSelectedCategories([]);
                                     }}
                                     className="flex-1 py-4 text-gray-400 font-black uppercase text-xs tracking-widest hover:text-gray-600"
                                 >
