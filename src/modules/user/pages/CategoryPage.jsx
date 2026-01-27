@@ -18,6 +18,8 @@ const CategoryPage = () => {
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [sortBy, setSortBy] = useState('popularity'); // popularity, price-low, price-high, rating
     const [filterRange, setFilterRange] = useState([0, 100000]);
+    const [selectedBrands, setSelectedBrands] = useState([]);
+    const [selectedRam, setSelectedRam] = useState([]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -48,8 +50,31 @@ const CategoryPage = () => {
             updated.sort((a, b) => b.rating - a.rating);
         }
 
+
+        // Apply Brand Filter
+        if (selectedBrands.length > 0) {
+            updated = updated.filter(p => p.brand && selectedBrands.includes(p.brand));
+        }
+
+        // Apply RAM Filter
+        if (selectedRam.length > 0) {
+            updated = updated.filter(p => p.ram && selectedRam.includes(p.ram));
+        }
+
         setSortedProducts(updated);
-    }, [sortBy, filterRange, categoryProducts]);
+    }, [sortBy, filterRange, selectedBrands, selectedRam, categoryProducts]);
+
+    // Unique Brands and RAM options
+    const availableBrands = [...new Set(categoryProducts.map(p => p.brand).filter(Boolean))];
+    const availableRam = [...new Set(categoryProducts.map(p => p.ram).filter(Boolean))];
+
+    const toggleBrand = (brand) => {
+        setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
+    };
+
+    const toggleRam = (ram) => {
+        setSelectedRam(prev => prev.includes(ram) ? prev.filter(r => r !== ram) : [...prev, ram]);
+    };
 
     if (!categoryData) {
         return <div className="p-10 text-center">Category not found</div>;
@@ -121,7 +146,51 @@ const CategoryPage = () => {
                                 </div>
                             </div>
 
-                            {/* Sort Filter */}
+                            {/* Brand Filter */}
+                            {availableBrands.length > 0 && (
+                                <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Brand</h4>
+                                    <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+                                        {availableBrands.map((brand) => (
+                                            <label key={brand} className="flex items-center gap-2 cursor-pointer group">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedBrands.includes(brand)}
+                                                    onChange={() => toggleBrand(brand)}
+                                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                />
+                                                <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
+                                                    {brand}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* RAM Filter */}
+                            {availableRam.length > 0 && (
+                                <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">RAM</h4>
+                                    <div className="space-y-2">
+                                        {availableRam.map((ram) => (
+                                            <label key={ram} className="flex items-center gap-2 cursor-pointer group">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedRam.includes(ram)}
+                                                    onChange={() => toggleRam(ram)}
+                                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                />
+                                                <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
+                                                    {ram}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Sort Filter - Restored for Web */}
                             <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Sort By</h4>
                                 <div className="space-y-3">
@@ -129,7 +198,7 @@ const CategoryPage = () => {
                                         { id: 'popularity', label: 'Popularity' },
                                         { id: 'price-low', label: 'Price -- Low to High' },
                                         { id: 'price-high', label: 'Price -- High to Low' },
-                                        { id: 'rating', label: 'Customer Ratings' },
+                                        { id: 'newest', label: 'Newest First' },
                                     ].map((option) => (
                                         <label key={option.id} className="flex items-center gap-2 cursor-pointer group">
                                             <input
@@ -142,23 +211,6 @@ const CategoryPage = () => {
                                             <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
                                                 {option.label}
                                             </span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Ratings Filter */}
-                            <div className="p-4">
-                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Customer Ratings</h4>
-                                <div className="space-y-3">
-                                    {[4, 3, 2, 1].map((star) => (
-                                        <label key={star} className="flex items-center gap-2 cursor-pointer group">
-                                            <input type="checkbox" className="w-4 h-4 accent-blue-600" />
-                                            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
-                                                <span>{star}</span>
-                                                <span className="material-icons text-[14px] text-yellow-500">star</span>
-                                                <span>& above</span>
-                                            </div>
                                         </label>
                                     ))}
                                 </div>
@@ -226,7 +278,11 @@ const CategoryPage = () => {
                                     <span className="material-icons text-6xl mb-4 opacity-50">search_off</span>
                                     <p className="text-lg font-bold">No products match your filters.</p>
                                     <button
-                                        onClick={() => setFilterRange([0, 1000000])}
+                                        onClick={() => {
+                                            setFilterRange([0, 1000000]);
+                                            setSelectedBrands([]);
+                                            setSelectedRam([]);
+                                        }}
                                         className="mt-4 bg-blue-600 text-white px-6 py-2 rounded font-bold uppercase text-xs"
                                     >
                                         Clear Filters
@@ -236,10 +292,10 @@ const CategoryPage = () => {
                         </div>
                     </main>
                 </div>
-            </div>
+            </div >
 
             {/* Sticky Sort/Filter Bar (MOBILE ONLY) */}
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 h-14 flex z-50">
+            < div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 h-14 flex z-50" >
                 <button
                     onClick={() => setShowSortModal(true)}
                     className="flex-1 flex items-center justify-center gap-2 border-r border-gray-100 dark:border-zinc-800 group active:bg-gray-50 dark:active:bg-zinc-800"
@@ -254,122 +310,163 @@ const CategoryPage = () => {
                     <span className="material-icons text-[18px] text-gray-500">filter_list</span>
                     <span className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Filter</span>
                 </button>
-            </div>
+            </div >
 
-            {/* Sort Modal (MOBILE ONLY) */}
-            {showSortModal && (
-                <div className="fixed inset-0 z-[100] flex items-end justify-center">
-                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSortModal(false)}></div>
-                    <div className="relative w-full bg-white dark:bg-zinc-900 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden">
-                        <div className="px-6 py-4 border-b dark:border-zinc-800 flex items-center justify-between">
-                            <h3 className="font-bold text-gray-800 dark:text-white uppercase text-xs tracking-widest">Sort By</h3>
-                            <button onClick={() => setShowSortModal(false)} className="material-icons text-gray-400">close</button>
-                        </div>
-                        <div className="p-2">
-                            {[
-                                { id: 'popularity', label: 'Popularity', icon: 'stars' },
-                                { id: 'price-low', label: 'Price -- Low to High', icon: 'trending_up' },
-                                { id: 'price-high', label: 'Price -- High to Low', icon: 'trending_down' },
-                                { id: 'rating', label: 'Customer Ratings', icon: 'thumb_up' },
-                            ].map((option) => (
-                                <button
-                                    key={option.id}
-                                    onClick={() => { setSortBy(option.id); setShowSortModal(false); }}
-                                    className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${sortBy === option.id ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : 'text-gray-600 dark:text-gray-400 active:bg-gray-50'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="material-icons-outlined text-lg">{option.icon}</span>
-                                        <span className="font-bold text-sm tracking-tight">{option.label}</span>
-                                    </div>
-                                    {sortBy === option.id && <span className="material-icons text-lg">check_circle</span>}
-                                </button>
-                            ))}
+            {/* Sort Modal (MOBILE ONLY) - Restored for Mobile Consistency */}
+            {
+                showSortModal && (
+                    <div className="fixed inset-0 z-[100] flex items-end justify-center">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSortModal(false)}></div>
+                        <div className="relative w-full bg-white dark:bg-zinc-900 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden">
+                            <div className="px-6 py-4 border-b dark:border-zinc-800 flex items-center justify-between">
+                                <h3 className="font-bold text-gray-800 dark:text-white uppercase text-xs tracking-widest">Sort By</h3>
+                                <button onClick={() => setShowSortModal(false)} className="material-icons text-gray-400">close</button>
+                            </div>
+                            <div className="p-2">
+                                {[
+                                    { id: 'popularity', label: 'Popularity', icon: 'stars' },
+                                    { id: 'price-low', label: 'Price -- Low to High', icon: 'trending_up' },
+                                    { id: 'price-high', label: 'Price -- High to Low', icon: 'trending_down' },
+                                    { id: 'newest', label: 'Newest First', icon: 'new_releases' },
+                                ].map((option) => (
+                                    <button
+                                        key={option.id}
+                                        onClick={() => { setSortBy(option.id); setShowSortModal(false); }}
+                                        className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${sortBy === option.id ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : 'text-gray-600 dark:text-gray-400 active:bg-gray-50'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="material-icons-outlined text-lg">{option.icon}</span>
+                                            <span className="font-bold text-sm tracking-tight">{option.label}</span>
+                                        </div>
+                                        {sortBy === option.id && <span className="material-icons text-lg">check_circle</span>}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
+
+
 
             {/* Filter Modal (MOBILE ONLY) */}
-            {showFilterModal && (
-                <div className="fixed inset-0 z-[100] flex items-end justify-center">
-                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowFilterModal(false)}></div>
-                    <div className="relative w-full bg-white dark:bg-zinc-900 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden h-[70vh] flex flex-col">
-                        <div className="px-6 py-4 border-b dark:border-zinc-800 flex items-center justify-between">
-                            <h3 className="font-bold text-gray-800 dark:text-white uppercase text-xs tracking-widest">Filters</h3>
-                            <button onClick={() => setShowFilterModal(false)} className="material-icons text-gray-400">close</button>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-6 space-y-8">
-                            <div>
-                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-6">Price Range</h4>
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between px-2">
-                                        <div className="bg-gray-50 dark:bg-zinc-800 px-4 py-2 rounded-lg border dark:border-zinc-700">
-                                            <span className="text-[10px] text-gray-400 block uppercase font-bold">Min</span>
-                                            <span className="font-black text-sm dark:text-white">₹{filterRange[0].toLocaleString()}</span>
-                                        </div>
-                                        <div className="w-8 h-[2px] bg-gray-200 dark:bg-zinc-800"></div>
-                                        <div className="bg-gray-50 dark:bg-zinc-800 px-4 py-2 rounded-lg border dark:border-zinc-700">
-                                            <span className="text-[10px] text-gray-400 block uppercase font-bold">Max</span>
-                                            <span className="font-black text-sm dark:text-white">₹{filterRange[1].toLocaleString()}</span>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {[
-                                            { label: 'Under ₹500', range: [0, 500] },
-                                            { label: '₹500 - ₹2000', range: [500, 2000] },
-                                            { label: '₹2000 - ₹5000', range: [2000, 5000] },
-                                            { label: 'Above ₹5000', range: [5000, 1000000] },
-                                        ].map((r) => (
-                                            <button
-                                                key={r.label}
-                                                onClick={() => setFilterRange(r.range)}
-                                                className={`px-3 py-2.5 rounded-lg border transition-all text-xs font-bold leading-tight ${JSON.stringify(filterRange) === JSON.stringify(r.range)
-                                                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
-                                                    : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
-                                                    }`}
-                                            >
-                                                {r.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+            {
+                showFilterModal && (
+                    <div className="fixed inset-0 z-[100] flex items-end justify-center">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowFilterModal(false)}></div>
+                        <div className="relative w-full bg-white dark:bg-zinc-900 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden h-[70vh] flex flex-col">
+                            <div className="px-6 py-4 border-b dark:border-zinc-800 flex items-center justify-between">
+                                <h3 className="font-bold text-gray-800 dark:text-white uppercase text-xs tracking-widest">Filters</h3>
+                                <button onClick={() => setShowFilterModal(false)} className="material-icons text-gray-400">close</button>
                             </div>
 
-                            <div>
-                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-4">Customer Rating</h4>
-                                <div className="flex gap-2">
-                                    {[4, 3, 2, 1].map((star) => (
-                                        <button
-                                            key={star}
-                                            className="px-3 py-2 rounded-lg border border-gray-100 dark:border-zinc-800 text-xs font-bold text-gray-600 dark:text-gray-400 flex items-center gap-1 active:bg-blue-50 active:border-blue-200"
-                                        >
-                                            {star} <span className="material-icons text-[12px] text-yellow-500">star</span> & above
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8">
 
-                        <div className="p-4 border-t dark:border-zinc-800 bg-white dark:bg-zinc-900 flex gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-                            <button
-                                onClick={() => setFilterRange([0, 100000])}
-                                className="flex-1 py-4 text-gray-400 font-black uppercase text-xs tracking-widest hover:text-gray-600"
-                            >
-                                Clear All
-                            </button>
-                            <button
-                                onClick={() => setShowFilterModal(false)}
-                                className="flex-[2] bg-[#fb641b] text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-xl shadow-[#fb641b]/20 active:scale-95 transition-all"
-                            >
-                                Apply Filters
-                            </button>
+                                {/* Brand Filter Mobile */}
+                                {availableBrands.length > 0 && (
+                                    <div>
+                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-4">Brand</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {availableBrands.map((brand) => (
+                                                <button
+                                                    key={brand}
+                                                    onClick={() => toggleBrand(brand)}
+                                                    className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all ${selectedBrands.includes(brand)
+                                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
+                                                        : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
+                                                        }`}
+                                                >
+                                                    {brand}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* RAM Filter Mobile */}
+                                {availableRam.length > 0 && (
+                                    <div>
+                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-4">RAM</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {availableRam.map((ram) => (
+                                                <button
+                                                    key={ram}
+                                                    onClick={() => toggleRam(ram)}
+                                                    className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all ${selectedRam.includes(ram)
+                                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
+                                                        : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
+                                                        }`}
+                                                >
+                                                    {ram}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-6">Price Range</h4>
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between px-2">
+                                            <div className="bg-gray-50 dark:bg-zinc-800 px-4 py-2 rounded-lg border dark:border-zinc-700">
+                                                <span className="text-[10px] text-gray-400 block uppercase font-bold">Min</span>
+                                                <span className="font-black text-sm dark:text-white">₹{filterRange[0].toLocaleString()}</span>
+                                            </div>
+                                            <div className="w-8 h-[2px] bg-gray-200 dark:bg-zinc-800"></div>
+                                            <div className="bg-gray-50 dark:bg-zinc-800 px-4 py-2 rounded-lg border dark:border-zinc-700">
+                                                <span className="text-[10px] text-gray-400 block uppercase font-bold">Max</span>
+                                                <span className="font-black text-sm dark:text-white">₹{filterRange[1].toLocaleString()}</span>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {[
+                                                { label: 'Under ₹500', range: [0, 500] },
+                                                { label: '₹500 - ₹2000', range: [500, 2000] },
+                                                { label: '₹2000 - ₹5000', range: [2000, 5000] },
+                                                { label: 'Above ₹5000', range: [5000, 1000000] },
+                                            ].map((r) => (
+                                                <button
+                                                    key={r.label}
+                                                    onClick={() => setFilterRange(r.range)}
+                                                    className={`px-3 py-2.5 rounded-lg border transition-all text-xs font-bold leading-tight ${JSON.stringify(filterRange) === JSON.stringify(r.range)
+                                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
+                                                        : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
+                                                        }`}
+                                                >
+                                                    {r.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <div className="p-4 border-t dark:border-zinc-800 bg-white dark:bg-zinc-900 flex gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                                <button
+                                    onClick={() => {
+                                        setFilterRange([0, 100000]);
+                                        setSelectedBrands([]);
+                                        setSelectedRam([]);
+                                    }}
+                                    className="flex-1 py-4 text-gray-400 font-black uppercase text-xs tracking-widest hover:text-gray-600"
+                                >
+                                    Clear All
+                                </button>
+                                <button
+                                    onClick={() => setShowFilterModal(false)}
+                                    className="flex-[2] bg-[#fb641b] text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-xl shadow-[#fb641b]/20 active:scale-95 transition-all"
+                                >
+                                    Apply Filters
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

@@ -399,23 +399,27 @@ export const products = [
     {
         id: 4,
         name: "Smart Phone X - 8GB RAM | 128GB Storage",
+        brand: "SmartX",
         price: 18499,
         originalPrice: 25999,
         discount: "28% off",
         rating: 4.6,
         image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=300",
         category: "Mobiles",
+        ram: "8 GB",
         tags: ["Mobiles", "5G Phones"]
     },
     {
         id: 24,
         name: "Apple iPhone 14 (Blue, 128 GB)",
+        brand: "Apple",
         price: 58999,
         originalPrice: 69900,
         discount: "15% off",
         rating: 4.6,
         image: "https://rukminim1.flixcart.com/image/312/312/xif0q/mobile/k/u/6/-original-imaghxen343entpp.jpeg?q=70",
         category: "Mobiles",
+        ram: "6 GB",
         tags: ["Mobiles", "iPhone", "Apple"]
     },
 
@@ -668,45 +672,53 @@ export const products = [
     {
         id: 201,
         name: "Samsung Galaxy S24 Ultra",
+        brand: "Samsung",
         price: 124999,
         originalPrice: 134999,
         discount: "7% off",
         rating: 4.8,
         image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=300",
         category: "Electronics",
+        ram: "12 GB",
         tags: ["Mobiles", "Samsung", "Electronics"] // Tags for filtering
     },
     {
         id: 202,
         name: "Samsung Galaxy A55 5G",
+        brand: "Samsung",
         price: 39999,
         originalPrice: 45000,
         discount: "11% off",
         rating: 4.3,
         image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=300",
         category: "Electronics",
+        ram: "8 GB",
         tags: ["Mobiles", "Samsung", "Electronics"]
     },
     {
         id: 203,
         name: "Samsung Galaxy M14",
+        brand: "Samsung",
         price: 9999,
         originalPrice: 14999,
         discount: "33% off",
         rating: 4.1,
         image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=300",
         category: "Electronics",
+        ram: "6 GB",
         tags: ["Mobiles", "Samsung", "Electronics"]
     },
     {
         id: 204,
         name: "Apple iPhone 15",
+        brand: "Apple",
         price: 69999,
         originalPrice: 79999,
         discount: "12% off",
         rating: 4.6,
         image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=300",
         category: "Electronics",
+        ram: "6 GB",
         tags: ["Mobiles", "Apple", "Electronics", "iPhone"]
     }
 ];
