@@ -21,6 +21,12 @@ const CategoryPage = () => {
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [selectedRam, setSelectedRam] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [selectedDiscount, setSelectedDiscount] = useState(null);
+    const [brandSearch, setBrandSearch] = useState('');
+    const [showAllBrands, setShowAllBrands] = useState(false);
+    const [showAllRam, setShowAllRam] = useState(false);
+    const [showAllCategories, setShowAllCategories] = useState(false);
+    const [collapsedSections, setCollapsedSections] = useState({});
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -68,8 +74,17 @@ const CategoryPage = () => {
             updated = updated.filter(p => p.ram && selectedRam.includes(p.ram));
         }
 
+        // Apply Discount Filter
+        if (selectedDiscount) {
+            updated = updated.filter(p => {
+                if (!p.discount) return false;
+                const discountPercent = parseInt(p.discount.replace(/\D/g, ''));
+                return discountPercent >= selectedDiscount;
+            });
+        }
+
         setSortedProducts(updated);
-    }, [sortBy, filterRange, selectedBrands, selectedRam, selectedCategories, categoryProducts]);
+    }, [sortBy, filterRange, selectedBrands, selectedRam, selectedCategories, selectedDiscount, categoryProducts]);
 
     // Unique Brands, RAM, and Subcategories from tags
     const availableBrands = [...new Set(categoryProducts.map(p => p.brand).filter(Boolean))];
@@ -94,6 +109,20 @@ const CategoryPage = () => {
     const toggleCategory = (category) => {
         setSelectedCategories(prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]);
     };
+
+    const toggleSection = (section) => {
+        setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }));
+    };
+
+    // Filter brands by search
+    const filteredBrands = availableBrands.filter(brand =>
+        brand.toLowerCase().includes(brandSearch.toLowerCase())
+    );
+
+    // Show limited items
+    const displayedBrands = showAllBrands ? filteredBrands : filteredBrands.slice(0, 6);
+    const displayedRam = showAllRam ? availableRam : availableRam.slice(0, 6);
+    const displayedCategories = showAllCategories ? availableCategories : availableCategories.slice(0, 6);
 
     if (!categoryData) {
         return <div className="p-10 text-center">Category not found</div>;
@@ -126,135 +155,300 @@ const CategoryPage = () => {
 
                 <div className="flex flex-col lg:flex-row gap-4">
 
-                    {/* LEFT SIDEBAR (Desktop Only) */}
-                    <aside className="hidden lg:block w-72 shrink-0 space-y-4">
-                        <div className="bg-white dark:bg-zinc-900 rounded shadow-sm border border-gray-100 dark:border-zinc-800 overflow-hidden sticky top-20">
-                            <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-800">
-                                <h3 className="font-bold text-gray-800 dark:text-white uppercase text-xs tracking-wider">Filters</h3>
+                    {/* LEFT SIDEBAR (Desktop Only) - Flipkart Style */}
+                    <aside className="hidden lg:block w-72 shrink-0">
+                        <div className="bg-white dark:bg-zinc-900 shadow-sm border border-gray-200 dark:border-zinc-800 sticky top-20">
+                            {/* Filters Header */}
+                            <div className="px-4 py-3 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
+                                <h3 className="font-semibold text-gray-900 dark:text-white text-lg">Filters</h3>
+                                <button
+                                    onClick={() => {
+                                        setFilterRange([0, 100000]);
+                                        setSelectedBrands([]);
+                                        setSelectedRam([]);
+                                        setSelectedCategories([]);
+                                        setSelectedDiscount(null);
+                                        setBrandSearch('');
+                                    }}
+                                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 uppercase"
+                                >
+                                    Clear All
+                                </button>
                             </div>
 
-                            {/* Price Filter */}
-                            <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
-                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Price</h4>
-                                <div className="space-y-3">
-                                    {[
-                                        { label: 'Under ₹500', range: [0, 500] },
-                                        { label: '₹500 - ₹2000', range: [500, 2000] },
-                                        { label: '₹2000 - ₹5000', range: [2000, 5000] },
-                                        { label: 'Above ₹5000', range: [5000, 1000000] },
-                                    ].map((r) => (
-                                        <label key={r.label} className="flex items-center gap-2 cursor-pointer group">
-                                            <input
-                                                type="radio"
-                                                name="priceFilter"
-                                                checked={JSON.stringify(filterRange) === JSON.stringify(r.range)}
-                                                onChange={() => setFilterRange(r.range)}
-                                                className="w-4 h-4 accent-blue-600"
-                                            />
-                                            <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
-                                                {r.label}
-                                            </span>
-                                        </label>
-                                    ))}
-                                    <button
-                                        onClick={() => setFilterRange([0, 1000000])}
-                                        className="text-xs text-blue-600 font-bold hover:underline pt-2"
-                                    >
-                                        Clear Price Filter
-                                    </button>
+                            {/* Categories Section */}
+                            {categoryData && (
+                                <div className="border-b border-gray-200 dark:border-zinc-800">
+                                    <div className="px-4 py-3">
+                                        <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">CATEGORIES</h4>
+                                        <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
+                                            <span className="material-icons text-sm">chevron_left</span>
+                                            <span className="text-gray-400">Mobiles & Accessories</span>
+                                        </div>
+                                        <div className="mt-1 font-medium text-gray-900 dark:text-white">
+                                            {categoryData.name}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Subcategory Filter */}
                             {availableCategories.length > 0 && (
-                                <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
-                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Subcategory</h4>
-                                    <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
-                                        {availableCategories.map((category) => (
-                                            <label key={category} className="flex items-center gap-2 cursor-pointer group">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedCategories.includes(category)}
-                                                    onChange={() => toggleCategory(category)}
-                                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                />
-                                                <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
-                                                    {category}
-                                                </span>
-                                            </label>
-                                        ))}
-                                    </div>
+                                <div className="border-b border-gray-200 dark:border-zinc-800">
+                                    <button
+                                        onClick={() => toggleSection('subcategory')}
+                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                    >
+                                        <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">SUBCATEGORY</h4>
+                                        <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.subcategory ? 'rotate-180' : ''}`}>
+                                            expand_more
+                                        </span>
+                                    </button>
+                                    {!collapsedSections.subcategory && (
+                                        <div className="px-4 pb-3">
+                                            <div className="space-y-2.5">
+                                                {displayedCategories.map((category) => (
+                                                    <label key={category} className="flex items-center gap-2.5 cursor-pointer group">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedCategories.includes(category)}
+                                                            onChange={() => toggleCategory(category)}
+                                                            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                        />
+                                                        <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                            {category}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            {availableCategories.length > 6 && (
+                                                <button
+                                                    onClick={() => setShowAllCategories(!showAllCategories)}
+                                                    className="mt-3 text-xs font-semibold text-blue-600 hover:text-blue-700 uppercase"
+                                                >
+                                                    {showAllCategories ? 'Show Less' : `${availableCategories.length - 6} MORE`}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
                             {/* Brand Filter */}
                             {availableBrands.length > 0 && (
-                                <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
-                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Brand</h4>
-                                    <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
-                                        {availableBrands.map((brand) => (
-                                            <label key={brand} className="flex items-center gap-2 cursor-pointer group">
+                                <div className="border-b border-gray-200 dark:border-zinc-800">
+                                    <button
+                                        onClick={() => toggleSection('brand')}
+                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                    >
+                                        <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">BRAND</h4>
+                                        <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.brand ? 'rotate-180' : ''}`}>
+                                            expand_more
+                                        </span>
+                                    </button>
+                                    {!collapsedSections.brand && (
+                                        <div className="px-4 pb-3">
+                                            {/* Search Brand */}
+                                            <div className="relative mb-3">
+                                                <span className="material-icons absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
                                                 <input
-                                                    type="checkbox"
-                                                    checked={selectedBrands.includes(brand)}
-                                                    onChange={() => toggleBrand(brand)}
-                                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    type="text"
+                                                    placeholder="Search Brand"
+                                                    value={brandSearch}
+                                                    onChange={(e) => setBrandSearch(e.target.value)}
+                                                    className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
                                                 />
-                                                <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
-                                                    {brand}
-                                                </span>
-                                            </label>
-                                        ))}
-                                    </div>
+                                            </div>
+                                            <div className="space-y-2.5 max-h-60 overflow-y-auto">
+                                                {displayedBrands.map((brand) => (
+                                                    <label key={brand} className="flex items-center gap-2.5 cursor-pointer group">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedBrands.includes(brand)}
+                                                            onChange={() => toggleBrand(brand)}
+                                                            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                        />
+                                                        <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                            {brand}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            {filteredBrands.length > 6 && (
+                                                <button
+                                                    onClick={() => setShowAllBrands(!showAllBrands)}
+                                                    className="mt-3 text-xs font-semibold text-blue-600 hover:text-blue-700 uppercase"
+                                                >
+                                                    {showAllBrands ? 'Show Less' : `${filteredBrands.length - 6} MORE`}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
                             {/* RAM Filter */}
                             {availableRam.length > 0 && (
-                                <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
-                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">RAM</h4>
-                                    <div className="space-y-2">
-                                        {availableRam.map((ram) => (
-                                            <label key={ram} className="flex items-center gap-2 cursor-pointer group">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedRam.includes(ram)}
-                                                    onChange={() => toggleRam(ram)}
-                                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                />
-                                                <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
-                                                    {ram}
-                                                </span>
-                                            </label>
-                                        ))}
-                                    </div>
+                                <div className="border-b border-gray-200 dark:border-zinc-800">
+                                    <button
+                                        onClick={() => toggleSection('ram')}
+                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                    >
+                                        <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">RAM</h4>
+                                        <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.ram ? 'rotate-180' : ''}`}>
+                                            expand_more
+                                        </span>
+                                    </button>
+                                    {!collapsedSections.ram && (
+                                        <div className="px-4 pb-3">
+                                            <div className="space-y-2.5">
+                                                {displayedRam.map((ram) => (
+                                                    <label key={ram} className="flex items-center gap-2.5 cursor-pointer group">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedRam.includes(ram)}
+                                                            onChange={() => toggleRam(ram)}
+                                                            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                        />
+                                                        <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                            {ram}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            {availableRam.length > 6 && (
+                                                <button
+                                                    onClick={() => setShowAllRam(!showAllRam)}
+                                                    className="mt-3 text-xs font-semibold text-blue-600 hover:text-blue-700 uppercase"
+                                                >
+                                                    {showAllRam ? 'Show Less' : `${availableRam.length - 6} MORE`}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
-                            {/* Sort Filter - Restored for Web */}
-                            <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
-                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Sort By</h4>
-                                <div className="space-y-3">
-                                    {[
-                                        { id: 'popularity', label: 'Popularity' },
-                                        { id: 'price-low', label: 'Price -- Low to High' },
-                                        { id: 'price-high', label: 'Price -- High to Low' },
-                                        { id: 'newest', label: 'Newest First' },
-                                    ].map((option) => (
-                                        <label key={option.id} className="flex items-center gap-2 cursor-pointer group">
-                                            <input
-                                                type="radio"
-                                                name="sortBy"
-                                                checked={sortBy === option.id}
-                                                onChange={() => setSortBy(option.id)}
-                                                className="w-4 h-4 accent-blue-600"
-                                            />
-                                            <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors">
-                                                {option.label}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </div>
+                            {/* Price Filter */}
+                            <div className="border-b border-gray-200 dark:border-zinc-800">
+                                <button
+                                    onClick={() => toggleSection('price')}
+                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                >
+                                    <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">PRICE</h4>
+                                    <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.price ? 'rotate-180' : ''}`}>
+                                        expand_more
+                                    </span>
+                                </button>
+                                {!collapsedSections.price && (
+                                    <div className="px-4 pb-3">
+                                        <div className="space-y-2.5">
+                                            {[
+                                                { label: 'Under ₹500', range: [0, 500] },
+                                                { label: '₹500 - ₹2000', range: [500, 2000] },
+                                                { label: '₹2000 - ₹5000', range: [2000, 5000] },
+                                                { label: 'Above ₹5000', range: [5000, 1000000] },
+                                            ].map((r) => (
+                                                <label key={r.label} className="flex items-center gap-2.5 cursor-pointer group">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={JSON.stringify(filterRange) === JSON.stringify(r.range)}
+                                                        onChange={() => setFilterRange(r.range)}
+                                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                    />
+                                                    <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                        {r.label}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Discount Filter */}
+                            <div className="border-b border-gray-200 dark:border-zinc-800">
+                                <button
+                                    onClick={() => toggleSection('discount')}
+                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                >
+                                    <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">DISCOUNT</h4>
+                                    <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.discount ? 'rotate-180' : ''}`}>
+                                        expand_more
+                                    </span>
+                                </button>
+                                {!collapsedSections.discount && (
+                                    <div className="px-4 pb-3">
+                                        <div className="space-y-2.5">
+                                            {[
+                                                { label: '10% or more', value: 10 },
+                                                { label: '20% or more', value: 20 },
+                                                { label: '30% or more', value: 30 },
+                                                { label: '40% or more', value: 40 },
+                                                { label: '50% or more', value: 50 },
+                                            ].map((option) => (
+                                                <label key={option.value} className="flex items-center gap-2.5 cursor-pointer group">
+                                                    <input
+                                                        type="radio"
+                                                        name="discountFilter"
+                                                        checked={selectedDiscount === option.value}
+                                                        onChange={() => setSelectedDiscount(option.value)}
+                                                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                    />
+                                                    <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                        {option.label}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                        {selectedDiscount && (
+                                            <button
+                                                onClick={() => setSelectedDiscount(null)}
+                                                className="mt-3 text-xs font-semibold text-blue-600 hover:text-blue-700"
+                                            >
+                                                Clear
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Sort Filter - Desktop */}
+                            <div className="border-b border-gray-200 dark:border-zinc-800">
+                                <button
+                                    onClick={() => toggleSection('sort')}
+                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                >
+                                    <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">SORT BY</h4>
+                                    <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.sort ? 'rotate-180' : ''}`}>
+                                        expand_more
+                                    </span>
+                                </button>
+                                {!collapsedSections.sort && (
+                                    <div className="px-4 pb-3">
+                                        <div className="space-y-2.5">
+                                            {[
+                                                { id: 'popularity', label: 'Popularity' },
+                                                { id: 'price-low', label: 'Price -- Low to High' },
+                                                { id: 'price-high', label: 'Price -- High to Low' },
+                                                { id: 'newest', label: 'Newest First' },
+                                            ].map((option) => (
+                                                <label key={option.id} className="flex items-center gap-2.5 cursor-pointer group">
+                                                    <input
+                                                        type="radio"
+                                                        name="sortBy"
+                                                        checked={sortBy === option.id}
+                                                        onChange={() => setSortBy(option.id)}
+                                                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                    />
+                                                    <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                        {option.label}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </aside>
@@ -468,6 +662,31 @@ const CategoryPage = () => {
                                     </div>
                                 )}
 
+                                {/* Discount Filter Mobile */}
+                                <div>
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-4">Discount</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {[
+                                            { label: '10% or more', value: 10 },
+                                            { label: '20% or more', value: 20 },
+                                            { label: '30% or more', value: 30 },
+                                            { label: '40% or more', value: 40 },
+                                            { label: '50% or more', value: 50 },
+                                        ].map((option) => (
+                                            <button
+                                                key={option.value}
+                                                onClick={() => setSelectedDiscount(selectedDiscount === option.value ? null : option.value)}
+                                                className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all ${selectedDiscount === option.value
+                                                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
+                                                    : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
+                                                    }`}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <div>
                                     <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-6">Price Range</h4>
                                     <div className="space-y-6">
@@ -514,6 +733,7 @@ const CategoryPage = () => {
                                         setSelectedBrands([]);
                                         setSelectedRam([]);
                                         setSelectedCategories([]);
+                                        setSelectedDiscount(null);
                                     }}
                                     className="flex-1 py-4 text-gray-400 font-black uppercase text-xs tracking-widest hover:text-gray-600"
                                 >
