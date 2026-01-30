@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+backend/node_modules
+backend/package-lock.jsons
 
 # Editor directories and files
 .vscode/*
