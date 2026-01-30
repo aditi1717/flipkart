@@ -18,7 +18,6 @@ export const useCartStore = create()(
                 email: 'aditi.sharma@example.com',
                 gender: 'Female'
             },
-            isAuthenticated: true,
             appliedCoupon: null, // { code, discount, type }
 
             applyCoupon: (coupon) => set({ appliedCoupon: coupon }),
@@ -27,9 +26,6 @@ export const useCartStore = create()(
             updateUserProfile: (profile) => set((state) => ({
                 userProfile: { ...state.userProfile, ...profile }
             })),
-
-            login: () => set({ isAuthenticated: true }),
-            logout: () => set({ isAuthenticated: false }),
 
             addToCart: (product, variant = {}) => {
                 set((state) => {

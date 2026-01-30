@@ -1,15 +1,22 @@
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+// import connectDB from './config/db.js'; // Assuming we convert this too, or just inline it
+import User from './models/User.js';
+import Product from './models/Product.js';
+import Category from './models/Category.js';
+import Order from './models/Order.js';
 
-const User = require('./models/User');
-const Product = require('./models/Product');
-const Category = require('./models/Category');
-const Order = require('./models/Order');
+dotenv.config();
 
-// Note: Requires manually copying the mock data arrays from frontend or defining them here.
-// For this task, I will define a subset of the data directly here to demonstrate functionality
-// as reading from the frontend file directly via require might fail due to ES modules syntax there.
+const connectDB = async () => {
+    try {
+        const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/ecom_db');
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        process.exit(1);
+    }
+};
 
 const users = [
     {
@@ -114,11 +121,5 @@ const destroyData = async () => {
 if (process.argv[2] === '-d') {
     destroyData();
 } else {
-    // We need to require Order model inside function or at top, forgot it above
-    // Adding it now for safety
-    try {
-         // Re-requiring inside to capture any potential missing reference
-         const Order = require('./models/Order');
-         importData();
-    } catch(e) { console.log(e) }
+    importData();
 }

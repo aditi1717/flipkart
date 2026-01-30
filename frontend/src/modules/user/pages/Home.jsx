@@ -1,13 +1,15 @@
-import { categories, products, secondaryCategories, fashionValueDeals, interestingFinds, saleBanner } from '../data/mockData';
+import { secondaryCategories, fashionValueDeals, interestingFinds, saleBanner } from '../data/mockData';
 import { useCartStore } from '../store/cartStore';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/product/ProductCard';
 import DealGrid from '../components/home/DealGrid';
 import ProductSection from '../components/home/ProductSection';
+import { useProducts } from '../../../hooks/useData';
 
 const Home = () => {
     const addToCart = useCartStore((state) => state.addToCart);
     const navigate = useNavigate();
+    const { products, loading: productsLoading } = useProducts();
 
     return (
         <div className="bg-background-light dark:bg-background-dark pb-8 pt-1">
@@ -81,20 +83,28 @@ const Home = () => {
                 />
 
                 {/* Popular Grocery Products Section */}
-                <ProductSection
-                    title="Popular Grocery Products for You"
-                    products={products.filter(p => p.category === 'Grocery').slice(0, 6)}
-                    containerClass="mt-6"
-                    onViewAll={() => navigate('/products?category=Grocery&title=Popular Grocery Products for You')}
-                />
+                {productsLoading ? (
+                    <div className="mt-6 text-center text-gray-500">Loading products...</div>
+                ) : (
+                    <ProductSection
+                        title="Popular Grocery Products for You"
+                        products={products.filter(p => p.category === 'Grocery').slice(0, 6)}
+                        containerClass="mt-6"
+                        onViewAll={() => navigate('/products?category=Grocery&title=Popular Grocery Products for You')}
+                    />
+                )}
 
                 {/* Suggested For You - Health & Wellness Grid */}
-                <ProductSection
-                    title="Suggested For You"
-                    products={products.filter(p => p.category === 'Health').slice(0, 6)}
-                    containerClass="mt-8"
-                    onViewAll={() => navigate('/products?category=Health&title=Suggested For You')}
-                />
+                 {productsLoading ? (
+                    <div className="mt-8 text-center text-gray-500">Loading products...</div>
+                ) : (
+                    <ProductSection
+                        title="Suggested For You"
+                        products={products.filter(p => p.category === 'Health').slice(0, 6)}
+                        containerClass="mt-8"
+                        onViewAll={() => navigate('/products?category=Health&title=Suggested For You')}
+                    />
+                )}
 
                 {/* Main Banner */}
                 <section className="mt-4 px-4 hidden md:block">
@@ -202,12 +212,14 @@ const Home = () => {
                 </section>
 
                 {/* Recently Viewed Section */}
-                <ProductSection
-                    title="Recently Viewed"
-                    products={products.filter(p => p.category === 'Electronics').slice(0, 6)}
-                    containerClass="mt-8"
-                    onViewAll={() => navigate('/products?category=Electronics&title=Recently Viewed')}
-                />
+                {productsLoading ? null : (
+                    <ProductSection
+                        title="Recently Viewed"
+                        products={products.filter(p => p.category === 'Electronics').slice(0, 6)}
+                        containerClass="mt-8"
+                        onViewAll={() => navigate('/products?category=Electronics&title=Recently Viewed')}
+                    />
+                )}
 
             </div>
         </div>

@@ -1,9 +1,9 @@
-const Order = require('../models/Order');
+import Order from '../models/Order.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private (Needs auth middleware later, currently public for MVP/Setup)
-const addOrderItems = async (req, res) => {
+export const addOrderItems = async (req, res) => {
     const {
         orderItems,
         shippingAddress,
@@ -34,8 +34,4 @@ const addOrderItems = async (req, res) => {
 
         res.status(201).json(createdOrder);
     }
-};
-
-module.exports = {
-    addOrderItems,
 };

@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { products } from '../data/mockData';
 import { useCartStore } from '../store/cartStore';
 import ProductSection from '../components/home/ProductSection';
+import { useProduct, useProducts } from '../../../hooks/useData';
 
 const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart, wishlist, toggleWishlist } = useCartStore();
-    const [product, setProduct] = useState(null);
+    
+    // Fetch individual product
+    const { product, loading } = useProduct(id);
+    
+    // Fetch all products for "Similar" and "High Rated" logic (could be optimized on backend)
+    const { products } = useProducts();
+    
     const [similarProducts, setSimilarProducts] = useState([]);
     const [highRatedProducts, setHighRatedProducts] = useState([]);
     const [showToast, setShowToast] = useState(false);
@@ -85,20 +91,17 @@ const ProductDetails = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        const pid = parseInt(id);
-        const found = products.find(p => p.id === pid);
-        if (found) {
-            setProduct(found);
-            // Find similar products
-            const similar = products.filter(p => p.category === found.category && p.id !== pid);
+        if (product && products.length > 0) {
+             // Find similar products
+            const similar = products.filter(p => p.category === product.category && p.id !== product.id);
             setSimilarProducts(similar);
             // Find high rated products in Fashion/Jewelry
-            const highRated = products.filter(p => p.rating >= 4.0 && p.id !== pid).slice(0, 6);
+            const highRated = products.filter(p => p.rating >= 4.0 && p.id !== product.id).slice(0, 6);
             setHighRatedProducts(highRated);
         }
-    }, [id]);
+    }, [product, products]);
 
-    if (!product) return <div className="p-10 text-center">Loading...</div>;
+    if (loading || !product) return <div className="p-10 text-center">Loading...</div>;
 
     const discountPercentage = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
 

@@ -1,9 +1,11 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useCartStore } from '../store/cartStore';
+import { useAuthStore } from '../store/authStore';
 
 const ProtectedRoute = ({ children }) => {
-    const { isAuthenticated } = useCartStore();
+    const { isAuthenticated, loading } = useAuthStore();
     const location = useLocation();
+
+    if (loading) return <div>Loading...</div>;
 
     if (!isAuthenticated) {
         // Redirect to login but save the attempted location

@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useCartStore } from '../store/cartStore';
+import { useAuthStore } from '../store/authStore';
 import logo from '../../../assets/indiankart-logo.png';
 
 const Signup = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { login } = useCartStore();
+    const { sendOtp, loading, error } = useAuthStore();
     const [mobile, setMobile] = useState('');
     const from = location.state?.from?.pathname || '/';
 
-    const handleSignup = () => {
-        // In a real app, this would trigger an OTP/Registration flow
+    const handleSignup = async () => {
         if (mobile.length === 10) {
-            login();
-            navigate(from, { replace: true });
+            try {
+                await sendOtp(mobile);
+                // Navigate to login to verify OTP, passing mobile number
+                navigate('/login', { state: { mobile } }); 
+            } catch (err) {
+                 // Error handled by store/hook, but we can also show it
+            }
         } else {
             alert('Please enter a valid 10-digit mobile number');
         }

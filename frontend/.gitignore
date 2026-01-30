@@ -24,3 +24,5 @@ backend/package-lock.jsons
 *.njsproj
 *.sln
 *.sw?
+backend/.env
+frontend/.env

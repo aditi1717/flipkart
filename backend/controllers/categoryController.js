@@ -1,17 +1,13 @@
-const Category = require('../models/Category');
+import Category from '../models/Category.js';
 
 // @desc    Fetch all categories
 // @route   GET /api/categories
 // @access  Public
-const getCategories = async (req, res) => {
+export const getCategories = async (req, res) => {
     try {
         const categories = await Category.find({});
         res.json(categories);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-};
-
-module.exports = {
-    getCategories,
 };

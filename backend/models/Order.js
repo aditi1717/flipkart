@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const orderSchema = mongoose.Schema({
     user: {
@@ -44,9 +44,16 @@ const orderSchema = mongoose.Schema({
     paidAt: { type: Date },
     isDelivered: { type: Boolean, required: true, default: false },
     deliveredAt: { type: Date },
+    
+    // OTP Delivery
+    deliveryOtp: { type: String },
+    deliveryOtpExpiresAt: { type: Date },
+    deliveryOtpVerified: { type: Boolean, default: false },
+    invoiceEnabled: { type: Boolean, default: false },
 }, {
     timestamps: true,
 });
 
 const Order = mongoose.model('Order', orderSchema);
-module.exports = Order;
+
+export default Order;
