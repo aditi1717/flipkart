@@ -8,7 +8,7 @@ const generateToken = (res, userId) => {
     res.cookie('jwt', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
-        sameSite: 'strict',
+        sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'strict', // Lax for dev to allow localhost/127.0.0.1 mix
         maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 };

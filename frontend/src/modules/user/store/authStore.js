@@ -10,7 +10,7 @@ export const useAuthStore = create((set, get) => ({
     // Check if user is logged in (on app mount)
     checkAuth: async () => {
         try {
-            const { data } = await API.get('/auth/me');
+            const { data } = await API.get('/auth/profile');
             set({ user: data, isAuthenticated: true, loading: false });
         } catch (error) {
             set({ user: null, isAuthenticated: false, loading: false });
@@ -88,6 +88,22 @@ export const useAuthStore = create((set, get) => ({
             console.error('Logout failed', error);
             // Force client-side logout anyway
             set({ user: null, isAuthenticated: false });
+        }
+    },
+    
+    // Update Profile
+    updateProfile: async (profileData) => {
+        set({ loading: true, error: null });
+        try {
+            const { data } = await API.put('/auth/profile', profileData);
+            set({ user: data, loading: false });
+            return data;
+        } catch (error) {
+            set({ 
+                loading: false, 
+                error: error.response?.data?.message || 'Update failed' 
+            });
+            throw error;
         }
     }
 }));

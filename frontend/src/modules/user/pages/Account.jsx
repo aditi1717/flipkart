@@ -5,8 +5,8 @@ import { useAuthStore } from '../store/authStore';
 
 const Account = () => {
     const navigate = useNavigate();
-    const { user } = useAuthStore();
-    const { userProfile, updateUserProfile } = useCartStore();
+    const { user, updateProfile } = useAuthStore();
+    const { userProfile } = useCartStore(); // Keep for fallback if needed, but don't use its update
     const [isEditing, setIsEditing] = useState(false);
 
     // Local state for editing to avoid direct store mutation before save
@@ -18,18 +18,30 @@ const Account = () => {
     });
 
     useEffect(() => {
-        if (user || userProfile) {
+        if (user) {
             setFormData({
-                name: user?.name || userProfile?.name || '',
-                mobile: user?.phone || userProfile?.mobile || '',
-                email: user?.email || userProfile?.email || '',
-                gender: userProfile?.gender || ''
+                name: user.name || '',
+                mobile: user.phone || '', // Map phone to mobile for form
+                email: user.email || '',
+                gender: user.gender || ''
+            });
+        } else if (userProfile) { // Fallback to local profile
+            setFormData({
+                name: userProfile.name || '',
+                mobile: userProfile.mobile || '',
+                email: userProfile.email || '',
+                gender: userProfile.gender || ''
             });
         }
     }, [user, userProfile]);
 
-    const handleSave = () => {
-        updateUserProfile(formData);
+    const handleSave = async () => {
+        console.log('Saving profile...', formData);
+        if (user) {
+            await updateProfile(formData);
+        }
+        // If we want to support local updates for guests, we could add logic here, 
+        // but for now let's focus on the "user info not saving" issue which implies logged in users.
         setIsEditing(false);
     };
 

@@ -9,7 +9,8 @@ import {
     getUserProfile,
     getUsers,
     deleteUser,
-    updateUser
+    updateUser,
+    updateUserProfile
 } from '../controllers/authController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -18,7 +19,9 @@ router.post('/login', authUser);
 router.post('/logout', logoutUser);
 router.post('/send-otp', sendLoginOtp);
 router.post('/verify-otp', verifyLoginOtp);
-router.get('/me', protect, getUserProfile);
+router.route('/profile')
+    .get(protect, getUserProfile)
+    .put(protect, updateUserProfile);
 
 // Admin Routes
 router.route('/users')
