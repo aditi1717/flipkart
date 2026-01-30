@@ -1,12 +1,23 @@
 import Category from '../models/Category.js';
+import SubCategory from '../models/SubCategory.js';
 
 // @desc    Fetch all categories
 // @route   GET /api/categories
 // @access  Public
 export const getCategories = async (req, res) => {
     try {
-        const categories = await Category.find({});
-        res.json(categories);
+        const categories = await Category.find({}).lean();
+        const subCategories = await SubCategory.find({}).lean(); // Fetch all subs
+
+        // Map subcategories to their parent category
+        const categoriesWithChildren = categories.map(cat => {
+            return {
+                ...cat,
+                children: subCategories.filter(sub => sub.category.toString() === cat._id.toString())
+            };
+        });
+
+        res.json(categoriesWithChildren);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

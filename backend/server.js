@@ -1,4 +1,4 @@
-import express from 'express';
+import express from 'express'; // Reload trigger 2
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -21,6 +21,7 @@ import reelRoutes from './routes/reelRoutes.js';
 import bannerRoutes from './routes/bannerRoutes.js';
 import homeSectionRoutes from './routes/homeSectionRoutes.js';
 import contentPageRoutes from './routes/contentPageRoutes.js';
+import subCategoryRoutes from './routes/subCategoryRoutes.js';
 
 dotenv.config();
 
@@ -51,7 +52,9 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/reels', reelRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/home-sections', homeSectionRoutes);
+app.use('/api/home-sections', homeSectionRoutes);
 app.use('/api/pages', contentPageRoutes);
+app.use('/api/subcategories', subCategoryRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

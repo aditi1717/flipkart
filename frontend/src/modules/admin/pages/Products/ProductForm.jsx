@@ -4,10 +4,10 @@ import { MdClose, MdAdd, MdDelete, MdImage, MdExpandMore, MdExpandLess, MdArrowB
 import useProductStore from '../../store/productStore';
 import useCategoryStore from '../../store/categoryStore';
 
-const ProductForm = () => {
+    const ProductForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { addProduct, updateProduct, products, fetchProduct } = useProductStore();
+    const { addProduct, updateProduct, products, fetchProduct, isLoading } = useProductStore();
     const { categories } = useCategoryStore();
 
     useEffect(() => {
@@ -70,7 +70,11 @@ const ProductForm = () => {
                     ...(product.colors?.length ? [{ name: 'Color', hasImage: true, options: product.colors }] : []),
                     ...(product.sizes?.length ? [{ name: product.variantLabel || 'Size', hasImage: false, options: product.sizes.map(s => typeof s === 'string' ? { name: s } : s) }] : [])
                 ] : []),
-                categoryPath: product.categoryPath || (product.categoryId ? [product.categoryId] : []),
+                categoryPath: product.categoryPath || (
+                    product.categoryId 
+                        ? (product.subCategory ? [product.categoryId, (product.subCategory._id || product.subCategory)] : [product.categoryId]) 
+                        : []
+                ),
                 skus: product.skus || [],
                 highlights: product.highlights || [],
                 features: product.features || [],
@@ -232,8 +236,18 @@ const ProductForm = () => {
             : Number(formData.stock);
         data.append('stock', String(stock));
 
-        const categoryId = formData.categoryPath[formData.categoryPath.length - 1] || '';
-        data.append('categoryId', String(categoryId));
+        // Category Logic
+        // 1. Primary Category (Legacy ID - Number)
+        const primaryCategoryId = formData.categoryPath[0] || '';
+        data.append('categoryId', String(primaryCategoryId)); // Parent ID
+
+        // 2. SubCategory (New ObjectId - String)
+        if (formData.categoryPath.length > 1) {
+             const subCategoryId = formData.categoryPath[formData.categoryPath.length - 1];
+             data.append('subCategory', String(subCategoryId));
+        } else {
+             data.append('subCategory', ''); // Clear if no subcat
+        }
         
         const discount = formData.originalPrice > formData.price
              ? `${Math.round(((formData.originalPrice - formData.price) / formData.originalPrice) * 100)}% off`
@@ -348,9 +362,19 @@ const ProductForm = () => {
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="px-10 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 flex items-center gap-2"
+                        disabled={isLoading}
+                        className={`px-10 py-2.5 rounded-xl text-sm font-bold text-white transition-all shadow-lg shadow-blue-200 flex items-center gap-2 ${
+                            isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
                     >
-                        {isEdit ? 'Save Changes' : 'Publish to Store'}
+                        {isLoading ? (
+                            <>
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            isEdit ? 'Save Changes' : 'Publish to Store'
+                        )}
                     </button>
                 </div>
             </div>
@@ -400,7 +424,8 @@ const ProductForm = () => {
                                 <select
                                     value={formData.categoryPath[0] || ''}
                                     onChange={(e) => {
-                                        const val = e.target.value ? parseInt(e.target.value) : null;
+                                        // Allow string or number (for legacy IDs vs ObjectId)
+                                        const val = e.target.value; 
                                         setFormData(prev => ({ ...prev, categoryPath: val ? [val] : [] }));
                                     }}
                                     className="px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium"
@@ -417,7 +442,7 @@ const ProductForm = () => {
                                             key={index}
                                             value={formData.categoryPath[index + 1] || ''}
                                             onChange={(e) => {
-                                                const val = e.target.value ? parseInt(e.target.value) : null;
+                                                const val = e.target.value;
                                                 const newPath = formData.categoryPath.slice(0, index + 1);
                                                 if (val) newPath.push(val);
                                                 setFormData(prev => ({ ...prev, categoryPath: newPath }));

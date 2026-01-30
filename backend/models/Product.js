@@ -10,8 +10,10 @@ const productSchema = mongoose.Schema({
     rating: { type: Number, default: 0 },
     image: { type: String }, // Primary image
     images: [{ type: String }], // Gallery images
-    category: { type: String, required: true }, // Main category name
-    categoryId: { type: Number }, // Main category ID
+    category: { type: String, required: true }, // Main category name (Legacy/Display)
+    categoryId: { type: Number }, // Main category ID (Legacy)
+    subCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory' }, // New Hierarchical Reference
+    categoryPath: [{ type: String }], // Array of category IDs (breadcrumbs) - Changed to String to support both Number and ObjectId
     categoryPath: [{ type: Number }], // Array of category IDs (breadcrumbs)
     
     // Description & Meta

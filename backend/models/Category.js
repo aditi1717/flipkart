@@ -6,7 +6,9 @@ const categorySchema = mongoose.Schema({
     icon: { type: String },
     bannerImage: { type: String },
     bannerAlt: { type: String },
-    subCategories: [{ type: String }], // Simplified for now
+    bannerImage: { type: String },
+    bannerAlt: { type: String },
+    // subCategories removed - now using separate SubCategory model
 }, {
     timestamps: true,
 });

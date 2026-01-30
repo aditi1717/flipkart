@@ -133,9 +133,16 @@ const ProductManager = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className="inline-block px-2.5 py-1 rounded-full bg-gray-100 text-[10px] font-black text-gray-500 uppercase">
-                                                    {product.category}
-                                                </span>
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className="inline-block px-2.5 py-1 rounded-full bg-blue-50 text-[10px] font-black text-blue-600 uppercase">
+                                                        {product.category}
+                                                    </span>
+                                                    {product.subCategory && (
+                                                        <span className="inline-block px-2.5 py-1 rounded-full bg-gray-100 text-[9px] font-bold text-gray-500 uppercase flex items-center gap-1">
+                                                            <span className="text-gray-300">↳</span> {product.subCategory.name}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <div className="flex flex-col items-center">

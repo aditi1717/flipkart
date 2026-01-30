@@ -5,7 +5,9 @@ import Product from '../models/Product.js';
 // @access  Public
 export const getProducts = async (req, res) => {
     try {
-        const products = await Product.find({}).sort({ createdAt: -1 });
+        const products = await Product.find({})
+            .populate('subCategory', 'name') // Populate subCategory name
+            .sort({ createdAt: -1 });
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -17,7 +19,7 @@ export const getProducts = async (req, res) => {
 // @access  Public
 export const getProductById = async (req, res) => {
     try {
-        const product = await Product.findOne({ id: req.params.id });
+        const product = await Product.findOne({ id: req.params.id }).populate('subCategory', 'name');
         if (product) {
             res.json(product);
         } else {
@@ -86,8 +88,11 @@ export const createProduct = async (req, res) => {
             discount: body.discount,
             image,
             images,
+            image,
+            images,
             category: body.category || 'Uncategorized',
-            categoryId: body.categoryId,
+            categoryId: body.categoryId ? Number(body.categoryId) : undefined,
+            subCategory: body.subCategory || null, // Handle subCategory
             categoryPath: parseJSON(body.categoryPath),
             shortDescription: body.shortDescription,
             highlights: parseJSON(body.highlights),
@@ -112,9 +117,9 @@ export const createProduct = async (req, res) => {
 // @access  Private/Admin
 export const updateProduct = async (req, res) => {
     try {
-        console.log('Update Product Request Body:', req.body);
-        console.log('Update Product Request Files:', req.files);
-        
+        console.log('Update Product ID:', req.params.id);
+        console.log('Update Body:', JSON.stringify(req.body, null, 2)); // improved logging
+
         const product = await Product.findOne({ id: req.params.id });
 
         if (product) {
@@ -143,7 +148,7 @@ export const updateProduct = async (req, res) => {
             // Prepare update object
             const updateData = { ...req.body };
             
-            // Parse complex fields if they exist in body
+            // Parse complex fields
             if (updateData.categoryPath) updateData.categoryPath = parseJSON(updateData.categoryPath);
             if (updateData.highlights) updateData.highlights = parseJSON(updateData.highlights);
             if (updateData.specifications) updateData.specifications = parseJSON(updateData.specifications);
@@ -152,8 +157,8 @@ export const updateProduct = async (req, res) => {
             
             if (updateData.variantHeadings) {
                 let variantHeadings = parseJSON(updateData.variantHeadings);
-                
                 if (req.files && req.files.variant_images) {
+                    // ... (Variant image logic - kept same)
                      const variantFiles = req.files.variant_images;
                      if (Array.isArray(variantHeadings)) {
                          variantHeadings = variantHeadings.map(vh => ({
@@ -173,10 +178,27 @@ export const updateProduct = async (req, res) => {
                 updateData.variantHeadings = variantHeadings;
             }
 
-            if (updateData.price) updateData.price = Number(updateData.price);
-            if (updateData.originalPrice) updateData.originalPrice = Number(updateData.originalPrice);
-            if (updateData.stock) updateData.stock = Number(updateData.stock);
-            if (updateData.deliveryDays) updateData.deliveryDays = Number(updateData.deliveryDays);
+            // Safe Number Casting
+            const safeNum = (val, prev) => {
+                if (val === undefined || val === null || val === '') return undefined;
+                const num = Number(val);
+                return isNaN(num) ? prev : num;
+            };
+
+            if (updateData.price !== undefined) updateData.price = safeNum(updateData.price, product.price);
+            if (updateData.originalPrice !== undefined) updateData.originalPrice = safeNum(updateData.originalPrice, product.originalPrice);
+            if (updateData.stock !== undefined) updateData.stock = safeNum(updateData.stock, product.stock);
+            if (updateData.deliveryDays !== undefined) updateData.deliveryDays = safeNum(updateData.deliveryDays, product.deliveryDays);
+
+            // Fix: Cast categoryId to Number safely
+            if (updateData.categoryId !== undefined) {
+                const catId = Number(updateData.categoryId);
+                updateData.categoryId = isNaN(catId) ? undefined : catId;
+            }
+
+            if (updateData.subCategory !== undefined) {
+                 updateData.subCategory = updateData.subCategory === '' ? null : updateData.subCategory;
+            }
 
             if (image) updateData.image = image;
             if (images.length > 0) updateData.images = images;
@@ -190,7 +212,11 @@ export const updateProduct = async (req, res) => {
             res.status(404).json({ message: 'Product not found' });
         }
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error('Update Product Fatal Error:', error);
+        res.status(500).json({ 
+            message: error.message, 
+            stack: error.stack 
+        });
     }
 };
 
