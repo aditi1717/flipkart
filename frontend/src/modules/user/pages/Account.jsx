@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
+import { useAuthStore } from '../store/authStore';
 
 const Account = () => {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
     const { userProfile, updateUserProfile } = useCartStore();
     const [isEditing, setIsEditing] = useState(false);
 
@@ -16,10 +18,15 @@ const Account = () => {
     });
 
     useEffect(() => {
-        if (userProfile) {
-            setFormData(userProfile);
+        if (user || userProfile) {
+            setFormData({
+                name: user?.name || userProfile?.name || '',
+                mobile: user?.phone || userProfile?.mobile || '',
+                email: user?.email || userProfile?.email || '',
+                gender: userProfile?.gender || ''
+            });
         }
-    }, [userProfile]);
+    }, [user, userProfile]);
 
     const handleSave = () => {
         updateUserProfile(formData);
@@ -45,7 +52,7 @@ const Account = () => {
                             </div>
                             <div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400">Hello,</div>
-                                <div className="font-bold text-gray-800 dark:text-white">{userProfile?.name || 'User'}</div>
+                                <div className="font-bold text-gray-800 dark:text-white">{user?.name || userProfile?.name || 'User'}</div>
                             </div>
                         </div>
 
@@ -170,8 +177,10 @@ const Account = () => {
                                             <span className="material-icons-outlined text-3xl">person</span>
                                         </div>
                                         <div>
-                                            <h2 className="text-lg font-bold dark:text-white">{userProfile?.name || 'User'}</h2>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">+91 {userProfile?.mobile}</p>
+                                            <h2 className="text-lg font-bold dark:text-white">{user?.name || userProfile?.name || 'User'}</h2>
+                                            {(user?.phone || userProfile?.mobile) && (
+                                                <p className="text-sm text-gray-500 dark:text-gray-400">+91 {user?.phone || userProfile?.mobile}</p>
+                                            )}
                                         </div>
                                     </div>
                                     <button

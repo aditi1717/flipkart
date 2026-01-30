@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdAdd, MdEdit, MdDelete, MdPlayArrow, MdRemoveRedEye, MdFavorite, MdShoppingBag } from 'react-icons/md';
 import usePlayStore from '../../store/playStore';
 import PlayForm from './PlayForm';
 
 const PlayManager = () => {
-    const { reels, deleteReel, toggleReelStatus } = usePlayStore();
+    const { reels, deleteReel, toggleReelStatus, fetchReels } = usePlayStore();
     const [showForm, setShowForm] = useState(false);
     const [editingReel, setEditingReel] = useState(null);
+
+    useEffect(() => {
+        fetchReels();
+    }, [fetchReels]);
 
     const handleEdit = (reel) => {
         setEditingReel(reel);

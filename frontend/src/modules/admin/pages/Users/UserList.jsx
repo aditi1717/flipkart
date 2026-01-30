@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdSearch, MdFilterList, MdVisibility, MdBlock, MdCheckCircle, MdMoreVert, MdChevronLeft, MdChevronRight, MdMail, MdPhone, MdShoppingBag } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from '../../store/userStore';
@@ -6,8 +6,12 @@ import Pagination from '../../components/common/Pagination';
 
 const UserList = () => {
     const navigate = useNavigate();
-    const { users, toggleUserStatus } = useUserStore();
+    const { users, toggleUserStatus, fetchUsers } = useUserStore();
     const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
     const [statusFilter, setStatusFilter] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;

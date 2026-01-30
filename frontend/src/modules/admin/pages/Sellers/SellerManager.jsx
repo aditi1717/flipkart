@@ -1,15 +1,19 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdCheckCircle, MdCancel, MdDelete, MdSearch, MdStore, MdLocationOn, MdPhone, MdEmail, MdVisibility, MdClose, MdContentCopy, MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import useSellerStore from '../../store/sellerStore';
 
 const SellerManager = () => {
-    const { sellers, approveSeller, rejectSeller, deleteSeller } = useSellerStore();
+    const { sellers, approveSeller, rejectSeller, deleteSeller, fetchSellers } = useSellerStore();
     const [filterStatus, setFilterStatus] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 20;
     const [selectedSeller, setSelectedSeller] = useState(null);
+
+    useEffect(() => {
+        fetchSellers();
+    }, [fetchSellers]);
 
     const filteredSellers = sellers.filter(seller => {
         const matchesStatus = filterStatus === 'All' ? true : seller.status === filterStatus.toLowerCase();

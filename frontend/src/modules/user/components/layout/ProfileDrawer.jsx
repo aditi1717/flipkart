@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
+import { useAuthStore } from '../../store/authStore';
 import { MdClose } from 'react-icons/md';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -14,6 +15,7 @@ import HelpCenter from '../../pages/HelpCenter';
 
 const ProfileDrawer = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
     const { userProfile, updateUserProfile } = useCartStore();
     const [isEditing, setIsEditing] = useState(false);
     const drawerRef = useRef(null);
@@ -28,10 +30,15 @@ const ProfileDrawer = ({ isOpen, onClose }) => {
     });
 
     useEffect(() => {
-        if (userProfile) {
-            setFormData(userProfile);
+        if (user || userProfile) {
+            setFormData({
+                name: user?.name || userProfile?.name || '',
+                mobile: user?.phone || userProfile?.mobile || '',
+                email: user?.email || userProfile?.email || '',
+                gender: userProfile?.gender || ''
+            });
         }
-    }, [userProfile]);
+    }, [user, userProfile]);
 
     const handleSave = () => {
         updateUserProfile(formData);
@@ -106,11 +113,13 @@ const ProfileDrawer = ({ isOpen, onClose }) => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xl shadow-sm">
-                                {userProfile?.name?.charAt(0) || 'U'}
+                                {(user?.name || userProfile?.name || 'U').charAt(0)}
                             </div>
-                            <div>
-                                <p className="font-bold text-gray-800">{userProfile?.name || 'User'}</p>
-                                <p className="text-xs text-gray-500">+91 {userProfile?.mobile}</p>
+                             <div>
+                                <p className="font-bold text-gray-800">{user?.name || userProfile?.name || 'User'}</p>
+                                {(user?.phone || userProfile?.mobile) && (
+                                    <p className="text-xs text-gray-500">+91 {user?.phone || userProfile?.mobile}</p>
+                                )}
                             </div>
                         </div>
                         <button

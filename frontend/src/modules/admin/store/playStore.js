@@ -1,65 +1,55 @@
 import { create } from 'zustand';
+import API from '../../../services/api';
 
-const usePlayStore = create((set, get) => ({
-    reels: [
-        {
-            id: 1,
-            videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4',
-            thumbnailUrl: 'https://via.placeholder.com/150/000000/FFFFFF/?text=Neon',
-            caption: 'Summer Vibes Collection ☀️',
-            productId: '101',
-            productName: 'Neon T-Shirt',
-            active: true,
-            views: '1.2k',
-            likes: '450'
-        },
-        {
-            id: 2,
-            videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4',
-            thumbnailUrl: 'https://via.placeholder.com/150/000000/FFFFFF/?text=Flowers',
-            caption: 'Fresh Floral Prints 🌸',
-            productId: '102',
-            productName: 'Floral Dress',
-            active: true,
-            views: '850',
-            likes: '230'
+const usePlayStore = create((set) => ({
+    reels: [],
+    isLoading: false,
+
+    fetchReels: async () => {
+        set({ isLoading: true });
+        try {
+            const { data } = await API.get('/reels');
+            set({ reels: data, isLoading: false });
+        } catch (error) {
+            set({ isLoading: false });
         }
-    ],
-
-    addReel: (reelData) => {
-        set((state) => ({
-            reels: [
-                {
-                    ...reelData,
-                    id: Date.now(),
-                    views: '0',
-                    likes: '0'
-                },
-                ...state.reels
-            ]
-        }));
     },
 
-    deleteReel: (id) => {
-        set((state) => ({
-            reels: state.reels.filter(r => r.id !== id)
-        }));
+    addReel: async (reelData) => {
+        try {
+            const { data } = await API.post('/reels', reelData);
+            set((state) => ({ reels: [...state.reels, data] }));
+        } catch (error) { console.error(error); }
     },
 
-    toggleReelStatus: (id) => {
-        set((state) => ({
-            reels: state.reels.map(r =>
-                r.id === id ? { ...r, active: !r.active } : r
-            )
-        }));
+    updateReel: async (id, updatedData) => {
+        try {
+            const { data } = await API.put(`/reels/${id}`, updatedData);
+             set((state) => ({
+                 reels: state.reels.map(r => r.id === id ? data : r)
+             }));
+        } catch (error) { console.error(error); }
     },
 
-    updateReel: (id, updates) => {
-        set((state) => ({
-            reels: state.reels.map(r =>
-                r.id === id ? { ...r, ...updates } : r
-            )
-        }));
+    deleteReel: async (id) => {
+        try {
+            await API.delete(`/reels/${id}`);
+            set((state) => ({ reels: state.reels.filter(r => r.id !== id) }));
+        } catch (error) { console.error(error); }
+    },
+
+    toggleReelStatus: async (id) => {
+          // Find reel to get current status
+          set(state => {
+              const reel = state.reels.find(r => r.id === id);
+              if(!reel) return state;
+              API.put(`/reels/${id}`, { active: !reel.active }).then(({data}) => {
+                   set(curr => ({
+                       reels: curr.reels.map(r => r.id === id ? data : r)
+                   }));
+              });
+              return state;
+          });
     }
 }));
 

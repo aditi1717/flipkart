@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdAdd, MdEdit, MdDelete, MdExpandMore, MdChevronRight, MdCheckCircle, MdCancel } from 'react-icons/md';
 import useCategoryStore from '../../store/categoryStore';
 import CategoryForm from './CategoryForm';
 import Pagination from '../../components/common/Pagination';
 
 const CategoryList = () => {
-    const { categories, deleteCategory, toggleCategoryStatus } = useCategoryStore();
+    const { categories, deleteCategory, toggleCategoryStatus, fetchCategories } = useCategoryStore();
     const [expandedIds, setExpandedIds] = useState(new Set());
     const [showForm, setShowForm] = useState(false);
+
+    useEffect(() => {
+        fetchCategories();
+    }, [fetchCategories]);
     const [editingCategory, setEditingCategory] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;

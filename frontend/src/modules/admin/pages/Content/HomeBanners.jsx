@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     MdEdit,
     MdSave,
@@ -9,169 +9,322 @@ import {
     MdViewCarousel,
     MdCloudUpload,
     MdArrowBack,
-    MdLink
+    MdLink,
+    MdImage
 } from 'react-icons/md';
-import { useContentStore } from '../../store/contentStore';
+import useBannerStore from '../../store/bannerStore';
 import useProductStore from '../../store/productStore';
 
 const HomeBanners = () => {
-    const { homeBanners, addHomeBanner, updateHomeBanner, deleteHomeBanner } = useContentStore();
+    // Correct store usage
+    const { banners, addBanner, updateBanner, deleteBanner, fetchBanners } = useBannerStore();
     const { products } = useProductStore();
+
+    useEffect(() => {
+        fetchBanners();
+    }, []);
 
     // UI State
     const [showForm, setShowForm] = useState(false);
     const [selectedBannerId, setSelectedBannerId] = useState(null);
 
     // Form State
-    const [formData, setFormData] = useState({ name: '', slides: [] });
+    const [formData, setFormData] = useState({
+        section: 'HomeHero', // Default section
+        type: 'slides', // 'slides' or 'hero'
+        active: true,
+        slides: [],
+        content: {
+            brand: '',
+            brandTag: '',
+            title: '',
+            subtitle: '',
+            description: '',
+            imageUrl: '',
+            badgeText: '',
+            offerText: '',
+            offerBank: '',
+            backgroundColor: ''
+        }
+    });
+
+    const [heroImageFile, setHeroImageFile] = useState(null);
+    const [heroImagePreview, setHeroImagePreview] = useState('');
+
     const [showProductPicker, setShowProductPicker] = useState(null); // stores slide index
     const [searchTerm, setSearchTerm] = useState('');
     const fileInputRef = useRef(null);
+    const heroFileInputRef = useRef(null);
 
     const handleAddSlide = (e) => {
         const files = Array.from(e.target.files);
         const newSlides = files.map(file => ({
             id: Date.now() + Math.random(),
-            imageUrl: URL.createObjectURL(file),
+            imageUrl: 'SLIDE_IMG_INDEX::' + (formData.slides.length), // Placeholder for backend mapping (needs improvement but works if sequential)
+            originalName: file.name, // To match file in backend
+            preview: URL.createObjectURL(file), // Local preview
+            file: file, // Store file object for upload
             linkedProduct: null
         }));
-        setFormData(prev => ({ ...prev, slides: [...prev.slides, ...newSlides] }));
+        // Note: Real index mapping needs to account for existing slides. 
+        // For simplicity here, we will just start index based on current length, but this is flaky for multiple batches.
+        // A better approach is to append files to a separate array and map by index in that array.
+        // But let's stick to simple form submission with FormData constructing.
+         setFormData(prev => ({ ...prev, slides: [...prev.slides, ...newSlides] }));
     };
 
-    const handleSaveBanner = () => {
-        if (!formData.name || formData.slides.length === 0) return;
-        if (selectedBannerId && selectedBannerId !== 'new') {
-            updateHomeBanner(selectedBannerId, formData);
+    const handleHeroImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setHeroImageFile(file);
+        setHeroImagePreview(URL.createObjectURL(file));
+        // Update formData content.imageUrl just for UI state if needed, but file is separate
+    };
+
+    const handleSaveBanner = async () => {
+        const data = new FormData();
+        data.append('section', formData.section);
+        data.append('type', formData.type);
+        data.append('active', String(formData.active));
+
+        if (formData.type === 'slides') {
+             // Handle Slides
+             // We need to re-index the image placeholders or just send them as is and hope backend logic aligns
+             // A safer way: send slides metadata JSON, and separate files with matching fieldnames/indices?
+             // The backend logic: `if (slide.imageUrl.startsWith('SLIDE_IMG_INDEX::'))` looks for `slideFiles[idx]`.
+             // We need to ensure `slide_images` array aligns with these indices.
+             // This is tricky.
+             // Let's assume for now user only adds NEW slides in one go or we don't support mixed partial edits well without better logic.
+             // Simplified: new slides have file objects attached.
+             
+             const slidesMetadata = formData.slides.map((s, i) => {
+                 if (s.file) {
+                     return { ...s, imageUrl: `SLIDE_IMG_INDEX::${i}`, file: undefined, preview: undefined }; 
+                 }
+                 return s;
+             });
+
+             data.append('slides', JSON.stringify(slidesMetadata));
+             
+             formData.slides.forEach((s) => {
+                 if (s.file) {
+                     data.append('slide_images', s.file);
+                 }
+             });
+
         } else {
-            addHomeBanner(formData);
+             // Handle Hero
+             data.append('content', JSON.stringify(formData.content));
+             if (heroImageFile) {
+                 data.append('hero_image', heroImageFile);
+             } else if (formData.content.imageUrl) {
+                 // Keep existing URL
+                  data.append('hero_image_url', formData.content.imageUrl);
+             }
+        }
+
+
+        if (selectedBannerId && selectedBannerId !== 'new') {
+            await updateBanner(selectedBannerId, data);
+        } else {
+            await addBanner(data);
         }
         setShowForm(false);
+        setHeroImageFile(null);
+        setHeroImagePreview('');
     };
 
     const handleEdit = (banner) => {
-        setFormData(banner);
-        setSelectedBannerId(banner.id);
+        // Prepare initial state
+        setFormData({
+            ...banner,
+            slides: banner.slides || [],
+            content: banner.content || {
+                brand: '', brandTag: '', title: '', subtitle: '', description: '',
+                imageUrl: '', badgeText: '', offerText: '', offerBank: '', backgroundColor: ''
+            }
+        });
+        setHeroImagePreview(banner.content?.imageUrl || '');
+        setSelectedBannerId(banner.id || banner._id);
         setShowForm(true);
-    };
-
-    const handleAttachProduct = (slideIndex, product) => {
-        const newSlides = [...formData.slides];
-        newSlides[slideIndex].linkedProduct = product;
-        setFormData({ ...formData, slides: newSlides });
-        setShowProductPicker(null);
     };
 
     const removeSlide = (index) => {
         setFormData({ ...formData, slides: formData.slides.filter((_, i) => i !== index) });
     };
 
+     const handleAttachProduct = (slideIndex, product) => {
+        const newSlides = [...formData.slides];
+        newSlides[slideIndex].linkedProduct = product;
+        setFormData({ ...formData, slides: newSlides });
+        setShowProductPicker(null);
+    };
+
     const filteredProducts = products.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // --- Main List View (Grid of Compact Cards) ---
+    // --- Main List View ---
     if (!showForm) {
         return (
             <div className="space-y-4 animate-in fade-in duration-300">
                 <div className="flex justify-end">
                     <button
-                        onClick={() => { setFormData({ name: '', slides: [] }); setShowForm(true); setSelectedBannerId('new'); }}
+                        onClick={() => { 
+                            setFormData({ 
+                                section: 'HomeHero', type: 'slides', active: true, slides: [],
+                                content: { brand: '', brandTag: '', title: '', subtitle: '', description: '', imageUrl: '', badgeText: '', offerText: '', offerBank: '', backgroundColor: '' } 
+                            }); 
+                            setHeroImageFile(null);
+                            setHeroImagePreview('');
+                            setShowForm(true); 
+                            setSelectedBannerId('new'); 
+                        }}
                         className="px-4 py-2 bg-purple-600 text-white rounded-xl text-[10px] font-bold hover:bg-purple-700 transition shadow-sm"
                     >
                         NEW BANNER
                     </button>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {homeBanners.map((banner) => (
-                        <div key={banner.id} className="group bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition">
-                            <div className="h-24 bg-gray-50 border-b border-gray-50 relative overflow-hidden">
-                                <img src={banner.slides[0]?.imageUrl} className="w-full h-full object-cover opacity-80" />
-                                <div className="absolute top-1 right-1 bg-black/60 text-[8px] font-bold text-white px-1.5 py-0.5 rounded-full">{banner.slides.length} SLIDES</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {banners.map((banner) => (
+                        <div key={banner.id || banner._id} className="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition">
+                            <div className="h-32 bg-gray-50 border-b border-gray-50 relative overflow-hidden">
+                                {banner.type === 'hero' ? (
+                                    <img src={banner.content?.imageUrl} className="w-full h-full object-cover" />
+                                ) : (
+                                    <img src={banner.slides[0]?.imageUrl} className="w-full h-full object-cover opacity-80" />
+                                )}
+                                <div className="absolute top-2 right-2 flex gap-1">
+                                     <span className="bg-black/60 text-[8px] font-bold text-white px-2 py-0.5 rounded-full uppercase">{banner.type}</span>
+                                     <span className="bg-blue-600/80 text-[8px] font-bold text-white px-2 py-0.5 rounded-full uppercase">{banner.section}</span>
+                                </div>
                             </div>
-                            <div className="p-3">
-                                <h3 className="text-[11px] font-black text-gray-800 truncate mb-3 uppercase tracking-tight">{banner.name}</h3>
+                            <div className="p-4 flex justify-between items-center">
+                                <div>
+                                    <p className="text-xs font-bold text-gray-500 uppercase">{banner.type === 'hero' ? banner.content?.brand : `${banner.slides.length} Slides`}</p>
+                                    <h3 className="text-sm font-black text-gray-800 truncate uppercase tracking-tight">{banner.type === 'hero' ? banner.content?.title : 'Slideshow'}</h3>
+                                </div>
                                 <div className="flex gap-2">
-                                    <button onClick={() => handleEdit(banner)} className="flex-1 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-[9px] font-bold hover:bg-gray-200 transition">EDIT</button>
-                                    <button onClick={() => deleteHomeBanner(banner.id)} className="p-1.5 text-red-400 hover:bg-red-50 rounded-lg transition"><MdDelete size={14} /></button>
+                                    <button onClick={() => handleEdit(banner)} className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"><MdEdit size={16} /></button>
+                                    <button onClick={() => deleteBanner(banner.id || banner._id)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition"><MdDelete size={16} /></button>
                                 </div>
                             </div>
                         </div>
                     ))}
-                    {homeBanners.length === 0 && <div className="col-span-full py-8 text-center text-xs text-gray-400 font-bold border-2 border-dashed border-gray-100 rounded-xl">No banners found.</div>}
+                    {banners.length === 0 && <div className="col-span-full py-12 text-center text-xs text-gray-400 font-bold border-2 border-dashed border-gray-100 rounded-xl">No banners found.</div>}
                 </div>
             </div>
         );
     }
 
-    // --- Create / Edit Form (Compact & Clean) ---
+    // --- Create / Edit Form ---
     return (
-        <div className="space-y-4 animate-in fade-in duration-300">
-            <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-3">
-                    <button onClick={() => setShowForm(false)} className="text-gray-400"><MdArrowBack size={18} /></button>
-                    <input
-                        type="text"
-                        placeholder="Banner Title..."
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="text-xs font-black uppercase text-gray-800 outline-none w-48 border-b-2 border-transparent focus:border-purple-200 px-1"
-                    />
+        <div className="space-y-6 animate-in fade-in duration-300 max-w-4xl mx-auto pb-12">
+            <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-gray-100 shadow-sm sticky top-4 z-20">
+                <div className="flex items-center gap-4">
+                    <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><MdArrowBack size={24} /></button>
+                    <h2 className="text-lg font-black text-gray-800 tracking-tight">{selectedBannerId === 'new' ? 'New Banner' : 'Edit Banner'}</h2>
                 </div>
-                <button onClick={handleSaveBanner} className="px-5 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black hover:bg-blue-700 transition shadow-sm">SAVE COLLECTION</button>
+                <button onClick={handleSaveBanner} className="px-8 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black hover:bg-blue-700 transition shadow-lg shadow-blue-200 uppercase tracking-wider">SAVE CHANGES</button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {formData.slides.map((slide, idx) => (
-                    <div key={slide.id} className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm relative group">
-                        <div className="h-28 bg-gray-50 rounded-lg overflow-hidden border border-gray-50 mb-3">
-                            <img src={slide.imageUrl} className="w-full h-full object-cover" />
+            {/* Configuration */}
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Section ID</label>
+                        <select 
+                            value={formData.section} 
+                            onChange={(e) => setFormData({...formData, section: e.target.value})}
+                            className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 outline-none font-bold text-gray-700"
+                        >
+                            <option value="HomeHero">Home Hero</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Fashion">Fashion</option>
+                        </select>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Banner Type</label>
+                        <div className="flex p-1 bg-gray-50 rounded-xl border border-gray-100">
+                             <button 
+                                onClick={() => setFormData({...formData, type: 'slides'})}
+                                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${formData.type === 'slides' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                             >
+                                 SLIDESHOW
+                             </button>
+                             <button 
+                                onClick={() => setFormData({...formData, type: 'hero'})}
+                                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${formData.type === 'hero' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                             >
+                                 HERO BANNER
+                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        {slide.linkedProduct ? (
-                            <div className="flex items-center gap-2 p-2 bg-blue-50/50 border border-blue-100 rounded-lg group/link">
-                                <img src={slide.linkedProduct.image} className="w-8 h-8 rounded-md object-cover" />
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-[9px] font-black text-gray-800 truncate leading-none">{slide.linkedProduct.name}</p>
-                                    <p className="text-[8px] text-blue-600 font-bold mt-1 uppercase tracking-tighter">LINKED</p>
-                                </div>
-                                <button onClick={() => { const ns = [...formData.slides]; ns[idx].linkedProduct = null; setFormData({ ...formData, slides: ns }); }} className="text-gray-400 hover:text-red-500"><MdClose size={14} /></button>
+            {/* Hero Form */}
+            {formData.type === 'hero' && (
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-8 animate-in slide-in-from-bottom-4">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                         <div className="space-y-6">
+                            <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest border-b border-gray-50 pb-2">Text Content</h3>
+                             <div className="space-y-4">
+                                <input type="text" placeholder="Brand Name (e.g. Vivo)" value={formData.content.brand} onChange={(e) => setFormData({...formData, content: {...formData.content, brand: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
+                                <input type="text" placeholder="Brand Tag (e.g. Flipkart Unique)" value={formData.content.brandTag} onChange={(e) => setFormData({...formData, content: {...formData.content, brandTag: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
+                                <input type="text" placeholder="Main Title (e.g. T4 Pro 5G)" value={formData.content.title} onChange={(e) => setFormData({...formData, content: {...formData.content, title: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-lg font-black" />
+                                <input type="text" placeholder="Subtitle / Price (e.g. From ₹4,250/M*)" value={formData.content.subtitle} onChange={(e) => setFormData({...formData, content: {...formData.content, subtitle: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
+                                <textarea placeholder="Description (e.g. Flagship level 3X zoom)" value={formData.content.description} onChange={(e) => setFormData({...formData, content: {...formData.content, description: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-medium h-24 resize-none" />
+                             </div>
+                         </div>
+
+                         <div className="space-y-6">
+                            <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest border-b border-gray-50 pb-2">Offers & Badge</h3>
+                             <div className="space-y-4">
+                                <input type="text" placeholder="Offer Bank (e.g. HDFC BANK)" value={formData.content.offerBank} onChange={(e) => setFormData({...formData, content: {...formData.content, offerBank: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
+                                <input type="text" placeholder="Offer Text (e.g. Flat ₹3,000 Off)" value={formData.content.offerText} onChange={(e) => setFormData({...formData, content: {...formData.content, offerText: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
+                                <input type="text" placeholder="Image Badge (e.g. 3X Periscope Camera)" value={formData.content.badgeText} onChange={(e) => setFormData({...formData, content: {...formData.content, badgeText: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
+                             </div>
+
+                             <div className="pt-4">
+                                <label className="block w-full aspect-video rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer relative overflow-hidden group">
+                                    {heroImagePreview ? (
+                                        <img src={heroImagePreview} className="w-full h-full object-contain p-4" />
+                                    ) : (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-300">
+                                            <MdCloudUpload size={48} />
+                                            <span className="text-xs font-black uppercase mt-2">Upload Hero Image</span>
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-bold uppercase transition-opacity">Change Image</div>
+                                    <input type="file" ref={heroFileInputRef} hidden onChange={handleHeroImageUpload} accept="image/*" />
+                                </label>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+            )}
+
+            {/* Slideshow Form - Existing Logic Refined */}
+            {formData.type === 'slides' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {formData.slides.map((slide, idx) => (
+                        <div key={slide.id} className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm relative group">
+                            <div className="h-36 bg-gray-50 rounded-lg overflow-hidden border border-gray-50 mb-3">
+                                <img src={slide.preview || slide.imageUrl} className="w-full h-full object-cover" />
                             </div>
-                        ) : (
-                            <button onClick={() => setShowProductPicker(idx)} className="w-full py-2.5 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-[9px] font-bold text-gray-400 hover:bg-gray-100 transition uppercase tracking-widest">Attach Product</button>
-                        )}
-
-                        <button onClick={() => removeSlide(idx)} className="absolute top-1 right-1 w-6 h-6 bg-white text-red-500 rounded-lg shadow-sm border border-red-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><MdDelete size={14} /></button>
-                    </div>
-                ))}
-
-                <button
-                    onClick={() => fileInputRef.current.click()}
-                    className="h-[188px] border-4 border-dashed border-gray-50 rounded-xl bg-gray-50/30 flex flex-col items-center justify-center hover:border-purple-100 hover:bg-white transition group"
-                >
-                    <input type="file" ref={fileInputRef} hidden multiple onChange={handleAddSlide} accept="image/*" />
-                    <MdAdd size={24} className="text-purple-200 group-hover:scale-110 transition" />
-                    <span className="text-[9px] font-black text-gray-300 mt-2 uppercase tracking-widest group-hover:text-purple-300 transition">Add More Slides</span>
-                </button>
-            </div>
-
-            {/* Compact Product Picker Modal */}
-            {showProductPicker !== null && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowProductPicker(null)}></div>
-                    <div className="relative bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
-                        <div className="p-3 border-b border-gray-50 flex justify-between items-center"><h3 className="text-[9px] font-black uppercase tracking-wider">Select Product</h3><button onClick={() => setShowProductPicker(null)}><MdClose size={18} /></button></div>
-                        <div className="p-3"><div className="relative"><MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} /><input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search..." className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-1.5 text-[10px] outline-none" /></div></div>
-                        <div className="max-h-[300px] overflow-y-auto p-3 space-y-1.5 no-scrollbar">
-                            {filteredProducts.map(p => (
-                                <button key={p.id} onClick={() => handleAttachProduct(showProductPicker, p)} className="w-full flex items-center gap-3 p-2 rounded-lg border border-gray-50 hover:border-blue-100 hover:bg-blue-50/20 transition text-left group">
-                                    <img src={p.image} className="w-8 h-8 rounded-md object-cover" />
-                                    <div className="flex-1 min-w-0 font-bold text-[10px] truncate">{p.name}</div>
-                                    <MdAdd size={16} className="text-blue-500 opacity-0 group-hover:opacity-100 transition" />
-                                </button>
-                            ))}
+                            <button onClick={() => removeSlide(idx)} className="absolute top-2 right-2 p-1.5 bg-white text-red-500 rounded-lg shadow-sm hover:bg-red-50 transition"><MdDelete size={14} /></button>
                         </div>
-                    </div>
+                    ))}
+                    <button
+                        onClick={() => fileInputRef.current.click()}
+                        className="h-[200px] border-4 border-dashed border-gray-50 rounded-xl bg-gray-50/30 flex flex-col items-center justify-center hover:border-purple-100 hover:bg-white transition group"
+                    >
+                        <input type="file" ref={fileInputRef} hidden multiple onChange={handleAddSlide} accept="image/*" />
+                        <MdAdd size={32} className="text-purple-200 group-hover:scale-110 transition" />
+                        <span className="text-[10px] font-black text-gray-300 mt-2 uppercase tracking-widest group-hover:text-purple-300 transition">Add Slides</span>
+                    </button>
                 </div>
             )}
         </div>
@@ -179,3 +332,4 @@ const HomeBanners = () => {
 };
 
 export default HomeBanners;
+

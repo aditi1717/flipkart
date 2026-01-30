@@ -25,14 +25,14 @@ import useReturnStore from '../store/returnStore';
 import useSupportStore from '../store/supportStore';
 
 const Dashboard = () => {
-    const navigate = useNavigate();
-    const { products } = useProductStore();
-    const { orders } = useOrderStore();
-    const { users } = useUserStore();
-    const { categories } = useCategoryStore();
-    const { coupons } = useCouponStore();
-    const { returns } = useReturnStore();
-    const { supportRequests } = useSupportStore();
+    const { products = [] } = useProductStore();
+const { orders = [] } = useOrderStore();
+const { users = [] } = useUserStore();
+const { categories = [] } = useCategoryStore();
+const { coupons = [] } = useCouponStore();
+const { returns = [] } = useReturnStore();
+const { supportRequests = [] } = useSupportStore();
+
 
     const activeCoupons = coupons.filter(c => c.active).length;
 

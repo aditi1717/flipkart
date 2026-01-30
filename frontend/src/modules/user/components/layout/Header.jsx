@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
-import { categories } from '../../data/mockData';
+import { useCategories } from '../../../../hooks/useData';
 import { IoSearch } from 'react-icons/io5';
 import {
     MdLocationPin,
@@ -35,6 +35,7 @@ const Header = () => {
     const totalItems = useCartStore((state) => state.getTotalItems());
     const navigate = useNavigate();
     const location = useLocation();
+    const { categories, loading: categoriesLoading } = useCategories();
 
     // Icon Mapping for dynamic data
     const iconMap = {
@@ -180,7 +181,7 @@ const Header = () => {
             </div>
 
             {/* Category Navigation - Hidden on PDP/List */}
-            {!isSpecialPage && (
+            {!isSpecialPage && !categoriesLoading && (
                 <div className="max-w-7xl mx-auto flex overflow-x-auto no-scrollbar gap-4 py-2 md:py-0 px-2 md:justify-between mt-0 md:-mt-2 border-t border-gray-100 pb-2 md:pb-1">
                     {categories.map((cat) => {
                         const active = isActiveCategory(cat.name);

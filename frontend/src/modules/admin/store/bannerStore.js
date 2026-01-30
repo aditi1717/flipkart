@@ -1,74 +1,54 @@
 import { create } from 'zustand';
+import API from '../../../services/api';
 
-const useBannerStore = create((set, get) => ({
-    banners: [
-        {
-            id: 1,
-            section: 'For You',
-            active: true,
-            slides: [
-                {
-                    id: 101,
-                    imageUrl: 'https://rukminim1.flixcart.com/fk-p-flap/1600/270/image/1e1177023344f6f2.jpg?q=20',
-                    targetType: 'product',
-                    targetValue: '101'
-                },
-                {
-                    id: 102,
-                    imageUrl: 'https://rukminim1.flixcart.com/fk-p-flap/1600/270/image/a2dace751a021966.jpg?q=20',
-                    targetType: 'url',
-                    targetValue: '/category/electronics'
-                }
-            ]
-        },
-        {
-            id: 2,
-            section: 'Electronics',
-            active: true,
-            slides: [
-                {
-                    id: 201,
-                    imageUrl: 'https://rukminim1.flixcart.com/fk-p-flap/1600/270/image/aa1b23751a021921.jpg?q=20',
-                    targetType: 'product',
-                    targetValue: '102'
-                }
-            ]
+const useBannerStore = create((set) => ({
+    banners: [],
+    isLoading: false,
+
+    fetchBanners: async () => {
+        set({ isLoading: true });
+        try {
+            const { data } = await API.get('/banners');
+            set({ banners: data, isLoading: false });
+        } catch (error) {
+            set({ isLoading: false });
         }
-    ],
-
-    // Add Banner
-    addBanner: (bannerData) => {
-        set((state) => ({
-            banners: [
-                ...state.banners,
-                { ...bannerData, id: Date.now() }
-            ]
-        }));
     },
 
-    // Update Banner
-    updateBanner: (id, updates) => {
-        set((state) => ({
-            banners: state.banners.map(b =>
-                b.id === id ? { ...b, ...updates } : b
-            )
-        }));
+    addBanner: async (bannerData) => {
+        try {
+            const { data } = await API.post('/banners', bannerData);
+            set((state) => ({ banners: [...state.banners, data] }));
+        } catch (error) { console.error(error); }
     },
 
-    // Delete Banner
-    deleteBanner: (id) => {
-        set((state) => ({
-            banners: state.banners.filter(b => b.id !== id)
-        }));
+    updateBanner: async (id, updatedData) => {
+         try {
+            const { data } = await API.put(`/banners/${id}`, updatedData);
+             set((state) => ({
+                 banners: state.banners.map(b => b.id === id ? data : b)
+             }));
+        } catch (error) { console.error(error); }
     },
 
-    // Toggle Active Status
-    toggleBannerStatus: (id) => {
-        set((state) => ({
-            banners: state.banners.map(b =>
-                b.id === id ? { ...b, active: !b.active } : b
-            )
-        }));
+    deleteBanner: async (id) => {
+        try {
+            await API.delete(`/banners/${id}`);
+            set((state) => ({ banners: state.banners.filter(b => b.id !== id) }));
+        } catch (error) { console.error(error); }
+    },
+
+    toggleBannerStatus: async (id) => {
+         set(state => {
+              const banner = state.banners.find(b => b.id === id);
+              if(!banner) return state;
+              API.put(`/banners/${id}`, { active: !banner.active }).then(({data}) => {
+                   set(curr => ({
+                       banners: curr.banners.map(b => b.id === id ? data : b)
+                   }));
+              });
+              return state;
+          });
     }
 }));
 

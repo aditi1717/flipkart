@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MdAdd, MdSearch, MdEdit, MdDelete, MdFilterList, MdImage, MdVisibility, MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import useProductStore from '../../store/productStore';
@@ -6,11 +6,15 @@ import Pagination from '../../components/common/Pagination';
 
 const ProductManager = () => {
     const navigate = useNavigate();
-    const { products, deleteProduct } = useProductStore();
+    const { products, deleteProduct, fetchProducts } = useProductStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 20;
+
+    useEffect(() => {
+        fetchProducts();
+    }, [fetchProducts]);
 
     // Get unique categories for filter
     const categories = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];

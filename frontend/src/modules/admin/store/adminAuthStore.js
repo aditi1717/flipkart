@@ -1,27 +1,36 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import API from '../../../services/api';
 
 const useAdminAuthStore = create(
     persist(
         (set) => ({
             isAuthenticated: false,
             adminUser: null,
+            error: null,
 
-            // Dummy login - checks against hardcoded credentials
-            login: (email, password) => {
-                // Hardcoded admin credentials for demo
-                if (email === 'admin@flipkart.com' && password === 'admin123') {
+            // Real login
+            login: async (email, password) => {
+                try {
+                    const { data } = await API.post('/auth/login', { email, password });
+                    if (data.isAdmin) {
+                        set({
+                            isAuthenticated: true,
+                            adminUser: data,
+                            error: null
+                        });
+                        return true;
+                    } else {
+                        set({ error: 'Not authorized as admin' });
+                        return false;
+                    }
+                } catch (error) {
                     set({
-                        isAuthenticated: true,
-                        adminUser: {
-                            name: 'Admin User',
-                            email: 'admin@flipkart.com',
-                            role: 'Super Admin'
-                        }
+                        error: error.response?.data?.message || 'Login failed',
+                        isAuthenticated: false
                     });
-                    return true;
+                     return false;
                 }
-                return false;
             },
 
             logout: () => {

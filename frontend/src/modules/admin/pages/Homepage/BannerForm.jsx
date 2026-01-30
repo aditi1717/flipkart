@@ -38,12 +38,29 @@ const BannerForm = ({ banner, onClose }) => {
             return;
         }
 
-        const dataToSave = { ...formData, slides: validSlides };
+        const data = new FormData();
+        data.append('section', formData.section);
+        data.append('active', formData.active);
+        
+        const slideImages = [];
+        const processedSlides = validSlides.map(slide => {
+            if (slide.file) {
+                slideImages.push(slide.file);
+                return { ...slide, imageUrl: `SLIDE_IMG_INDEX::${slideImages.length - 1}`, file: undefined }; // Remove file object from JSON
+            }
+            return slide;
+        });
+        
+        data.append('slides', JSON.stringify(processedSlides));
+        
+        slideImages.forEach(file => {
+            data.append('slide_images', file);
+        });
 
         if (banner) {
-            updateBanner(banner.id, dataToSave);
+            updateBanner(banner.id, data);
         } else {
-            addBanner(dataToSave);
+            addBanner(data);
         }
         onClose();
     };
@@ -52,7 +69,7 @@ const BannerForm = ({ banner, onClose }) => {
         const file = e.target.files[0];
         if (file) {
             const tempUrl = URL.createObjectURL(file);
-            updateSlide(index, { imageUrl: tempUrl });
+            updateSlide(index, { imageUrl: tempUrl, file: file });
         }
     };
 

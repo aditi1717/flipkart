@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MdArrowBack } from 'react-icons/md';
-import { categories, products, resolveCategoryPath } from '../data/mockData';
+import { useProducts, useCategories } from '../../../hooks/useData';
+import { resolveCategoryPath } from '../../../utils/categoryUtils';
 import CategoryBanner from '../components/category/CategoryBanner';
 import SubCategoryList from '../components/category/SubCategoryList';
 import CategoryDeals from '../components/category/CategoryDeals';
@@ -11,6 +12,9 @@ import ProductCard from '../components/product/ProductCard';
 const CategoryPage = () => {
     const navigate = useNavigate();
     const { categoryName, "*": subPath } = useParams();
+    const { products, loading: productsLoading } = useProducts();
+    const { categories, loading: categoriesLoading } = useCategories();
+    
     const [categoryData, setCategoryData] = useState(null);
     const [categoryProducts, setCategoryProducts] = useState([]);
     const [sortedProducts, setSortedProducts] = useState([]);
@@ -31,7 +35,9 @@ const CategoryPage = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
 
-        const result = resolveCategoryPath(categoryName, subPath);
+        if (productsLoading || categoriesLoading) return;
+
+        const result = resolveCategoryPath(categories, products, categoryName, subPath);
 
         if (result && result.data) {
             setCategoryData(result.data);
@@ -40,7 +46,7 @@ const CategoryPage = () => {
         } else {
             setCategoryData(null);
         }
-    }, [categoryName, subPath]);
+    }, [categoryName, subPath, products, categories, productsLoading, categoriesLoading]);
 
     useEffect(() => {
         let updated = [...categoryProducts];
@@ -123,6 +129,10 @@ const CategoryPage = () => {
     const displayedBrands = showAllBrands ? filteredBrands : filteredBrands.slice(0, 6);
     const displayedRam = showAllRam ? availableRam : availableRam.slice(0, 6);
     const displayedCategories = showAllCategories ? availableCategories : availableCategories.slice(0, 6);
+
+    if (productsLoading || categoriesLoading) {
+        return <div className="p-10 text-center">Loading products...</div>;
+    }
 
     if (!categoryData) {
         return <div className="p-10 text-center">Category not found</div>;

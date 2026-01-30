@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     MdEdit,
     MdSave,
@@ -18,9 +18,14 @@ const HomeSections = () => {
         homeSections,
         updateSectionTitle,
         addProductToSection,
-        removeProductFromSection
+        removeProductFromSection,
+        fetchHomeSections
     } = useContentStore();
     const { products } = useProductStore();
+
+    useEffect(() => {
+        fetchHomeSections();
+    }, [fetchHomeSections]);
 
     // Navigation State
     const [selectedSectionId, setSelectedSectionId] = useState(null);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { products } from '../data/mockData';
+import { useProducts } from '../../../hooks/useData';
 import ProductCard from '../components/product/ProductCard';
 import { MdArrowBack, MdFilterList, MdSort, MdClose } from 'react-icons/md';
 
@@ -10,6 +10,7 @@ const ProductListingPage = () => {
     const category = searchParams.get('category');
     const subcategory = searchParams.get('subcategory');
     const title = searchParams.get('title'); // Support Custom Title via Query Param
+    const { products, loading: productsLoading } = useProducts();
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [sortedProducts, setSortedProducts] = useState([]);
     const [showSortModal, setShowSortModal] = useState(false);
@@ -22,6 +23,7 @@ const ProductListingPage = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
+        if (productsLoading) return;
         let results = products;
 
         // Filter by Category
@@ -43,7 +45,7 @@ const ProductListingPage = () => {
 
         setFilteredProducts(results);
         setSortedProducts(results);
-    }, [category, subcategory]);
+    }, [category, subcategory, products, productsLoading]);
 
     useEffect(() => {
         let updated = [...filteredProducts];
@@ -110,7 +112,11 @@ const ProductListingPage = () => {
 
             {/* Product Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-2">
-                {sortedProducts.length > 0 ? (
+                {productsLoading ? (
+                    <div className="col-span-full text-center py-20">
+                        <p className="text-gray-500">Loading products...</p>
+                    </div>
+                ) : sortedProducts.length > 0 ? (
                     sortedProducts.map(product => (
                         <ProductCard key={product.id} product={product} />
                     ))

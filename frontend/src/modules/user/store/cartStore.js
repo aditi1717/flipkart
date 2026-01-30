@@ -8,16 +8,9 @@ export const useCartStore = create()(
             wishlist: [],
             savedForLater: [],
             orders: [],
-            addresses: [
-                { id: 1, name: 'Aditi Sharma', mobile: '9876543210', pincode: '452001', address: '501, Princess Center, 5th Floor, New Palasia', city: 'Indore', state: 'Madhya Pradesh', type: 'Work', isDefault: true }
-            ],
+            addresses: [],
             language: 'English',
-            userProfile: {
-                name: 'Aditi Sharma',
-                mobile: '9876543210',
-                email: 'aditi.sharma@example.com',
-                gender: 'Female'
-            },
+            userProfile: null,
             appliedCoupon: null, // { code, discount, type }
 
             applyCoupon: (coupon) => set({ appliedCoupon: coupon }),

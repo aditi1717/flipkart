@@ -6,9 +6,12 @@ import {
     sendLoginOtp,
     verifyLoginOtp,
     logoutUser,
-    getUserProfile
+    getUserProfile,
+    getUsers,
+    deleteUser,
+    updateUser
 } from '../controllers/authController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
 router.post('/register', registerUser);
 router.post('/login', authUser);
@@ -16,5 +19,13 @@ router.post('/logout', logoutUser);
 router.post('/send-otp', sendLoginOtp);
 router.post('/verify-otp', verifyLoginOtp);
 router.get('/me', protect, getUserProfile);
+
+// Admin Routes
+router.route('/users')
+    .get(protect, admin, getUsers);
+
+router.route('/users/:id')
+    .delete(protect, admin, deleteUser)
+    .put(protect, admin, updateUser);
 
 export default router;

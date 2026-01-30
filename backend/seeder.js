@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-// import connectDB from './config/db.js'; // Assuming we convert this too, or just inline it
+import connectDB from './config/db.js';
 import User from './models/User.js';
 import Product from './models/Product.js';
 import Category from './models/Category.js';
@@ -8,15 +8,7 @@ import Order from './models/Order.js';
 
 dotenv.config();
 
-const connectDB = async () => {
-    try {
-        const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/ecom_db');
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
-    } catch (error) {
-        console.error(`Error: ${error.message}`);
-        process.exit(1);
-    }
-};
+
 
 const users = [
     {

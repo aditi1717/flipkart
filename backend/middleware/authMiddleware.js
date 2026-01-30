@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Admin from '../models/Admin.js';
 
 export const protect = async (req, res, next) => {
     let token;
@@ -13,6 +14,14 @@ export const protect = async (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
 
             req.user = await User.findById(decoded.id).select('-password');
+            if (!req.user) {
+                req.user = await Admin.findById(decoded.id).select('-password');
+            }
+
+            if (!req.user) {
+                 res.status(401);
+                 throw new Error('Not authorized, token failed');
+            }
 
             next();
         } catch (error) {
@@ -25,7 +34,7 @@ export const protect = async (req, res, next) => {
 };
 
 export const admin = (req, res, next) => {
-    if (req.user && req.user.isAdmin) {
+    if (req.user && (req.user.isAdmin || (req.user.role && ['admin', 'superadmin', 'editor', 'moderator'].includes(req.user.role)))) {
         next();
     } else {
         res.status(401).json({ message: 'Not authorized as an admin' });

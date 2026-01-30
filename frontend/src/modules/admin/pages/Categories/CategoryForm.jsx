@@ -8,9 +8,10 @@ const CategoryForm = ({ category, onClose }) => {
 
     const [formData, setFormData] = useState({
         name: '',
-        image: '',
+        image: '', // Will hold string URL or File object for preview/upload
         parentId: null,
-        active: true
+        active: true,
+        file: null // Explicit file state
     });
 
     useEffect(() => {
@@ -18,9 +19,10 @@ const CategoryForm = ({ category, onClose }) => {
             // Edit Mode
             setFormData({
                 name: category.name,
-                image: category.image || '',
+                image: category.icon || category.image || '', // Map icon to image for preview
                 parentId: category.parentId || null,
-                active: category.active
+                active: category.active,
+                file: null
             });
         } else if (category?.parentId) {
             // Add Subcategory Mode
@@ -28,7 +30,8 @@ const CategoryForm = ({ category, onClose }) => {
                 name: '',
                 image: '',
                 parentId: category.parentId,
-                active: true
+                active: true,
+                file: null
             });
         }
     }, [category]);
@@ -36,12 +39,23 @@ const CategoryForm = ({ category, onClose }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        const data = new FormData();
+        data.append('name', formData.name);
+        if (formData.parentId) data.append('parentId', formData.parentId);
+        data.append('active', formData.active);
+        
+        if (formData.file) {
+            data.append('icon', formData.file);
+        } else if (formData.image) {
+             data.append('icon', formData.image);
+        }
+
         if (category?.id) {
             // Update existing category
-            updateCategory(category.id, formData);
+            updateCategory(category.id, data);
         } else {
             // Add new category
-            addCategory(formData);
+            addCategory(data);
         }
 
         onClose();
@@ -59,7 +73,7 @@ const CategoryForm = ({ category, onClose }) => {
         const file = e.target.files[0];
         if (file) {
             const imageUrl = URL.createObjectURL(file);
-            setFormData(prev => ({ ...prev, image: imageUrl }));
+            setFormData(prev => ({ ...prev, image: imageUrl, file: file }));
         }
     };
 

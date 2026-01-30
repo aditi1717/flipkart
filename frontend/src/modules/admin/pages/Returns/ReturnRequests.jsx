@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdSearch, MdFilterList, MdCheckCircle, MdCancel, MdPendingActions, MdAutorenew, MdHistory, MdVisibility, MdLocalShipping, MdInventory, MdAssignmentReturn, MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import useReturnStore from '../../store/returnStore';
 
 const ReturnRequests = () => {
-    const { returns, updateReturnStatus } = useReturnStore();
+    const { returns, updateReturnStatus, fetchReturns } = useReturnStore();
     const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        fetchReturns();
+    }, [fetchReturns]);
     const [typeFilter, setTypeFilter] = useState('All');
     const [statusFilter, setStatusFilter] = useState('All');
     const [selectedReturn, setSelectedReturn] = useState(null);

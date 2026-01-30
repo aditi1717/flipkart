@@ -3,10 +3,14 @@ import { useContentStore } from '../store/contentStore';
 import { MdSave, MdDescription, MdSecurity } from 'react-icons/md';
 
 const PageManager = () => {
-    const { privacyPolicy, aboutUs, seoContent, updateContent } = useContentStore();
+    const { privacyPolicy, aboutUs, seoContent, updateContent, fetchPages } = useContentStore();
     const [activeTab, setActiveTab] = useState('privacyPolicy');
     const [editorContent, setEditorContent] = useState('');
     const [isSaved, setIsSaved] = useState(false);
+
+    useEffect(() => {
+        fetchPages();
+    }, [fetchPages]);
 
     useEffect(() => {
         if (activeTab === 'privacyPolicy') {

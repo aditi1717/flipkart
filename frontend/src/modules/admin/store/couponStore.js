@@ -1,111 +1,93 @@
 import { create } from 'zustand';
+import API from '../../../services/api';
 
 const useCouponStore = create((set) => ({
-    coupons: [
-        {
-            id: 'C001',
-            code: 'WELCOME50',
-            title: 'New User Offer',
-            description: 'Get 50% off on your first order above ₹500',
-            type: 'percentage', // percentage | flat
-            value: 50,
-            minPurchase: 500,
-            maxDiscount: 100,
-            expiryDate: '2024-12-31',
-            active: true,
-            usageCount: 45,
-            userSegment: 'new_user', // all | new_user | existing_user
-            applicableCategory: 'all' // all | electronics | fashion | ...
-        },
-        {
-            id: 'C002',
-            code: 'FLAT200',
-            title: 'Flat ₹200 OFF',
-            description: 'Flat Rs. 200 off on all orders above ₹1000',
-            type: 'flat',
-            value: 200,
-            minPurchase: 1000,
-            maxDiscount: 200,
-            expiryDate: '2024-10-15',
-            active: true,
-            usageCount: 12,
-            userSegment: 'all',
-            applicableCategory: 'fashion'
+    coupons: [],
+    offers: [],
+    isLoading: false,
+
+    fetchCoupons: async () => {
+        set({ isLoading: true });
+        try {
+            const { data } = await API.get('/coupons');
+            // Filter into coupons and offers based on isOffer flag or specific logic
+            // Assuming 'isOffer' field in model, or implicit by type 'Bank Offer' etc.
+            // Model has `type` which could be 'percentage'/'flat' (Coupons) or 'Bank Offer' etc (Offers)
+            // Or `isOffer` boolean if added.
+             
+            // Map backend data to store structure
+            const couponList = data.filter(c => !c.isOffer && (c.type === 'percentage' || c.type === 'flat'));
+            const offerList = data.filter(c => c.isOffer || (c.type !== 'percentage' && c.type !== 'flat'));
+
+            set({ coupons: couponList, offers: offerList, isLoading: false });
+        } catch (error) {
+            set({ isLoading: false });
         }
-    ],
+    },
 
-    offers: [
-        {
-            id: 'OFF001',
-            type: 'Bank Offer',
-            title: '10% off on HDFC Bank Credit Card',
-            description: 'Get 10% instant discount on HDFC Bank Credit Card transactions. Min purchase value ₹5000.',
-            terms: 'Max discount up to ₹1500. TCA.',
-            active: true
-        },
-        {
-            id: 'OFF002',
-            type: 'Partner Offer',
-            title: 'Sign up for Flipkart Pay Later',
-            description: 'Get ₹500 Gift Card on signing up for Flipkart Pay Later.',
-            terms: 'Valid only for new signups.',
-            active: true
+    addCoupon: async (couponData) => {
+        // Backend stores all in one collection
+        const payload = { ...couponData, isOffer: false };
+        try {
+            const { data } = await API.post('/coupons', payload);
+            set((state) => ({ coupons: [...state.coupons, data] }));
+        } catch (error) {
+            console.error(error);
         }
-    ],
-
-    addCoupon: (couponData) => {
-        set((state) => ({
-            coupons: [
-                {
-                    ...couponData,
-                    id: `C${Date.now()}`,
-                    active: true,
-                    usageCount: 0
-                },
-                ...state.coupons
-            ]
-        }));
+    },
+    
+    addOffer: async (offerData) => {
+        const payload = { ...offerData, isOffer: true };
+        try {
+            const { data } = await API.post('/coupons', payload);
+            set((state) => ({ offers: [...state.offers, data] }));
+        } catch (error) {
+             console.error(error);
+        }
     },
 
-    deleteCoupon: (id) => {
-        set((state) => ({
-            coupons: state.coupons.filter(c => c.id !== id)
-        }));
+    deleteCoupon: async (id) => {
+        try {
+            await API.delete(`/coupons/${id}`);
+            set((state) => ({ coupons: state.coupons.filter(c => c.id !== id) }));
+        } catch (error) { console.error(error); }
     },
 
-    toggleCouponStatus: (id) => {
-        set((state) => ({
-            coupons: state.coupons.map(c =>
-                c.id === id ? { ...c, active: !c.active } : c
-            )
-        }));
+    deleteOffer: async (id) => {
+        try {
+            await API.delete(`/coupons/${id}`);
+             set((state) => ({ offers: state.offers.filter(o => o.id !== id) }));
+        } catch (error) { console.error(error); }
     },
 
-    addOffer: (offerData) => {
-        set((state) => ({
-            offers: [
-                {
-                    ...offerData,
-                    id: `OFF${Date.now()}`,
-                    active: true
-                },
-                ...state.offers
-            ]
-        }));
+    toggleCouponStatus: async (id) => {
+        // Need current status? Since toggle, assume backend handles or we invert local
+         // Optimized: Update local first then sync? Or wait.
+         // Let's find item first
+         set(state => {
+             const coupon = state.coupons.find(c => c.id === id);
+             if(!coupon) return state;
+             // Toggle logic via API
+             API.put(`/coupons/${id}`, { active: !coupon.active }).then(({data}) => {
+                  set(curr => ({
+                      coupons: curr.coupons.map(c => c.id === id ? data : c)
+                  }));
+             });
+             return state;
+         });
     },
 
-    deleteOffer: (id) => {
-        set((state) => ({
-            offers: state.offers.filter(o => o.id !== id)
-        }));
-    },
-
-    toggleOfferStatus: (id) => {
-        set((state) => ({
-            offers: state.offers.map(o =>
-                o.id === id ? { ...o, active: !o.active } : o
-            )
-        }));
+    toggleOfferStatus: async (id) => {
+         set(state => {
+             const offer = state.offers.find(o => o.id === id);
+             if(!offer) return state;
+             API.put(`/coupons/${id}`, { active: !offer.active }).then(({data}) => {
+                  set(curr => ({
+                      offers: curr.offers.map(o => o.id === id ? data : o)
+                  }));
+             });
+             return state;
+         });
     }
 }));
 

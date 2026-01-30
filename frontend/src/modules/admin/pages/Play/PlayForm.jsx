@@ -11,7 +11,8 @@ const PlayForm = ({ reel, onClose }) => {
         thumbnailUrl: '', // In a real app, you'd generate this from video
         productId: '',
         productName: '',
-        active: true
+        active: true,
+        file: null
     });
 
     // Mock products for linking
@@ -25,22 +26,32 @@ const PlayForm = ({ reel, onClose }) => {
 
     useEffect(() => {
         if (reel) {
-            setFormData(reel);
+            setFormData({ ...reel, file: null });
         }
     }, [reel]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.videoUrl) {
+        if (!formData.videoUrl && !formData.file) {
             alert('Please upload a video');
             return;
         }
 
-        if (reel) {
-            updateReel(reel.id, formData);
+        const data = new FormData();
+        data.append('productLink', formData.productLink || '');
+        data.append('active', formData.active);
+        
+        if (formData.file) {
+            data.append('video', formData.file);
         } else {
-            addReel(formData);
+            data.append('videoUrl', formData.videoUrl);
+        }
+
+        if (reel) {
+            updateReel(reel.id, data);
+        } else {
+            addReel(data);
         }
         onClose();
     };
@@ -52,6 +63,7 @@ const PlayForm = ({ reel, onClose }) => {
             setFormData(prev => ({
                 ...prev,
                 videoUrl: url,
+                file: file,
                 thumbnailUrl: 'https://via.placeholder.com/150/000000/FFFFFF/?text=Video' // Placeholder for thumbnail
             }));
         }

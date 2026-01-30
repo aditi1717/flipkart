@@ -7,8 +7,14 @@ import useCategoryStore from '../../store/categoryStore';
 const ProductForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { addProduct, updateProduct, products } = useProductStore();
+    const { addProduct, updateProduct, products, fetchProduct } = useProductStore();
     const { categories } = useCategoryStore();
+
+    useEffect(() => {
+        if (id) {
+            fetchProduct(id);
+        }
+    }, [id, fetchProduct]);
 
     // Fetch product if editing
     const product = id ? products.find(p => p.id === parseInt(id)) : null;
@@ -48,14 +54,17 @@ const ProductForm = () => {
     });
 
     // Populate form if editing
+    // Populate form if editing
     useEffect(() => {
         if (product) {
+            const initImages = product.images && product.images.length > 0 ? product.images : [product.image || ''];
+            
             setFormData({
                 ...formData,
                 ...product,
-                images: product.images && product.images.length > 0 ? product.images : [product.image || ''],
+                // Store images as objects: { type: 'url'|'file', content: string|File, preview: string }
+                images: initImages.map(url => ({ type: 'url', content: url, preview: url })).filter(i => i.content),
                 price: product.price || '',
-                originalPrice: product.originalPrice || '',
                 originalPrice: product.originalPrice || '',
                 variantHeadings: product.variantHeadings || (product.colors?.length || product.sizes?.length ? [
                     ...(product.colors?.length ? [{ name: 'Color', hasImage: true, options: product.colors }] : []),
@@ -78,11 +87,10 @@ const ProductForm = () => {
     const handleFileUpload = (e, callback) => {
         const file = e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            callback(reader.result);
-        };
-        reader.readAsDataURL(file);
+        
+        const previewUrl = URL.createObjectURL(file);
+        // callback expects the stored image object
+        callback({ type: 'file', content: file, preview: previewUrl });
     };
 
     const updateArrayItem = (field, index, value) => {
@@ -92,6 +100,7 @@ const ProductForm = () => {
     };
 
     const addArrayItem = (field, emptyVal = '') => {
+        // If field is images, emptyVal should be compatible placeholder if we want
         setFormData(prev => ({ ...prev, [field]: [...prev[field], emptyVal] }));
     };
 
@@ -205,28 +214,95 @@ const ProductForm = () => {
         setFormData(prev => ({ ...prev, skus: newSkus }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const finalData = {
-            ...formData,
-            image: formData.images[0] || '',
-            price: Number(formData.price),
-            originalPrice: Number(formData.originalPrice),
-            stock: formData.skus.length > 0
-                ? formData.skus.reduce((acc, curr) => acc + (Number(curr.stock) || 0), 0)
-                : Number(formData.stock),
-            categoryId: formData.categoryPath[formData.categoryPath.length - 1] || '',
-            discount: formData.originalPrice > formData.price
-                ? `${Math.round(((formData.originalPrice - formData.price) / formData.originalPrice) * 100)}% off`
-                : null
-        };
+        
+        const data = new FormData();
+        data.append('name', formData.name);
+        data.append('brand', formData.brand);
+        data.append('price', String(formData.price));
+        data.append('originalPrice', String(formData.originalPrice));
+        data.append('shortDescription', formData.shortDescription);
+        data.append('longDescription', formData.longDescription || '');
+        data.append('manufacturerInfo', formData.manufacturerInfo || '');
+        
+        // Calculated fields
+        const stock = formData.skus.length > 0
+            ? formData.skus.reduce((acc, curr) => acc + (Number(curr.stock) || 0), 0)
+            : Number(formData.stock);
+        data.append('stock', String(stock));
 
-        if (isEdit) {
-            updateProduct(parseInt(id), finalData);
-        } else {
-            addProduct(finalData);
+        const categoryId = formData.categoryPath[formData.categoryPath.length - 1] || '';
+        data.append('categoryId', String(categoryId));
+        
+        const discount = formData.originalPrice > formData.price
+             ? `${Math.round(((formData.originalPrice - formData.price) / formData.originalPrice) * 100)}% off`
+             : '';
+        if(discount) data.append('discount', discount);
+        
+        data.append('deliveryDays', String(formData.deliveryDays));
+
+        // Complex objects
+        data.append('categoryPath', JSON.stringify(formData.categoryPath));
+        data.append('highlights', JSON.stringify(formData.highlights));
+        data.append('specifications', JSON.stringify(formData.specifications));
+        data.append('features', JSON.stringify(formData.features));
+        data.append('skus', JSON.stringify(formData.skus));
+
+        // Process Variant Headings (handle nested images)
+        const variantImages = [];
+        const processedHeadings = formData.variantHeadings.map(vh => ({
+            ...vh,
+            options: vh.options.map(opt => {
+                if (opt.image && opt.image.type === 'file') {
+                    variantImages.push(opt.image.content);
+                    return { ...opt, image: `VARIANT_INDEX::${variantImages.length - 1}` };
+                } else if (opt.image && opt.image.type === 'url') {
+                    return { ...opt, image: opt.image.content };
+                }
+                 // Handle case where it might be raw string (shouldn't happen with new state, but safety)
+                if (typeof opt.image === 'string') return opt;
+                return { ...opt, image: '' };
+            })
+        }));
+        data.append('variantHeadings', JSON.stringify(processedHeadings));
+        
+        variantImages.forEach(file => {
+            data.append('variant_images', file);
+        });
+
+        // Main Images
+        if (formData.images.length > 0) {
+            const mainImg = formData.images[0];
+             // If first image is file or string
+             if (mainImg.type === 'file') {
+                data.append('image', mainImg.content); // If file, multer handles
+             } else {
+                 data.append('image', mainImg.content); // If string, separate field? No, multer 'image' field can be string if not file? 
+                 // Multer puts files in req.files, text in req.body. 
+                 // If we append string to 'image', it goes to req.body.image.
+             }
+
+            formData.images.forEach(img => {
+                if (img.type === 'file') {
+                    data.append('images', img.content);
+                } else {
+                     data.append('images', img.content);
+                }
+            });
         }
-        navigate('/admin/products');
+
+        try {
+            if (isEdit) {
+                await updateProduct(parseInt(id), data);
+            } else {
+                await addProduct(data);
+            }
+            navigate('/admin/products');
+        } catch (error) {
+            console.error("Failed to save product:", error);
+            alert("Failed to save product. Please try again.");
+        }
     };
 
     const findInTree = (items, targetId) => {
@@ -447,7 +523,7 @@ const ProductForm = () => {
 
                         {/* Variant Headings List */}
                         <div className="space-y-8">
-                            {formData.variantHeadings.map((vh) => (
+                            {formData.variantHeadings.map(vh => (
                                 <div key={vh.id} className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 relative group animate-in slide-in-from-top-2">
                                     <button
                                         type="button"
@@ -516,7 +592,11 @@ const ProductForm = () => {
                                                         {vh.hasImage && (
                                                             <div className="flex items-center gap-2">
                                                                 <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-100 relative group/file">
-                                                                    {opt.image ? <img src={opt.image} className="w-full h-full object-cover" /> : <MdImage className="w-full h-full p-2 text-gray-300" />}
+                                                                    {opt.image ? (
+                                                                        <img src={opt.image.preview || opt.image} className="w-full h-full object-cover" />
+                                                                    ) : (
+                                                                        <MdImage className="w-full h-full p-2 text-gray-300" />
+                                                                    )}
                                                                     <label className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-file/hover:opacity-100 cursor-pointer transition-opacity">
                                                                         <MdAdd size={14} />
                                                                         <input
@@ -530,7 +610,7 @@ const ProductForm = () => {
                                                                 <input
                                                                     type="text"
                                                                     placeholder="Or URL..."
-                                                                    value={opt.image}
+                                                                    value={opt.image?.content || (typeof opt.image === 'string' ? opt.image : '')}
                                                                     onChange={(e) => updateVariantOption(vh.id, optIdx, 'image', e.target.value)}
                                                                     className="flex-1 text-[8px] bg-gray-50 px-2 py-1 rounded outline-none border border-transparent focus:border-blue-200"
                                                                 />
@@ -665,51 +745,53 @@ const ProductForm = () => {
                     <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
                         <div className="flex justify-between items-center border-b border-gray-50 pb-3">
                             <h2 className="text-sm font-black text-gray-800 uppercase tracking-widest">Media</h2>
-                            <button type="button" onClick={() => addArrayItem('images')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">+ Add Slot</button>
+                            <button type="button" onClick={() => addArrayItem('images', { type: 'url', content: '', preview: '' })} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">+ Add Slot</button>
                         </div>
 
                         <div className="grid grid-cols-4 gap-2">
-                            {formData.images.map((img, idx) => (
-                                <div key={idx} className="relative group animate-in slide-in-from-right-2">
-                                    <div className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${idx === 0 ? 'border-blue-500 shadow-lg shadow-blue-100' : 'border-gray-50'}`}>
-                                        {img ? (
-                                            <img src={img} className="w-full h-full object-cover" alt="" />
-                                        ) : (
-                                            <label className="w-full h-full bg-gray-50 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
-                                                <MdImage size={24} className="text-gray-300" />
-                                                <span className="text-[8px] font-black text-gray-400 mt-1 uppercase">Upload</span>
-                                                <input
-                                                    type="file"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={(e) => handleFileUpload(e, (data) => updateArrayItem('images', idx, data))}
-                                                />
-                                            </label>
-                                        )}
-                                        {img && (
-                                            <label className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                                                <span className="text-[10px] font-bold">Replace</span>
-                                                <input
-                                                    type="file"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={(e) => handleFileUpload(e, (data) => updateArrayItem('images', idx, data))}
-                                                />
-                                            </label>
+                            {formData.images.map((img, idx) => {
+                                return (
+                                    <div key={idx} className="relative group animate-in slide-in-from-right-2">
+                                        <div className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${idx === 0 ? 'border-blue-500 shadow-lg shadow-blue-100' : 'border-gray-50'}`}>
+                                            {img && (img.preview || img.content) ? (
+                                                <img src={img.preview || img.content} className="w-full h-full object-cover" alt="" />
+                                            ) : (
+                                                <label className="w-full h-full bg-gray-50 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
+                                                    <MdImage size={24} className="text-gray-300" />
+                                                    <span className="text-[8px] font-black text-gray-400 mt-1 uppercase">Upload</span>
+                                                    <input
+                                                        type="file"
+                                                        className="hidden"
+                                                        accept="image/*"
+                                                        onChange={(e) => handleFileUpload(e, (data) => updateArrayItem('images', idx, data))}
+                                                    />
+                                                </label>
+                                            )}
+                                            {img && (img.preview || img.content) && (
+                                                <label className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                                                    <span className="text-[10px] font-bold">Replace</span>
+                                                    <input
+                                                        type="file"
+                                                        className="hidden"
+                                                        accept="image/*"
+                                                        onChange={(e) => handleFileUpload(e, (data) => updateArrayItem('images', idx, data))}
+                                                    />
+                                                </label>
+                                            )}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeArrayItem('images', idx)}
+                                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 z-10"
+                                        >
+                                            <MdClose size={10} />
+                                        </button>
+                                        {idx === 0 && (
+                                            <span className="absolute top-1 left-1 bg-blue-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm">CORE</span>
                                         )}
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeArrayItem('images', idx)}
-                                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 z-10"
-                                    >
-                                        <MdClose size={10} />
-                                    </button>
-                                    {idx === 0 && (
-                                        <span className="absolute top-1 left-1 bg-blue-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm">CORE</span>
-                                    )}
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </section>
 

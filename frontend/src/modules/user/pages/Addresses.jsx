@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
+import { useAuthStore } from '../store/authStore';
 
 const Addresses = () => {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
     const { addresses, addAddress, updateAddress, removeAddress } = useCartStore();
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -77,7 +79,7 @@ const Addresses = () => {
                             </div>
                             <div>
                                 <p className="text-[10px] text-gray-500">Hello,</p>
-                                <p className="text-sm font-bold text-gray-800">User</p>
+                                <p className="text-sm font-bold text-gray-800">{user?.name || 'User'}</p>
                             </div>
                         </div>
                     </div>

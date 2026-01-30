@@ -1,15 +1,18 @@
-import { secondaryCategories, fashionValueDeals, interestingFinds, saleBanner } from '../data/mockData';
-import { useCartStore } from '../store/cartStore';
 import { useNavigate } from 'react-router-dom';
-import ProductCard from '../components/product/ProductCard';
 import DealGrid from '../components/home/DealGrid';
 import ProductSection from '../components/home/ProductSection';
-import { useProducts } from '../../../hooks/useData';
+import { useProducts, useHomeSections, useBanners } from '../../../hooks/useData';
 
 const Home = () => {
-    const addToCart = useCartStore((state) => state.addToCart);
     const navigate = useNavigate();
     const { products, loading: productsLoading } = useProducts();
+    const { sections, loading: sectionsLoading } = useHomeSections();
+    const { banners } = useBanners();
+
+    const fashionValueDeals = sections.find(s => s.id === 'fashion_value_deals')?.products || [];
+    const interestingFinds = sections.find(s => s.id === 'interesting_finds')?.products || [];
+
+    const heroBanner = banners.find(b => b.section === 'HomeHero' && b.type === 'hero' && b.active);
 
     return (
         <div className="bg-background-light dark:bg-background-dark pb-8 pt-1">
@@ -18,69 +21,63 @@ const Home = () => {
 
             <div className="max-w-[1440px] mx-auto px-4 md:px-0">
                 {/* Secondary Icon Row - Temporarily Removed on User Request */}
-                {/* 
-                <section className="bg-white dark:bg-gray-900 py-3 border-b border-gray-100 dark:border-gray-800">
-                    <div className="flex overflow-x-auto no-scrollbar gap-6 px-4 md:justify-center md:gap-12">
-                        {secondaryCategories.map((cat) => (
-                            <div key={cat.id} className="flex flex-col items-center gap-1.5 min-w-[56px] cursor-pointer hover:scale-105 transition-transform">
-                                <div className={`${cat.color} w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shadow-sm active:scale-90 transition-transform`}>
-                                    <span className="material-icons text-primary md:text-2xl">{cat.icon}</span>
-                                </div>
-                                <span className="text-[10px] md:text-xs font-semibold text-gray-700 dark:text-gray-300">{cat.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-                */}
+                
+                {/* Featured Deal Banner (Dynamic) */}
+                {heroBanner && (
+                    <section className="mt-2 md:mt-3">
+                        <div className={`relative rounded-2xl overflow-hidden h-[180px] md:h-[300px] shadow-xl border border-white/5 group cursor-pointer ${heroBanner.content.backgroundColor || 'bg-gradient-to-br from-[#0a0a1a] via-[#1a1a3a] to-[#0a0a1a]'}`}>
+                            <div className="absolute inset-0 flex">
+                                <div className="w-1/2 md:w-2/5 p-5 md:pl-16 flex flex-col justify-center z-10">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-[10px] md:text-sm font-bold text-blue-400 border border-blue-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">{heroBanner.content.brand}</span>
+                                        <span className="text-[10px] md:text-sm font-bold text-yellow-500 uppercase tracking-tighter">{heroBanner.content.brandTag}</span>
+                                    </div>
+                                    <h2 className="text-white text-xl md:text-5xl font-black leading-tight tracking-tight uppercase group-hover:underline decoration-yellow-400 decoration-4 underline-offset-4 transition-all">{heroBanner.content.title}</h2>
+                                    <p className="text-white text-lg md:text-3xl font-bold mt-1 md:mt-2">{heroBanner.content.subtitle}</p>
+                                    <p className="text-white/60 text-[10px] md:text-base mt-1 leading-tight">{heroBanner.content.description}</p>
 
-                {/* Featured Deal Banner (Vivo Style) */}
-                <section className="mt-2 md:mt-3">
-                    <div className="relative rounded-2xl overflow-hidden h-[180px] md:h-[300px] bg-gradient-to-br from-[#0a0a1a] via-[#1a1a3a] to-[#0a0a1a] shadow-xl border border-white/5 group cursor-pointer">
-                        <div className="absolute inset-0 flex">
-                            <div className="w-1/2 md:w-2/5 p-5 md:pl-16 flex flex-col justify-center z-10">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-[10px] md:text-sm font-bold text-blue-400 border border-blue-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">Vivo</span>
-                                    <span className="text-[10px] md:text-sm font-bold text-yellow-500 uppercase tracking-tighter">Flipkart Unique</span>
-                                </div>
-                                <h2 className="text-white text-xl md:text-5xl font-black leading-tight tracking-tight uppercase group-hover:underline decoration-yellow-400 decoration-4 underline-offset-4 transition-all">T4 Pro 5G | Steal deal</h2>
-                                <p className="text-white text-lg md:text-3xl font-bold mt-1 md:mt-2">From ₹4,250/M*</p>
-                                <p className="text-white/60 text-[10px] md:text-base mt-1 leading-tight">Flagship level 3X periscope zoom</p>
-
-                                <div className="mt-4 flex items-center gap-2">
-                                    <div className="bg-white/10 backdrop-blur-md rounded p-1.5 md:p-2 flex items-center gap-2 border border-white/10">
-                                        <div className="bg-[#1d4ed8] p-0.5 rounded">
-                                            <span className="text-[8px] md:text-xs font-bold text-white">HDFC BANK</span>
+                                    <div className="mt-4 flex items-center gap-2">
+                                        <div className="bg-white/10 backdrop-blur-md rounded p-1.5 md:p-2 flex items-center gap-2 border border-white/10">
+                                            <div className="bg-[#1d4ed8] p-0.5 rounded">
+                                                <span className="text-[8px] md:text-xs font-bold text-white">{heroBanner.content.offerBank}</span>
+                                            </div>
+                                            <span className="text-[8px] md:text-sm font-bold text-white truncate">{heroBanner.content.offerText}</span>
                                         </div>
-                                        <span className="text-[8px] md:text-sm font-bold text-white truncate">Flat ₹3,000 Instant Discount*</span>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="w-1/2 md:w-3/5 relative">
-                                <img
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEBqorOw1nzFs235FA4-dgkHZlzxDMvInFBJdBP7ewPqElzT6CiyiNpMe3H3RetbNb_otxAGe_FJCozdna8wHncQ7sWuSpieB7tsIvPQz8oywlQSkC1NweH_Z4sNHAURspBlnUsojvCexz5qWuLqFSm5iMDTRse2oZDetSu1E9ZFpESOKoOwpE3wJPNFFzz49DStNPsES1OY9eRw-uL2ELze3zys5Mkv_V0Z8PFX0HGBB-Pivq8Yzvw0UHFbiyIWiYL_0c6Ie4YkB2"
-                                    alt="Vivo T4 Pro"
-                                    className="absolute right-0 top-1/2 -translate-y-1/2 h-[90%] md:h-[110%] object-contain scale-110 md:scale-100 rotate-[-10deg] md:rotate-0 drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)] transition-transform group-hover:scale-105 duration-500"
-                                />
-                                <div className="absolute bottom-4 right-4 bg-yellow-400 text-black px-2 py-1 rounded-lg text-[10px] md:text-lg font-black uppercase italic shadow-lg">
-                                    3X <span className="block text-[8px] md:text-xs -mt-1 md:-mt-1.5">Periscope Camera</span>
+                                <div className="w-1/2 md:w-3/5 relative">
+                                    <img
+                                        src={heroBanner.content.imageUrl}
+                                        alt={heroBanner.content.title}
+                                        className="absolute right-0 top-1/2 -translate-y-1/2 h-[90%] md:h-[110%] object-contain scale-110 md:scale-100 rotate-[-10deg] md:rotate-0 drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)] transition-transform group-hover:scale-105 duration-500"
+                                    />
+                                    {heroBanner.content.badgeText && (
+                                        <div className="absolute bottom-4 right-4 bg-yellow-400 text-black px-2 py-1 rounded-lg text-[10px] md:text-lg font-black uppercase italic shadow-lg">
+                                            {heroBanner.content.badgeText}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                )}
 
                 {/* Best Value Deals on Fashion - New Section */}
-                <DealGrid
-                    title="Best Value Deals on Fashion"
-                    items={fashionValueDeals}
-                    bgColor="bg-[#ffdcb4]"
-                    darkBgColor="dark:bg-[#4d3420]"
-                    titleKey="name"
-                    subtitleKey="discount"
-                    containerClass="mt-4"
-                    isScrollable={true}
-                    showArrow={false}
-                />
+                {sectionsLoading ? (
+                    <div className="mt-4 text-center text-gray-500">Loading deals...</div>
+                ) : (
+                    <DealGrid
+                        title="Best Value Deals on Fashion"
+                        items={fashionValueDeals}
+                        bgColor="bg-[#ffdcb4]"
+                        darkBgColor="dark:bg-[#4d3420]"
+                        titleKey="name"
+                        subtitleKey="discount"
+                        containerClass="mt-4"
+                        isScrollable={true}
+                        showArrow={false}
+                    />
+                )}
 
                 {/* Popular Grocery Products Section */}
                 {productsLoading ? (
@@ -137,26 +134,30 @@ const Home = () => {
 
 
                 {/* Interesting finds Section - Styled as per screenshot */}
-                <DealGrid
-                    title="Interesting finds"
-                    items={interestingFinds}
-                    bgColor="bg-[#ffe8d6]"
-                    darkBgColor="dark:bg-[#3d2c22]"
-                    titleKey="title"
-                    subtitleKey="tag"
-                    showArrow={false}
-                    showStamp={true}
-                    stampText="NEW DELHI INDIA"
-                    containerClass="mt-8"
-                    isScrollable={true}
-                />
+                {sectionsLoading ? (
+                    <div className="mt-8 text-center text-gray-500">Loading interesting finds...</div>
+                ) : (
+                    <DealGrid
+                        title="Interesting finds"
+                        items={interestingFinds}
+                        bgColor="bg-[#ffe8d6]"
+                        darkBgColor="dark:bg-[#3d2c22]"
+                        titleKey="title"
+                        subtitleKey="tag"
+                        showArrow={false}
+                        showStamp={true}
+                        stampText="NEW DELHI INDIA"
+                        containerClass="mt-8"
+                        isScrollable={true}
+                    />
+                )}
 
                 {/* Republic Day Sale Banner */}
                 <section className="mt-8">
                     <div className="rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm cursor-pointer active:scale-[0.98] transition-transform group relative h-[180px] md:h-[300px]">
                         <img
-                            src={saleBanner.image}
-                            alt={saleBanner.alt}
+                            src="https://images.unsplash.com/photo-1532375810709-75b1da00537c?q=80&w=1200&auto=format&fit=crop"
+                            alt="REPUBLIC DAY SALE IS LIVE!"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                             onError={(e) => {
                                 e.target.onerror = null;

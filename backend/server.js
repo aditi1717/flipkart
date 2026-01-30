@@ -3,11 +3,26 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import connectDB from './config/db.js';
 
 import authRoutes from './routes/authRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+// ... existing imports ...
+
+// ... middleware ...
+
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 import productRoutes from './routes/productRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import returnRoutes from './routes/returnRoutes.js';
+import sellerRoutes from './routes/sellerRoutes.js';
+import couponRoutes from './routes/couponRoutes.js';
+import reelRoutes from './routes/reelRoutes.js';
+import bannerRoutes from './routes/bannerRoutes.js';
+import homeSectionRoutes from './routes/homeSectionRoutes.js';
+import contentPageRoutes from './routes/contentPageRoutes.js';
 
 dotenv.config();
 
@@ -21,17 +36,9 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Database Connection
-const connectDB = async () => {
-    try {
-        const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/ecom_db');
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
-    } catch (error) {
-        console.error(`Error: ${error.message}`);
-        process.exit(1);
-    }
-};
 
+
+// Connect to Database
 connectDB();
 
 // Routes
@@ -39,6 +46,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/returns', returnRoutes);
+app.use('/api/sellers', sellerRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/reels', reelRoutes);
+app.use('/api/banners', bannerRoutes);
+app.use('/api/home-sections', homeSectionRoutes);
+app.use('/api/pages', contentPageRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

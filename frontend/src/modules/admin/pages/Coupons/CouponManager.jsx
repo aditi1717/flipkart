@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdAdd, MdClose, MdLocalOffer, MdDelete, MdToggleOn, MdToggleOff, MdContentCopy } from 'react-icons/md';
 import useCouponStore from '../../store/couponStore';
 
 const CouponManager = () => {
     const {
         coupons, addCoupon, deleteCoupon, toggleCouponStatus,
-        offers, addOffer, deleteOffer, toggleOfferStatus
+        offers, addOffer, deleteOffer, toggleOfferStatus, fetchCoupons
     } = useCouponStore();
+
+    useEffect(() => {
+        fetchCoupons();
+    }, [fetchCoupons]);
 
     const [activeTab, setActiveTab] = useState('coupons'); // 'coupons' | 'offers'
     const [showForm, setShowForm] = useState(false);

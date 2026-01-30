@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdAdd, MdEdit, MdDelete, MdToggleOn, MdToggleOff } from 'react-icons/md';
 import useBannerStore from '../../store/bannerStore';
 import BannerForm from './BannerForm';
 
 const BannerManager = () => {
-    const { banners, deleteBanner, toggleBannerStatus } = useBannerStore();
+    const { banners, deleteBanner, toggleBannerStatus, fetchBanners } = useBannerStore();
     const [filterSection, setFilterSection] = useState('All');
     const [showForm, setShowForm] = useState(false);
     const [editingBanner, setEditingBanner] = useState(null);
+
+    useEffect(() => {
+        fetchBanners();
+    }, [fetchBanners]);
 
     const sections = ['All', 'For You', 'Electronics', 'Fashion', 'Mobiles', 'Home & Kitchen', 'Grocery'];
 
