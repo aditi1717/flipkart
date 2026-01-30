@@ -11,8 +11,6 @@ import adminRoutes from './routes/adminRoutes.js';
 
 // ... middleware ...
 
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
 import productRoutes from './routes/productRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
@@ -43,6 +41,7 @@ connectDB();
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);

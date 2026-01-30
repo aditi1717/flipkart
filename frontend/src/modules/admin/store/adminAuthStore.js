@@ -12,8 +12,8 @@ const useAdminAuthStore = create(
             // Real login
             login: async (email, password) => {
                 try {
-                    const { data } = await API.post('/auth/login', { email, password });
-                    if (data.isAdmin) {
+                    const { data } = await API.post('/admin/login', { email, password });
+                    if (data.isAdmin || data.role === 'superadmin' || data.role === 'admin') {
                         set({
                             isAuthenticated: true,
                             adminUser: data,
@@ -33,7 +33,10 @@ const useAdminAuthStore = create(
                 }
             },
 
-            logout: () => {
+            logout: async () => {
+                try {
+                    await API.post('/admin/logout');
+                } catch (e) { console.error(e); }
                 set({
                     isAuthenticated: false,
                     adminUser: null
