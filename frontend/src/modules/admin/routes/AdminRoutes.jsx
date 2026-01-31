@@ -10,6 +10,7 @@ import PlayManager from '../pages/Play/PlayManager';
 import CouponManager from '../pages/Coupons/CouponManager';
 import OrderList from '../pages/Orders/OrderList';
 import OrderDetail from '../pages/Orders/OrderDetail';
+import DeliverySlip from '../pages/DeliverySlip/DeliverySlip';
 import ReturnRequests from '../pages/Returns/ReturnRequests';
 import ProtectedAdminRoute from './ProtectedAdminRoute';
 import ProductManager from '../pages/Products/ProductManager';
@@ -44,6 +45,7 @@ const AdminRoutes = () => {
                 <Route path="subcategories" element={<SubCategoryList />} />
                 <Route path="orders" element={<OrderList />} />
                 <Route path="orders/:id" element={<OrderDetail />} />
+                <Route path="delivery-slip" element={<DeliverySlip />} />
                 <Route path="returns" element={<ReturnRequests />} />
                 <Route path="coupons" element={<CouponManager />} />
                 <Route path="play" element={<PlayManager />} />

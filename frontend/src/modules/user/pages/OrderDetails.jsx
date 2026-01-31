@@ -131,12 +131,12 @@ const OrderDetails = () => {
                                 <div className="relative">
                                     {/* Progress Bar */}
                                     <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 hidden md:block">
-                                        <div 
+                                        <div
                                             className="h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-500"
                                             style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
                                         ></div>
                                     </div>
-                                    
+
                                     {/* Steps */}
                                     <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-0">
                                         {steps.map((step, index) => {
@@ -144,11 +144,10 @@ const OrderDetails = () => {
                                             const isCurrent = index === currentStep;
                                             return (
                                                 <div key={step.status} className="flex flex-col items-center relative z-10">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
-                                                        isCompleted 
-                                                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${isCompleted
+                                                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
                                                             : 'bg-white border-2 border-gray-300 text-gray-400'
-                                                    } ${isCurrent ? 'ring-4 ring-blue-200 scale-110' : ''}`}>
+                                                        } ${isCurrent ? 'ring-4 ring-blue-200 scale-110' : ''}`}>
                                                         <span className="material-icons text-lg">{step.icon}</span>
                                                     </div>
                                                     <p className={`text-xs font-bold text-center ${isCompleted ? 'text-gray-800' : 'text-gray-400'}`}>
@@ -286,10 +285,10 @@ const OrderDetails = () => {
                                 </div>
                                 {order.paidAt && (
                                     <div className="text-xs text-gray-500 mt-2">
-                                        Paid on {new Date(order.paidAt).toLocaleDateString('en-IN', { 
-                                            day: 'numeric', 
-                                            month: 'short', 
-                                            year: 'numeric' 
+                                        Paid on {new Date(order.paidAt).toLocaleDateString('en-IN', {
+                                            day: 'numeric',
+                                            month: 'short',
+                                            year: 'numeric'
                                         })}
                                     </div>
                                 )}
@@ -306,9 +305,9 @@ const OrderDetails = () => {
                                 <div>
                                     <span className="text-gray-600">Order Date</span>
                                     <p className="font-semibold text-gray-800">
-                                        {new Date(order.createdAt).toLocaleDateString('en-IN', { 
-                                            day: 'numeric', 
-                                            month: 'long', 
+                                        {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                                            day: 'numeric',
+                                            month: 'long',
                                             year: 'numeric',
                                             hour: '2-digit',
                                             minute: '2-digit'
@@ -319,10 +318,10 @@ const OrderDetails = () => {
                                     <div>
                                         <span className="text-gray-600">Delivered On</span>
                                         <p className="font-semibold text-green-600">
-                                            {new Date(order.deliveredAt).toLocaleDateString('en-IN', { 
-                                                day: 'numeric', 
-                                                month: 'long', 
-                                                year: 'numeric' 
+                                            {new Date(order.deliveredAt).toLocaleDateString('en-IN', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric'
                                             })}
                                         </p>
                                     </div>
@@ -330,8 +329,21 @@ const OrderDetails = () => {
                             </div>
                         </div>
 
+                        {/* Download Invoice Button */}
+                        <button
+                            onClick={() => {
+                                import('../../../utils/invoiceGenerator').then(({ generateInvoice }) => {
+                                    generateInvoice(order);
+                                });
+                            }}
+                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl font-bold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                        >
+                            <span className="material-icons">download</span>
+                            Download Invoice
+                        </button>
+
                         {/* Help Button */}
-                        <button 
+                        <button
                             onClick={() => navigate('/help-center')}
                             className="w-full bg-white border-2 border-blue-100 text-blue-600 px-6 py-4 rounded-xl font-bold hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
                         >

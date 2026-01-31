@@ -69,6 +69,17 @@ const OrderSuccess = () => {
                             Track Order
                         </button>
                         <button
+                            onClick={() => {
+                                import('../../../utils/invoiceGenerator').then(({ generateInvoice }) => {
+                                    generateInvoice(latestOrder);
+                                });
+                            }}
+                            className="w-full bg-purple-600 text-white py-3.5 rounded-lg font-bold shadow-lg hover:bg-purple-700 transition flex items-center justify-center gap-2"
+                        >
+                            <span className="material-icons">download</span>
+                            Download Invoice
+                        </button>
+                        <button
                             onClick={() => navigate('/my-orders')}
                             className="w-full bg-blue-600 text-white py-3.5 rounded-lg font-bold shadow-lg hover:bg-blue-700 transition"
                         >

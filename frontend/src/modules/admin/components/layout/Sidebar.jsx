@@ -33,6 +33,7 @@ const Sidebar = () => {
         { name: 'Subcategories', icon: MdCategory, path: '/admin/subcategories' },
         { name: 'Users', icon: MdPeople, path: '/admin/users' },
         { name: 'Orders', icon: MdShoppingCart, path: '/admin/orders' },
+        { name: 'Delivery Slip', icon: MdLocalShipping, path: '/admin/delivery-slip' },
         { name: 'Returns', icon: MdAssignmentReturn, path: '/admin/returns' },
         { name: 'Coupons & Offers', icon: MdLocalOffer, path: '/admin/coupons' },
         { name: 'Play (Reels)', icon: MdPlayCircle, path: '/admin/play' },
