@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const bannerSchema = mongoose.Schema({
     section: { type: String, required: true }, // 'All', 'Electronics', 'HomeHero', etc.
-    type: { type: String, default: 'slides', enum: ['slides', 'hero'] }, 
+    type: { type: String, default: 'slides', enum: ['slides', 'hero', 'card', 'product_feature'] }, 
     active: { type: Boolean, default: true },
     
     // For 'slides' type

@@ -22,6 +22,7 @@ import bannerRoutes from './routes/bannerRoutes.js';
 import homeSectionRoutes from './routes/homeSectionRoutes.js';
 import contentPageRoutes from './routes/contentPageRoutes.js';
 import subCategoryRoutes from './routes/subCategoryRoutes.js';
+import homeLayoutRoutes from './routes/homeLayoutRoutes.js';
 
 dotenv.config();
 
@@ -35,8 +36,6 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
-
-
 
 // Connect to Database
 connectDB();
@@ -53,9 +52,9 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/reels', reelRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/home-sections', homeSectionRoutes);
-app.use('/api/home-sections', homeSectionRoutes);
 app.use('/api/pages', contentPageRoutes);
 app.use('/api/subcategories', subCategoryRoutes);
+app.use('/api/home-layout', homeLayoutRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

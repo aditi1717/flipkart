@@ -14,15 +14,18 @@ import {
 } from 'react-icons/md';
 import useBannerStore from '../../store/bannerStore';
 import useProductStore from '../../store/productStore';
+import { useContentStore } from '../../store/contentStore';
 
 const HomeBanners = () => {
     // Correct store usage
     const { banners, addBanner, updateBanner, deleteBanner, fetchBanners } = useBannerStore();
     const { products } = useProductStore();
+    const { homeSections, fetchHomeSections } = useContentStore();
 
     useEffect(() => {
         fetchBanners();
-    }, []);
+        fetchHomeSections();
+    }, [fetchBanners, fetchHomeSections]);
 
     // UI State
     const [showForm, setShowForm] = useState(false);
@@ -240,51 +243,66 @@ const HomeBanners = () => {
                             className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 outline-none font-bold text-gray-700"
                         >
                             <option value="HomeHero">Home Hero</option>
-                            <option value="Electronics">Electronics</option>
-                            <option value="Fashion">Fashion</option>
+                            {homeSections.map(section => (
+                                <option key={section.id} value={section.id}>{section.title} ({section.id})</option>
+                            ))}
+                            {!homeSections.some(s => s.id === 'Electronics') && <option value="Electronics">Electronics (Legacy)</option>}
+                            {!homeSections.some(s => s.id === 'Fashion') && <option value="Fashion">Fashion (Legacy)</option>}
                         </select>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 col-span-2 md:col-span-1">
                         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Banner Type</label>
-                        <div className="flex p-1 bg-gray-50 rounded-xl border border-gray-100">
-                             <button 
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                             <button
                                 onClick={() => setFormData({...formData, type: 'slides'})}
-                                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${formData.type === 'slides' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                                className={`py-2 rounded-lg text-xs font-bold transition-all border ${formData.type === 'slides' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-gray-50 border-transparent text-gray-400 hover:text-gray-600'}`}
                              >
                                  SLIDESHOW
                              </button>
-                             <button 
+                             <button
                                 onClick={() => setFormData({...formData, type: 'hero'})}
-                                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${formData.type === 'hero' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                                className={`py-2 rounded-lg text-xs font-bold transition-all border ${formData.type === 'hero' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-gray-50 border-transparent text-gray-400 hover:text-gray-600'}`}
                              >
-                                 HERO BANNER
+                                 HERO
+                             </button>
+                             <button
+                                onClick={() => setFormData({...formData, type: 'card'})}
+                                className={`py-2 rounded-lg text-xs font-bold transition-all border ${formData.type === 'card' ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-gray-50 border-transparent text-gray-400 hover:text-gray-600'}`}
+                             >
+                                 CARD
+                             </button>
+                             <button
+                                onClick={() => setFormData({...formData, type: 'product_feature'})}
+                                className={`py-2 rounded-lg text-xs font-bold transition-all border ${formData.type === 'product_feature' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-gray-50 border-transparent text-gray-400 hover:text-gray-600'}`}
+                             >
+                                 FEATURE
                              </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Hero Form */}
-            {formData.type === 'hero' && (
+            {/* Content Form (Hero, Card, Feature use same fields) */}
+            {['hero', 'card', 'product_feature'].includes(formData.type) && (
                 <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-8 animate-in slide-in-from-bottom-4">
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                          <div className="space-y-6">
                             <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest border-b border-gray-50 pb-2">Text Content</h3>
                              <div className="space-y-4">
-                                <input type="text" placeholder="Brand Name (e.g. Vivo)" value={formData.content.brand} onChange={(e) => setFormData({...formData, content: {...formData.content, brand: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
-                                <input type="text" placeholder="Brand Tag (e.g. Flipkart Unique)" value={formData.content.brandTag} onChange={(e) => setFormData({...formData, content: {...formData.content, brandTag: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
-                                <input type="text" placeholder="Main Title (e.g. T4 Pro 5G)" value={formData.content.title} onChange={(e) => setFormData({...formData, content: {...formData.content, title: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-lg font-black" />
-                                <input type="text" placeholder="Subtitle / Price (e.g. From ₹4,250/M*)" value={formData.content.subtitle} onChange={(e) => setFormData({...formData, content: {...formData.content, subtitle: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
-                                <textarea placeholder="Description (e.g. Flagship level 3X zoom)" value={formData.content.description} onChange={(e) => setFormData({...formData, content: {...formData.content, description: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-medium h-24 resize-none" />
+                                <input type="text" placeholder="Brand Name (e.g. Vivo)" value={formData.content.brand} onChange={(e) => setFormData({...formData, content: {...formData.content, brand: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
+                                <input type="text" placeholder="Brand Tag (e.g. Flipkart Unique)" value={formData.content.brandTag} onChange={(e) => setFormData({...formData, content: {...formData.content, brandTag: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
+                                <input type="text" placeholder="Main Title (e.g. T4 Pro 5G)" value={formData.content.title} onChange={(e) => setFormData({...formData, content: {...formData.content, title: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-lg font-bold text-gray-900" />
+                                <input type="text" placeholder="Subtitle / Price (e.g. From ₹4,250/M*)" value={formData.content.subtitle} onChange={(e) => setFormData({...formData, content: {...formData.content, subtitle: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
+                                <textarea placeholder="Description (e.g. Flagship level 3X zoom)" value={formData.content.description} onChange={(e) => setFormData({...formData, content: {...formData.content, description: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800 h-24 resize-none" />
                              </div>
                          </div>
 
                          <div className="space-y-6">
                             <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest border-b border-gray-50 pb-2">Offers & Badge</h3>
                              <div className="space-y-4">
-                                <input type="text" placeholder="Offer Bank (e.g. HDFC BANK)" value={formData.content.offerBank} onChange={(e) => setFormData({...formData, content: {...formData.content, offerBank: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
-                                <input type="text" placeholder="Offer Text (e.g. Flat ₹3,000 Off)" value={formData.content.offerText} onChange={(e) => setFormData({...formData, content: {...formData.content, offerText: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
-                                <input type="text" placeholder="Image Badge (e.g. 3X Periscope Camera)" value={formData.content.badgeText} onChange={(e) => setFormData({...formData, content: {...formData.content, badgeText: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm font-bold" />
+                                <input type="text" placeholder="Offer Bank (e.g. HDFC BANK)" value={formData.content.offerBank} onChange={(e) => setFormData({...formData, content: {...formData.content, offerBank: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
+                                <input type="text" placeholder="Offer Text (e.g. Flat ₹3,000 Off)" value={formData.content.offerText} onChange={(e) => setFormData({...formData, content: {...formData.content, offerText: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
+                                <input type="text" placeholder="Image Badge (e.g. 3X Periscope Camera)" value={formData.content.badgeText} onChange={(e) => setFormData({...formData, content: {...formData.content, badgeText: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
                              </div>
 
                              <div className="pt-4">

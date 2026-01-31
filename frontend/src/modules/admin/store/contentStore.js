@@ -3,10 +3,34 @@ import API from '../../../services/api';
 
 export const useContentStore = create((set, get) => ({
     homeSections: [],
+    homeLayout: [], // { type: 'section' | 'banner', referenceId: string }
     privacyPolicy: '',
     aboutUs: '',
     seoContent: '',
     isLoading: false,
+
+    // --- Home Layout ---
+    fetchHomeLayout: async () => {
+        set({ isLoading: true });
+        try {
+            const { data } = await API.get('/home-layout');
+            set({ homeLayout: data.items || [], isLoading: false });
+        } catch (error) {
+            set({ isLoading: false });
+            console.error("Failed to fetch home layout:", error);
+        }
+    },
+
+    updateHomeLayout: async (newLayoutItems) => {
+        // Optimistic update
+        set({ homeLayout: newLayoutItems });
+        try {
+            await API.put('/home-layout', { items: newLayoutItems });
+        } catch (error) {
+            console.error("Failed to update home layout:", error);
+            // Revert? Or just show error toast
+        }
+    },
 
     // --- Home Sections ---
     fetchHomeSections: async () => {
@@ -36,12 +60,32 @@ export const useContentStore = create((set, get) => ({
         const section = state.homeSections.find(s => s.id === sectionId);
         if(!section) return;
 
-        const updatedProducts = [...section.products, product];
+        // Use _id for Mongoose References
+        const currentIds = section.products.map(p => typeof p === 'string' ? String(p) : String(p._id));
+        const newId = typeof product === 'string' ? String(product) : String(product._id);
+        
+        if (currentIds.includes(newId)) return; 
+
+        const productIds = [...currentIds, newId]; 
         try {
-            const { data } = await API.put(`/home-sections/${sectionId}`, { products: updatedProducts });
+            const { data } = await API.put(`/home-sections/${sectionId}`, { products: productIds });
              set((state) => ({
                 homeSections: state.homeSections.map(s => s.id === sectionId ? data : s)
             }));
+        } catch (error) { console.error(error); }
+    },
+
+    createHomeSection: async (sectionData) => { // { title: string, id: string }
+        try {
+            const { data } = await API.post('/home-sections', sectionData);
+            set((state) => ({ homeSections: [...state.homeSections, data] }));
+        } catch (error) { console.error(error); }
+    },
+
+    deleteHomeSection: async (id) => {
+        try {
+            await API.delete(`/home-sections/${id}`);
+            set((state) => ({ homeSections: state.homeSections.filter(s => s.id !== id) }));
         } catch (error) { console.error(error); }
     },
 
@@ -50,9 +94,17 @@ export const useContentStore = create((set, get) => ({
         const section = state.homeSections.find(s => s.id === sectionId);
         if(!section) return;
 
-        const updatedProducts = section.products.filter(p => p.id !== productId);
+        // Filter using String comparison
+        const currentProducts = section.products;
+        const targetId = String(productId); // productId passed here should be _id
+        
+        // Ensure we extract _id from objects
+        const remainingIds = currentProducts
+            .map(p => typeof p === 'string' ? String(p) : String(p._id)) 
+            .filter(id => id !== targetId);
+
         try {
-            const { data } = await API.put(`/home-sections/${sectionId}`, { products: updatedProducts });
+            const { data } = await API.put(`/home-sections/${sectionId}`, { products: remainingIds });
              set((state) => ({
                 homeSections: state.homeSections.map(s => s.id === sectionId ? data : s)
             }));

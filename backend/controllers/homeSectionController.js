@@ -5,7 +5,7 @@ import HomeSection from '../models/HomeSection.js';
 // @access  Public (App) / Private (Admin)
 export const getHomeSections = async (req, res) => {
     try {
-        const sections = await HomeSection.find({});
+        const sections = await HomeSection.find({}).populate('products');
         res.json(sections);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -44,6 +44,7 @@ export const updateHomeSection = async (req, res) => {
                 section.products = req.body.products;
             }
             const updatedSection = await section.save();
+            await updatedSection.populate('products');
             res.json(updatedSection);
         } else {
              // If not found, create it? Or 404.
