@@ -18,8 +18,8 @@ const useCategoryStore = create((set, get) => ({
                 // However, based on the frontend usage so far, we treat them as nested objects for display if available.
                 // If they are just IDs, this map won't work for display names. 
                 // Assuming the fetchCategories populates them or they are embedded.
-                if (cat.subCategories && Array.isArray(cat.subCategories) && cat.subCategories.length > 0) {
-                    result = result.concat(flatten(cat.subCategories, level + 1));
+                if (cat.children && Array.isArray(cat.children) && cat.children.length > 0) {
+                    result = result.concat(flatten(cat.children, level + 1));
                 }
             }
             return result;

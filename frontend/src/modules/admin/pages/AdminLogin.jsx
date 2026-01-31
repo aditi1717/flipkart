@@ -2,22 +2,25 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAdminAuthStore from '../store/adminAuthStore';
 
+import toast from 'react-hot-toast';
+
 const AdminLogin = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    // const [error, setError] = useState(''); // Removing local error state
     const login = useAdminAuthStore((state) => state.login);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        // setError('');
 
-        const success = login(email, password);
+        const success = await login(email, password);
         if (success) {
+            toast.success('Welcome back, Admin!');
             navigate('/admin/dashboard');
         } else {
-            setError('Invalid credentials. Try admin@flipkart.com / admin123');
+            toast.error('Invalid credentials. Please try again.');
         }
     };
 
@@ -38,7 +41,7 @@ const AdminLogin = () => {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900"
                             placeholder="admin@flipkart.com"
                             required
                         />
@@ -52,17 +55,13 @@ const AdminLogin = () => {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900"
                             placeholder="••••••••"
                             required
                         />
                     </div>
 
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                            {error}
-                        </div>
-                    )}
+
 
                     <button
                         type="submit"

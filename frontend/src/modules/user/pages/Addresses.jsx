@@ -121,27 +121,27 @@ const Addresses = () => {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="col-span-2 md:col-span-1 space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">Full Name</label>
-                                            <input required type="text" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500" value={newAddr.name} onChange={e => setNewAddr({ ...newAddr, name: e.target.value })} />
+                                            <input required type="text" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.name} onChange={e => setNewAddr({ ...newAddr, name: e.target.value })} />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">Phone Number</label>
-                                            <input required type="tel" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500" value={newAddr.mobile} onChange={e => setNewAddr({ ...newAddr, mobile: e.target.value })} />
+                                            <input required type="tel" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.mobile} onChange={e => setNewAddr({ ...newAddr, mobile: e.target.value })} />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">Pincode</label>
-                                            <input required type="number" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500" value={newAddr.pincode} onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })} />
+                                            <input required type="number" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.pincode} onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })} />
                                         </div>
                                         <div className="col-span-2 space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">Address (Area and Street)</label>
-                                            <textarea required rows="3" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500" value={newAddr.address} onChange={e => setNewAddr({ ...newAddr, address: e.target.value })} />
+                                            <textarea required rows="3" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.address} onChange={e => setNewAddr({ ...newAddr, address: e.target.value })} />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">City/District/Town</label>
-                                            <input required type="text" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500" value={newAddr.city} onChange={e => setNewAddr({ ...newAddr, city: e.target.value })} />
+                                            <input required type="text" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.city} onChange={e => setNewAddr({ ...newAddr, city: e.target.value })} />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">State</label>
-                                            <input required type="text" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500" value={newAddr.state} onChange={e => setNewAddr({ ...newAddr, state: e.target.value })} />
+                                            <input required type="text" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.state} onChange={e => setNewAddr({ ...newAddr, state: e.target.value })} />
                                         </div>
                                     </div>
 

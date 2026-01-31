@@ -68,7 +68,7 @@ const Coupons = () => {
                         <input
                             type="text"
                             placeholder="Enter Coupon Code"
-                            className="flex-1 border-b-2 border-gray-200 outline-none focus:border-blue-600 px-2 py-2 text-sm font-bold uppercase tracking-wider transition-colors placeholder-gray-400"
+                            className="flex-1 border-b-2 border-gray-200 outline-none focus:border-blue-600 px-2 py-2 text-sm font-bold uppercase tracking-wider transition-colors placeholder-gray-400 text-gray-900"
                             value={couponCode}
                             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                         />

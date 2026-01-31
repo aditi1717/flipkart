@@ -244,27 +244,27 @@ const Checkout = () => {
                                                 <div className="grid grid-cols-2 gap-3">
                                                     <div className="space-y-1 col-span-2">
                                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">Name</label>
-                                                        <input required type="text" placeholder="Full Name" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none" value={newAddr.name} onChange={e => setNewAddr({ ...newAddr, name: e.target.value })} />
+                                                        <input required type="text" placeholder="Full Name" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.name} onChange={e => setNewAddr({ ...newAddr, name: e.target.value })} />
                                                     </div>
                                                     <div className="space-y-1">
                                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">Mobile</label>
-                                                        <input required type="tel" placeholder="10-digit number" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none" value={newAddr.mobile} onChange={e => setNewAddr({ ...newAddr, mobile: e.target.value })} />
+                                                        <input required type="tel" placeholder="10-digit number" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.mobile} onChange={e => setNewAddr({ ...newAddr, mobile: e.target.value })} />
                                                     </div>
                                                     <div className="space-y-1">
                                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">Pincode</label>
-                                                        <input required type="number" placeholder="6-digit pincode" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none" value={newAddr.pincode} onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })} />
+                                                        <input required type="number" placeholder="6-digit pincode" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.pincode} onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })} />
                                                     </div>
                                                     <div className="space-y-1 col-span-2">
                                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">Address</label>
-                                                        <textarea required rows="3" placeholder="House No, Building Name, Road Area" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none" value={newAddr.address} onChange={e => setNewAddr({ ...newAddr, address: e.target.value })} />
+                                                        <textarea required rows="3" placeholder="House No, Building Name, Road Area" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.address} onChange={e => setNewAddr({ ...newAddr, address: e.target.value })} />
                                                     </div>
                                                     <div className="space-y-1">
                                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">City</label>
-                                                        <input required type="text" placeholder="City/District" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none" value={newAddr.city} onChange={e => setNewAddr({ ...newAddr, city: e.target.value })} />
+                                                        <input required type="text" placeholder="City/District" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.city} onChange={e => setNewAddr({ ...newAddr, city: e.target.value })} />
                                                     </div>
                                                     <div className="space-y-1">
                                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">State</label>
-                                                        <input required type="text" placeholder="State" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none" value={newAddr.state} onChange={e => setNewAddr({ ...newAddr, state: e.target.value })} />
+                                                        <input required type="text" placeholder="State" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.state} onChange={e => setNewAddr({ ...newAddr, state: e.target.value })} />
                                                     </div>
                                                 </div>
                                                 <div className="space-y-2">
@@ -339,7 +339,7 @@ const Checkout = () => {
                                         placeholder="Enter Coupon Code"
                                         value={couponInput}
                                         onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                                        className="flex-1 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold uppercase placeholder-gray-400 disabled:bg-gray-50"
+                                        className="flex-1 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold uppercase placeholder-gray-400 disabled:bg-gray-50 text-gray-900"
                                         disabled={appliedCoupon !== null}
                                     />
                                     {appliedCoupon ? (
@@ -516,7 +516,7 @@ const Checkout = () => {
                                     placeholder="Enter Coupon Code"
                                     value={couponInput}
                                     onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                                    className="flex-1 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold uppercase placeholder-gray-400 disabled:bg-gray-50"
+                                    className="flex-1 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold uppercase placeholder-gray-400 disabled:bg-gray-50 text-gray-900"
                                     disabled={appliedCoupon !== null}
                                 />
                                 {appliedCoupon ? (
@@ -581,7 +581,7 @@ const Checkout = () => {
                                 <input
                                     type="text"
                                     placeholder="Enter Coupon Code"
-                                    className="flex-1 border-b border-gray-300 outline-none focus:border-blue-600 px-1 py-1 text-sm font-bold uppercase transition-colors"
+                                    className="flex-1 border-b border-gray-300 outline-none focus:border-blue-600 px-1 py-1 text-sm font-bold uppercase transition-colors text-gray-900"
                                     value={couponInput}
                                     onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                                 />

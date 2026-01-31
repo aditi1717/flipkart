@@ -30,7 +30,8 @@ const app = express();
 // Middleware
 app.use(cors({
     origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Allow both localhost and IP
-    credentials: true // Allow cookies
+    credentials: true, // Allow cookies
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(cookieParser());

@@ -72,7 +72,7 @@ const HelpCenter = () => {
                     <input
                         type="text"
                         placeholder="Explain your problem here..."
-                        className="flex-1 outline-none text-sm font-medium"
+                        className="flex-1 outline-none text-sm font-medium text-gray-900"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -102,7 +102,7 @@ const HelpCenter = () => {
                         <input
                             type="text"
                             placeholder="Search for help topics..."
-                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-sm focus:border-blue-500 outline-none text-sm"
+                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-sm focus:border-blue-500 outline-none text-sm text-gray-900"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -204,7 +204,7 @@ const HelpCenter = () => {
                                 <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Issue Category</label>
-                                        <select required className="w-full border border-gray-200 p-3 rounded-lg text-sm bg-gray-50 focus:border-blue-500 outline-none appearance-none">
+                                        <select required className="w-full border border-gray-200 p-3 rounded-lg text-sm bg-gray-50 focus:border-blue-500 outline-none appearance-none text-gray-900">
                                             <option value="">Select an option</option>
                                             <option>Order Delay</option>
                                             <option>Damaged Product</option>
@@ -217,17 +217,17 @@ const HelpCenter = () => {
                                     <div className="grid grid-cols-1 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Full Name</label>
-                                            <input required type="text" placeholder="Your name" className="w-full border border-gray-200 p-3 rounded-lg text-sm focus:border-blue-500 outline-none shadow-sm" />
+                                            <input required type="text" placeholder="Your name" className="w-full border border-gray-200 p-3 rounded-lg text-sm focus:border-blue-500 outline-none shadow-sm text-gray-900" />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Mobile / Email</label>
-                                            <input required type="text" placeholder="How should we reach you?" className="w-full border border-gray-200 p-3 rounded-lg text-sm focus:border-blue-500 outline-none shadow-sm" />
+                                            <input required type="text" placeholder="How should we reach you?" className="w-full border border-gray-200 p-3 rounded-lg text-sm focus:border-blue-500 outline-none shadow-sm text-gray-900" />
                                         </div>
                                     </div>
 
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Describe your problem</label>
-                                        <textarea required rows="4" placeholder="Be as descriptive as possible..." className="w-full border border-gray-200 p-3 rounded-lg text-sm focus:border-blue-500 outline-none shadow-sm"></textarea>
+                                        <textarea required rows="4" placeholder="Be as descriptive as possible..." className="w-full border border-gray-200 p-3 rounded-lg text-sm focus:border-blue-500 outline-none shadow-sm text-gray-900"></textarea>
                                     </div>
 
                                     <button

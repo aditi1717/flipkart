@@ -211,7 +211,7 @@ const Account = () => {
                                                 type="text"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                className="w-full border border-gray-200 rounded p-2 text-sm focus:border-blue-600 outline-none"
+                                                className="w-full border border-gray-200 rounded p-2 text-sm focus:border-blue-600 outline-none text-gray-900 dark:text-gray-100 bg-transparent"
                                             />
                                         </div>
                                         <div>
@@ -220,7 +220,7 @@ const Account = () => {
                                                 type="tel"
                                                 value={formData.mobile}
                                                 onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                                                className="w-full border border-gray-200 rounded p-2 text-sm focus:border-blue-600 outline-none"
+                                                className="w-full border border-gray-200 rounded p-2 text-sm focus:border-blue-600 outline-none text-gray-900 dark:text-gray-100 bg-transparent"
                                             />
                                         </div>
                                         <div>
@@ -229,7 +229,7 @@ const Account = () => {
                                                 type="email"
                                                 value={formData.email}
                                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                className="w-full border border-gray-200 rounded p-2 text-sm focus:border-blue-600 outline-none"
+                                                className="w-full border border-gray-200 rounded p-2 text-sm focus:border-blue-600 outline-none text-gray-900 dark:text-gray-100 bg-transparent"
                                             />
                                         </div>
                                         <div>

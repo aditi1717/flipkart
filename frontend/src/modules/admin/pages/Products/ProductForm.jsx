@@ -3,18 +3,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MdClose, MdAdd, MdDelete, MdImage, MdExpandMore, MdExpandLess, MdArrowBack } from 'react-icons/md';
 import useProductStore from '../../store/productStore';
 import useCategoryStore from '../../store/categoryStore';
+import toast from 'react-hot-toast';
 
     const ProductForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addProduct, updateProduct, products, fetchProduct, isLoading } = useProductStore();
-    const { categories } = useCategoryStore();
+    const { categories, fetchCategories } = useCategoryStore();
 
     useEffect(() => {
+        if (categories.length === 0) fetchCategories();
         if (id) {
             fetchProduct(id);
         }
-    }, [id, fetchProduct]);
+    }, [id, fetchProduct, fetchCategories, categories.length]);
 
     // Fetch product if editing
     const product = id ? products.find(p => p.id === parseInt(id)) : null;
@@ -306,16 +308,21 @@ import useCategoryStore from '../../store/categoryStore';
             });
         }
 
+// ... (inside ProductForm component)
+
         try {
             if (isEdit) {
                 await updateProduct(parseInt(id), data);
+                toast.success('Product updated successfully!');
             } else {
                 await addProduct(data);
+                toast.success('Product created successfully!');
             }
             navigate('/admin/products');
         } catch (error) {
             console.error("Failed to save product:", error);
-            alert("Failed to save product. Please try again.");
+            const message = error.response?.data?.message || "Failed to save product. Please try again.";
+            toast.error(message);
         }
     };
 
@@ -428,7 +435,7 @@ import useCategoryStore from '../../store/categoryStore';
                                         const val = e.target.value; 
                                         setFormData(prev => ({ ...prev, categoryPath: val ? [val] : [] }));
                                     }}
-                                    className="px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium"
+                                    className="px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium text-gray-900"
                                 >
                                     <option value="">Select Primary Category</option>
                                     {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
@@ -447,7 +454,7 @@ import useCategoryStore from '../../store/categoryStore';
                                                 if (val) newPath.push(val);
                                                 setFormData(prev => ({ ...prev, categoryPath: newPath }));
                                             }}
-                                            className="px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium animate-in slide-in-from-left-2"
+                                            className="px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium animate-in slide-in-from-left-2 text-gray-900"
                                         >
                                             <option value="">Select Subcategory</option>
                                             {currentCat.children.map(sub => <option key={sub.id} value={sub.id}>{sub.name}</option>)}
@@ -463,7 +470,7 @@ import useCategoryStore from '../../store/categoryStore';
                                 name="shortDescription"
                                 value={formData.shortDescription}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-blue-500 focus:bg-white outline-none transition-all text-sm h-20 resize-none"
+                                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-blue-500 focus:bg-white outline-none transition-all text-sm h-20 resize-none text-gray-900"
                                 placeholder="A 2-line summary for browse pages..."
                             />
                         </div>
@@ -565,7 +572,7 @@ import useCategoryStore from '../../store/categoryStore';
                                                 type="text"
                                                 value={vh.name}
                                                 onChange={(e) => updateVariantHeading(vh.id, 'name', e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-200 outline-none focus:border-blue-500 font-bold"
+                                                className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-200 outline-none focus:border-blue-500 font-bold text-gray-900"
                                                 placeholder="Enter heading..."
                                             />
                                         </div>
@@ -612,7 +619,7 @@ import useCategoryStore from '../../store/categoryStore';
                                                             placeholder="Option (e.g. Red, XL)"
                                                             value={opt.name}
                                                             onChange={(e) => updateVariantOption(vh.id, optIdx, 'name', e.target.value)}
-                                                            className="text-xs font-bold border-b border-gray-100 outline-none p-1 focus:border-blue-500"
+                                                            className="text-xs font-bold border-b border-gray-100 outline-none p-1 focus:border-blue-500 text-gray-900"
                                                         />
                                                         {vh.hasImage && (
                                                             <div className="flex items-center gap-2">
@@ -637,7 +644,7 @@ import useCategoryStore from '../../store/categoryStore';
                                                                     placeholder="Or URL..."
                                                                     value={opt.image?.content || (typeof opt.image === 'string' ? opt.image : '')}
                                                                     onChange={(e) => updateVariantOption(vh.id, optIdx, 'image', e.target.value)}
-                                                                    className="flex-1 text-[8px] bg-gray-50 px-2 py-1 rounded outline-none border border-transparent focus:border-blue-200"
+                                                                    className="flex-1 text-[8px] bg-gray-50 px-2 py-1 rounded outline-none border border-transparent focus:border-blue-200 text-gray-900"
                                                                 />
                                                             </div>
                                                         )}

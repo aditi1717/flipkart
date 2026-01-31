@@ -105,7 +105,7 @@ const CategoryForm = ({ category, onClose }) => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900"
                             placeholder="Enter category name"
                             required
                         />
@@ -123,7 +123,7 @@ const CategoryForm = ({ category, onClose }) => {
                                 ...prev,
                                 parentId: e.target.value ? parseInt(e.target.value) : null
                             }))}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900"
                         >
                             <option value="">-- Root Category --</option>
                             {allCategories
@@ -149,7 +149,7 @@ const CategoryForm = ({ category, onClose }) => {
                             type="file"
                             accept="image/*"
                             onChange={handleImageChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900"
                         />
                         {formData.image && (
                             <div className="mt-3 border border-gray-200 rounded-lg p-2 bg-gray-50">

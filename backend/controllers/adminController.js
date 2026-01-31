@@ -9,13 +9,14 @@ export const authAdmin = async (req, res) => {
     const admin = await Admin.findOne({ email });
 
     if (admin && (await admin.matchPassword(password))) {
-        generateToken(res, admin._id);
+        const token = generateToken(res, admin._id);
         res.json({
             _id: admin._id,
             name: admin.name,
             email: admin.email,
             role: admin.role,
-            isAdmin: true
+            isAdmin: true,
+            token
         });
     } else {
         res.status(401).json({ message: 'Invalid email or password' });

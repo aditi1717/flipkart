@@ -301,7 +301,7 @@ const ReturnOrder = () => {
                                     <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block">Comments (Optional)</label>
                                     <textarea
                                         placeholder="Tell us more about the issue... (e.g. Broken screen, Wrong color)"
-                                        className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-600/20 outline-none h-24 transition-all"
+                                        className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-600/20 outline-none h-24 transition-all text-gray-900"
                                     ></textarea>
                                 </div>
 

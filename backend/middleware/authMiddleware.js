@@ -5,7 +5,15 @@ import Admin from '../models/Admin.js';
 export const protect = async (req, res, next) => {
     let token;
 
-    if (req.cookies.jwt) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        try {
+            token = req.headers.authorization.split(' ')[1];
+        } catch (error) {
+            console.error('Error extracting bearer token:', error);
+        }
+    }
+    
+    if (!token && req.cookies.jwt) {
         token = req.cookies.jwt;
     }
 

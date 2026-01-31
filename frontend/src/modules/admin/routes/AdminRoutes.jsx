@@ -4,6 +4,7 @@ import AdminLogin from '../pages/AdminLogin';
 import AdminLayout from '../components/layout/AdminLayout';
 import Dashboard from '../pages/Dashboard';
 import CategoryList from '../pages/Categories/CategoryList';
+import SubCategoryList from '../pages/SubCategories/SubCategoryList';
 import BannerManager from '../pages/Homepage/BannerManager';
 import PlayManager from '../pages/Play/PlayManager';
 import SellerManager from '../pages/Sellers/SellerManager';
@@ -41,6 +42,7 @@ const AdminRoutes = () => {
                 <Route path="products/new" element={<ProductForm />} />
                 <Route path="products/edit/:id" element={<ProductForm />} />
                 <Route path="categories" element={<CategoryList />} />
+                <Route path="subcategories" element={<SubCategoryList />} />
                 <Route path="orders" element={<OrderList />} />
                 <Route path="orders/:id" element={<OrderDetail />} />
                 <Route path="returns" element={<ReturnRequests />} />

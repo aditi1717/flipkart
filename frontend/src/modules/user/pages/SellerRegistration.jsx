@@ -46,7 +46,7 @@ const SellerRegistration = () => {
                                 required
                                 value={formData.contactNumber}
                                 onChange={handleChange}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
                                 placeholder="+91 98765 43210"
                             />
                         </div>
@@ -59,7 +59,7 @@ const SellerRegistration = () => {
                                 required
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
                                 placeholder="business@example.com"
                             />
                         </div>
@@ -72,7 +72,7 @@ const SellerRegistration = () => {
                                 required
                                 value={formData.gst}
                                 onChange={handleChange}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
                                 placeholder="GSTIN12345678"
                             />
                         </div>
@@ -85,7 +85,7 @@ const SellerRegistration = () => {
                                 required
                                 value={formData.brandName}
                                 onChange={handleChange}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
                                 placeholder="Your Brand Name"
                             />
                         </div>
@@ -98,7 +98,7 @@ const SellerRegistration = () => {
                                 required
                                 value={formData.sellerRegNumber}
                                 onChange={handleChange}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
                                 placeholder="REG-2024-XXXX"
                             />
                         </div>

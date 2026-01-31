@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import logo from '../../../assets/indiankart-logo.png';
 
+import toast from 'react-hot-toast';
+
 const Signup = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -14,13 +16,15 @@ const Signup = () => {
         if (mobile.length === 10) {
             try {
                 await sendOtp(mobile);
+                toast.success(`OTP sent to ${mobile}`);
                 // Navigate to login to verify OTP, passing mobile number
                 navigate('/login', { state: { mobile } }); 
             } catch (err) {
                  // Error handled by store/hook, but we can also show it
+                 toast.error(error || 'Failed to send OTP');
             }
         } else {
-            alert('Please enter a valid 10-digit mobile number');
+            toast.error('Please enter a valid 10-digit mobile number');
         }
     };
 

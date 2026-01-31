@@ -5,6 +5,8 @@ import AdminRoutes from './modules/admin/routes/AdminRoutes';
 import { useAuthStore } from './modules/user/store/authStore';
 import './App.css';
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
 
@@ -14,6 +16,7 @@ function App() {
 
   return (
     <Router>
+      <Toaster position="top-right" reverseOrder={false} />
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
