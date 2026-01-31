@@ -7,6 +7,7 @@ import {
     MdShoppingCart,
     MdAssignmentReturn,
     MdLocalOffer,
+    MdLocalShipping,
     MdStorefront,
     MdPlayCircle,
     MdHome,
