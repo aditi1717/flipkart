@@ -366,7 +366,7 @@ const seedData = async () => {
         // Create Admin User
         await Admin.create({
             name: 'Admin User',
-            email: 'admin@flipkart.com',
+            email: 'admin@flipkart.com'.toLowerCase(),
             password: 'admin123',
             role: 'superadmin'
         });

@@ -53,7 +53,8 @@ export const verifyLoginOtp = async (req, res) => {
 };
 
 export const authUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
         generateToken(res, user._id);
