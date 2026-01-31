@@ -7,6 +7,7 @@ import Order from '../models/Order.js';
 // @access  Private
 export const createRazorpayOrder = async (req, res) => {
     const { amount } = req.body;
+    console.log(`Processing Razorpay order request - Amount: ₹${amount}`);
 
     try {
         const instance = new Razorpay({
@@ -28,6 +29,7 @@ export const createRazorpayOrder = async (req, res) => {
 
         res.json(order);
     } catch (error) {
+        console.error('Razorpay Order Creation Error:', error);
         res.status(500).json({ message: error.message });
     }
 };
