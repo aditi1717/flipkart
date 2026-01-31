@@ -41,6 +41,23 @@ const useAdminAuthStore = create(
                     isAuthenticated: false,
                     adminUser: null
                 });
+            },
+
+            // Update admin profile
+            updateProfile: async (profileData) => {
+                try {
+                    const { data } = await API.put('/admin/profile', profileData);
+                    set({
+                        adminUser: data,
+                        error: null
+                    });
+                    return data;
+                } catch (error) {
+                    set({
+                        error: error.response?.data?.message || 'Update failed'
+                    });
+                    throw error;
+                }
             }
         }),
         {

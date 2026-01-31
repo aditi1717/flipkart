@@ -7,7 +7,6 @@ import CategoryList from '../pages/Categories/CategoryList';
 import SubCategoryList from '../pages/SubCategories/SubCategoryList';
 import BannerManager from '../pages/Homepage/BannerManager';
 import PlayManager from '../pages/Play/PlayManager';
-import SellerManager from '../pages/Sellers/SellerManager';
 import CouponManager from '../pages/Coupons/CouponManager';
 import OrderList from '../pages/Orders/OrderList';
 import OrderDetail from '../pages/Orders/OrderDetail';
@@ -47,7 +46,6 @@ const AdminRoutes = () => {
                 <Route path="orders/:id" element={<OrderDetail />} />
                 <Route path="returns" element={<ReturnRequests />} />
                 <Route path="coupons" element={<CouponManager />} />
-                <Route path="sellers" element={<SellerManager />} />
                 <Route path="play" element={<PlayManager />} />
                 <Route path="homepage" element={<BannerManager />} />
                 <Route path="users" element={<UserList />} />

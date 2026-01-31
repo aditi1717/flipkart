@@ -122,22 +122,20 @@ export const useCartStore = create()(
                 }));
             },
 
-            placeOrder: (orderData) => {
-                const orderId = `OD${Math.floor(Math.random() * 900000000000) + 100000000000}`;
+            placeOrder: (order) => {
+                const normalizedOrder = {
+                    ...order,
+                    id: order._id || order.id,
+                    date: order.createdAt || order.date,
+                    items: (order.orderItems || order.items || []).map(item => ({
+                        ...item,
+                        id: item.product || item.id, // product is the number ID
+                        status: item.status || order.status || 'PLACED'
+                    })),
+                    status: order.status || 'PLACED'
+                };
                 set((state) => ({
-                    orders: [
-                        {
-                            ...orderData,
-                            id: orderId,
-                            date: new Date().toISOString(),
-                            status: 'PLACED',
-                            items: orderData.items.map(item => ({ ...item, status: 'PLACED' })),
-                            tracking: [
-                                { status: 'PLACED', title: 'Order Placed', time: new Date().toISOString(), completed: true, current: true }
-                            ]
-                        },
-                        ...state.orders
-                    ],
+                    orders: [normalizedOrder, ...state.orders],
                     cart: []
                 }));
             },

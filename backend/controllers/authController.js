@@ -39,7 +39,14 @@ export const verifyLoginOtp = async (req, res) => {
             });
         }
         generateToken(res, user._id);
-        res.json({ _id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin });
+        res.json({ 
+            _id: user._id, 
+            name: user.name, 
+            email: user.email, 
+            phone: user.phone,
+            gender: user.gender,
+            isAdmin: user.isAdmin 
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -50,7 +57,14 @@ export const authUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
         generateToken(res, user._id);
-        res.json({ _id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin });
+        res.json({ 
+            _id: user._id, 
+            name: user.name, 
+            email: user.email, 
+            phone: user.phone,
+            gender: user.gender,
+            isAdmin: user.isAdmin 
+        });
     } else {
         res.status(401).json({ message: 'Invalid email or password' });
     }
@@ -66,7 +80,14 @@ export const registerUser = async (req, res) => {
     const user = await User.create({ name, email, password });
     if (user) {
         generateToken(res, user._id);
-        res.status(201).json({ _id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin });
+        res.status(201).json({ 
+            _id: user._id, 
+            name: user.name, 
+            email: user.email, 
+            phone: user.phone,
+            gender: user.gender,
+            isAdmin: user.isAdmin 
+        });
     } else {
         res.status(400).json({ message: 'Invalid user data' });
     }
@@ -78,7 +99,14 @@ export const logoutUser = (req, res) => {
 };
 
 export const getUserProfile = async (req, res) => {
-    const user = { _id: req.user._id, name: req.user.name, email: req.user.email, isAdmin: req.user.isAdmin };
+    const user = { 
+        _id: req.user._id, 
+        name: req.user.name, 
+        email: req.user.email, 
+        phone: req.user.phone,
+        gender: req.user.gender,
+        isAdmin: req.user.isAdmin 
+    };
     res.status(200).json(user);
 };
 

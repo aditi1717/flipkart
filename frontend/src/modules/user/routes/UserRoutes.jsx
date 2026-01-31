@@ -23,7 +23,6 @@ import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import ProtectedRoute from './ProtectedRoute';
 import ProductListingPage from '../pages/ProductListingPage';
-import SellerRegistration from '../pages/SellerRegistration';
 import AllCategories from '../pages/AllCategories';
 import InfoPage from '../pages/InfoPage';
 
@@ -57,7 +56,6 @@ const UserRoutes = () => {
                 <Route path="product/:id" element={<ProductDetails />} />
                 <Route path="login" element={<Login />} />
                 <Route path="signup" element={<Signup />} />
-                <Route path="seller-registration" element={<SellerRegistration />} />
                 <Route path="info" element={<InfoPage />} />
             </Route>
         </Routes>

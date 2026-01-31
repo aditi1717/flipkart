@@ -271,7 +271,7 @@ export async function verifySmsOtp(sessionId, otpInput, mobile, userType = 'Deli
 }
 
 // ==========================================
-// SMS OTP (Seller / Admin)
+// SMS OTP (Admin)
 // ==========================================
 
 export async function sendOTP(mobile, userType) {

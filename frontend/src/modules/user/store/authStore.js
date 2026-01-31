@@ -95,7 +95,13 @@ export const useAuthStore = create((set, get) => ({
     updateProfile: async (profileData) => {
         set({ loading: true, error: null });
         try {
-            const { data } = await API.put('/auth/profile', profileData);
+            const currentUser = get().user;
+            const isAdmin = currentUser?.isAdmin || currentUser?.role;
+            
+            // Use different endpoint based on user type
+            const endpoint = isAdmin ? '/admin/profile' : '/auth/profile';
+            const { data } = await API.put(endpoint, profileData);
+            
             set({ user: data, loading: false });
             return data;
         } catch (error) {

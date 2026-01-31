@@ -8,7 +8,6 @@ The application uses a persistent layout for core navigation, with specific over
 ### **Header (Top Navigation)**
 - **Logo Area**:
   - **Logo**: "IndianKart" logo on the left.
-  - **Seller Button**: "Become a Seller" button right next to the logo. Redirects to `/seller-registration`.
 - **Location Strip**: Displayed below the logo row. Shows "Delivering to [Pincode]" and "Update location".
 - **Search Bar**:
   - Full-width search input ("Search for products").
@@ -96,23 +95,10 @@ Shopping cart management.
 - **Place Order**: fixed bottom button to proceed to Checkout.
 - **Empty State**: Shows "Your cart is empty" if no items are added.
 
-### **G. Seller Registration (`/seller-registration`)**
-A dedicated form for users wanting to become sellers.
-- **Entry Point**: "Become a Seller" button on the Homepage Header.
-- **Form Fields**:
-  - Contact Number.
-  - Email ID.
-  - GST Number.
-  - Brand Name / Deal.
-  - Seller Registration Number.
-- **Action**: "Submit Application" button (Shows success alert and redirects to Home).
-
 ---
 
 ## 3. Navigation Flows
 - **Category -> Subcategory**: Clicking a subcategory in `/categories` navigates to filtered Product Listing.
 - **Play -> Product**: Clicking the bottom card in a video reel takes you to that specific product's page.
-- **Home -> Seller**: Clicking "Become a Seller" opens the registration form.
 - **Back Navigation**:
   - `/play` has a custom back button to Home.
-  - `/seller-registration` has a custom back button to previous page.

@@ -24,6 +24,8 @@ router.route('/profile')
     .get(protect, getUserProfile)
     .put(protect, updateUserProfile);
 
+console.log('Auth routes registered: /profile (GET, PUT)');
+
 // Admin Routes
 router.route('/users')
     .get(protect, admin, getUsers);

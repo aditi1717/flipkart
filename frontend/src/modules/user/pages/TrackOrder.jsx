@@ -57,7 +57,7 @@ const TrackOrder = () => {
             ]
             : [
                 { status: 'PLACED', title: 'Order Placed', desc: 'Your order has been placed', time: order.date },
-                { status: 'PACKED', title: 'Packed', desc: 'Seller is processing your order' },
+                { status: 'PACKED', title: 'Packed', desc: 'We are processing your order' },
                 { status: 'SHIPPED', title: 'Shipped', desc: 'Order has been handed over to courier' },
                 { status: 'OUT_FOR_DELIVERY', title: 'Out for Delivery', desc: 'Your order is arriving today' },
                 { status: 'DELIVERED', title: 'Delivered', desc: 'Order has been delivered' }

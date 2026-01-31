@@ -7,8 +7,8 @@ const Footer = () => {
     return (
         <>
             {/* ================= WHY CHOOSE US (SEO TEXT) - DESKTOP ONLY ================= */}
-            <div className="hidden md:block bg-[#f1f3f6] dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 py-10 px-4">
-                <div className="max-w-[1440px] mx-auto text-[#565656] dark:text-gray-400 text-xs leading-relaxed space-y-4">
+            <div className="hidden md:block bg-[#f1f3f6] border-t border-gray-200 py-10 px-4">
+                <div className="max-w-[1440px] mx-auto text-[#565656] text-xs leading-relaxed space-y-4">
                     {seoContent?.split('\n').filter(line => line.trim() !== '').map((line, index) => {
                         // Simple heuristic: Short lines are headings, long lines are content
                         if (line.length < 100 && !line.includes('.')) {
@@ -23,8 +23,8 @@ const Footer = () => {
                 {/* ================= DESKTOP VIEW ================= */}
                 <div className="hidden md:block max-w-[1440px] mx-auto px-4 py-10">
                     <div className="flex w-full">
-                        {/* LEFT SIDE: 5 COLUMNS OF LINKS */}
-                        <div className="flex-[4] grid grid-cols-5 gap-4 border-r border-[#454d5e] pr-8">
+                        {/* LEFT SIDE: 4 COLUMNS OF LINKS */}
+                        <div className="flex-[4] grid grid-cols-4 gap-4 border-r border-[#454d5e] pr-8">
                             {/* Column 1: ABOUT */}
                             <div>
                                 <h6 className="text-[#878787] uppercase mb-3 font-medium cursor-default">About</h6>
@@ -60,16 +60,6 @@ const Footer = () => {
                                 <h6 className="text-[#878787] uppercase mb-3 font-medium cursor-default">Social</h6>
                                 <ul className="space-y-1.5 font-medium">
                                     {['Facebook', 'Twitter', 'YouTube', 'Instagram'].map((item) => (
-                                        <li key={item}><a href="#" className="hover:underline">{item}</a></li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            {/* Column 5: SELL WITH US (Added as per request) */}
-                            <div>
-                                <h6 className="text-[#878787] uppercase mb-3 font-medium cursor-default">Sell With Us</h6>
-                                <ul className="space-y-1.5 font-medium">
-                                    {['Become a Seller', 'Advertise', 'Logistics', 'Seller Hub'].map((item) => (
                                         <li key={item}><a href="#" className="hover:underline">{item}</a></li>
                                     ))}
                                 </ul>
@@ -111,10 +101,6 @@ const Footer = () => {
                             {/* Left: Quick Links & Icons */}
                             <div className="flex items-center gap-6">
                                 <div className="flex items-center gap-2">
-                                    <span className="material-icons text-[#ffc200] text-sm">store</span>
-                                    <span className="font-medium">Become a Seller</span>
-                                </div>
-                                <div className="flex items-center gap-2">
                                     <span className="material-icons text-[#ffc200] text-sm">stars</span>
                                     <span className="font-medium">Advertise</span>
                                 </div>
@@ -138,8 +124,8 @@ const Footer = () => {
                 </div>
 
                 {/* ================= MOBILE VIEW (Simplified) ================= */}
-                <div className="md:hidden bg-background-light dark:bg-background-dark py-6 px-4">
-                    <div className="flex flex-col gap-4 text-xs text-gray-500 dark:text-gray-400">
+                <div className="md:hidden bg-background-light py-6 px-4">
+                    <div className="flex flex-col gap-4 text-xs text-gray-500">
                         <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center">
                             <a href="#" className="hover:underline">Privacy Policy</a>
                             <a href="#" className="hover:underline">Terms of Use</a>

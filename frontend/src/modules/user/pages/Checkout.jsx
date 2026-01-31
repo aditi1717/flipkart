@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MdArrowBack, MdClose } from 'react-icons/md';
 import { useCartStore } from '../store/cartStore';
 import useCouponStore from '../../admin/store/couponStore';
+import API from '../../../services/api';
 
 const Checkout = () => {
     const navigate = useNavigate();
@@ -91,21 +92,117 @@ const Checkout = () => {
     const delivery = totalPrice > 500 ? 0 : 40;
     const finalAmount = Math.max(0, totalPrice + delivery - discount);
 
-    const handlePlaceOrder = () => {
+    const handlePlaceOrder = async (paymentMethodOverride = 'COD') => {
+        // Validate address is selected
+        if (!selectedAddress) {
+            alert('Please select a delivery address');
+            return;
+        }
+
+        const selectedAddrObj = addresses.find(a => a.id === selectedAddress);
+        
+        // Validate address object exists and has required fields
+        if (!selectedAddrObj || !selectedAddrObj.address || !selectedAddrObj.city || !selectedAddrObj.pincode) {
+            alert('Please add a complete delivery address with all required fields');
+            return;
+        }
+
         setIsPlacingOrder(true);
-        setTimeout(() => {
-            const orderData = {
-                items: cart,
-                totalAmount: finalAmount,
-                address: addresses.find(a => a.id === selectedAddress),
-                paymentMethod,
-                discount
-            };
-            placeOrder(orderData);
-            setIsPlacingOrder(false);
-            if (appliedCoupon) removeCoupon();
-            navigate('/order-success', { replace: true });
-        }, 2500);
+        
+        const orderData = {
+            orderItems: cart.map(item => ({
+                name: item.name,
+                qty: item.quantity,
+                image: item.image,
+                price: item.price,
+                product: item.id
+            })),
+            shippingAddress: {
+                street: selectedAddrObj.address,
+                city: selectedAddrObj.city,
+                postalCode: selectedAddrObj.pincode,
+                country: 'India'
+            },
+            paymentMethod: paymentMethodOverride,
+            itemsPrice: totalPrice,
+            taxPrice: 0,
+            shippingPrice: delivery,
+            totalPrice: finalAmount,
+        };
+
+        if (paymentMethodOverride === 'COD') {
+            try {
+                const { data } = await API.post('/orders', orderData);
+                placeOrder(data);
+                setIsPlacingOrder(false);
+                if (appliedCoupon) removeCoupon();
+                navigate('/order-success', { replace: true });
+            } catch (error) {
+                console.error(error);
+                setIsPlacingOrder(false);
+                alert(error.response?.data?.message || "Order failed!");
+            }
+        } else {
+            // Razorpay flow
+            try {
+                const { data: config } = await API.get('/payments/config');
+                const { data: order } = await API.post('/payments/order', { amount: finalAmount });
+                
+                const options = {
+                    key: config.keyId,
+                    amount: order.amount,
+                    currency: order.currency,
+                    name: "Geeta Stores",
+                    description: "Order Payment",
+                    order_id: order.id,
+                    handler: async (response) => {
+                        try {
+                            const { data: verification } = await API.post('/payments/verify', response);
+                            if (verification.message === "Payment verified successfully") {
+                                const paidOrderData = {
+                                    ...orderData,
+                                    paymentResult: {
+                                        id: response.razorpay_payment_id,
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        status: 'paid',
+                                        update_time: new Date().toISOString(),
+                                    },
+                                    isPaid: true,
+                                    paidAt: new Date().toISOString()
+                                };
+                                const { data } = await API.post('/orders', paidOrderData);
+                                placeOrder(data);
+                                setIsPlacingOrder(false);
+                                if (appliedCoupon) removeCoupon();
+                                navigate('/order-success', { replace: true });
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            alert("Payment verification failed!");
+                            setIsPlacingOrder(false);
+                        }
+                    },
+                    prefill: {
+                        name: selectedAddrObj?.name,
+                        contact: selectedAddrObj?.mobile
+                    },
+                    theme: {
+                        color: "#2874f0"
+                    },
+                    modal: {
+                        ondismiss: () => {
+                            setIsPlacingOrder(false);
+                        }
+                    }
+                };
+                const rzp = new window.Razorpay(options);
+                rzp.open();
+            } catch (error) {
+                console.error(error);
+                setIsPlacingOrder(false);
+                alert("Failed to initialize payment!");
+            }
+        }
     };
 
     if (isPlacingOrder) {
@@ -124,17 +221,20 @@ const Checkout = () => {
     }
 
     return (
-        <div className="bg-[#f1f3f6] min-h-screen pb-10">
-            {/* Simple Header */}
-            <div className="bg-white sticky top-0 z-50 shadow-sm md:static md:shadow-none md:bg-transparent md:mb-4">
-                <div className="px-4 py-4 flex items-center gap-4 border-b md:border-none md:max-w-[1248px] md:mx-auto md:px-0 md:bg-white md:rounded-sm md:shadow-sm">
+        <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen pb-10">
+            {/* Enhanced Header */}
+            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 sticky top-0 z-50 shadow-lg md:static md:shadow-xl md:mb-6">
+                <div className="px-4 py-5 flex items-center gap-4 md:max-w-[1248px] md:mx-auto md:px-6 md:rounded-2xl">
                     <button
                         onClick={() => step === 3 ? setStep(2) : navigate(-1)}
-                        className="p-1 -ml-1 text-gray-700 hover:bg-gray-100 rounded-full transition md:hidden"
+                        className="p-2 -ml-1 text-white hover:bg-white/20 rounded-full transition-all md:hidden"
                     >
                         <MdArrowBack size={24} />
                     </button>
-                    <h1 className="text-lg font-bold text-gray-800">{step === 2 ? 'Order Summary' : 'Payment'}</h1>
+                    <div className="flex-1">
+                        <h1 className="text-xl font-black text-white tracking-tight">{step === 2 ? '🛒 Order Summary' : '💳 Payment'}</h1>
+                        <p className="text-xs text-white/80 mt-0.5">Complete your purchase securely</p>
+                    </div>
                 </div>
             </div>
 
@@ -143,35 +243,35 @@ const Checkout = () => {
 
                 {/* Left Column */}
                 <div className="md:flex-1 md:min-w-0">
-                    {/* Steps Progress (Flipkart Style) */}
-                    <div className="bg-white px-2 py-4 border-b flex items-center justify-center mb-2 md:rounded-sm md:shadow-sm md:mb-4">
-                        <div className="flex items-center w-full max-w-sm">
+                    {/* Enhanced Steps Progress */}
+                    <div className="bg-gradient-to-r from-white to-blue-50 px-4 py-6 border-2 border-blue-100 flex items-center justify-center mb-4 md:rounded-2xl md:shadow-lg">
+                        <div className="flex items-center w-full max-w-md">
                             {/* Cart Step */}
                             <div className="flex flex-col items-center flex-1 relative">
-                                <div className="w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center z-10">
-                                    <span className="material-icons text-[14px]">check</span>
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white flex items-center justify-center z-10 shadow-lg shadow-green-500/50">
+                                    <span className="material-icons text-[18px]">check</span>
                                 </div>
-                                <span className="text-[10px] font-bold text-green-600 uppercase mt-1 tracking-tighter">Cart</span>
+                                <span className="text-[11px] font-black text-green-600 uppercase mt-2 tracking-tight">Cart</span>
                             </div>
 
-                            <div className="flex-1 h-[1px] bg-gray-200 -mt-5"></div>
+                            <div className="flex-1 h-[3px] bg-gradient-to-r from-green-500 to-blue-500 -mt-8 rounded-full"></div>
 
                             {/* Summary Step */}
                             <div className="flex flex-col items-center flex-1 relative">
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center z-10 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'} text-white text-[11px] font-bold`}>
-                                    {step > 2 ? <span className="material-icons text-[14px]">check</span> : '2'}
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 shadow-lg ${step >= 2 ? 'bg-gradient-to-br from-blue-500 to-purple-600 shadow-blue-500/50' : 'bg-gray-200'} text-white text-sm font-black`}>
+                                    {step > 2 ? <span className="material-icons text-[18px]">check</span> : '2'}
                                 </div>
-                                <span className={`text-[10px] font-bold uppercase mt-1 tracking-tighter ${step >= 2 ? 'text-blue-600' : 'text-gray-400'}`}>Summary</span>
+                                <span className={`text-[11px] font-black uppercase mt-2 tracking-tight ${step >= 2 ? 'bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent' : 'text-gray-400'}`}>Summary</span>
                             </div>
 
-                            <div className={`flex-1 h-[1px] -mt-5 ${step > 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+                            <div className={`flex-1 h-[3px] -mt-8 rounded-full ${step > 2 ? 'bg-gradient-to-r from-blue-500 to-purple-500' : 'bg-gray-200'}`}></div>
 
                             {/* Payment Step */}
                             <div className="flex flex-col items-center flex-1 relative">
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center z-10 ${step === 3 ? 'bg-blue-600' : 'bg-gray-200'} text-white text-[11px] font-bold`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 shadow-lg ${step === 3 ? 'bg-gradient-to-br from-purple-500 to-pink-600 shadow-purple-500/50' : 'bg-gray-200'} text-white text-sm font-black`}>
                                     3
                                 </div>
-                                <span className={`text-[10px] font-bold uppercase mt-1 tracking-tighter ${step === 3 ? 'text-blue-600' : 'text-gray-400'}`}>Payment</span>
+                                <span className={`text-[11px] font-black uppercase mt-2 tracking-tight ${step === 3 ? 'bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent' : 'text-gray-400'}`}>Payment</span>
                             </div>
                         </div>
                     </div>
@@ -245,30 +345,30 @@ const Checkout = () => {
                                             </button>
                                         ) : (
                                             <form onSubmit={handleAddAddress} className="border border-blue-200 p-4 rounded-lg bg-blue-50/10 space-y-4 animate-in slide-in-from-top-4 duration-300">
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <div className="space-y-1 col-span-2">
-                                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">Name</label>
-                                                        <input required type="text" placeholder="Full Name" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.name} onChange={e => setNewAddr({ ...newAddr, name: e.target.value })} />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-2 col-span-2">
+                                                        <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">👤 Full Name</label>
+                                                        <input required type="text" placeholder="Enter your full name" className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-gray-900 font-semibold placeholder-blue-300 bg-white shadow-sm" value={newAddr.name} onChange={e => setNewAddr({ ...newAddr, name: e.target.value })} />
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">Mobile</label>
-                                                        <input required type="tel" placeholder="10-digit number" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.mobile} onChange={e => setNewAddr({ ...newAddr, mobile: e.target.value })} />
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">📱 Mobile</label>
+                                                        <input required type="tel" placeholder="10-digit mobile" className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-gray-900 font-semibold placeholder-blue-300 bg-white shadow-sm" value={newAddr.mobile} onChange={e => setNewAddr({ ...newAddr, mobile: e.target.value })} />
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">Pincode</label>
-                                                        <input required type="number" placeholder="6-digit pincode" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.pincode} onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })} />
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">📮 Pincode</label>
+                                                        <input required type="number" placeholder="6-digit PIN" className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-gray-900 font-semibold placeholder-blue-300 bg-white shadow-sm" value={newAddr.pincode} onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })} />
                                                     </div>
-                                                    <div className="space-y-1 col-span-2">
-                                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">Address</label>
-                                                        <textarea required rows="3" placeholder="House No, Building Name, Road Area" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.address} onChange={e => setNewAddr({ ...newAddr, address: e.target.value })} />
+                                                    <div className="space-y-2 col-span-2">
+                                                        <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">🏠 Address</label>
+                                                        <textarea required rows="3" placeholder="House No, Building, Street, Area" className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-gray-900 font-semibold placeholder-blue-300 bg-white shadow-sm" value={newAddr.address} onChange={e => setNewAddr({ ...newAddr, address: e.target.value })} />
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">City</label>
-                                                        <input required type="text" placeholder="City/District" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.city} onChange={e => setNewAddr({ ...newAddr, city: e.target.value })} />
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">🏙️ City</label>
+                                                        <input required type="text" placeholder="Your city" className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-gray-900 font-semibold placeholder-blue-300 bg-white shadow-sm" value={newAddr.city} onChange={e => setNewAddr({ ...newAddr, city: e.target.value })} />
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">State</label>
-                                                        <input required type="text" placeholder="State" className="w-full border border-gray-200 p-2.5 rounded-sm text-sm focus:border-blue-500 outline-none text-gray-900" value={newAddr.state} onChange={e => setNewAddr({ ...newAddr, state: e.target.value })} />
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">🗺️ State</label>
+                                                        <input required type="text" placeholder="Your state" className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-gray-900 font-semibold placeholder-blue-300 bg-white shadow-sm" value={newAddr.state} onChange={e => setNewAddr({ ...newAddr, state: e.target.value })} />
                                                     </div>
                                                 </div>
                                                 <div className="space-y-2">
@@ -312,12 +412,20 @@ const Checkout = () => {
                                     </div>
                                 ))}
                                 {/* Desktop Continue Button */}
-                                <div className="hidden md:flex justify-end p-4 border-t sticky bottom-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+                                <div className="hidden md:flex justify-end gap-3 p-4 border-t sticky bottom-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+                                    <button
+                                        onClick={() => handlePlaceOrder('COD')}
+                                        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3.5 rounded-xl font-black text-sm shadow-lg hover:shadow-xl transition-all uppercase tracking-wide flex items-center gap-2"
+                                    >
+                                        <span className="material-icons text-lg">local_shipping</span>
+                                        Cash on Delivery
+                                    </button>
                                     <button
                                         onClick={() => setStep(3)}
-                                        className="bg-[#fb641b] text-white px-10 py-3.5 rounded-sm font-bold text-base shadow-sm hover:bg-[#e65a17] transition uppercase tracking-wide"
+                                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-3.5 rounded-xl font-black text-sm shadow-lg hover:shadow-xl transition-all uppercase tracking-wide flex items-center gap-2"
                                     >
-                                        Continue
+                                        <span className="material-icons text-lg">payment</span>
+                                        Pay Online
                                     </button>
                                 </div>
                             </div>
@@ -337,26 +445,26 @@ const Checkout = () => {
                                 </div>
 
                                 {/* Inline Coupon Input */}
-                                <div className="mt-4 flex gap-2">
+                                <div className="mt-4 flex gap-3">
                                     <input
                                         type="text"
-                                        placeholder="Enter Coupon Code"
+                                        placeholder="🎟️ Enter Coupon Code"
                                         value={couponInput}
                                         onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                                        className="flex-1 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold uppercase placeholder-gray-400 disabled:bg-gray-50 text-gray-900"
+                                        className="flex-1 border-2 border-purple-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 font-black uppercase placeholder-purple-300 disabled:bg-gray-50 text-gray-900 shadow-sm bg-white"
                                         disabled={appliedCoupon !== null}
                                     />
                                     {appliedCoupon ? (
                                         <button
                                             onClick={handleRemoveCoupon}
-                                            className="text-red-600 font-bold text-xs uppercase px-2 hover:bg-red-50"
+                                            className="bg-gradient-to-r from-red-500 to-pink-600 text-white font-black text-xs uppercase px-5 py-3 rounded-xl hover:shadow-lg transition-all shadow-md"
                                         >
                                             Remove
                                         </button>
                                     ) : (
                                         <button
                                             onClick={() => handleApplyCoupon()}
-                                            className="text-blue-600 font-bold text-sm uppercase px-4 cursor-pointer hover:bg-blue-50"
+                                            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black text-sm uppercase px-6 py-3 rounded-xl cursor-pointer hover:shadow-lg transition-all shadow-md"
                                         >
                                             Apply
                                         </button>
@@ -416,12 +524,22 @@ const Checkout = () => {
                                     <span className="text-lg font-black text-gray-900">₹{finalAmount.toLocaleString()}</span>
                                     <button className="text-[10px] text-blue-600 font-black uppercase tracking-tighter text-left w-fit">View Details</button>
                                 </div>
-                                <button
-                                    onClick={() => setStep(3)}
-                                    className="bg-[#fb641b] text-white px-14 py-3.5 rounded-sm font-black uppercase text-[13px] shadow-lg shadow-[#fb641b]/20 active:scale-[0.98] transition-all"
-                                >
-                                    Continue
-                                </button>
+                                <div className="flex flex-col gap-2">
+                                    <button
+                                        onClick={() => handlePlaceOrder('COD')}
+                                        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3 rounded-xl font-black uppercase text-[11px] shadow-lg shadow-green-600/20 active:scale-[0.98] transition-all flex items-center gap-2"
+                                    >
+                                        <span className="material-icons text-sm">local_shipping</span>
+                                        Cash on Delivery
+                                    </button>
+                                    <button
+                                        onClick={() => setStep(3)}
+                                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-black uppercase text-[11px] shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center gap-2"
+                                    >
+                                        <span className="material-icons text-sm">payment</span>
+                                        Pay Online
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -466,10 +584,10 @@ const Checkout = () => {
                                     </div>
 
                                     <button
-                                        onClick={handlePlaceOrder}
-                                        className="w-full mt-6 bg-[#fb641b] text-white py-4 rounded-sm font-black uppercase text-[14px] shadow-lg shadow-[#fb641b]/20 active:scale-[0.98] transition-all hover:bg-[#e65a17]"
+                                        onClick={() => handlePlaceOrder(paymentMethod)}
+                                        className="w-full mt-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-black uppercase text-[14px] shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all hover:shadow-xl"
                                     >
-                                        Pay & Place Order
+                                        {paymentMethod === 'COD' ? '🚚 Place Order (COD)' : '💳 Pay & Place Order'}
                                     </button>
                                 </div>
                             </div>
@@ -514,26 +632,26 @@ const Checkout = () => {
 
                         {/* Apply Coupon Sidebar */}
                         <div className="bg-white p-4 rounded-sm shadow-sm border border-gray-100">
-                            <div className="flex gap-2 mb-2">
+                            <div className="flex gap-3 mb-3">
                                 <input
                                     type="text"
-                                    placeholder="Enter Coupon Code"
+                                    placeholder="🎟️ Enter Coupon Code"
                                     value={couponInput}
                                     onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                                    className="flex-1 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-blue-500 font-bold uppercase placeholder-gray-400 disabled:bg-gray-50 text-gray-900"
+                                    className="flex-1 border-2 border-purple-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 font-black uppercase placeholder-purple-300 disabled:bg-gray-50 text-gray-900 shadow-sm bg-white"
                                     disabled={appliedCoupon !== null}
                                 />
                                 {appliedCoupon ? (
                                     <button
                                         onClick={handleRemoveCoupon}
-                                        className="text-red-600 font-bold text-xs uppercase px-2 hover:bg-red-50 border border-red-100 rounded-sm"
+                                        className="bg-gradient-to-r from-red-500 to-pink-600 text-white font-black text-xs uppercase px-5 py-3 rounded-xl hover:shadow-lg transition-all shadow-md"
                                     >
                                         Remove
                                     </button>
                                 ) : (
                                     <button
                                         onClick={() => handleApplyCoupon()}
-                                        className="text-blue-600 font-bold text-sm uppercase px-4 cursor-pointer hover:bg-blue-50 border border-blue-100 rounded-sm"
+                                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black text-sm uppercase px-6 py-3 rounded-xl cursor-pointer hover:shadow-lg transition-all shadow-md"
                                     >
                                         Apply
                                     </button>
@@ -581,17 +699,17 @@ const Checkout = () => {
                         {/* Coupons List */}
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
                             {/* Input at Top of Modal */}
-                            <div className="bg-white p-4 rounded-sm shadow-sm flex gap-3 mb-6">
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-5 rounded-2xl shadow-lg border-2 border-purple-200 flex gap-3 mb-6">
                                 <input
                                     type="text"
-                                    placeholder="Enter Coupon Code"
-                                    className="flex-1 border-b border-gray-300 outline-none focus:border-blue-600 px-1 py-1 text-sm font-bold uppercase transition-colors text-gray-900"
+                                    placeholder="🎟️ Enter your coupon code here"
+                                    className="flex-1 border-b-2 border-purple-300 outline-none focus:border-purple-600 px-2 py-2 text-sm font-black uppercase transition-colors text-gray-900 bg-transparent placeholder-purple-400"
                                     value={couponInput}
                                     onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                                 />
                                 <button
                                     onClick={() => handleApplyCoupon()}
-                                    className="text-blue-600 font-bold text-sm uppercase px-2 hover:bg-blue-50 rounded"
+                                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black text-sm uppercase px-6 py-2 hover:shadow-lg rounded-xl transition-all shadow-md"
                                 >
                                     Check
                                 </button>

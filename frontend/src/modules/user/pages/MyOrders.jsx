@@ -1,28 +1,78 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCartStore } from '../store/cartStore';
+import API from '../../../services/api';
+import { useAuthStore } from '../store/authStore';
+import useAdminAuthStore from '../../admin/store/adminAuthStore';
 
 const MyOrders = () => {
     const navigate = useNavigate();
-    const orders = useCartStore(state => state.orders);
+    const { user } = useAuthStore();
+    const { adminUser } = useAdminAuthStore();
+    const currentUser = adminUser || user;
+    
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Flatten all orders into individual items for the history view
-    const allItems = orders.flatMap(order =>
-        order.items.map(item => ({
-            ...item,
-            orderId: order.id,
-            orderDate: order.date,
-            orderStatus: order.status,
-            // If item has no specific status, use order status
-            displayStatus: item.status || order.status
-        }))
-    );
+    useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    const fetchOrders = async () => {
+        try {
+            setLoading(true);
+            const { data } = await API.get('/orders/myorders');
+            setOrders(data);
+            setError(null);
+        } catch (err) {
+            console.error('Fetch orders error:', err);
+            setError(err.response?.data?.message || 'Failed to fetch orders');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getStatusColor = (status) => {
+        const colors = {
+            'Pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            'Confirmed': 'bg-blue-100 text-blue-800 border-blue-200',
+            'Packed': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+            'Dispatched': 'bg-purple-100 text-purple-800 border-purple-200',
+            'Out for Delivery': 'bg-orange-100 text-orange-800 border-orange-200',
+            'Delivered': 'bg-green-100 text-green-800 border-green-200',
+            'Cancelled': 'bg-red-100 text-red-800 border-red-200'
+        };
+        return colors[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+    };
+
+    const getStatusIcon = (status) => {
+        const icons = {
+            'Pending': 'pending',
+            'Confirmed': 'check_circle',
+            'Packed': 'inventory_2',
+            'Dispatched': 'local_shipping',
+            'Out for Delivery': 'delivery_dining',
+            'Delivered': 'done_all',
+            'Cancelled': 'cancel'
+        };
+        return icons[status] || 'info';
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600 font-semibold">Loading your orders...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="bg-[#f1f3f6] min-h-screen pb-20 md:py-6">
-
-            {/* Mobile Header - Hidden on Desktop */}
-            <div className="bg-blue-600 text-white px-4 py-4 flex items-center justify-between sticky top-0 z-10 md:hidden">
+        <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-gray-50 pb-24 md:pb-6">
+            {/* Mobile Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-4 flex items-center justify-between sticky top-0 z-10 md:hidden shadow-lg">
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => navigate('/account')}
@@ -36,109 +86,125 @@ const MyOrders = () => {
             </div>
 
             {/* Desktop Container */}
-            <div className="md:max-w-[1000px] md:mx-auto md:px-4">
-
-                {/* Desktop Breadcrumbs/Title - Visible only on Desktop */}
-                <div className="hidden md:flex items-center gap-2 text-xs text-gray-500 mb-4">
-                    <span onClick={() => navigate('/')} className="cursor-pointer hover:text-blue-600">Home</span>
-                    <span className="material-icons text-[10px]">chevron_right</span>
-                    <span onClick={() => navigate('/account')} className="cursor-pointer hover:text-blue-600">My Account</span>
-                    <span className="material-icons text-[10px]">chevron_right</span>
-                    <span className="text-gray-800 font-bold">My Orders</span>
+            <div className="md:max-w-6xl md:mx-auto md:px-4">
+                {/* Desktop Breadcrumbs */}
+                <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 mb-6 mt-4">
+                    <span onClick={() => navigate('/')} className="cursor-pointer hover:text-blue-600 font-medium">Home</span>
+                    <span className="material-icons text-xs">chevron_right</span>
+                    <span onClick={() => navigate('/account')} className="cursor-pointer hover:text-blue-600 font-medium">My Account</span>
+                    <span className="material-icons text-xs">chevron_right</span>
+                    <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">My Orders</span>
                 </div>
 
-                {allItems.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center pt-20 px-10 text-center bg-white h-[80vh] md:h-[60vh] md:rounded-sm md:shadow-sm md:pt-0">
-                        <img src="https://rukminim2.flixcart.com/www/800/800/promos/16/05/2019/d405a710-1043-4977-88f2-fdc95bede36f.png?q=90" alt="empty" className="w-48 mb-6" />
-                        <h2 className="text-xl font-bold mb-2">You haven't placed any orders yet!</h2>
-                        <p className="text-gray-500 text-sm mb-6">Start shopping to see your orders here.</p>
-                        <button onClick={() => navigate('/')} className="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-all hover:shadow-xl">Shop Now</button>
+                {error && (
+                    <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6 mx-4 md:mx-0">
+                        <div className="flex items-center gap-2">
+                            <span className="material-icons text-red-600">error</span>
+                            <p className="text-red-700 font-semibold">{error}</p>
+                        </div>
+                    </div>
+                )}
+
+                {!loading && orders.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 px-10 text-center bg-white mx-4 md:mx-0 rounded-xl shadow-lg border border-blue-100">
+                        <img src="https://rukminim2.flixcart.com/www/800/800/promos/16/05/2019/d405a710-1043-4977-88f2-fdc95bede36f.png?q=90" alt="empty" className="w-48 mb-6 opacity-80" />
+                        <h2 className="text-2xl font-bold mb-2 text-gray-800">You haven't placed any orders yet!</h2>
+                        <p className="text-gray-600 text-base mb-6">Start shopping to see your orders here.</p>
+                        <button onClick={() => navigate('/')} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-3.5 rounded-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+                            Shop Now
+                        </button>
                     </div>
                 ) : (
-                    <div className="space-y-[1px] py-[1px] md:space-y-3">
-                        {allItems.map((item, idx) => (
-                            <div
-                                key={`${item.orderId}-${idx}`}
-                                onClick={() => navigate(`/my-orders/${item.orderId}`)}
-                                className="bg-white p-4 flex gap-4 cursor-pointer active:bg-gray-50 transition-all md:rounded-sm md:shadow-sm md:border md:border-gray-200 md:hover:shadow-md md:hover:-translate-y-0.5"
+                    <div className="space-y-4 px-4 md:px-0">
+                        {orders.map((order) => (
+                            <div 
+                                key={order._id} 
+                                className="bg-white rounded-lg shadow-md border-2 border-blue-100 overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
+                                onClick={() => navigate(`/my-orders/${order._id}`)}
                             >
-                                {/* Image */}
-                                <div className="w-16 h-20 bg-gray-50 rounded border border-gray-100 p-1 flex-shrink-0 flex items-center justify-center md:w-24 md:h-24">
-                                    <img src={item.image} alt="" className="max-w-full max-h-full object-contain" />
-                                </div>
-
-                                {/* Right Side Content (Details + Badges) */}
-                                <div className="flex-1 flex flex-col justify-between">
-                                    {/* Top Section: Name & Status */}
-                                    <div className="space-y-1">
-                                        <div className="flex items-center justify-between">
-                                            <h2 className="text-[13px] font-bold text-gray-800 line-clamp-1 leading-tight flex-1 md:text-base">
-                                                {item.name}
-                                            </h2>
-                                            <span className="material-icons text-gray-300 text-[18px]">chevron_right</span>
+                                {/* Order Header */}
+                                <div className="bg-gradient-to-r from-white to-blue-50 px-5 py-4 border-b border-blue-100">
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <span className="material-icons text-blue-600 text-2xl">receipt_long</span>
+                                            <div>
+                                                <p className="text-xs text-gray-500 font-medium">Order ID</p>
+                                                <p className="font-bold text-gray-800 text-sm">#{order._id.slice(-8).toUpperCase()}</p>
+                                            </div>
                                         </div>
-
-                                        <div className="flex items-center gap-2">
-                                            {item.displayStatus === 'DELIVERED' ? (
-                                                <div className="flex items-center gap-1">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-green-600 md:w-2 md:h-2"></div>
-                                                    <p className="text-[11px] font-bold text-gray-900 md:text-sm">Delivered on {new Date(item.orderDate).toLocaleDateString()}</p>
-                                                </div>
-                                            ) : item.displayStatus === 'CANCELLED' ? (
-                                                <div className="flex items-center gap-1">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-600 md:w-2 md:h-2"></div>
-                                                    <p className="text-[11px] font-bold text-red-600 md:text-sm">Cancelled</p>
-                                                </div>
-                                            ) : item.displayStatus === 'REFUND_PROCESSED' ? (
-                                                <div className="flex items-center gap-1">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-500 md:w-2 md:h-2"></div>
-                                                    <p className="text-[11px] font-bold text-gray-500 md:text-sm">Returned</p>
-                                                </div>
-                                            ) : item.displayStatus === 'REPLACEMENT_DELIVERED' ? (
-                                                <div className="flex items-center gap-1">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-green-600 md:w-2 md:h-2"></div>
-                                                    <p className="text-[11px] font-bold text-green-600 md:text-sm">Replaced</p>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-1">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse md:w-2 md:h-2"></div>
-                                                    <p className={`text-[11px] font-bold md:text-sm ${item.displayStatus.includes('RETURN') ? 'text-orange-600' :
-                                                        item.displayStatus.includes('REPLACEMENT') ? 'text-blue-600' : 'text-gray-900'
-                                                        }`}>
-                                                        {item.displayStatus.replace(/_/g, ' ')}
-                                                    </p>
-                                                </div>
-                                            )}
+                                        <div className="flex items-center gap-4">
+                                            <div>
+                                                <p className="text-xs text-gray-500 font-medium">Placed on</p>
+                                                <p className="font-semibold text-gray-800 text-sm">
+                                                    {new Date(order.createdAt).toLocaleDateString('en-IN', { 
+                                                        day: 'numeric', 
+                                                        month: 'short', 
+                                                        year: 'numeric' 
+                                                    })}
+                                                </p>
+                                            </div>
+                                            <span className={`px-3 py-1.5 rounded-full text-xs font-bold border flex items-center gap-1 ${getStatusColor(order.status)}`}>
+                                                <span className="material-icons text-sm">{getStatusIcon(order.status)}</span>
+                                                {order.status}
+                                            </span>
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Bottom Section: ID & Badges */}
-                                    <div className="mt-2 flex items-center justify-between border-t border-gray-50 pt-2">
-                                        <div className="flex items-center gap-1">
-                                            <span className="material-icons text-[14px] text-gray-400">inventory_2</span>
-                                            <span className="text-[10px] text-gray-400 uppercase font-black md:text-xs">ID: {item.orderId.slice(-6)}</span>
+                                {/* Order Items */}
+                                <div className="p-5">
+                                    <div className="space-y-3">
+                                        {order.orderItems.slice(0, 3).map((item, index) => (
+                                            <div key={index} className="flex gap-4 items-center">
+                                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg border-2 border-blue-100 p-2 flex-shrink-0">
+                                                    <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="text-sm font-bold text-gray-800 line-clamp-2">{item.name}</h3>
+                                                    <p className="text-xs text-gray-500 mt-1">Quantity: {item.qty}</p>
+                                                    <p className="text-base font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mt-1">
+                                                        ₹{item.price.toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {order.orderItems.length > 3 && (
+                                            <p className="text-xs text-blue-600 font-bold">
+                                                +{order.orderItems.length - 3} more item(s)
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Order Total */}
+                                    <div className="mt-4 pt-4 border-t border-blue-100 flex flex-col md:flex-row justify-between md:items-center gap-3">
+                                        <div>
+                                            <p className="text-xs text-gray-500 font-medium">Total Amount</p>
+                                            <p className="text-xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                                ₹{order.totalPrice.toLocaleString()}
+                                            </p>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            {!['DELIVERED', 'CANCELLED', 'REFUND_PROCESSED', 'REPLACEMENT_DELIVERED'].includes(item.displayStatus) && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate(`/track-order/${item.orderId}${item.displayStatus.includes('RETURN') || item.displayStatus.includes('REPLACEMENT') ? `/${item.id}` : ''}`);
-                                                    }}
-                                                    className="text-[10px] font-black text-blue-600 border border-blue-600/20 bg-blue-50 px-2.5 py-1 rounded-sm uppercase active:scale-95 transition-all hover:bg-blue-100"
-                                                >
-                                                    Track {item.displayStatus.includes('RETURN') ? 'Return' : item.displayStatus.includes('REPLACEMENT') ? 'Replacement' : 'Item'}
-                                                </button>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {order.isPaid ? (
+                                                <div className="flex items-center gap-1 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full">
+                                                    <span className="material-icons text-green-600 text-sm">check_circle</span>
+                                                    <span className="text-xs font-bold text-green-700">Paid</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-1 bg-yellow-50 border border-yellow-200 px-3 py-1.5 rounded-full">
+                                                    <span className="material-icons text-yellow-600 text-sm">pending</span>
+                                                    <span className="text-xs font-bold text-yellow-700">COD</span>
+                                                </div>
                                             )}
-                                            {item.displayStatus === 'DELIVERED' && (
-                                                <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-sm font-black uppercase tracking-tighter md:text-[11px]">Delivered</span>
-                                            )}
-                                            {item.displayStatus === 'REFUND_PROCESSED' && (
-                                                <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-sm font-black uppercase tracking-tighter md:text-[11px]">Returned</span>
-                                            )}
-                                            {item.displayStatus === 'REPLACEMENT_DELIVERED' && (
-                                                <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-sm font-black uppercase tracking-tighter md:text-[11px]">Replaced</span>
-                                            )}
+                                            <button 
+                                                className="flex items-center gap-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:shadow-lg transition-all"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate(`/my-orders/${order._id}`);
+                                                }}
+                                            >
+                                                View Details
+                                                <span className="material-icons text-sm">arrow_forward</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

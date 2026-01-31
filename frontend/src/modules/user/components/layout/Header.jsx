@@ -88,17 +88,6 @@ const Header = () => {
                         </div>
                     )}
 
-                    {/* Beome a Seller Button (Right) */}
-                    {!isSpecialPage && (
-                        <button
-                            onClick={() => navigate('/seller-registration')}
-                            className="md:hidden flex items-center gap-1 bg-yellow-500 text-white px-3 py-1.5 rounded-md text-[10px] font-bold shadow-sm whitespace-nowrap"
-                        >
-                            <MdStars className="text-sm" />
-                            Become a Seller
-                        </button>
-                    )}
-
                     {/* Desktop Logo */}
                     <div className="hidden md:flex flex-col">
                         <img src={logo} alt="IndianKart" className="h-[65px] lg:h-[100px] object-contain" />
@@ -165,12 +154,6 @@ const Header = () => {
                             {totalItems > 0 && <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">{totalItems}</div>}
                         </div>
                         <span className="text-gray-800 font-medium text-[15px]">Cart</span>
-                    </div>
-
-                    {/* Become a Seller */}
-                    <div onClick={() => navigate('/seller-registration')} className="flex items-center gap-2 cursor-pointer hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors">
-                        <MdStore className="text-[24px] text-gray-700" />
-                        <span className="text-gray-800 font-medium text-[15px]">Become a Seller</span>
                     </div>
 
                     {/* More */}

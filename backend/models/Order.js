@@ -35,6 +35,7 @@ const orderSchema = mongoose.Schema({
         status: { type: String },
         update_time: { type: String },
         email_address: { type: String },
+        razorpay_order_id: { type: String },
     },
     itemsPrice: { type: Number, required: true, default: 0.0 },
     taxPrice: { type: Number, required: true, default: 0.0 },
@@ -50,6 +51,13 @@ const orderSchema = mongoose.Schema({
     deliveryOtpExpiresAt: { type: Date },
     deliveryOtpVerified: { type: Boolean, default: false },
     invoiceEnabled: { type: Boolean, default: false },
+    
+    // Order Status
+    status: { 
+        type: String, 
+        default: 'Pending',
+        enum: ['Pending', 'Confirmed', 'Packed', 'Dispatched', 'Out for Delivery', 'Delivered', 'Cancelled']
+    },
 }, {
     timestamps: true,
 });

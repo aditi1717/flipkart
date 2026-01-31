@@ -34,7 +34,6 @@ const Sidebar = () => {
         { name: 'Users', icon: MdPeople, path: '/admin/users' },
         { name: 'Orders', icon: MdShoppingCart, path: '/admin/orders' },
         { name: 'Returns', icon: MdAssignmentReturn, path: '/admin/returns' },
-        { name: 'Sellers', icon: MdStorefront, path: '/admin/sellers' },
         { name: 'Coupons & Offers', icon: MdLocalOffer, path: '/admin/coupons' },
         { name: 'Play (Reels)', icon: MdPlayCircle, path: '/admin/play' },
         { name: 'Home Sections', icon: MdViewAgenda, path: '/admin/content/home' },

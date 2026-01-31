@@ -15,7 +15,6 @@ import productRoutes from './routes/productRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import returnRoutes from './routes/returnRoutes.js';
-import sellerRoutes from './routes/sellerRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import reelRoutes from './routes/reelRoutes.js';
 import bannerRoutes from './routes/bannerRoutes.js';
@@ -23,7 +22,7 @@ import homeSectionRoutes from './routes/homeSectionRoutes.js';
 import contentPageRoutes from './routes/contentPageRoutes.js';
 import subCategoryRoutes from './routes/subCategoryRoutes.js';
 import homeLayoutRoutes from './routes/homeLayoutRoutes.js';
-import sellerRequestRoutes from './routes/sellerRequestRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 dotenv.config();
 
@@ -48,7 +47,6 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/returns', returnRoutes);
-app.use('/api/sellers', sellerRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/reels', reelRoutes);
 app.use('/api/banners', bannerRoutes);
@@ -56,7 +54,7 @@ app.use('/api/home-sections', homeSectionRoutes);
 app.use('/api/pages', contentPageRoutes);
 app.use('/api/subcategories', subCategoryRoutes);
 app.use('/api/home-layout', homeLayoutRoutes);
-app.use('/api/seller-requests', sellerRequestRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

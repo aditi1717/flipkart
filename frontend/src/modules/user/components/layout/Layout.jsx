@@ -26,14 +26,13 @@ const Layout = () => {
         '/login',
         '/signup',
         '/play',
-        '/seller-registration',
         '/categories'
     ].some(path => location.pathname.includes(path));
 
     const isAccountPage = location.pathname === '/account';
 
     return (
-        <div className="w-full min-h-screen flex flex-col relative bg-background-light dark:bg-background-dark overflow-x-hidden">
+        <div className="w-full min-h-screen flex flex-col relative bg-background-light overflow-x-hidden">
             {!isStandalonePage && (
                 <div>
                     <Header />

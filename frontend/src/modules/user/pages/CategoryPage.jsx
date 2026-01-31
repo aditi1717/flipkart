@@ -142,11 +142,11 @@ const CategoryPage = () => {
     }
 
     return (
-        <div className="bg-background-light dark:bg-background-dark min-h-screen pb-20 md:pb-10 lg:bg-[#f1f3f6]">
+        <div className="bg-background-light min-h-screen pb-20 md:pb-10 lg:bg-[#f1f3f6]">
             {/* Back Button Row (Mobile) */}
             <div className="flex items-center gap-2 px-3 mb-2 md:hidden">
                 <MdArrowBack onClick={() => navigate(-1)} className="text-2xl text-gray-700 cursor-pointer" />
-                <span className="text-base font-semibold capitalize text-gray-800 dark:text-white">{categoryData.name}</span>
+                <span className="text-base font-semibold capitalize text-gray-800">{categoryData.name}</span>
             </div>
 
             <div className="max-w-[1440px] mx-auto md:px-4 md:py-4">
@@ -154,12 +154,12 @@ const CategoryPage = () => {
                 <div className="hidden md:flex items-center gap-4 mb-4">
                     <button
                         onClick={() => navigate(-1)}
-                        className="bg-white dark:bg-zinc-900 p-2 rounded-full shadow-sm border border-gray-100 dark:border-zinc-800 hover:shadow-md transition-shadow group"
+                        className="bg-white p-2 rounded-full shadow-sm border border-gray-100 hover:shadow-md transition-shadow group"
                     >
-                        <MdArrowBack className="text-xl text-gray-600 dark:text-gray-400 group-hover:text-blue-600" />
+                        <MdArrowBack className="text-xl text-gray-600 group-hover:text-blue-600" />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-black text-gray-800 dark:text-white capitalize tracking-tight flex items-center gap-2">
+                        <h1 className="text-2xl font-black text-gray-800 capitalize tracking-tight flex items-center gap-2">
                             {categoryData.name}
                             <span className="text-sm font-medium text-gray-400">({sortedProducts.length} items)</span>
                         </h1>
@@ -170,10 +170,10 @@ const CategoryPage = () => {
 
                     {/* LEFT SIDEBAR (Desktop Only) - Flipkart Style */}
                     <aside className="hidden lg:block w-72 shrink-0">
-                        <div className="bg-white dark:bg-zinc-900 shadow-sm border border-gray-200 dark:border-zinc-800 sticky top-20">
+                        <div className="bg-white shadow-sm border border-gray-200 sticky top-20">
                             {/* Filters Header */}
-                            <div className="px-4 py-3 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
-                                <h3 className="font-semibold text-gray-900 dark:text-white text-lg">Filters</h3>
+                            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                                <h3 className="font-semibold text-gray-900 text-lg">Filters</h3>
                                 <button
                                     onClick={() => {
                                         setFilterRange([0, 100000]);
@@ -191,23 +191,23 @@ const CategoryPage = () => {
 
                             {/* Categories Section */}
                             {categoryData && (
-                                <div className="border-b border-gray-200 dark:border-zinc-800">
+                                <div className="border-b border-gray-200">
                                     <div className="px-4 py-3">
-                                        <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">CATEGORIES</h4>
+                                        <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">CATEGORIES</h4>
                                         {breadcrumbs.length > 1 ? (
                                              breadcrumbs.slice(0, -1).map((crumb, i) => (
-                                                <div key={i} className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 cursor-pointer hover:underline mb-1" onClick={() => navigate(`/category/${breadcrumbs.slice(0, i + 1).map(b => b.name).join('/')}`)}>
+                                                <div key={i} className="flex items-center gap-1 text-sm text-blue-600 cursor-pointer hover:underline mb-1" onClick={() => navigate(`/category/${breadcrumbs.slice(0, i + 1).map(b => b.name).join('/')}`)}>
                                                     <span className="material-icons text-sm">chevron_left</span>
                                                     <span>{crumb.name}</span>
                                                 </div>
                                              ))
                                         ) : (
-                                            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
+                                            <div className="flex items-center gap-1 text-sm text-gray-600">
                                                 <span className="material-icons text-sm">grid_view</span>
                                                 <span className="text-gray-400">All Categories</span>
                                             </div>
                                         )}
-                                        <div className="mt-1 font-bold text-gray-900 dark:text-white pl-3 border-l-2 border-blue-600">
+                                        <div className="mt-1 font-bold text-gray-900 pl-3 border-l-2 border-blue-600">
                                             {categoryData.name}
                                         </div>
                                     </div>
@@ -216,12 +216,12 @@ const CategoryPage = () => {
 
                             {/* Subcategory Filter */}
                             {availableCategories.length > 0 && (
-                                <div className="border-b border-gray-200 dark:border-zinc-800">
+                                <div className="border-b border-gray-200">
                                     <button
                                         onClick={() => toggleSection('subcategory')}
-                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
                                     >
-                                        <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">SUBCATEGORY</h4>
+                                        <h4 className="text-xs font-semibold text-gray-900 uppercase">SUBCATEGORY</h4>
                                         <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.subcategory ? 'rotate-180' : ''}`}>
                                             expand_more
                                         </span>
@@ -237,7 +237,7 @@ const CategoryPage = () => {
                                                             onChange={() => toggleCategory(category)}
                                                             className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                         />
-                                                        <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                        <span className="text-sm text-gray-700 group-hover:text-blue-600">
                                                             {category}
                                                         </span>
                                                     </label>
@@ -258,12 +258,12 @@ const CategoryPage = () => {
 
                             {/* Brand Filter */}
                             {availableBrands.length > 0 && (
-                                <div className="border-b border-gray-200 dark:border-zinc-800">
+                                <div className="border-b border-gray-200">
                                     <button
                                         onClick={() => toggleSection('brand')}
-                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
                                     >
-                                        <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">BRAND</h4>
+                                        <h4 className="text-xs font-semibold text-gray-900 uppercase">BRAND</h4>
                                         <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.brand ? 'rotate-180' : ''}`}>
                                             expand_more
                                         </span>
@@ -278,7 +278,7 @@ const CategoryPage = () => {
                                                     placeholder="Search Brand"
                                                     value={brandSearch}
                                                     onChange={(e) => setBrandSearch(e.target.value)}
-                                                    className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500 dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
+                                                    className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                                                 />
                                             </div>
                                             <div className="space-y-2.5 max-h-60 overflow-y-auto">
@@ -290,7 +290,7 @@ const CategoryPage = () => {
                                                             onChange={() => toggleBrand(brand)}
                                                             className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                         />
-                                                        <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                        <span className="text-sm text-gray-700 group-hover:text-blue-600">
                                                             {brand}
                                                         </span>
                                                     </label>
@@ -311,12 +311,12 @@ const CategoryPage = () => {
 
                             {/* RAM Filter */}
                             {availableRam.length > 0 && (
-                                <div className="border-b border-gray-200 dark:border-zinc-800">
+                                <div className="border-b border-gray-200">
                                     <button
                                         onClick={() => toggleSection('ram')}
-                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
                                     >
-                                        <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">RAM</h4>
+                                        <h4 className="text-xs font-semibold text-gray-900 uppercase">RAM</h4>
                                         <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.ram ? 'rotate-180' : ''}`}>
                                             expand_more
                                         </span>
@@ -332,7 +332,7 @@ const CategoryPage = () => {
                                                             onChange={() => toggleRam(ram)}
                                                             className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                         />
-                                                        <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                        <span className="text-sm text-gray-700 group-hover:text-blue-600">
                                                             {ram}
                                                         </span>
                                                     </label>
@@ -352,12 +352,12 @@ const CategoryPage = () => {
                             )}
 
                             {/* Price Filter */}
-                            <div className="border-b border-gray-200 dark:border-zinc-800">
+                            <div className="border-b border-gray-200">
                                 <button
                                     onClick={() => toggleSection('price')}
-                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
                                 >
-                                    <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">PRICE</h4>
+                                    <h4 className="text-xs font-semibold text-gray-900 uppercase">PRICE</h4>
                                     <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.price ? 'rotate-180' : ''}`}>
                                         expand_more
                                     </span>
@@ -378,7 +378,7 @@ const CategoryPage = () => {
                                                         onChange={() => setFilterRange(r.range)}
                                                         className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                     />
-                                                    <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                    <span className="text-sm text-gray-700 group-hover:text-blue-600">
                                                         {r.label}
                                                     </span>
                                                 </label>
@@ -389,12 +389,12 @@ const CategoryPage = () => {
                             </div>
 
                             {/* Discount Filter */}
-                            <div className="border-b border-gray-200 dark:border-zinc-800">
+                            <div className="border-b border-gray-200">
                                 <button
                                     onClick={() => toggleSection('discount')}
-                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
                                 >
-                                    <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">DISCOUNT</h4>
+                                    <h4 className="text-xs font-semibold text-gray-900 uppercase">DISCOUNT</h4>
                                     <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.discount ? 'rotate-180' : ''}`}>
                                         expand_more
                                     </span>
@@ -417,7 +417,7 @@ const CategoryPage = () => {
                                                         onChange={() => setSelectedDiscount(option.value)}
                                                         className="w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                     />
-                                                    <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                    <span className="text-sm text-gray-700 group-hover:text-blue-600">
                                                         {option.label}
                                                     </span>
                                                 </label>
@@ -436,12 +436,12 @@ const CategoryPage = () => {
                             </div>
 
                             {/* Sort Filter - Desktop */}
-                            <div className="border-b border-gray-200 dark:border-zinc-800">
+                            <div className="border-b border-gray-200">
                                 <button
                                     onClick={() => toggleSection('sort')}
-                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800"
+                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
                                 >
-                                    <h4 className="text-xs font-semibold text-gray-900 dark:text-white uppercase">SORT BY</h4>
+                                    <h4 className="text-xs font-semibold text-gray-900 uppercase">SORT BY</h4>
                                     <span className={`material-icons text-gray-600 transition-transform ${collapsedSections.sort ? 'rotate-180' : ''}`}>
                                         expand_more
                                     </span>
@@ -463,7 +463,7 @@ const CategoryPage = () => {
                                                         onChange={() => setSortBy(option.id)}
                                                         className="w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                     />
-                                                    <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                                    <span className="text-sm text-gray-700 group-hover:text-blue-600">
                                                         {option.label}
                                                     </span>
                                                 </label>
@@ -480,7 +480,7 @@ const CategoryPage = () => {
 
                         {/* 1. Main Banner */}
                         {(categoryData.bannerImage || (categoryData.banners && categoryData.banners.length > 0)) && (
-                            <div className="bg-white dark:bg-zinc-900 md:rounded md:shadow-sm overflow-hidden border border-gray-100 dark:border-zinc-800">
+                            <div className="bg-white md:rounded md:shadow-sm overflow-hidden border border-gray-100">
                                 <CategoryBanner
                                     image={categoryData.bannerImage}
                                     alt={categoryData.bannerAlt}
@@ -491,7 +491,7 @@ const CategoryPage = () => {
 
                         {/* 2. Sub-Categories (Horizontal list) */}
                         {categoryData.subCategories && categoryData.subCategories.length > 0 && (
-                            <div className="bg-white dark:bg-zinc-900 md:rounded md:shadow-sm py-2 px-1 border border-gray-100 dark:border-zinc-800">
+                            <div className="bg-white md:rounded md:shadow-sm py-2 px-1 border border-gray-100">
                                 <SubCategoryList subCategories={categoryData.subCategories} />
                             </div>
                         )}
@@ -502,7 +502,7 @@ const CategoryPage = () => {
                         {categoryData.promoBanners && categoryData.promoBanners.length > 0 && (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {categoryData.promoBanners.map((banner, index) => (
-                                    <div key={index} className="rounded-lg overflow-hidden shadow-sm border border-gray-100 dark:border-zinc-800">
+                                    <div key={index} className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
                                         <img
                                             src={banner.image}
                                             alt={banner.alt}
@@ -514,9 +514,9 @@ const CategoryPage = () => {
                         )}
 
                         {/* 6. Product Section */}
-                        <div className="bg-white dark:bg-zinc-900 md:rounded md:shadow-sm border border-gray-100 dark:border-zinc-800 p-4">
+                        <div className="bg-white md:rounded md:shadow-sm border border-gray-100 p-4">
                             <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-base md:text-xl font-bold dark:text-white uppercase tracking-tight">
+                                <h2 className="text-base md:text-xl font-bold uppercase tracking-tight">
                                     Explore {categoryData.name}
                                 </h2>
                                 <span className="text-xs text-gray-400 font-medium">({sortedProducts.length} Products)</span>
@@ -531,7 +531,7 @@ const CategoryPage = () => {
                             </div>
 
                             {sortedProducts.length === 0 && (
-                                <div className="p-20 text-center text-gray-500 bg-gray-50 dark:bg-zinc-800 rounded-xl">
+                                <div className="p-20 text-center text-gray-500 bg-gray-50 rounded-xl">
                                     <span className="material-icons text-6xl mb-4 opacity-50">search_off</span>
                                     <p className="text-lg font-bold">No products match your filters.</p>
                                     <button
@@ -553,20 +553,20 @@ const CategoryPage = () => {
             </div >
 
             {/* Sticky Sort/Filter Bar (MOBILE ONLY) */}
-            < div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 h-14 flex z-50" >
+            < div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 h-14 flex z-50" >
                 <button
                     onClick={() => setShowSortModal(true)}
-                    className="flex-1 flex items-center justify-center gap-2 border-r border-gray-100 dark:border-zinc-800 group active:bg-gray-50 dark:active:bg-zinc-800"
+                    className="flex-1 flex items-center justify-center gap-2 border-r border-gray-100 group active:bg-gray-50"
                 >
                     <span className="material-icons text-[18px] text-gray-500">swap_vert</span>
-                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Sort</span>
+                    <span className="text-sm font-bold text-gray-700 uppercase tracking-tight">Sort</span>
                 </button>
                 <button
                     onClick={() => setShowFilterModal(true)}
-                    className="flex-1 flex items-center justify-center gap-2 active:bg-gray-50 dark:active:bg-zinc-800"
+                    className="flex-1 flex items-center justify-center gap-2 active:bg-gray-50"
                 >
                     <span className="material-icons text-[18px] text-gray-500">filter_list</span>
-                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tight">Filter</span>
+                    <span className="text-sm font-bold text-gray-700 uppercase tracking-tight">Filter</span>
                 </button>
             </div >
 
@@ -575,9 +575,9 @@ const CategoryPage = () => {
                 showSortModal && (
                     <div className="fixed inset-0 z-[100] flex items-end justify-center">
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSortModal(false)}></div>
-                        <div className="relative w-full bg-white dark:bg-zinc-900 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden">
-                            <div className="px-6 py-4 border-b dark:border-zinc-800 flex items-center justify-between">
-                                <h3 className="font-bold text-gray-800 dark:text-white uppercase text-xs tracking-widest">Sort By</h3>
+                        <div className="relative w-full bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden">
+                            <div className="px-6 py-4 border-b flex items-center justify-between">
+                                <h3 className="font-bold text-gray-800 uppercase text-xs tracking-widest">Sort By</h3>
                                 <button onClick={() => setShowSortModal(false)} className="material-icons text-gray-400">close</button>
                             </div>
                             <div className="p-2">
@@ -590,7 +590,7 @@ const CategoryPage = () => {
                                     <button
                                         key={option.id}
                                         onClick={() => { setSortBy(option.id); setShowSortModal(false); }}
-                                        className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${sortBy === option.id ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : 'text-gray-600 dark:text-gray-400 active:bg-gray-50'
+                                        className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${sortBy === option.id ? 'bg-blue-50 text-blue-600' : 'text-gray-600 active:bg-gray-50'
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">
@@ -613,9 +613,9 @@ const CategoryPage = () => {
                 showFilterModal && (
                     <div className="fixed inset-0 z-[100]">
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowFilterModal(false)}></div>
-                        <div className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white dark:bg-zinc-900 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
-                            <div className="px-6 py-4 border-b dark:border-zinc-800 flex items-center justify-between">
-                                <h3 className="font-bold text-gray-800 dark:text-white uppercase text-xs tracking-widest">Filters</h3>
+                        <div className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+                            <div className="px-6 py-4 border-b flex items-center justify-between">
+                                <h3 className="font-bold text-gray-800 uppercase text-xs tracking-widest">Filters</h3>
                                 <button onClick={() => setShowFilterModal(false)} className="material-icons text-gray-400">close</button>
                             </div>
 
@@ -631,8 +631,8 @@ const CategoryPage = () => {
                                                     key={category}
                                                     onClick={() => toggleCategory(category)}
                                                     className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all ${selectedCategories.includes(category)
-                                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
-                                                        : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
+                                                        ? 'border-blue-600 bg-blue-50 text-blue-600'
+                                                        : 'border-gray-100 text-gray-600'
                                                         }`}
                                                 >
                                                     {category}
@@ -652,8 +652,8 @@ const CategoryPage = () => {
                                                     key={brand}
                                                     onClick={() => toggleBrand(brand)}
                                                     className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all ${selectedBrands.includes(brand)
-                                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
-                                                        : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
+                                                        ? 'border-blue-600 bg-blue-50 text-blue-600'
+                                                        : 'border-gray-100 text-gray-600'
                                                         }`}
                                                 >
                                                     {brand}
@@ -673,8 +673,8 @@ const CategoryPage = () => {
                                                     key={ram}
                                                     onClick={() => toggleRam(ram)}
                                                     className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all ${selectedRam.includes(ram)
-                                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
-                                                        : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
+                                                        ? 'border-blue-600 bg-blue-50 text-blue-600'
+                                                        : 'border-gray-100 text-gray-600'
                                                         }`}
                                                 >
                                                     {ram}
@@ -699,8 +699,8 @@ const CategoryPage = () => {
                                                 key={option.value}
                                                 onClick={() => setSelectedDiscount(selectedDiscount === option.value ? null : option.value)}
                                                 className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all ${selectedDiscount === option.value
-                                                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
-                                                    : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
+                                                    ? 'border-blue-600 bg-blue-50 text-blue-600'
+                                                    : 'border-gray-100 text-gray-600'
                                                     }`}
                                             >
                                                 {option.label}
@@ -713,14 +713,14 @@ const CategoryPage = () => {
                                     <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-6">Price Range</h4>
                                     <div className="space-y-6">
                                         <div className="flex items-center justify-between px-2">
-                                            <div className="bg-gray-50 dark:bg-zinc-800 px-4 py-2 rounded-lg border dark:border-zinc-700">
+                                            <div className="bg-gray-50 px-4 py-2 rounded-lg border">
                                                 <span className="text-[10px] text-gray-400 block uppercase font-bold">Min</span>
-                                                <span className="font-black text-sm dark:text-white">₹{filterRange[0].toLocaleString()}</span>
+                                                <span className="font-black text-sm">₹{filterRange[0].toLocaleString()}</span>
                                             </div>
-                                            <div className="w-8 h-[2px] bg-gray-200 dark:bg-zinc-800"></div>
-                                            <div className="bg-gray-50 dark:bg-zinc-800 px-4 py-2 rounded-lg border dark:border-zinc-700">
+                                            <div className="w-8 h-[2px] bg-gray-200"></div>
+                                            <div className="bg-gray-50 px-4 py-2 rounded-lg border">
                                                 <span className="text-[10px] text-gray-400 block uppercase font-bold">Max</span>
-                                                <span className="font-black text-sm dark:text-white">₹{filterRange[1].toLocaleString()}</span>
+                                                <span className="font-black text-sm">₹{filterRange[1].toLocaleString()}</span>
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
@@ -734,8 +734,8 @@ const CategoryPage = () => {
                                                     key={r.label}
                                                     onClick={() => setFilterRange(r.range)}
                                                     className={`px-3 py-2.5 rounded-lg border transition-all text-xs font-bold leading-tight ${JSON.stringify(filterRange) === JSON.stringify(r.range)
-                                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 text-blue-600'
-                                                        : 'border-gray-100 dark:border-zinc-800 text-gray-600 dark:text-gray-400'
+                                                        ? 'border-blue-600 bg-blue-50 text-blue-600'
+                                                        : 'border-gray-100 text-gray-600'
                                                         }`}
                                                 >
                                                     {r.label}
@@ -748,7 +748,7 @@ const CategoryPage = () => {
 
                             </div>
 
-                            <div className="p-4 border-t dark:border-zinc-800 bg-white dark:bg-zinc-900 flex gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                            <div className="p-4 border-t bg-white flex gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
                                 <button
                                     onClick={() => {
                                         setFilterRange([0, 100000]);

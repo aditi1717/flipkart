@@ -238,20 +238,23 @@ const OrderDetail = () => {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                                {['Confirmed', 'Shipped', 'Delivered'].map(status => (
-                                    <button
-                                        key={status}
-                                        disabled={order.status === status}
-                                        onClick={() => handleStatusUpdate(status)}
-                                        className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${order.status === status
-                                                ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                                                : 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white shadow-sm'
-                                            }`}
-                                    >
-                                        Mark as {status}
-                                    </button>
-                                ))}
+                            <div className="space-y-3">
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Select New Status</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {['Confirmed', 'Packed', 'Dispatched', 'Out for Delivery', 'Delivered'].map(status => (
+                                        <button
+                                            key={status}
+                                            disabled={order.status === status}
+                                            onClick={() => handleStatusUpdate(status)}
+                                            className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${order.status === status
+                                                    ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white shadow-sm'
+                                                }`}
+                                        >
+                                            {status}
+                                        </button>
+                                    ))}
+                                </div>
                                 <button
                                     onClick={() => {
                                         if (window.confirm('Are you sure you want to cancel this order?')) {
@@ -259,7 +262,7 @@ const OrderDetail = () => {
                                             setUpdating(false);
                                         }
                                     }}
-                                    className="px-4 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white text-xs font-black uppercase tracking-widest transition-all shadow-sm"
+                                    className="w-full mt-2 px-4 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white text-xs font-black uppercase tracking-widest transition-all shadow-sm"
                                 >
                                     Cancel Order
                                 </button>
