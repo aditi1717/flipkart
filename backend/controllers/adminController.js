@@ -5,7 +5,9 @@ import generateToken from '../utils/generateToken.js';
 // @route   POST /api/admin/login
 // @access  Public
 export const authAdmin = async (req, res) => {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+
     const admin = await Admin.findOne({ email });
 
     if (admin && (await admin.matchPassword(password))) {
