@@ -187,6 +187,29 @@ const Header = () => {
                                 <span className={`text-[10px] md:text-sm font-bold transition-colors ${active ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
                                     {cat.name}
                                 </span>
+
+                                {/* Hover Subcategories Dropdown */}
+                                {(cat.children?.length > 0 || cat.subCategories?.length > 0) && (
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 hidden md:group-hover:block z-50 animate-in fade-in slide-in-from-top-2">
+                                        {/* Little Triangle Pointer */}
+                                        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45 border-t border-l border-gray-100"></div>
+                                        
+                                        <div className="py-2 relative bg-white rounded-xl">
+                                            {(cat.children || cat.subCategories).map((sub) => (
+                                                <div 
+                                                    key={sub.id || sub._id}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate(`/category/${cat.name}/${sub.name}`);
+                                                    }}
+                                                    className="px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors text-center whitespace-normal"
+                                                >
+                                                    {sub.name}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         );
                     })}

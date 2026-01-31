@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MdClose } from 'react-icons/md';
+import toast from 'react-hot-toast';
 import useSubCategoryStore from '../../store/subCategoryStore';
 import useCategoryStore from '../../store/categoryStore';
 
@@ -92,11 +93,24 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
         // I will assume for now `image` is a URL string. I'll pass `formData.image`.
 
         if (subCategory?.id || subCategory?._id) {
-            await updateSubCategory(subCategory._id || subCategory.id, data);
+            try {
+                await updateSubCategory(subCategory._id || subCategory.id, data);
+                toast.success('SubCategory updated successfully');
+                onClose();
+            } catch (error) {
+                console.error(error);
+                toast.error(error.response?.data?.message || 'Failed to update subcategory');
+            }
         } else {
-            await addSubCategory(data);
+            try {
+                await addSubCategory(data);
+                toast.success('SubCategory created successfully');
+                onClose();
+            } catch (error) {
+                console.error(error);
+                toast.error(error.response?.data?.message || 'Failed to create subcategory');
+            }
         }
-        onClose();
     };
 
 

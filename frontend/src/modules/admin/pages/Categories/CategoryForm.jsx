@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MdClose } from 'react-icons/md';
+import toast from 'react-hot-toast';
 import useCategoryStore from '../../store/categoryStore';
 
 const CategoryForm = ({ category, onClose }) => {
@@ -36,7 +37,7 @@ const CategoryForm = ({ category, onClose }) => {
         }
     }, [category]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const data = new FormData();
@@ -50,15 +51,21 @@ const CategoryForm = ({ category, onClose }) => {
              data.append('icon', formData.image);
         }
 
-        if (category?.id) {
-            // Update existing category
-            updateCategory(category.id, data);
-        } else {
-            // Add new category
-            addCategory(data);
+        try {
+            if (category?.id) {
+                // Update existing category
+                await updateCategory(category.id, data);
+                toast.success('Category updated successfully');
+            } else {
+                // Add new category
+                await addCategory(data);
+                toast.success('Category created successfully');
+            }
+            onClose();
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || 'Failed to save category');
         }
-
-        onClose();
     };
 
     const handleChange = (e) => {
