@@ -3,17 +3,8 @@ import Otp from '../models/Otp.js';
 import Order from '../models/Order.js';
 
 // SMS India HUB Configuration
-const SMS_INDIA_HUB_API_KEY = process.env.SMS_INDIA_HUB_API_KEY;
-const SMS_INDIA_HUB_SENDER_ID = process.env.SMS_INDIA_HUB_SENDER_ID;
-const SMS_INDIA_HUB_DLT_TEMPLATE_ID = process.env.SMS_INDIA_HUB_DLT_TEMPLATE_ID;
-const SMS_INDIA_HUB_API_URL = process.env.SMS_INDIA_HUB_API_URL || 'http://cloud.smsindiahub.in/vendorsms/pushsms.aspx';
+// SMS India HUB Configuration accessed dynamically to handle ESM loading order
 const API_TIMEOUT = 30000; // 30 seconds
-
-if (!SMS_INDIA_HUB_API_KEY || !SMS_INDIA_HUB_SENDER_ID) {
-    if (process.env.NODE_ENV === 'production' || process.env.USE_MOCK_OTP === 'false') {
-        console.warn('SMS India HUB credentials are not fully set in environment variables');
-    }
-}
 
 /**
  * Generate numeric OTP
@@ -48,7 +39,7 @@ function normalizeMobileNumber(mobile) {
  * Build DLT-compliant message
  */
 function buildOtpMessage(otp) {
-    const appName = process.env.APP_NAME || 'Geeta Stores';
+    const appName = process.env.APP_NAME || 'Indian Kart';
     return `Welcome to the ${appName} powered by SMSINDIAHUB. Your OTP for registration is ${otp}`;
 }
 
@@ -85,26 +76,35 @@ function handleSmsResponse(responseData) {
  * Send SMS via SMS India HUB API
  */
 async function sendSmsViaApi(mobile, message) {
-    if (!SMS_INDIA_HUB_API_KEY || !SMS_INDIA_HUB_SENDER_ID) {
+    const API_KEY = process.env.SMS_INDIA_HUB_API_KEY;
+    const SENDER_ID = process.env.SMS_INDIA_HUB_SENDER_ID;
+    const TEMPLATE_ID = process.env.SMS_INDIA_HUB_DLT_TEMPLATE_ID;
+    const API_URL = process.env.SMS_INDIA_HUB_API_URL || 'http://cloud.smsindiahub.in/vendorsms/pushsms.aspx';
+    const GWID = process.env.SMS_INDIA_HUB_GWID || '2';
+
+    if (!API_KEY || !SENDER_ID) {
         throw new Error('SMS India HUB credentials are missing. Please check environment variables.');
     }
 
     const cleanMobile = normalizeMobileNumber(mobile);
 
     const params = {
-        APIKey: SMS_INDIA_HUB_API_KEY.trim(),
+        APIKey: API_KEY.trim(),
         msisdn: cleanMobile,
-        sid: SMS_INDIA_HUB_SENDER_ID.trim(),
+        sid: SENDER_ID.trim(),
         msg: message,
         fl: '0',
-        gwid: '2',
+        gwid: GWID,
     };
 
-    if (SMS_INDIA_HUB_DLT_TEMPLATE_ID && SMS_INDIA_HUB_DLT_TEMPLATE_ID.trim()) {
-        params.DLT_TE_ID = SMS_INDIA_HUB_DLT_TEMPLATE_ID.trim();
+    if (TEMPLATE_ID && TEMPLATE_ID.trim()) {
+        params.DLT_TE_ID = TEMPLATE_ID.trim();
     }
 
-    const response = await axios.get(SMS_INDIA_HUB_API_URL, {
+    // DEBUG LOG
+    console.log('[SMS] Sending via API:', { mobile: cleanMobile, sender: SENDER_ID, url: API_URL });
+
+    const response = await axios.get(API_URL, {
         params,
         paramsSerializer: (params) => {
             return Object.keys(params)
@@ -113,6 +113,8 @@ async function sendSmsViaApi(mobile, message) {
         },
         timeout: API_TIMEOUT,
     });
+
+    console.log('[SMS] API Response:', response.data);
 
     handleSmsResponse(response.data);
 }
@@ -176,7 +178,11 @@ function isSpecialBypass(mobile) {
  * Check if mock mode should be used
  */
 function isMockMode() {
-    return process.env.USE_MOCK_OTP === 'true' || !SMS_INDIA_HUB_API_KEY || !SMS_INDIA_HUB_SENDER_ID;
+    const API_KEY = process.env.SMS_INDIA_HUB_API_KEY;
+    const SENDER_ID = process.env.SMS_INDIA_HUB_SENDER_ID;
+    // Log status for clarity
+    // console.log('[DEBUG] Mock Check:', { useMock: process.env.USE_MOCK_OTP, hasKey: !!API_KEY, hasSender: !!SENDER_ID });
+    return process.env.USE_MOCK_OTP === 'true' || !API_KEY || !SENDER_ID;
 }
 
 /**
@@ -333,17 +339,22 @@ export async function generateDeliveryOtp(orderId, customerPhone) {
         await order.save();
 
         try {
-            const TWOFACTOR_API_KEY = process.env.TWOFACTOR_API_KEY;
-
-            if (TWOFACTOR_API_KEY && TWOFACTOR_API_KEY !== 'your_2factor_api_key' && process.env.USE_MOCK_OTP !== 'true') {
-                const url = `https://2factor.in/API/V1/${TWOFACTOR_API_KEY}/SMS/${customerPhone}/${otp}/DELIVERY_OTP`;
-                await axios.get(url);
-                console.log(`Delivery OTP ${otp} sent to ${customerPhone} for order ${orderId}`);
+            // Use SMS India HUB for Delivery OTPs as well
+            const appName = process.env.APP_NAME || 'Indian Kart';
+            const message = `Welcome to the ${appName} powered by SMSINDIAHUB. Your Delivery OTP for Order #${orderId.slice(-6).toUpperCase()} is ${otp}`;
+            
+            if (process.env.USE_MOCK_OTP !== 'true') {
+                 await sendSmsViaApi(customerPhone, message);
+                 console.log(`Delivery OTP sent to ${customerPhone} for order ${orderId}`);
             } else {
-                console.log(`[MOCK MODE] Delivery OTP ${otp} for order ${orderId} to ${customerPhone}`);
+                 console.log(`[MOCK MODE] Delivery OTP ${otp} for order ${orderId} to ${customerPhone}`);
             }
+
         } catch (smsError) {
             console.error('Error sending delivery OTP SMS:', smsError.message);
+            // Don't fail the whole request if SMS fails, just log it? 
+            // Or maybe we should throw to let the frontend know. 
+            // For now, consistent with previous code, we log it but improved logging.
         }
 
         return { success: true, message: 'Delivery OTP sent successfully to customer' };

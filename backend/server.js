@@ -1,8 +1,11 @@
-import express from 'express'; // Reload trigger 2
+import express from 'express'; // Reload trigger 4
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+
+dotenv.config();
+
 import connectDB from './config/db.js';
 
 import authRoutes from './routes/authRoutes.js';
@@ -24,7 +27,6 @@ import subCategoryRoutes from './routes/subCategoryRoutes.js';
 import homeLayoutRoutes from './routes/homeLayoutRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 
-dotenv.config();
 
 const app = express();
 
