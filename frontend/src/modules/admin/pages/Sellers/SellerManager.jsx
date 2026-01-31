@@ -19,7 +19,7 @@ const SellerManager = () => {
         const matchesStatus = filterStatus === 'All' ? true : seller.status === filterStatus.toLowerCase();
         const matchesSearch =
             seller.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            seller.registrationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            seller.sellerRegNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
             seller.contactNumber.includes(searchTerm);
 
         return matchesStatus && matchesSearch;
@@ -115,13 +115,13 @@ const SellerManager = () => {
                         ) : (
                             paginatedSellers.map(seller => (
                                 <tr key={seller.id} className="hover:bg-gray-50 transition">
-                                    <td className="p-4 font-mono font-medium text-blue-600">{seller.registrationNumber}</td>
+                                    <td className="p-4 font-mono font-medium text-blue-600">{seller.sellerRegNumber}</td>
                                     <td className="p-4 font-bold text-gray-800">{seller.brandName}</td>
                                     <td className="p-4">
                                         <p className="flex items-center gap-1"><MdPhone size={14} className="text-gray-400" /> {seller.contactNumber}</p>
-                                        <p className="flex items-center gap-1 text-xs text-gray-500 mt-0.5"><MdEmail size={14} className="text-gray-400" /> {seller.emailId}</p>
+                                        <p className="flex items-center gap-1 text-xs text-gray-500 mt-0.5"><MdEmail size={14} className="text-gray-400" /> {seller.email}</p>
                                     </td>
-                                    <td className="p-4 font-mono">{seller.gstNumber}</td>
+                                    <td className="p-4 font-mono">{seller.gst}</td>
                                     <td className="p-4 text-center">
                                         <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${getStatusColor(seller.status)}`}>
                                             {seller.status}
@@ -204,7 +204,7 @@ const SellerManager = () => {
                             <div>
                                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Seller Registration Number</label>
                                 <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-mono font-medium">
-                                    {selectedSeller.registrationNumber}
+                                    {selectedSeller.sellerRegNumber}
                                 </div>
                             </div>
 
@@ -227,7 +227,7 @@ const SellerManager = () => {
                                 <div>
                                     <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Email ID</label>
                                     <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-medium truncate" title={selectedSeller.emailId}>
-                                        {selectedSeller.emailId}
+                                        {selectedSeller.email}
                                     </div>
                                 </div>
                             </div>
@@ -236,7 +236,7 @@ const SellerManager = () => {
                             <div>
                                 <label className="text-xs font-bold text-gray-400 uppercase block mb-1">GST Number</label>
                                 <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 font-mono font-medium flex justify-between items-center">
-                                    {selectedSeller.gstNumber}
+                                    {selectedSeller.gst}
                                     <MdContentCopy className="text-gray-400 cursor-pointer hover:text-blue-500" title="Copy" />
                                 </div>
                             </div>

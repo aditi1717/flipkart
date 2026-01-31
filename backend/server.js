@@ -23,6 +23,7 @@ import homeSectionRoutes from './routes/homeSectionRoutes.js';
 import contentPageRoutes from './routes/contentPageRoutes.js';
 import subCategoryRoutes from './routes/subCategoryRoutes.js';
 import homeLayoutRoutes from './routes/homeLayoutRoutes.js';
+import sellerRequestRoutes from './routes/sellerRequestRoutes.js';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use('/api/home-sections', homeSectionRoutes);
 app.use('/api/pages', contentPageRoutes);
 app.use('/api/subcategories', subCategoryRoutes);
 app.use('/api/home-layout', homeLayoutRoutes);
+app.use('/api/seller-requests', sellerRequestRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

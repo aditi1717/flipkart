@@ -8,6 +8,7 @@ const categorySchema = mongoose.Schema({
     bannerAlt: { type: String },
     bannerImage: { type: String },
     bannerAlt: { type: String },
+    active: { type: Boolean, default: true },
     // subCategories removed - now using separate SubCategory model
 }, {
     timestamps: true,

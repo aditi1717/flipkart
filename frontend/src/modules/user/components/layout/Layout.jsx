@@ -39,7 +39,7 @@ const Layout = () => {
                     <Header />
                 </div>
             )}
-            <main className={`flex-1 ${!isPDP && 'pb-20'} md:pb-0 w-full mx-auto md:max-w-[1440px] transition-all duration-300
+            <main className={`flex-1 flex flex-col ${!isPDP && 'pb-20'} md:pb-0 w-full transition-all duration-300
                 ${isStandalonePage ? 'pt-0' : isSpecialPage ? 'pt-[64px] md:pt-[110px]' : 'pt-[220px] md:pt-[180px]'}`}>
                 <AnimatePresence mode="wait">
                     <motion.div
@@ -48,6 +48,7 @@ const Layout = () => {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ duration: 0.2 }}
+                        className="flex-1 flex flex-col"
                     >
                         <Outlet />
                     </motion.div>

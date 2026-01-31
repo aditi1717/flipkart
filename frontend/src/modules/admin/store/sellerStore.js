@@ -8,7 +8,7 @@ const useSellerStore = create((set) => ({
     fetchSellers: async () => {
         set({ isLoading: true });
         try {
-            const { data } = await API.get('/sellers');
+            const { data } = await API.get('/seller-requests');
             set({ sellers: data, isLoading: false });
         } catch (error) {
             set({ isLoading: false });
@@ -18,7 +18,7 @@ const useSellerStore = create((set) => ({
     updateSellerStatus: async (id, status) => {
         set({ isLoading: true });
         try {
-            const { data } = await API.put(`/sellers/${id}`, { status });
+            const { data } = await API.put(`/seller-requests/${id}`, { status });
             set((state) => ({
                 sellers: state.sellers.map(s => s.id === id ? data : s),
                 isLoading: false
@@ -28,16 +28,35 @@ const useSellerStore = create((set) => ({
         }
     },
 
+    approveSeller: async (id) => {
+        const { updateSellerStatus } = useSellerStore.getState();
+        await updateSellerStatus(id, 'approved');
+    },
+
+    rejectSeller: async (id) => {
+        const { updateSellerStatus } = useSellerStore.getState();
+        await updateSellerStatus(id, 'rejected');
+    },
+
     deleteSeller: async (id) => {
         set({ isLoading: true });
         try {
-            await API.delete(`/sellers/${id}`);
+            await API.delete(`/seller-requests/${id}`);
             set((state) => ({
                 sellers: state.sellers.filter(s => s.id !== id),
                 isLoading: false
             }));
         } catch (error) {
             set({ isLoading: false });
+        }
+    },
+
+    submitSellerRequest: async (formData) => {
+        try {
+            await API.post('/seller-requests', formData);
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.response?.data?.message || 'Submission failed' };
         }
     }
 }));

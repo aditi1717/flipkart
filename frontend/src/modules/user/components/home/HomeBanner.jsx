@@ -11,8 +11,8 @@ const HomeBanner = ({ banner }) => {
     // --- Hero Banner Style ---
     if (banner.type === 'hero') {
         return (
-            <section className="mt-4 md:mt-8 px-4 md:px-0">
-                <div className={`relative rounded-2xl overflow-hidden h-[180px] md:h-[300px] shadow-xl border border-white/5 group cursor-pointer ${banner.content.backgroundColor || 'bg-gradient-to-br from-[#0a0a1a] via-[#1a1a3a] to-[#0a0a1a]'}`}>
+            <section className="w-full mt-4 md:mt-8">
+                <div className={`relative md:rounded-2xl overflow-hidden h-[180px] md:h-[300px] shadow-xl border border-white/5 group cursor-pointer ${banner.content.backgroundColor || 'bg-gradient-to-br from-[#0a0a1a] via-[#1a1a3a] to-[#0a0a1a]'}`}>
                     <div className="absolute inset-0 flex">
                         <div className="w-1/2 md:w-2/5 p-5 md:pl-16 flex flex-col justify-center z-10">
                             {(banner.content.brand || banner.content.brandTag) && (
@@ -63,8 +63,8 @@ const HomeBanner = ({ banner }) => {
     // --- Card Style (Visual Image with Text Overlay) ---
     if (banner.type === 'card') {
         return (
-            <section className="mt-6 md:mt-8 px-4 md:px-0">
-                <div className="rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm cursor-pointer active:scale-[0.98] transition-transform group relative h-[180px] md:h-[300px]">
+            <section className="w-full mt-6 md:mt-8">
+                <div className="md:rounded-2xl overflow-hidden border border-gray-100 shadow-sm cursor-pointer active:scale-[0.98] transition-transform group relative h-[180px] md:h-[300px]">
                     <img
                         src={banner.content.imageUrl}
                         alt={banner.content.title}
@@ -92,20 +92,20 @@ const HomeBanner = ({ banner }) => {
     // --- Product Feature Style (Sponsored / Special Layout) ---
     if (banner.type === 'product_feature') {
         return (
-            <section className="mt-8 md:mt-10 px-4 md:px-0">
-                 <div className="flex items-center gap-2 mb-3">
-                    <h3 className="text-lg md:text-2xl font-bold dark:text-white">Sponsored</h3>
+            <section className="w-full mt-2 md:mt-10">
+                 <div className="flex items-center gap-2 mb-3 px-4 md:px-0">
+                    <h3 className="text-lg md:text-2xl font-bold text-gray-900">Sponsored</h3>
                 </div>
-                <div className={`relative rounded-3xl overflow-hidden h-[200px] md:h-[360px] cursor-pointer group hover:shadow-xl transition-shadow ${banner.content.backgroundColor || 'bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-900 dark:to-blue-900'} border border-blue-200 dark:border-blue-800`}>
+                <div className={`relative md:rounded-3xl overflow-hidden h-[200px] md:h-[360px] cursor-pointer group hover:shadow-xl transition-shadow ${banner.content.backgroundColor || 'bg-gradient-to-b from-white to-blue-100'} border-y md:border border-blue-200`}>
                     <div className="absolute inset-0 p-6 md:p-12 flex items-center">
                         <div className="w-1/2 md:w-1/3 z-10">
                             {banner.content.brand && (
                                 <h4 className="text-[#e67e22] text-xs md:text-sm font-black tracking-widest uppercase mb-1">{banner.content.brand}</h4>
                             )}
-                            <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-tight mb-2 line-clamp-2">
+                            <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-gray-900 leading-tight mb-2 line-clamp-2">
                                 {banner.content.title}
                             </h2>
-                            <p className="text-xs md:text-lg font-bold text-gray-600 dark:text-gray-300 line-clamp-2">
+                            <p className="text-xs md:text-lg font-bold text-gray-600 line-clamp-2">
                                 {banner.content.description}
                             </p>
                             <button className="hidden md:block mt-6 bg-gray-900 text-white px-6 py-2 rounded-full font-bold hover:bg-black transition-colors">
@@ -140,13 +140,13 @@ const HomeBanner = ({ banner }) => {
     // --- Slideshow Style ---
     if (banner.type === 'slides' && banner.slides?.length > 0) {
         return (
-            <section className="mt-4 md:mt-8 px-4 md:px-0">
+            <section className="w-full mt-4 md:mt-8">
                 <Swiper
                     modules={[Autoplay, Pagination, Navigation]}
                     autoplay={{ delay: 3000, disableOnInteraction: false }}
                     pagination={{ clickable: true }}
                     loop={true}
-                    className="rounded-2xl overflow-hidden shadow-sm"
+                    className="md:rounded-2xl overflow-hidden shadow-sm"
                 >
                     {banner.slides.map((slide, index) => (
                         <SwiperSlide key={index}>

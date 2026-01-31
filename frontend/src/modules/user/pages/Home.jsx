@@ -25,15 +25,19 @@ const Home = () => {
     }
 
     return (
-        <div className="bg-background-light dark:bg-background-dark pb-20 pt-1 min-h-screen">
-            <div className="max-w-[1440px] mx-auto px-4 md:px-0 space-y-6 md:space-y-8">
+        <div className="bg-gradient-to-b from-white to-blue-100 pb-20 pt-1 flex-1 flex flex-col">
+            <div className="w-full space-y-4 md:space-y-8">
                 
                 {/* Dynamic Content Stream */}
                 {layout.map((item, index) => {
                     if (item.type === 'banner') {
                         const banner = banners.find(b => (b.id || b._id) === item.referenceId);
                         if (!banner) return null;
-                        return <HomeBanner key={`${item.type}-${index}`} banner={banner} />;
+                        return (
+                            <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto px-4 md:px-0">
+                                <HomeBanner banner={banner} />
+                            </div>
+                        );
                     }
 
                     if (item.type === 'section') {
@@ -46,28 +50,30 @@ const Home = () => {
                         
                         if (isDeal && section.products.length <= 4) {
                              return (
+                             <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full">
                                 <DealGrid
-                                    key={`${item.type}-${index}`}
                                     title={section.title}
                                     items={section.products}
-                                    bgColor="bg-white" // Default, maybe add color to HomeSection model later
-                                    darkBgColor="dark:bg-gray-800"
+                                    bgColor="bg-white"
+                                    darkBgColor=""
                                     titleKey="name"
                                     subtitleKey="price" // Or discount if available
                                     containerClass="mt-4"
                                     showArrow={true}
                                 />
+                             </div>
                              );
                         }
 
                         return (
-                            <ProductSection
-                                key={`${item.type}-${index}`}
-                                title={section.title}
-                                products={section.products}
-                                containerClass="mt-4"
-                                onViewAll={() => navigate(`/products?search=${section.title}`)}
-                            />
+                            <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full">
+                                <ProductSection
+                                    title={section.title}
+                                    products={section.products}
+                                    containerClass="mt-4"
+                                    onViewAll={() => navigate(`/products?search=${section.title}`)}
+                                />
+                            </div>
                         );
                     }
 

@@ -94,23 +94,18 @@ const CategoryList = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => toggleCategoryStatus(category.id)}
-                            className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${category.active
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-600'
-                                }`}
+                        {/* Visual Toggle Switch */}
+                        <div
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCategoryStatus(category.id);
+                            }}
+                            className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${category.active ? 'bg-green-500' : 'bg-gray-300'}`}
                         >
-                            {category.active ? (
-                                <>
-                                    <MdCheckCircle size={14} /> Active
-                                </>
-                            ) : (
-                                <>
-                                    <MdCancel size={14} /> Inactive
-                                </>
-                            )}
-                        </button>
+                            <div
+                                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${category.active ? 'translate-x-5' : 'translate-x-0'}`}
+                            />
+                        </div>
 
                         <button
                             onClick={() => {

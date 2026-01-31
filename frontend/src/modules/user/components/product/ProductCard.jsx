@@ -15,7 +15,7 @@ const ProductCard = ({ product, footerText }) => {
             className="flex flex-col h-full cursor-pointer group"
             onClick={() => navigate(`/product/${product.id}`)}
         >
-            <div className="relative aspect-square mb-2 bg-[#f8f8f8] dark:bg-gray-900 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-50 dark:border-gray-800 shadow-sm">
+            <div className="relative aspect-square mb-2 bg-[#f8f8f8] rounded-2xl overflow-hidden flex items-center justify-center border border-gray-50 shadow-sm">
                 <img
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -28,7 +28,7 @@ const ProductCard = ({ product, footerText }) => {
 
                 {/* Rating Badge - Bottom Left */}
                 {product.rating && (
-                    <div className="absolute bottom-2 left-2 bg-white dark:bg-gray-800 px-1.5 py-0.5 rounded-md flex items-center gap-0.5 text-[10px] md:text-xs font-bold shadow-sm border border-black/5 leading-none">
+                    <div className="absolute bottom-2 left-2 bg-white px-1.5 py-0.5 rounded-md flex items-center gap-0.5 text-[10px] md:text-xs font-bold shadow-sm border border-black/5 leading-none">
                         {product.rating} <span className="material-icons text-green-700 md:text-[12px]" style={{ fontSize: '10px' }}>star</span>
                     </div>
                 )}
@@ -43,13 +43,13 @@ const ProductCard = ({ product, footerText }) => {
 
             <div className="px-1 flex flex-col flex-1">
                 {/* Brand / Title */}
-                <h4 className="text-[12px] md:text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1 mb-0.5">
+                <h4 className="text-[12px] md:text-sm font-bold text-gray-900 line-clamp-1 mb-0.5">
                     {product.brand || product.name.split(' ')[0]} {product.name}
                 </h4>
 
                 {/* Discount Percentage */}
                 {discountPercent && (
-                    <p className="text-[11px] md:text-xs font-bold text-green-700 dark:text-green-500 mb-0.5 uppercase">
+                    <p className="text-[11px] md:text-xs font-bold text-green-700 mb-0.5 uppercase">
                         {discountPercent}
                     </p>
                 )}
@@ -59,11 +59,11 @@ const ProductCard = ({ product, footerText }) => {
                     {product.originalPrice && (
                         <span className="text-[12px] md:text-sm text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
                     )}
-                    <span className="text-[14px] md:text-lg font-bold text-gray-900 dark:text-white">₹{product.price.toLocaleString()}</span>
+                    <span className="text-[14px] md:text-lg font-bold text-gray-900">₹{product.price.toLocaleString()}</span>
                 </div>
 
                 {/* Offer/Footer Text */}
-                <p className="text-[11px] md:text-xs font-bold text-blue-600 dark:text-blue-400 line-clamp-1">
+                <p className="text-[11px] md:text-xs font-bold text-blue-600 line-clamp-1">
                     {displayFooterText}
                 </p>
             </div>

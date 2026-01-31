@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MdArrowBack, MdClose } from 'react-icons/md';
 import { useCartStore } from '../store/cartStore';
@@ -7,7 +7,11 @@ import useCouponStore from '../../admin/store/couponStore';
 const Checkout = () => {
     const navigate = useNavigate();
     const { cart, addresses, placeOrder, getTotalPrice, addAddress, appliedCoupon, applyCoupon, removeCoupon } = useCartStore();
-    const { coupons } = useCouponStore(); // Get coupons from the store
+    const { coupons, fetchCoupons } = useCouponStore(); // Get coupons from the store
+
+    useEffect(() => {
+        fetchCoupons();
+    }, [fetchCoupons]);
 
     const [step, setStep] = useState(2);
     const [selectedAddress, setSelectedAddress] = useState(addresses[0]?.id || null);

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MdArrowBack } from 'react-icons/md';
+import useSellerStore from '../../admin/store/sellerStore';
+import { toast } from 'react-hot-toast';
 
 const SellerRegistration = () => {
     const navigate = useNavigate();
+    const { submitSellerRequest } = useSellerStore();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         contactNumber: '',
         email: '',
@@ -16,12 +20,19 @@ const SellerRegistration = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Here you would typically send the data to a backend
-        console.log('Seller Registration Data:', formData);
-        alert('Registration Submitted Successfully! We will contact you soon.');
-        navigate('/');
+        setIsSubmitting(true);
+        
+        const result = await submitSellerRequest(formData);
+        
+        if (result.success) {
+            toast.success('Registration Submitted Successfully! We will contact you soon.');
+            navigate('/');
+        } else {
+            toast.error(result.message);
+        }
+        setIsSubmitting(false);
     };
 
     return (
@@ -105,9 +116,17 @@ const SellerRegistration = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-600/30 active:scale-95 transition-all mt-4"
+                            disabled={isSubmitting}
+                            className={`w-full bg-blue-600 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-600/30 active:scale-95 transition-all mt-4 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
-                            Submit Application
+                            {isSubmitting ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Submitting...
+                                </div>
+                            ) : (
+                                'Submit Application'
+                            )}
                         </button>
                     </form>
                 </div>

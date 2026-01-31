@@ -50,6 +50,7 @@ export const createCategory = async (req, res) => {
             icon,
             bannerImage,
             bannerAlt,
+            active: req.body.active !== undefined ? req.body.active : true,
             subCategories
         });
 
@@ -80,6 +81,7 @@ export const updateCategory = async (req, res) => {
             if (icon) category.icon = icon;
             if (bannerImage) category.bannerImage = bannerImage;
             category.bannerAlt = req.body.bannerAlt || category.bannerAlt;
+            if (req.body.active !== undefined) category.active = req.body.active;
             
             if (req.body.subCategories) {
                  let subs = req.body.subCategories;

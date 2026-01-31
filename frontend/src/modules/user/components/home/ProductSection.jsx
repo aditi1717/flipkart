@@ -28,16 +28,16 @@ const ProductSection = ({
         <section className={`${containerClass}`}>
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <h3 className="text-[17px] md:text-2xl font-bold dark:text-white">{title}</h3>
+                    <h3 className="text-[17px] md:text-2xl font-bold text-gray-900">{title}</h3>
                     {titleBadge && (
-                        <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                        <span className="bg-gray-100 text-gray-500 text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
                             {titleBadge}
                         </span>
                     )}
                 </div>
                 <button
                     onClick={onViewAll}
-                    className="bg-gray-900 dark:bg-gray-700 text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center hover:bg-gray-700 transition-colors"
+                    className="bg-blue-600 text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center hover:bg-blue-700 transition-colors"
                 >
                     <span className="material-icons text-white text-lg">arrow_forward</span>
                 </button>
@@ -48,9 +48,9 @@ const ProductSection = ({
                     {/* Left Scroll Button */}
                     <button
                         onClick={() => scroll('left')}
-                        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-zinc-800 rounded-full shadow-lg items-center justify-center border border-gray-100 dark:border-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 -ml-5"
+                        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg items-center justify-center border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 -ml-5"
                     >
-                        <span className="material-icons text-gray-700 dark:text-gray-300">chevron_left</span>
+                        <span className="material-icons text-gray-700">chevron_left</span>
                     </button>
 
                     <div ref={scrollRef} className="flex overflow-x-auto gap-3 md:gap-6 no-scrollbar pb-2 -mx-1 px-1 scroll-smooth">
@@ -64,9 +64,9 @@ const ProductSection = ({
                     {/* Right Scroll Button */}
                     <button
                         onClick={() => scroll('right')}
-                        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-zinc-800 rounded-full shadow-lg items-center justify-center border border-gray-100 dark:border-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 -mr-5"
+                        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg items-center justify-center border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 -mr-5"
                     >
-                        <span className="material-icons text-gray-700 dark:text-gray-300">chevron_right</span>
+                        <span className="material-icons text-gray-700">chevron_right</span>
                     </button>
                 </div>
             ) : (

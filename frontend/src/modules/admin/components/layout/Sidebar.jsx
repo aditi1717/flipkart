@@ -38,7 +38,7 @@ const Sidebar = () => {
         { name: 'Coupons & Offers', icon: MdLocalOffer, path: '/admin/coupons' },
         { name: 'Play (Reels)', icon: MdPlayCircle, path: '/admin/play' },
         { name: 'Home Sections', icon: MdViewAgenda, path: '/admin/content/home' },
-        { name: 'Home Banners', icon: MdViewCarousel, path: '/admin/content/banners' },
+        // { name: 'Home Banners', icon: MdViewCarousel, path: '/admin/content/banners' },
         { name: 'Content Pages', icon: MdDescription, path: '/admin/pages' },
         { name: 'Support Requests', icon: MdSupportAgent, path: '/admin/support' },
         { name: 'Settings', icon: MdSettings, path: '/admin/settings' },
