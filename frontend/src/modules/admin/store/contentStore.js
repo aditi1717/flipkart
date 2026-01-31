@@ -25,10 +25,20 @@ export const useContentStore = create((set, get) => ({
         // Optimistic update
         set({ homeLayout: newLayoutItems });
         try {
-            await API.put('/home-layout', { items: newLayoutItems });
+            // Clean items: Only send valid _id if it's from MongoDB, otherwise strip it
+            const cleanedItems = newLayoutItems.map(item => {
+                const { _id, type, referenceId } = item;
+                if (_id && String(_id).startsWith('temp-')) {
+                    return { type, referenceId };
+                }
+                return { _id, type, referenceId };
+            });
+            await API.put('/home-layout', { items: cleanedItems });
+            
+            // Re-fetch to get real DB IDs for newly added items
+            get().fetchHomeLayout();
         } catch (error) {
             console.error("Failed to update home layout:", error);
-            // Revert? Or just show error toast
         }
     },
 

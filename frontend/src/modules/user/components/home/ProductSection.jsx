@@ -5,7 +5,7 @@ const ProductSection = ({
     title,
     subtitle,
     titleBadge,
-    products,
+    products = [],
     onViewAll,
     containerClass = "mt-6",
     isScrollable = true,
@@ -13,8 +13,6 @@ const ProductSection = ({
 }) => {
     const scrollRef = React.useRef(null);
     const skeletonItems = [1, 2, 3, 4, 5, 6];
-
-    if (!loading && (!products || products.length === 0)) return null;
 
     const scroll = (direction) => {
         if (scrollRef.current) {

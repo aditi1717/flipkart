@@ -107,7 +107,9 @@ const MyOrders = () => {
 
                 {!loading && orders.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 px-10 text-center bg-white mx-4 md:mx-0 rounded-xl shadow-lg border border-blue-100">
-                        <img src="https://rukminim2.flixcart.com/www/800/800/promos/16/05/2019/d405a710-1043-4977-88f2-fdc95bede36f.png?q=90" alt="empty" className="w-48 mb-6 opacity-80" />
+                        <div className="w-24 h-24 md:w-32 md:h-32 bg-indigo-50 rounded-full flex items-center justify-center mb-6 shadow-inner ring-8 ring-indigo-50/50">
+                            <span className="material-icons text-indigo-600 text-6xl md:text-7xl">receipt_long</span>
+                        </div>
                         <h2 className="text-2xl font-bold mb-2 text-gray-800">You haven't placed any orders yet!</h2>
                         <p className="text-gray-600 text-base mb-6">Start shopping to see your orders here.</p>
                         <button onClick={() => navigate('/')} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-3.5 rounded-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">

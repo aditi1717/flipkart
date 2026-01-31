@@ -31,7 +31,7 @@ const Home = () => {
                 {/* Dynamic Content Stream */}
                 {layout.map((item, index) => {
                     if (item.type === 'banner') {
-                        const banner = banners.find(b => String(b._id || b.id) === String(item.referenceId));
+                        const banner = banners.find(b => String(b._id) === String(item.referenceId) || String(b.id) === String(item.referenceId));
                         if (!banner) return null;
                         return (
                             <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto px-4 md:px-0">
@@ -42,18 +42,19 @@ const Home = () => {
 
                     if (item.type === 'section') {
                         const section = sections.find(s => String(s.id) === String(item.referenceId));
-                        if (!section || !section.products || section.products.length === 0) return null;
+                        if (!section) return null;
 
                         // Decide layout based on product count or defaults
                         // Use DealGrid for specifically "Deal" types or small sets, otherwise ProductSection slider
                         const isDeal = section.title.toLowerCase().includes('deal') || section.title.toLowerCase().includes('find');
+                        const productCount = section.products?.length || 0;
                         
-                        if (isDeal && section.products.length <= 4) {
+                        if (isDeal && productCount <= 4) {
                              return (
                              <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full">
                                 <DealGrid
                                     title={section.title}
-                                    items={section.products}
+                                    items={section.products || []}
                                     bgColor="bg-white"
                                     darkBgColor=""
                                     titleKey="name"

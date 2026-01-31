@@ -165,7 +165,12 @@ const HomeBanner = ({ banner }) => {
         );
     }
 
-    return null;
+    // Fallback for missing slides or unknown type
+    return (
+        <div className="w-full h-24 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center text-gray-400 text-xs font-bold uppercase tracking-widest mt-4">
+            Banner Content Coming Soon ({banner.type})
+        </div>
+    );
 };
 
 export default HomeBanner;
