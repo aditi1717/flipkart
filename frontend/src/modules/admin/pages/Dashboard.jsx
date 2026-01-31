@@ -125,6 +125,7 @@ const { supportRequests = [] } = useSupportStore();
 
             if (!customerSpend[order.user.email]) {
                 customerSpend[order.user.email] = {
+                    id: order.user._id || order.user.id, // Support both _id and id
                     name: order.user.name,
                     email: order.user.email,
                     spend: 0,
@@ -151,7 +152,10 @@ const { supportRequests = [] } = useSupportStore();
             {/* 1. Key Metrics Grid (Old Stats + Revenue) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Standard Counts */}
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
+                <div 
+                    onClick={() => navigate('/admin/products')}
+                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
+                >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Products</p>
                         <h3 className="text-2xl font-black text-gray-900">{products.length.toLocaleString()}</h3>
@@ -161,7 +165,10 @@ const { supportRequests = [] } = useSupportStore();
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
+                <div 
+                    onClick={() => navigate('/admin/orders')}
+                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
+                >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Orders</p>
                         <h3 className="text-2xl font-black text-gray-900">{orders.length.toLocaleString()}</h3>
@@ -171,7 +178,10 @@ const { supportRequests = [] } = useSupportStore();
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
+                <div 
+                    onClick={() => navigate('/admin/users')}
+                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
+                >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Users</p>
                         <h3 className="text-2xl font-black text-gray-900">{users.length.toLocaleString()}</h3>
@@ -181,7 +191,10 @@ const { supportRequests = [] } = useSupportStore();
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all">
+                <div 
+                    onClick={() => navigate('/admin/coupons')}
+                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
+                >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Active Coupons</p>
                         <h3 className="text-2xl font-black text-gray-900">{activeCoupons}</h3>
@@ -194,7 +207,10 @@ const { supportRequests = [] } = useSupportStore();
 
             {/* 2. Financial Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div 
+                    onClick={() => navigate('/admin/orders')}
+                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all cursor-pointer"
+                >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Revenue</p>
                         <h3 className="text-2xl font-black text-gray-900">₹{totalRevenue.toLocaleString()}</h3>
@@ -206,7 +222,10 @@ const { supportRequests = [] } = useSupportStore();
                         <MdAttachMoney size={24} />
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div 
+                    onClick={() => navigate('/admin/orders')}
+                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all cursor-pointer"
+                >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Today's Sales</p>
                         <h3 className="text-2xl font-black text-gray-900">₹{todayRevenue.toLocaleString()}</h3>
@@ -301,19 +320,32 @@ const { supportRequests = [] } = useSupportStore();
                     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="font-bold text-lg text-gray-800">Recent Activity</h3>
-                            <button className="text-xs font-bold text-gray-600 hover:bg-gray-50 px-3 py-1 wrapped-full rounded-full transition">View All</button>
+                            <button 
+                                onClick={() => navigate('/admin/orders')}
+                                className="text-xs font-bold text-gray-600 hover:bg-gray-50 px-3 py-1 border border-gray-200 rounded-full transition"
+                            >
+                                View All Orders
+                            </button>
                         </div>
                         <div className="relative pl-2 space-y-6">
                             {/* Timeline Line */}
                             <div className="absolute top-2 left-[19px] bottom-2 w-0.5 bg-gray-100"></div>
 
                             {recentActivity.map((activity, index) => (
-                                <div key={index} className="relative flex items-start gap-4 z-10">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ring-4 ring-white bg-gray-50 text-gray-600 shrink-0`}>
+                                <div 
+                                    key={index} 
+                                    onClick={() => {
+                                        if (activity.type === 'order') navigate(`/admin/orders/${activity.id}`);
+                                        else if (activity.type === 'user') navigate(`/admin/users/${activity.id}`);
+                                        else if (activity.type === 'return') navigate('/admin/returns');
+                                    }}
+                                    className="relative flex items-start gap-4 z-10 cursor-pointer group"
+                                >
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ring-4 ring-white bg-gray-50 text-gray-600 shrink-0 group-hover:bg-gray-100 transition-colors`}>
                                         <activity.icon size={18} />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-gray-800">{activity.text}</p>
+                                        <p className="text-sm font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{activity.text}</p>
                                         <p className="text-xs text-gray-400 font-medium mt-0.5">{new Date(activity.time).toLocaleString()}</p>
                                     </div>
                                 </div>
@@ -335,7 +367,11 @@ const { supportRequests = [] } = useSupportStore();
                                 <p className="text-sm text-gray-400 italic">No low stock items.</p>
                             ) : (
                                 lowStockProducts.map(product => (
-                                    <div key={product.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <div 
+                                        key={product.id} 
+                                        onClick={() => navigate(`/admin/products/edit/${product.id}`)}
+                                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition"
+                                    >
                                         <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover bg-white" />
                                         <div className="flex-1 min-w-0">
                                             <h4 className="text-xs font-bold text-gray-800 truncate">{product.name}</h4>
@@ -355,13 +391,17 @@ const { supportRequests = [] } = useSupportStore();
                         </div>
                         <div className="space-y-4">
                             {topCustomers.map((customer, idx) => (
-                                <div key={idx} className="flex items-center justify-between border-b border-gray-50 last:border-0 pb-3 last:pb-0">
+                                <div 
+                                    key={idx} 
+                                    onClick={() => customer.id && navigate(`/admin/users/${customer.id}`)}
+                                    className={`flex items-center justify-between border-b border-gray-50 last:border-0 pb-3 last:pb-0 ${customer.id ? 'cursor-pointer group' : ''}`}
+                                >
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-gray-50 text-gray-600 flex items-center justify-center font-bold text-xs uppercase">
+                                        <div className="w-8 h-8 rounded-full bg-gray-50 text-gray-600 flex items-center justify-center font-bold text-xs uppercase group-hover:bg-gray-100 transition-colors">
                                             {customer.name.substring(0, 2)}
                                         </div>
                                         <div>
-                                            <h4 className="text-xs font-bold text-gray-800">{customer.name}</h4>
+                                            <h4 className="text-xs font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{customer.name}</h4>
                                             <p className="text-[10px] text-gray-400">{customer.orders} orders</p>
                                         </div>
                                     </div>
