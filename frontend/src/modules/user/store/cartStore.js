@@ -22,11 +22,10 @@ export const useCartStore = create()(
 
             addToCart: (product, variant = {}) => {
                 set((state) => {
-                    const cartItem = { ...product, ...variant };
+                    const cartItem = { ...product, variant };
                     const existingItem = state.cart.find((item) =>
                         item.id === product.id &&
-                        JSON.stringify(item.selectedSize) === JSON.stringify(variant.selectedSize) &&
-                        JSON.stringify(item.selectedColor) === JSON.stringify(variant.selectedColor)
+                        JSON.stringify(item.variant) === JSON.stringify(variant)
                     );
 
                     if (existingItem) {
@@ -44,8 +43,7 @@ export const useCartStore = create()(
                 set((state) => ({
                     cart: state.cart.filter((item) => !(
                         item.id === productId &&
-                        JSON.stringify(item.selectedSize) === JSON.stringify(variant.selectedSize) &&
-                        JSON.stringify(item.selectedColor) === JSON.stringify(variant.selectedColor)
+                        JSON.stringify(item.variant) === JSON.stringify(variant)
                     )),
                 }));
             },
@@ -54,8 +52,7 @@ export const useCartStore = create()(
                 set((state) => ({
                     cart: state.cart.map((item) =>
                         (item.id === productId &&
-                            JSON.stringify(item.selectedSize) === JSON.stringify(variant.selectedSize) &&
-                            JSON.stringify(item.selectedColor) === JSON.stringify(variant.selectedColor))
+                            JSON.stringify(item.variant) === JSON.stringify(variant))
                             ? { ...item, quantity: Math.max(1, quantity) } : item
                     ),
                 }));

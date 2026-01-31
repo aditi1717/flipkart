@@ -28,7 +28,8 @@ import {
     MdMoreVert,
     MdKitchen,
     MdFlight,
-    MdSportsEsports
+    MdSportsEsports,
+    MdCancel
 } from 'react-icons/md';
 import logo from '../../../../assets/indiankart-logo.png';
 
@@ -43,6 +44,48 @@ const Header = () => {
     const [hoveredSubcategory, setHoveredSubcategory] = useState(null);
     const [subcategoryProducts, setSubcategoryProducts] = useState([]);
     const [loadingProducts, setLoadingProducts] = useState(false);
+
+    // Search state
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState({ products: [], categories: [], subCategories: [] });
+    const [isSearching, setIsSearching] = useState(false);
+    const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
+    // Fetch search results as user types (debounced)
+    useEffect(() => {
+        const fetchSearchResults = async () => {
+            if (!searchQuery.trim() || searchQuery.length < 2) {
+                setSearchResults({ products: [], categories: [], subCategories: [] });
+                setShowSearchDropdown(false);
+                return;
+            }
+
+            setIsSearching(true);
+            try {
+                const { data } = await API.get(`/search?q=${searchQuery}`);
+                setSearchResults(data);
+                setShowSearchDropdown(true);
+            } catch (error) {
+                console.error("Search failed:", error);
+            } finally {
+                setIsSearching(false);
+            }
+        };
+
+        const debounceTimer = setTimeout(fetchSearchResults, 300);
+        return () => clearTimeout(debounceTimer);
+    }, [searchQuery]);
+
+    // Close search dropdown on click outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (!e.target.closest('.search-container')) {
+                setShowSearchDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Icon Mapping for dynamic data
     const iconMap = {
@@ -143,20 +186,120 @@ const Header = () => {
                 )}
 
                 {/* Search Bar Row */}
-                <div className="flex items-center gap-3 flex-1 mt-0 md:mt-0">
-                    <div className="flex-1 bg-white rounded-lg flex items-center px-3 md:px-4 shadow-sm md:shadow-none overflow-hidden h-10 md:h-11 border border-gray-200">
-                        <IoSearch className="text-gray-400 md:text-gray-500 text-[18px] md:text-[20px] mr-2 md:mr-3" />
+                <div className="flex items-center gap-3 flex-1 mt-0 md:mt-0 relative search-container">
+                    <div className="flex-1 bg-white rounded-lg flex items-center px-3 md:px-4 shadow-sm md:shadow-none overflow-hidden h-10 md:h-11 border border-gray-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-100 transition-all">
+                        <IoSearch className={`text-gray-400 md:text-gray-500 text-[18px] md:text-[20px] mr-2 md:mr-3 ${isSearching ? 'animate-pulse' : ''}`} />
                         <input
                             className="bg-transparent border-none focus:ring-0 text-[14px] md:text-[15px] w-full p-0 outline-none placeholder-gray-400 md:placeholder-gray-500 text-black md:text-gray-800 h-full flex items-center font-normal"
                             placeholder="Search for Products, Brands and More"
                             type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onFocus={() => searchQuery.length >= 2 && setShowSearchDropdown(true)}
                         />
-                        {!isSpecialPage && (
+                        {!isSpecialPage && !searchQuery && (
                             <div className="flex items-center gap-3 pl-2 md:hidden">
                                 <MdOutlinePhotoCamera className="text-gray-400 text-[22px]" />
                             </div>
                         )}
+                        {searchQuery && (
+                            <button 
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setSearchResults({ products: [], categories: [], subCategories: [] });
+                                    setShowSearchDropdown(false);
+                                }}
+                                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                                <MdCancel className="text-gray-400" size={18} />
+                            </button>
+                        )}
                     </div>
+
+                    {/* Search Results Dropdown */}
+                    {showSearchDropdown && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 z-[100] max-h-[80vh] overflow-y-auto animate-in fade-in slide-in-from-top-2">
+                            {/* Categories & Subcategories Section */}
+                            {(searchResults.categories?.length > 0 || searchResults.subCategories?.length > 0) && (
+                                <div className="p-2 border-b border-gray-50">
+                                    <div className="flex flex-wrap gap-2">
+                                        {searchResults.categories?.map(cat => (
+                                            <button
+                                                key={cat.id}
+                                                onClick={() => {
+                                                    navigate(`/category/${cat.name}`);
+                                                    setShowSearchDropdown(false);
+                                                    setSearchQuery('');
+                                                }}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-full text-xs font-bold hover:bg-blue-600 hover:text-white transition-all"
+                                            >
+                                                <MdGridView size={14} />
+                                                {cat.name}
+                                            </button>
+                                        ))}
+                                        {searchResults.subCategories?.map(sub => (
+                                            <button
+                                                key={sub._id}
+                                                onClick={() => {
+                                                    navigate(`/category/${sub.category?.name}/${sub.name}`);
+                                                    setShowSearchDropdown(false);
+                                                    setSearchQuery('');
+                                                }}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-600 rounded-full text-xs font-bold hover:bg-gray-600 hover:text-white transition-all"
+                                            >
+                                                <MdKeyboardArrowRight size={14} />
+                                                {sub.name} in <span className="opacity-70">{sub.category?.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Products Section */}
+                            <div className="p-2">
+                                <h3 className="px-3 py-1 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Products</h3>
+                                {searchResults.products?.length > 0 ? (
+                                    <div className="space-y-1">
+                                        {searchResults.products.map(product => (
+                                            <div
+                                                key={product.id || product._id}
+                                                onClick={() => {
+                                                    navigate(`/product/${product.id || product._id}`);
+                                                    setShowSearchDropdown(false);
+                                                    setSearchQuery('');
+                                                }}
+                                                className="flex items-center gap-4 p-2 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors group"
+                                            >
+                                                <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 border border-gray-100">
+                                                    <img 
+                                                        src={product.image} 
+                                                        alt={product.name} 
+                                                        className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">{product.name}</h4>
+                                                    <p className="text-[10px] text-gray-500 font-medium uppercase tracking-tighter">
+                                                        {product.brand} • <span className="text-blue-600 font-bold">{product.category}</span>
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-sm font-black text-gray-900">₹{product.price?.toLocaleString()}</div>
+                                                    {product.discount > 0 && (
+                                                        <div className="text-[9px] font-bold text-green-600 bg-green-50 px-1 rounded inline-block">{product.discount}% OFF</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-8 text-center">
+                                        <p className="text-sm text-gray-400 font-medium italic">No products found matching "{searchQuery}"</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Cart Icon (Only Visible on Mobile Special Pages) */}
                     {isSpecialPage && (

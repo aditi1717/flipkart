@@ -161,6 +161,15 @@ const MyOrders = () => {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h3 className="text-sm font-bold text-gray-800 line-clamp-2">{item.name}</h3>
+                                                    {item.variant && (
+                                                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                                                            {Object.entries(item.variant).map(([key, value]) => (
+                                                                <span key={key} className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">
+                                                                    {key}: <span className="text-blue-600">{value}</span>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                     <p className="text-xs text-gray-500 mt-1">Quantity: {item.qty}</p>
                                                     <p className="text-base font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mt-1">
                                                         ₹{item.price.toLocaleString()}

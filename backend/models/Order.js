@@ -12,6 +12,7 @@ const orderSchema = mongoose.Schema({
             qty: { type: Number, required: true },
             image: { type: String, required: true },
             price: { type: Number, required: true },
+            variant: { type: Object }, // To store dynamic variants like { Weight: "1kg" }
             product: {
                 type: Number, // Using Number ID for now
                 required: true,

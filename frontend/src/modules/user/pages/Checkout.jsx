@@ -115,6 +115,7 @@ const Checkout = () => {
                 qty: item.quantity,
                 image: item.image,
                 price: item.price,
+                variant: item.variant,
                 product: item.id
             })),
             shippingAddress: {
@@ -401,7 +402,12 @@ const Checkout = () => {
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="text-[13px] font-medium text-gray-800 line-clamp-2 leading-snug">{item.name}</h3>
-                                            <p className="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-tight">Quantity: {item.quantity}</p>
+                                            {item.variant && Object.entries(item.variant).map(([key, value]) => (
+                                                <p key={key} className="text-[10px] text-gray-400 mt-0.5 uppercase font-bold tracking-tight">
+                                                    {key}: {value}
+                                                </p>
+                                            ))}
+                                            <p className="text-[10px] text-gray-400 mt-0.5 uppercase font-bold tracking-tight">Quantity: {item.quantity}</p>
                                             <div className="flex items-center gap-2 mt-2">
                                                 <span className="text-[16px] font-black text-gray-900">₹{item.price.toLocaleString()}</span>
                                                 {item.originalPrice && (

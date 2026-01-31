@@ -119,8 +119,11 @@ const Cart = () => {
                                                 </div>
                                                 <div className="flex-1">
                                                     <h2 className="text-base font-bold text-gray-900 line-clamp-2 hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate(`/product/${item.id}`)}>{item.name}</h2>
-                                                    {item.selectedSize && <p className="text-xs text-gray-600 mt-1 font-medium">Size: <span className="text-blue-600">{item.selectedSize}</span></p>}
-                                                    {item.selectedColor && <p className="text-xs text-gray-600 font-medium">Color: <span className="text-purple-600">{item.selectedColor}</span></p>}
+                                                    {item.variant && Object.entries(item.variant).map(([key, value]) => (
+                                                        <p key={key} className="text-xs text-gray-600 mt-0.5 font-medium">
+                                                            {key}: <span className="text-blue-600">{value}</span>
+                                                        </p>
+                                                    ))}
                                                     <div className="flex items-center gap-3 mt-3">
                                                         <span className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">₹{item.price.toLocaleString()}</span>
                                                         {item.originalPrice && (
@@ -135,14 +138,14 @@ const Cart = () => {
                                             <div className="flex items-center gap-4 mt-6">
                                                 <div className="flex items-center border-2 border-blue-600 rounded-lg overflow-hidden shadow-sm">
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1, { selectedSize: item.selectedSize, selectedColor: item.selectedColor })}
+                                                        onClick={() => updateQuantity(item.id, item.quantity - 1, item.variant)}
                                                         className="w-10 h-10 flex items-center justify-center active:bg-blue-600 hover:bg-blue-50 active:text-white transition-all"
                                                     >
                                                         <span className="material-icons text-lg">remove</span>
                                                     </button>
                                                     <span className="w-12 text-center text-base font-extrabold text-blue-600">{item.quantity}</span>
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1, { selectedSize: item.selectedSize, selectedColor: item.selectedColor })}
+                                                        onClick={() => updateQuantity(item.id, item.quantity + 1, item.variant)}
                                                         className="w-10 h-10 flex items-center justify-center active:bg-blue-600 hover:bg-blue-50 active:text-white transition-all"
                                                     >
                                                         <span className="material-icons text-lg">add</span>
@@ -153,7 +156,7 @@ const Cart = () => {
                                                         <span className="material-icons text-base">bookmark</span>
                                                         Save for later
                                                     </button>
-                                                    <button onClick={() => removeFromCart(item.id, { selectedSize: item.selectedSize, selectedColor: item.selectedColor })} className="text-red-500 hover:text-red-700 transition-colors flex items-center gap-1">
+                                                    <button onClick={() => removeFromCart(item.id, item.variant)} className="text-red-500 hover:text-red-700 transition-colors flex items-center gap-1">
                                                         <span className="material-icons text-base">delete</span>
                                                         Remove
                                                     </button>

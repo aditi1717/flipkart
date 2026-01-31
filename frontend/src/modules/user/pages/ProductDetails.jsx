@@ -21,14 +21,28 @@ const ProductDetails = () => {
 
     const isInWishlist = product && wishlist.find(item => item.id === product.id);
 
+    const [selectedVariants, setSelectedVariants] = useState({});
+
+    useEffect(() => {
+        if (product && product.variantHeadings && product.variantHeadings.length > 0) {
+            const initial = {};
+            product.variantHeadings.forEach(vh => {
+                if (vh.options && vh.options.length > 0) {
+                    initial[vh.name] = vh.options[0].name;
+                }
+            });
+            setSelectedVariants(initial);
+        }
+    }, [product]);
+
     const handleAddToCart = () => {
-        addToCart(product, { selectedSize, selectedColor });
+        addToCart(product, selectedVariants);
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
     };
 
     const handleBuyNow = () => {
-        addToCart(product, { selectedSize, selectedColor });
+        addToCart(product, selectedVariants);
         navigate('/checkout');
     };
     const [reviews, setReviews] = useState([
@@ -50,24 +64,6 @@ const ProductDetails = () => {
     const [selectedDetailTab, setSelectedDetailTab] = useState('Description');
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [selectedColor, setSelectedColor] = useState('Black');
-    const [selectedSize, setSelectedSize] = useState('M');
-
-    const colors = [
-        { name: 'Black', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/v/h/t/na-s-short-gown-z-atkins-original-imagp8m8zgzgzgze.jpeg' },
-        { name: 'Green', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/i/a/e/na-s-short-gown-z-atkins-original-imagp8m8vfsxhv6f.jpeg' },
-        { name: 'Purple', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/m/3/g/na-s-short-gown-z-atkins-original-imagp8m8yghyyzgz.jpeg' },
-        { name: 'Wine', img: 'https://rukminim2.flixcart.com/image/832/832/xif0q/gown/y/f/v/na-s-short-gown-z-atkins-original-imagp8m8xghfgyvz.jpeg' }
-    ];
-
-    const sizes = [
-        { label: 'XS', available: false },
-        { label: 'S', available: false },
-        { label: 'M', available: true },
-        { label: 'L', available: false },
-        { label: 'XL', available: false },
-        { label: 'XXL', available: true }
-    ];
 
     const offers = [
         { type: 'Bank Offer', text: '5% Unlimited Cashback on Flipkart Axis Bank Credit Card' },
@@ -199,44 +195,37 @@ const ProductDetails = () => {
                             ))}
                         </div>
 
-                        {/* Variants Desktop */}
-                        <div className="flex gap-16 mb-6">
-                            {/* Color */}
-                            <div className="flex gap-4">
-                                <span className="text-gray-500 font-medium text-sm w-12 pt-1">Color</span>
-                                <div className="flex gap-2">
-                                    {colors.map((color) => (
-                                        <div
-                                            key={color.name}
-                                            onClick={() => setSelectedColor(color.name)}
-                                            className={`w-14 h-16 rounded border-2 p-0.5 cursor-pointer transition-all hover:scale-105 ${selectedColor === color.name ? 'border-blue-600' : 'border-transparent'}`}
-                                        >
-                                            <img src={color.img} alt={color.name} className="w-full h-full object-cover rounded-[2px]" />
-                                        </div>
-                                    ))}
+                        {/* Dynamic Variants Desktop */}
+                        <div className="space-y-6 mb-8">
+                            {product.variantHeadings?.map((vh) => (
+                                <div key={vh.id} className="flex gap-4">
+                                    <span className="text-gray-500 font-medium text-sm w-12 pt-1">{vh.name}</span>
+                                    <div className="flex flex-wrap gap-2 max-w-[500px]">
+                                        {vh.options?.map((opt, idx) => (
+                                            vh.hasImage ? (
+                                                <div
+                                                    key={idx}
+                                                    onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                                    className={`w-14 h-16 rounded border-2 p-0.5 cursor-pointer transition-all hover:scale-105 ${selectedVariants[vh.name] === opt.name ? 'border-blue-600' : 'border-transparent'}`}
+                                                >
+                                                    <img src={opt.image} alt={opt.name} className="w-full h-full object-cover rounded-[2px]" />
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                                    className={`min-w-[50px] h-10 px-3 rounded-sm border-2 font-bold text-sm transition-all ${selectedVariants[vh.name] === opt.name
+                                                        ? 'border-blue-600 text-blue-600 bg-blue-50/20'
+                                                        : 'border-gray-300 text-gray-900 hover:border-blue-400'
+                                                        }`}
+                                                >
+                                                    {opt.name}
+                                                </button>
+                                            )
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* Size */}
-                        <div className="flex gap-4 mb-8">
-                            <span className="text-gray-500 font-medium text-sm w-12 pt-1">Size</span>
-                            <div className="flex flex-wrap gap-2 max-w-[400px]">
-                                {sizes.map((size) => (
-                                    <button
-                                        key={size.label}
-                                        onClick={() => size.available && setSelectedSize(size.label)}
-                                        className={`min-w-[50px] h-10 px-3 rounded-sm border-2 font-bold text-sm transition-all ${!size.available
-                                            ? 'border-gray-100 text-gray-300 cursor-not-allowed border-dashed'
-                                            : selectedSize === size.label
-                                                ? 'border-blue-600 text-blue-600 bg-blue-50/20'
-                                                : 'border-gray-300 text-gray-900 hover:border-blue-400'
-                                            }`}
-                                    >
-                                        {size.label}
-                                    </button>
-                                ))}
-                            </div>
+                            ))}
                         </div>
 
                         {/* Delivery & Seller - Desktop */}
@@ -409,49 +398,39 @@ const ProductDetails = () => {
                     </div>
                 </div>
 
-                {/* Selected Color Section */}
-                <div className="px-4 mt-6">
-                    <p className="text-[14px] font-bold text-gray-900 mb-3 uppercase tracking-tight">
-                        Selected Color: <span className="font-normal text-gray-600 normal-case">{selectedColor}</span>
-                    </p>
-                    <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-                        {colors.map((color) => (
-                            <div
-                                key={color.name}
-                                onClick={() => setSelectedColor(color.name)}
-                                className={`min-w-[70px] aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${selectedColor === color.name ? 'border-black shadow-sm' : 'border-gray-100'
-                                    }`}
-                            >
-                                <img src={color.img} alt={color.name} className="w-full h-full object-cover" />
+                {/* Dynamic Variants Mobile */}
+                <div className="space-y-6">
+                    {product.variantHeadings?.map((vh) => (
+                        <div key={vh.id} className="px-4 mt-6">
+                            <p className="text-[14px] font-bold text-gray-900 mb-3 uppercase tracking-tight">
+                                {vh.name}: <span className="font-normal text-gray-600 normal-case">{selectedVariants[vh.name]}</span>
+                            </p>
+                            <div className="flex flex-wrap gap-3">
+                                {vh.options?.map((opt, idx) => (
+                                    vh.hasImage ? (
+                                        <div
+                                            key={idx}
+                                            onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                            className={`min-w-[70px] aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${selectedVariants[vh.name] === opt.name ? 'border-black shadow-sm' : 'border-gray-100'}`}
+                                        >
+                                            <img src={opt.image} alt={opt.name} className="w-full h-full object-cover" />
+                                        </div>
+                                    ) : (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                            className={`min-w-[48px] h-[36px] px-3 rounded-lg flex items-center justify-center text-[12px] font-bold border transition-all ${selectedVariants[vh.name] === opt.name
+                                                ? 'border-black bg-white text-gray-900 shadow-sm'
+                                                : 'border-gray-200 text-gray-900'
+                                                }`}
+                                        >
+                                            {opt.name}
+                                        </button>
+                                    )
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Select Size Section */}
-                <div className="px-4 mt-6">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <span className="text-[14px] font-bold text-gray-900 uppercase tracking-tight">Select Size</span>
-                            <button className="text-[13px] font-bold text-blue-600">Size Chart</button>
                         </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {sizes.map((size) => (
-                            <button
-                                key={size.label}
-                                onClick={() => size.available && setSelectedSize(size.label)}
-                                className={`min-w-[48px] h-[36px] px-2 rounded-lg flex items-center justify-center text-[12px] font-bold border transition-all ${!size.available
-                                    ? 'border-dashed border-gray-200 text-gray-300 cursor-not-allowed opacity-60'
-                                    : selectedSize === size.label
-                                        ? 'border-black bg-white text-gray-900 shadow-sm'
-                                        : 'border-gray-200 text-gray-900'
-                                    }`}
-                            >
-                                {size.label}
-                            </button>
-                        ))}
-                    </div>
+                    ))}
                 </div>
 
                 {/* Offers Section */}

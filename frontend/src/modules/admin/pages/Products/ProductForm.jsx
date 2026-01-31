@@ -617,6 +617,12 @@ import toast from 'react-hot-toast';
                                                     { id: Date.now() + 1, name: 'Storage', hasImage: false, options: [{ name: '' }] }
                                                 ];
                                             }
+                                            // Food/Grocery: Weight or Quantity
+                                            else if (catName.includes('food') || catName.includes('grocery') || catName.includes('vegetable') || catName.includes('fruit')) {
+                                                newHeadings = [
+                                                    { id: Date.now(), name: 'Weight/Quantity', hasImage: false, options: [{ name: '' }] }
+                                                ];
+                                            }
                                         }
 
                                         setFormData(prev => ({ 
