@@ -69,6 +69,7 @@ const Home = () => {
                             <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full">
                                 <ProductSection
                                     title={section.title}
+                                    subtitle={section.subtitle}
                                     products={section.products}
                                     containerClass="mt-4"
                                     onViewAll={() => navigate(`/products?search=${section.title}`)}

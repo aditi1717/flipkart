@@ -65,17 +65,32 @@ export const getOrderById = async (req, res) => {
         const order = await Order.findById(req.params.id).populate('user', 'name email phone');
         
         if (order) {
-            // Check if the order belongs to the logged-in user or if user is admin
-            if (order.user._id.toString() === req.user._id.toString() || req.user.isAdmin) {
+            // Check if user is still attached to the order
+            // If population failed (e.g. user deleted or admin), order.user might be null if we accessed it as an object
+            // However, we can try to get the raw user ID if populate didn't work as expected
+            const orderUserId = order.user?._id?.toString() || order.user?.toString();
+            const currentUserId = req.user?._id?.toString();
+            const isAdmin = req.user && (req.user.isAdmin || ['admin', 'superadmin', 'editor', 'moderator'].includes(req.user.role));
+
+            console.log(`Checking Order Auth: OrderOwner=${orderUserId}, RequestUser=${currentUserId}, isAdmin=${isAdmin}`);
+
+            // Check if it's the owner or an admin
+            if (orderUserId === currentUserId || isAdmin) {
                 res.json(order);
             } else {
-                res.status(401).json({ message: 'Not authorized to view this order' });
+                res.status(401).json({ 
+                    message: 'Not authorized to view this order',
+                    details: `Current: ${currentUserId}, Owner: ${orderUserId}`
+                });
             }
         } else {
             res.status(404).json({ message: 'Order not found' });
         }
     } catch (error) {
-        console.error('Get order by ID error:', error);
+        console.error(`Get order by ID error [ID: ${req.params.id}]:`, error);
+        if (error.kind === 'ObjectId') {
+            return res.status(400).json({ message: 'Invalid order ID format' });
+        }
         res.status(500).json({ message: error.message });
     }
 };

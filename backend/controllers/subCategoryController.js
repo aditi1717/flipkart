@@ -18,7 +18,7 @@ export const getSubCategories = async (req, res) => {
 // @access  Public
 export const getSubCategoriesByCategory = async (req, res) => {
     try {
-        const subCategories = await SubCategory.find({ category: req.params.categoryId });
+        const subCategories = await SubCategory.find({ category: req.params.categoryId }).populate('category', 'name');
         res.json(subCategories);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -46,6 +46,7 @@ export const createSubCategory = async (req, res) => {
         });
 
         const createdSubCategory = await subCategory.save();
+        await createdSubCategory.populate('category', 'name');
         res.status(201).json(createdSubCategory);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -87,6 +88,7 @@ export const updateSubCategory = async (req, res) => {
             if (category !== undefined) subCategory.category = category;
 
             const updatedSubCategory = await subCategory.save();
+            await updatedSubCategory.populate('category', 'name');
             res.json(updatedSubCategory);
         } else {
             res.status(404).json({ message: 'Subcategory not found' });

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     MdInventory,
@@ -26,13 +26,23 @@ import useSupportStore from '../store/supportStore';
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const { products = [] } = useProductStore();
-const { orders = [] } = useOrderStore();
-const { users = [] } = useUserStore();
-const { categories = [] } = useCategoryStore();
-const { coupons = [] } = useCouponStore();
-const { returns = [] } = useReturnStore();
-const { supportRequests = [] } = useSupportStore();
+    const { products = [], fetchProducts } = useProductStore();
+    const { orders = [], fetchOrders } = useOrderStore();
+    const { users = [], fetchUsers } = useUserStore();
+    const { categories = [], fetchCategories } = useCategoryStore();
+    const { coupons = [], fetchCoupons } = useCouponStore();
+    const { returns = [], fetchReturns } = useReturnStore();
+    const { supportRequests = [] } = useSupportStore();
+
+    useEffect(() => {
+        // Fetch all necessary data on component mount
+        fetchProducts();
+        fetchOrders();
+        fetchUsers();
+        fetchCategories();
+        fetchCoupons();
+        fetchReturns();
+    }, [fetchProducts, fetchOrders, fetchUsers, fetchCategories, fetchCoupons, fetchReturns]);
 
 
     const activeCoupons = coupons.filter(c => c.active).length;
@@ -88,7 +98,7 @@ const { supportRequests = [] } = useSupportStore();
             ...orders.map(o => ({
                 type: 'order',
                 id: o.id,
-                text: `New order ${o.id} placed by ${o.user.name}`,
+                text: `New order ${o.id} placed by ${o.user?.name || 'Customer'}`,
                 time: o.date,
                 icon: MdShoppingCart,
                 color: 'gray'
@@ -96,7 +106,7 @@ const { supportRequests = [] } = useSupportStore();
             ...users.map(u => ({
                 type: 'user',
                 id: u.id,
-                text: `New user ${u.name} registered`,
+                text: `New user ${u.name || 'someone'} registered`,
                 time: u.joinDate || new Date().toISOString(),
                 icon: MdPersonAdd,
                 color: 'gray'
@@ -119,6 +129,8 @@ const { supportRequests = [] } = useSupportStore();
     const topCustomers = useMemo(() => {
         const customerSpend = {};
         orders.forEach(order => {
+            if (!order.user || !order.user.email) return;
+
             const amount = typeof order.total === 'string'
                 ? parseFloat(order.total.replace(/[^0-9.-]+/g, ""))
                 : order.total;

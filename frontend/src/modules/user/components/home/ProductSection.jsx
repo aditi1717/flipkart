@@ -3,6 +3,7 @@ import ProductCard from '../product/ProductCard';
 
 const ProductSection = ({
     title,
+    subtitle,
     titleBadge,
     products,
     onViewAll,
@@ -27,13 +28,16 @@ const ProductSection = ({
     return (
         <section className={`${containerClass}`}>
             <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <h3 className="text-[17px] md:text-2xl font-bold text-gray-900">{title}</h3>
-                    {titleBadge && (
-                        <span className="bg-gray-100 text-gray-500 text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
-                            {titleBadge}
-                        </span>
-                    )}
+                <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900">{title}</h3>
+                        {titleBadge && (
+                            <span className="bg-gray-100 text-gray-500 text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                {titleBadge}
+                            </span>
+                        )}
+                    </div>
+                    {subtitle && <p className="text-[10px] md:text-sm text-gray-500 font-medium -mt-0.5">{subtitle}</p>}
                 </div>
                 <button
                     onClick={onViewAll}

@@ -52,6 +52,19 @@ export const useContentStore = create((set, get) => ({
         } catch (error) { console.error(error); }
     },
 
+    updateHomeSection: async (oldId, sectionData) => {
+        try {
+            const { data } = await API.put(`/home-sections/${oldId}`, sectionData);
+            set((state) => ({
+                homeSections: state.homeSections.map(s => s.id === oldId ? data : s)
+            }));
+            return data;
+        } catch (error) { 
+            console.error(error);
+            throw error;
+        }
+    },
+
     addProductToSection: async (sectionId, product) => {
         // Need to add product to the array on backend
         // We fetch current section, append, then save? Or specialized endpoint.

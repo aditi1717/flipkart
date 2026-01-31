@@ -44,19 +44,23 @@
   animation: bounce-subtle 2s infinite;
 }
 
-/* Swiper Custom Styling for Flipkart Look */
+/* Swiper Custom Styling for Modern Look */
 .home-banner-swiper .swiper-button-next,
 .home-banner-swiper .swiper-button-prev {
   background-color: white;
-  width: 40px !important;
-  height: 100px !important;
+  width: 48px !important;
+  height: 48px !important;
   top: 50%;
   transform: translateY(-50%);
   margin-top: 0;
-  box-shadow: 0 1px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 20;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .home-banner-swiper:hover .swiper-button-next,
@@ -65,20 +69,30 @@
 }
 
 .home-banner-swiper .swiper-button-next {
-  right: 0 !important;
-  border-radius: 10px 0 0 10px;
+  right: 20px !important;
 }
 
 .home-banner-swiper .swiper-button-prev {
-  left: 0 !important;
-  border-radius: 0 10px 10px 0;
+  left: 20px !important;
 }
 
 .home-banner-swiper .swiper-button-next::after,
 .home-banner-swiper .swiper-button-prev::after {
-  font-size: 24px !important;
+  font-size: 18px !important;
   font-weight: 900 !important;
-  color: #212121;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+
+  .home-banner-swiper .swiper-button-next,
+  .home-banner-swiper .swiper-button-prev {
+    width: 36px !important;
+    height: 36px !important;
+    right: 10px !important;
+    left: 10px !important;
+    opacity: 0.8;
+  }
 }
 
 .home-banner-swiper .swiper-pagination-bullet {
