@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
 import { useCategories } from '../../../../hooks/useData';
+import API from '../../../../services/api';
 import { IoSearch } from 'react-icons/io5';
 import {
     MdLocationPin,
@@ -36,6 +37,12 @@ const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { categories, loading: categoriesLoading } = useCategories();
+    
+    // Mega menu state
+    const [hoveredCategory, setHoveredCategory] = useState(null);
+    const [hoveredSubcategory, setHoveredSubcategory] = useState(null);
+    const [subcategoryProducts, setSubcategoryProducts] = useState([]);
+    const [loadingProducts, setLoadingProducts] = useState(false);
 
     // Icon Mapping for dynamic data
     const iconMap = {
@@ -56,6 +63,29 @@ const Header = () => {
         'person_outline': MdPersonOutline,
         'shopping_cart': MdShoppingCart,
     };
+
+    // Fetch products when hovering on a subcategory
+    useEffect(() => {
+        const fetchProducts = async () => {
+            if (!hoveredSubcategory || !hoveredCategory) {
+                setSubcategoryProducts([]);
+                return;
+            }
+            
+            setLoadingProducts(true);
+            try {
+                const { data } = await API.get(`/products?category=${hoveredCategory}&subcategory=${hoveredSubcategory}`);
+                setSubcategoryProducts(data.slice(0, 6)); // Limit to 6 products
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                setSubcategoryProducts([]);
+            } finally {
+                setLoadingProducts(false);
+            }
+        };
+
+        fetchProducts();
+    }, [hoveredSubcategory, hoveredCategory]);
 
     // Helper to check active state
     const isActiveCategory = (catName) => {
@@ -188,25 +218,117 @@ const Header = () => {
                                     {cat.name}
                                 </span>
 
-                                {/* Hover Subcategories Dropdown */}
+                                {/* Enhanced Mega Menu with Products */}
                                 {(cat.children?.length > 0 || cat.subCategories?.length > 0) && (
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 hidden md:group-hover:block z-50 animate-in fade-in slide-in-from-top-2">
-                                        {/* Little Triangle Pointer */}
+                                    <div 
+                                        className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 hidden md:group-hover:block z-50 animate-in fade-in slide-in-from-top-2"
+                                        onMouseEnter={() => setHoveredCategory(cat.name)}
+                                        onMouseLeave={() => {
+                                            setHoveredCategory(null);
+                                            setHoveredSubcategory(null);
+                                        }}
+                                    >
+                                        {/* Triangle Pointer */}
                                         <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45 border-t border-l border-gray-100"></div>
                                         
-                                        <div className="py-2 relative bg-white rounded-xl">
-                                            {(cat.children || cat.subCategories).map((sub) => (
-                                                <div 
-                                                    key={sub.id || sub._id}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate(`/category/${cat.name}/${sub.name}`);
-                                                    }}
-                                                    className="px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors text-center whitespace-normal"
-                                                >
-                                                    {sub.name}
+                                        <div className="flex relative bg-white rounded-xl overflow-hidden">
+                                            {/* Subcategories Column */}
+                                            <div className="w-56 py-2 border-r border-gray-100">
+                                                {(cat.children || cat.subCategories).map((sub) => (
+                                                    <div 
+                                                        key={sub.id || sub._id}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/category/${cat.name}/${sub.name}`);
+                                                        }}
+                                                        onMouseEnter={() => setHoveredSubcategory(sub.name)}
+                                                        className={`px-4 py-2.5 text-sm font-medium transition-all cursor-pointer flex items-center justify-between group/sub ${
+                                                            hoveredSubcategory === sub.name 
+                                                                ? 'bg-blue-50 text-blue-600' 
+                                                                : 'text-gray-700 hover:bg-gray-50'
+                                                        }`}
+                                                    >
+                                                        <span>{sub.name}</span>
+                                                        <MdKeyboardArrowRight className={`text-lg transition-transform ${hoveredSubcategory === sub.name ? 'translate-x-1' : ''}`} />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            
+                                            {/* Products Panel */}
+                                            {hoveredSubcategory && hoveredCategory === cat.name && (
+                                                <div className="w-[500px] p-4 bg-gray-50/50">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">
+                                                            {hoveredSubcategory}
+                                                        </h3>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                navigate(`/category/${cat.name}/${hoveredSubcategory}`);
+                                                            }}
+                                                            className="text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wide"
+                                                        >
+                                                            View All →
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    {loadingProducts ? (
+                                                        <div className="grid grid-cols-3 gap-3">
+                                                            {[1, 2, 3, 4, 5, 6].map((i) => (
+                                                                <div key={i} className="bg-white rounded-lg p-3 animate-pulse">
+                                                                    <div className="bg-gray-200 h-28 rounded-lg mb-2"></div>
+                                                                    <div className="bg-gray-200 h-3 rounded mb-1"></div>
+                                                                    <div className="bg-gray-200 h-3 rounded w-2/3"></div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : subcategoryProducts.length > 0 ? (
+                                                        <div className="grid grid-cols-3 gap-3">
+                                                            {subcategoryProducts.map((product) => (
+                                                                <div
+                                                                    key={product.id || product._id}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        navigate(`/product/${product.id || product._id}`);
+                                                                    }}
+                                                                    className="bg-white rounded-lg p-2 hover:shadow-lg transition-all cursor-pointer group/product border border-transparent hover:border-blue-200"
+                                                                >
+                                                                    <div className="aspect-square bg-gray-100 rounded-lg mb-2 overflow-hidden">
+                                                                        <img 
+                                                                            src={product.images?.[0]?.url || product.image} 
+                                                                            alt={product.name}
+                                                                            className="w-full h-full object-contain group-hover/product:scale-105 transition-transform"
+                                                                        />
+                                                                    </div>
+                                                                    <h4 className="text-xs font-medium text-gray-800 line-clamp-2 mb-1 group-hover/product:text-blue-600 transition-colors">
+                                                                        {product.name}
+                                                                    </h4>
+                                                                    <div className="flex items-center gap-1">
+                                                                        <span className="text-sm font-black text-gray-900">
+                                                                            ₹{product.price?.toLocaleString()}
+                                                                        </span>
+                                                                        {product.originalPrice && product.originalPrice > product.price && (
+                                                                            <span className="text-xs text-gray-400 line-through">
+                                                                                ₹{product.originalPrice?.toLocaleString()}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    {product.discount && (
+                                                                        <span className="inline-block text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded mt-1">
+                                                                            {product.discount}% OFF
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center py-8 text-sm text-gray-500">
+                                                            <MdShoppingBasket className="mx-auto text-4xl text-gray-300 mb-2" />
+                                                            <p>No products available</p>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
                                     </div>
                                 )}

@@ -5,8 +5,26 @@ import Product from '../models/Product.js';
 // @access  Public
 export const getProducts = async (req, res) => {
     try {
-        const products = await Product.find({})
-            .populate('subCategories', 'name') // Populate multiple subcategory names
+        const { category, subcategory } = req.query;
+        
+        // Build filter object
+        let filter = {};
+        
+        if (category) {
+            filter.category = category;
+        }
+        
+        if (subcategory) {
+            // Search for products that have this subcategory
+            const SubCategory = (await import('../models/SubCategory.js')).default;
+            const subCat = await SubCategory.findOne({ name: subcategory });
+            if (subCat) {
+                filter.subCategories = subCat._id;
+            }
+        }
+        
+        const products = await Product.find(filter)
+            .populate('subCategories', 'name')
             .sort({ createdAt: -1 });
         res.json(products);
     } catch (error) {
