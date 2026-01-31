@@ -149,7 +149,7 @@ const Header = () => {
     const isSpecialPage = isPDP || isCategory;
 
     return (
-        <header className={`bg-gradient-to-b from-white to-blue-100 px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-sm border-b border-blue-100 md:border-gray-100 ${isSpecialPage ? 'py-2' : 'py-0.5 md:py-0'}`}>
+        <header className={`bg-gradient-to-b from-white to-blue-100 px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-sm border-b border-blue-100 md:border-gray-100 transition-all duration-300 ${isSpecialPage ? 'py-2' : 'py-0.5 md:py-0'}`}>
             <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center md:gap-8">
 
                 {/* Mobile Top Row: Logo (Left) + Seller Button (Right) */}

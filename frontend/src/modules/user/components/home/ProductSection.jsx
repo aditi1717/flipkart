@@ -8,11 +8,13 @@ const ProductSection = ({
     products,
     onViewAll,
     containerClass = "mt-6",
-    isScrollable = true
+    isScrollable = true,
+    loading = false
 }) => {
-    if (!products || products.length === 0) return null;
-
     const scrollRef = React.useRef(null);
+    const skeletonItems = [1, 2, 3, 4, 5, 6];
+
+    if (!loading && (!products || products.length === 0)) return null;
 
     const scroll = (direction) => {
         if (scrollRef.current) {
@@ -58,11 +60,21 @@ const ProductSection = ({
                     </button>
 
                     <div ref={scrollRef} className="flex overflow-x-auto gap-3 md:gap-6 no-scrollbar pb-2 -mx-1 px-1 scroll-smooth">
-                        {products.map((product) => (
-                            <div key={product.id} className="min-w-[140px] w-[140px] md:min-w-[240px] md:w-[240px] flex-shrink-0">
-                                <ProductCard product={product} />
-                            </div>
-                        ))}
+                        {loading ? (
+                            skeletonItems.map((i) => (
+                                <div key={i} className="min-w-[140px] w-[140px] md:min-w-[240px] md:w-[240px] flex-shrink-0 animate-pulse">
+                                    <div className="aspect-square bg-gray-100 rounded-2xl mb-3"></div>
+                                    <div className="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                                    <div className="h-4 bg-gray-50 rounded w-1/2"></div>
+                                </div>
+                            ))
+                        ) : (
+                            products.map((product) => (
+                                <div key={product.id} className="min-w-[140px] w-[140px] md:min-w-[240px] md:w-[240px] flex-shrink-0">
+                                    <ProductCard product={product} />
+                                </div>
+                            ))
+                        )}
                     </div>
 
                     {/* Right Scroll Button */}

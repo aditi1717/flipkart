@@ -3,6 +3,16 @@ import { useNavigate } from 'react-router-dom';
 
 const ProductCard = ({ product, footerText }) => {
     const navigate = useNavigate();
+    const [isNavigating, setIsNavigating] = React.useState(false);
+
+    const handleNavigate = () => {
+        setIsNavigating(true);
+        // Add a small delay for visual feedback before navigating
+        setTimeout(() => {
+            navigate(`/product/${product.id}`);
+            setIsNavigating(false);
+        }, 300);
+    };
 
     // Calculate dynamic discount if not provided
     const discountPercent = product.discount || (product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) + '% OFF' : null);
@@ -12,10 +22,15 @@ const ProductCard = ({ product, footerText }) => {
 
     return (
         <div
-            className="flex flex-col h-full cursor-pointer group"
-            onClick={() => navigate(`/product/${product.id}`)}
+            className={`flex flex-col h-full cursor-pointer group transition-opacity duration-300 ${isNavigating ? 'opacity-70' : ''}`}
+            onClick={handleNavigate}
         >
             <div className="relative aspect-square mb-2 bg-[#f8f8f8] rounded-2xl overflow-hidden flex items-center justify-center border border-gray-50 shadow-sm">
+                {isNavigating && (
+                    <div className="absolute inset-0 z-20 bg-white/40 flex items-center justify-center backdrop-blur-[1px]">
+                        <div className="w-8 h-8 border-[3px] border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                )}
                 <img
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

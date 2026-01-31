@@ -4,6 +4,75 @@ import { useCartStore } from '../store/cartStore';
 import ProductSection from '../components/home/ProductSection';
 import { useProduct, useProducts } from '../../../hooks/useData';
 
+const ProductSkeleton = () => {
+    return (
+        <div className="bg-white min-h-screen pb-24 font-sans animate-pulse px-4 md:px-0">
+            {/* Desktop Skeleton */}
+            <div className="hidden md:block max-w-[1600px] mx-auto p-6">
+                <div className="flex items-center gap-2 mb-6">
+                    <div className="h-3 w-12 bg-gray-100 rounded"></div>
+                    <div className="h-3 w-4 bg-gray-50 rounded"></div>
+                    <div className="h-3 w-20 bg-gray-100 rounded"></div>
+                    <div className="h-3 w-4 bg-gray-50 rounded"></div>
+                    <div className="h-3 w-32 bg-gray-100 rounded"></div>
+                </div>
+                <div className="flex gap-10">
+                    <div className="w-[40%] flex gap-4">
+                        <div className="flex flex-col gap-3 w-16">
+                            {[1, 2, 3, 4, 5].map(i => <div key={i} className="w-16 h-16 bg-gray-100 rounded-lg"></div>)}
+                        </div>
+                        <div className="flex-1 h-[450px] bg-gray-100 rounded-xl"></div>
+                    </div>
+                    <div className="flex-1 space-y-6">
+                        <div className="space-y-2">
+                            <div className="h-3 w-24 bg-gray-100 rounded"></div>
+                            <div className="h-8 w-3/4 bg-gray-100 rounded"></div>
+                            <div className="h-4 w-full bg-gray-50 rounded"></div>
+                            <div className="h-4 w-5/6 bg-gray-50 rounded"></div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="h-6 w-16 bg-gray-100 rounded"></div>
+                            <div className="h-4 w-32 bg-gray-50 rounded"></div>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="h-4 w-20 bg-gray-100 rounded"></div>
+                            <div className="h-10 w-40 bg-gray-100 rounded"></div>
+                        </div>
+                        <div className="flex gap-4 pt-4">
+                            <div className="h-14 flex-1 bg-gray-100 rounded-sm"></div>
+                            <div className="h-14 flex-1 bg-gray-100 rounded-sm"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Skeleton */}
+            <div className="md:hidden">
+                <div className="w-full aspect-[3/2] bg-gray-100"></div>
+                <div className="px-4 py-6 space-y-6">
+                    <div className="space-y-2">
+                        <div className="h-4 w-1/4 bg-gray-100 rounded"></div>
+                        <div className="h-6 w-full bg-gray-100 rounded"></div>
+                        <div className="h-4 w-3/4 bg-gray-50 rounded"></div>
+                    </div>
+                    <div className="h-10 w-1/3 bg-gray-100 rounded"></div>
+                    <div className="space-y-3">
+                        <div className="h-4 w-1/2 bg-gray-100 rounded"></div>
+                        <div className="flex gap-3">
+                            {[1, 2, 3, 4].map(i => <div key={i} className="w-16 h-20 bg-gray-100 rounded-xl"></div>)}
+                        </div>
+                    </div>
+                </div>
+                {/* Sticky Footer Skeleton */}
+                <div className="fixed bottom-0 left-0 right-0 bg-white p-2 flex gap-2 border-t border-gray-100">
+                    <div className="h-12 flex-1 bg-gray-100 rounded-sm"></div>
+                    <div className="h-12 flex-1 bg-gray-100 rounded-sm"></div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -13,7 +82,7 @@ const ProductDetails = () => {
     const { product, loading } = useProduct(id);
     
     // Fetch all products for "Similar" and "High Rated" logic (could be optimized on backend)
-    const { products } = useProducts();
+    const { products, loading: productsLoading } = useProducts();
     
     const [similarProducts, setSimilarProducts] = useState([]);
     const [highRatedProducts, setHighRatedProducts] = useState([]);
@@ -97,7 +166,7 @@ const ProductDetails = () => {
         }
     }, [product, products]);
 
-    if (loading || !product) return <div className="p-10 text-center">Loading...</div>;
+    if (loading || !product) return <ProductSkeleton />;
 
     const discountPercentage = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
 
@@ -520,6 +589,7 @@ const ProductDetails = () => {
                 <ProductSection
                     title="Similar Products"
                     products={similarProducts}
+                    loading={productsLoading}
                     containerClass="mt-4 pb-4 px-4 md:px-0"
                     onViewAll={() => console.log('View all similar products')}
                 />
@@ -661,6 +731,7 @@ const ProductDetails = () => {
                     <ProductSection
                         title={`Similar ${product.brand || ''} Styles`}
                         products={similarProducts.slice(0, 6)}
+                        loading={productsLoading}
                         containerClass="mt-2 pb-4 px-4 md:px-0"
                         onViewAll={() => console.log('View all similar styles')}
                     />
@@ -671,6 +742,7 @@ const ProductDetails = () => {
                     <ProductSection
                         title="Earrings rated 4 stars and above"
                         products={highRatedProducts}
+                        loading={productsLoading}
                         containerClass="mt-2 pb-8 px-4 md:px-0"
                         onViewAll={() => console.log('View all top rated')}
                     />
@@ -800,6 +872,7 @@ const ProductDetails = () => {
                     <ProductSection
                         title="Recently Viewed"
                         products={products.slice(0, 6)}
+                        loading={productsLoading}
                         containerClass="mt-2 pb-4 px-4 md:px-0"
                         onViewAll={() => console.log('View all recently viewed')}
                     />
@@ -811,6 +884,7 @@ const ProductDetails = () => {
                         title="You may also like"
                         titleBadge="AD"
                         products={products.slice(6, 12)}
+                        loading={productsLoading}
                         containerClass="mt-2 pb-4 px-4 md:px-0"
                         onViewAll={() => console.log('View all recommendations')}
                     />

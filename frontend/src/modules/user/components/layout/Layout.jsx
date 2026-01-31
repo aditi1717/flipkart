@@ -38,9 +38,9 @@ const Layout = () => {
                     <Header />
                 </div>
             )}
-            <main className={`flex-1 flex flex-col ${!isPDP && 'pb-20'} md:pb-0 w-full transition-all duration-300
+            <main className={`flex-1 flex flex-col ${!isPDP && 'pb-20'} md:pb-0 w-full transition-all duration-300 min-h-[60vh] bg-white
                 ${isStandalonePage ? 'pt-0' : isSpecialPage ? 'pt-[64px] md:pt-[110px]' : 'pt-[220px] md:pt-[180px]'}`}>
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="popLayout">
                     <motion.div
                         key={location.pathname}
                         initial={{ opacity: 0, x: 20 }}
