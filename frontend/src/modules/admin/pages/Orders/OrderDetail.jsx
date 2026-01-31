@@ -158,21 +158,21 @@ const OrderDetail = () => {
                         <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-4">Customer Profile</h2>
                         <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-2xl">
                             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-blue-500 shadow-sm font-black text-xl">
-                                {order.user.name.charAt(0)}
+                                {order.user?.name?.charAt(0) || 'U'}
                             </div>
                             <div className="min-w-0">
-                                <h4 className="text-sm font-black text-gray-900 truncate">{order.user.name}</h4>
+                                <h4 className="text-sm font-black text-gray-900 truncate">{order.user?.name || 'Unknown User'}</h4>
                                 <p className="text-[10px] text-blue-600 font-black uppercase tracking-tighter">Gold Member</p>
                             </div>
                         </div>
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 text-gray-600">
                                 <MdEmail className="text-gray-300" size={18} />
-                                <span className="text-xs font-medium truncate">{order.user.email}</span>
+                                <span className="text-xs font-medium truncate">{order.user?.email || 'N/A'}</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-600">
                                 <MdPhone className="text-gray-300" size={18} />
-                                <span className="text-xs font-medium">{order.user.phone}</span>
+                                <span className="text-xs font-medium">{order.user?.phone || 'N/A'}</span>
                             </div>
                         </div>
                     </div>
@@ -181,15 +181,15 @@ const OrderDetail = () => {
                     <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">Delivery Address</h2>
-                            <span className="px-2 py-0.5 bg-gray-100 text-[8px] font-black uppercase rounded text-gray-500">{order.address.type}</span>
+                            <span className="px-2 py-0.5 bg-gray-100 text-[8px] font-black uppercase rounded text-gray-500">{order.address?.type || 'Home'}</span>
                         </div>
                         <div className="flex gap-4">
                             <MdLocationOn className="text-blue-500 flex-shrink-0 mt-1" size={20} />
                             <div className="text-xs text-gray-600 leading-relaxed font-medium">
-                                <p className="font-black text-gray-900 mb-1">{order.address.name}</p>
-                                <p>{order.address.line}</p>
-                                <p>{order.address.city}, {order.address.state}</p>
-                                <p className="font-black mt-1 text-gray-400">{order.address.pincode}</p>
+                                <p className="font-black text-gray-900 mb-1">{order.address?.name || order.user?.name || 'N/A'}</p>
+                                <p>{order.address?.line || order.shippingAddress?.street || 'N/A'}</p>
+                                <p>{order.address?.city || order.shippingAddress?.city || 'N/A'}, {order.address?.state || order.shippingAddress?.state || 'N/A'}</p>
+                                <p className="font-black mt-1 text-gray-400">{order.address?.pincode || order.shippingAddress?.postalCode || 'N/A'}</p>
                             </div>
                         </div>
                     </div>
@@ -200,14 +200,14 @@ const OrderDetail = () => {
                         <div className="space-y-4">
                             <div className="flex justify-between items-center text-xs">
                                 <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Method</span>
-                                <span className="font-black text-gray-800">{order.payment.method}</span>
+                                <span className="font-black text-gray-800">{order.payment?.method || order.paymentMethod || 'COD'}</span>
                             </div>
                             <div className="flex justify-between items-center text-xs">
                                 <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Status</span>
-                                <span className={`font-black uppercase tracking-tighter px-2 py-0.5 rounded ${order.payment.status === 'Paid' ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
-                                    }`}>{order.payment.status}</span>
+                                <span className={`font-black uppercase tracking-tighter px-2 py-0.5 rounded ${order.payment?.status === 'Paid' || order.isPaid ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
+                                    }`}>{order.payment?.status || (order.isPaid ? 'Paid' : 'Pending')}</span>
                             </div>
-                            {order.payment.transactionId && (
+                            {order.payment?.transactionId && (
                                 <div className="pt-4 border-t border-gray-50">
                                     <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Transaction ID</p>
                                     <p className="text-[11px] font-bold text-gray-600 font-mono break-all bg-gray-50 p-2 rounded-lg">{order.payment.transactionId}</p>

@@ -20,13 +20,13 @@ const OrderList = () => {
     }, [fetchOrders]);
 
     const filteredOrders = orders.filter(order => {
-        const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.user.email.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = (order.id?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.user?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.user?.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
 
         const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
 
-        const matchesUserFilter = !userEmailFilter || order.user.email.toLowerCase() === userEmailFilter.toLowerCase();
+        const matchesUserFilter = !userEmailFilter || (order.user?.email?.toLowerCase() || '') === userEmailFilter.toLowerCase();
 
         return matchesSearch && matchesStatus && matchesUserFilter;
     });
@@ -132,8 +132,8 @@ const OrderList = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
-                                    {paginatedOrders.map(order => (
-                                        <tr key={order.id} className="hover:bg-blue-50/10 transition-colors group">
+                                    {paginatedOrders.map((order, index) => (
+                                        <tr key={order.id || `order-${index}`} className="hover:bg-blue-50/10 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
                                                     <span className="text-xs font-black text-gray-900 group-hover:text-blue-600 transition-colors">{order.id}</span>
@@ -144,10 +144,10 @@ const OrderList = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="text-xs font-bold text-gray-800">{order.user.name}</span>
+                                                    <span className="text-xs font-bold text-gray-800">{order.user?.name || 'Unknown'}</span>
                                                     <div className="flex flex-col mt-0.5 gap-0.5">
-                                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight hover:text-blue-500 transition-colors cursor-pointer">{order.user.email}</span>
-                                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight">{order.user.phone}</span>
+                                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight hover:text-blue-500 transition-colors cursor-pointer">{order.user?.email || 'N/A'}</span>
+                                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight">{order.user?.phone || 'N/A'}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -155,7 +155,7 @@ const OrderList = () => {
                                                 <div className="flex items-center gap-3">
                                                     {/* Product Thumbnails */}
                                                     <div className="flex -space-x-2 overflow-hidden items-center">
-                                                        {order.items.slice(0, 3).map((item, idx) => (
+                                                        {(order.items || []).slice(0, 3).map((item, idx) => (
                                                             <div key={idx} className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-gray-100 flex-shrink-0">
                                                                 <img 
                                                                     src={item.image} 
@@ -164,24 +164,24 @@ const OrderList = () => {
                                                                 />
                                                             </div>
                                                         ))}
-                                                        {order.items.length > 3 && (
+                                                        {(order.items || []).length > 3 && (
                                                             <div className="h-8 w-8 rounded-full ring-2 ring-white bg-gray-50 flex items-center justify-center text-[9px] font-bold text-gray-500 z-10">
-                                                                +{order.items.length - 3}
+                                                                +{(order.items || []).length - 3}
                                                             </div>
                                                         )}
                                                     </div>
                                                     
                                                     <div className="flex flex-col">
-                                                        <span className="text-[13px] font-black text-gray-900">₹{order.total.toLocaleString()}</span>
-                                                        <span className="text-[9px] font-bold text-gray-400 uppercase">{order.items.length} {order.items.length === 1 ? 'Item' : 'Items'}</span>
+                                                        <span className="text-[13px] font-black text-gray-900">₹{(order.total || 0).toLocaleString()}</span>
+                                                        <span className="text-[9px] font-bold text-gray-400 uppercase">{(order.items || []).length} {(order.items || []).length === 1 ? 'Item' : 'Items'}</span>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <div className="flex flex-col items-center gap-1">
-                                                    <span className="text-[10px] font-black text-gray-500 uppercase">{order.payment.method}</span>
-                                                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${order.payment.status === 'Paid' ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'}`}>
-                                                        {order.payment.status}
+                                                    <span className="text-[10px] font-black text-gray-500 uppercase">{order.payment?.method || 'N/A'}</span>
+                                                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${order.payment?.status === 'Paid' ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'}`}>
+                                                        {order.payment?.status || 'Pending'}
                                                     </span>
                                                 </div>
                                             </td>

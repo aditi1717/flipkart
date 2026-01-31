@@ -62,7 +62,7 @@ export const getMyOrders = async (req, res) => {
 // @access  Private
 export const getOrderById = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id).populate('user', 'name email');
+        const order = await Order.findById(req.params.id).populate('user', 'name email phone');
         
         if (order) {
             // Check if the order belongs to the logged-in user or if user is admin
@@ -86,7 +86,7 @@ export const getOrderById = async (req, res) => {
 export const getOrders = async (req, res) => {
     try {
         const orders = await Order.find({})
-            .populate('user', 'id name email')
+            .populate('user', 'name email phone')
             .sort({ createdAt: -1 });
         res.json(orders);
     } catch (error) {
