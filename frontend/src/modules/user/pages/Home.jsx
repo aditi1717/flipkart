@@ -31,7 +31,7 @@ const Home = () => {
                 {/* Dynamic Content Stream */}
                 {layout.map((item, index) => {
                     if (item.type === 'banner') {
-                        const banner = banners.find(b => (b.id || b._id) === item.referenceId);
+                        const banner = banners.find(b => String(b._id || b.id) === String(item.referenceId));
                         if (!banner) return null;
                         return (
                             <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto px-4 md:px-0">
@@ -41,7 +41,7 @@ const Home = () => {
                     }
 
                     if (item.type === 'section') {
-                        const section = sections.find(s => s.id === item.referenceId);
+                        const section = sections.find(s => String(s.id) === String(item.referenceId));
                         if (!section || !section.products || section.products.length === 0) return null;
 
                         // Decide layout based on product count or defaults

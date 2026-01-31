@@ -26,7 +26,7 @@ const useBannerStore = create((set) => ({
          try {
             const { data } = await API.put(`/banners/${id}`, updatedData);
              set((state) => ({
-                 banners: state.banners.map(b => b.id === id ? data : b)
+                 banners: state.banners.map(b => b._id === id ? data : b)
              }));
         } catch (error) { console.error(error); }
     },
@@ -34,17 +34,17 @@ const useBannerStore = create((set) => ({
     deleteBanner: async (id) => {
         try {
             await API.delete(`/banners/${id}`);
-            set((state) => ({ banners: state.banners.filter(b => b.id !== id) }));
+            set((state) => ({ banners: state.banners.filter(b => b._id !== id) }));
         } catch (error) { console.error(error); }
     },
 
     toggleBannerStatus: async (id) => {
          set(state => {
-              const banner = state.banners.find(b => b.id === id);
+              const banner = state.banners.find(b => b._id === id);
               if(!banner) return state;
               API.put(`/banners/${id}`, { active: !banner.active }).then(({data}) => {
                    set(curr => ({
-                       banners: curr.banners.map(b => b.id === id ? data : b)
+                       banners: curr.banners.map(b => b._id === id ? data : b)
                    }));
               });
               return state;

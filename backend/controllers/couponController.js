@@ -35,7 +35,6 @@ export const createCoupon = async (req, res) => {
         } = req.body;
 
         const coupon = new Coupon({
-            id: Date.now(),
             type,
             title,
             description,
@@ -64,7 +63,7 @@ export const createCoupon = async (req, res) => {
 // @access  Private/Admin
 export const updateCouponStatus = async (req, res) => {
     try {
-        const coupon = await Coupon.findOne({ id: req.params.id });
+        const coupon = await Coupon.findById(req.params.id);
         if (coupon) {
             coupon.active = req.body.active !== undefined ? req.body.active : coupon.active;
             const updatedCoupon = await coupon.save();
@@ -82,7 +81,7 @@ export const updateCouponStatus = async (req, res) => {
 // @access  Private/Admin
 export const deleteCoupon = async (req, res) => {
     try {
-        const coupon = await Coupon.findOne({ id: req.params.id });
+        const coupon = await Coupon.findById(req.params.id);
         if (coupon) {
             await coupon.deleteOne();
             res.json({ message: 'Coupon removed' });

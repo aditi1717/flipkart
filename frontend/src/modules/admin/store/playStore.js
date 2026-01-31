@@ -26,7 +26,7 @@ const usePlayStore = create((set) => ({
         try {
             const { data } = await API.put(`/reels/${id}`, updatedData);
              set((state) => ({
-                 reels: state.reels.map(r => r.id === id ? data : r)
+                 reels: state.reels.map(r => r._id === id ? data : r)
              }));
         } catch (error) { console.error(error); }
     },
@@ -34,18 +34,18 @@ const usePlayStore = create((set) => ({
     deleteReel: async (id) => {
         try {
             await API.delete(`/reels/${id}`);
-            set((state) => ({ reels: state.reels.filter(r => r.id !== id) }));
+            set((state) => ({ reels: state.reels.filter(r => r._id !== id) }));
         } catch (error) { console.error(error); }
     },
 
     toggleReelStatus: async (id) => {
           // Find reel to get current status
           set(state => {
-              const reel = state.reels.find(r => r.id === id);
+              const reel = state.reels.find(r => r._id === id);
               if(!reel) return state;
               API.put(`/reels/${id}`, { active: !reel.active }).then(({data}) => {
                    set(curr => ({
-                       reels: curr.reels.map(r => r.id === id ? data : r)
+                       reels: curr.reels.map(r => r._id === id ? data : r)
                    }));
               });
               return state;

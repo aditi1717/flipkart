@@ -29,8 +29,8 @@ const HomeLayoutEditor = () => {
     }, [fetchHomeSections, fetchBanners, fetchHomeLayout]);
 
     // Helpers to get details
-    const getSectionDetails = (id) => homeSections.find(s => s.id === id);
-    const getBannerDetails = (id) => banners.find(b => (b.id || b._id) === id);
+    const getSectionDetails = (id) => homeSections.find(s => String(s.id) === String(id));
+    const getBannerDetails = (id) => banners.find(b => String(b._id || b.id) === String(id));
 
     const handleAddToLayout = (type, id) => {
         const newItem = {
@@ -88,7 +88,7 @@ const HomeLayoutEditor = () => {
                                         </div>
                                     </div>
                                     <button 
-                                        onClick={() => handleAddToLayout('banner', banner.id || banner._id)}
+                                        onClick={() => handleAddToLayout('banner', banner._id || banner.id)}
                                         className="p-1.5 bg-white text-purple-600 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
                                         <MdAdd size={16} />

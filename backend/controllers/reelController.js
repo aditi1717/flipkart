@@ -25,7 +25,6 @@ export const createReel = async (req, res) => {
         }
 
         const reel = new Reel({
-            id: Date.now(),
             videoUrl,
             productLink,
             active: active !== undefined ? (active === 'true' || active === true) : true,
@@ -44,7 +43,7 @@ export const createReel = async (req, res) => {
 // @access  Private/Admin
 export const updateReel = async (req, res) => {
     try {
-        const reel = await Reel.findOne({ id: req.params.id });
+        const reel = await Reel.findById(req.params.id);
         if (reel) {
             let videoUrl = req.body.videoUrl;
             if (req.file) {
@@ -72,7 +71,7 @@ export const updateReel = async (req, res) => {
 // @access  Private/Admin
 export const deleteReel = async (req, res) => {
     try {
-        const reel = await Reel.findOne({ id: req.params.id });
+        const reel = await Reel.findById(req.params.id);
         if (reel) {
             await reel.deleteOne();
             res.json({ message: 'Reel removed' });

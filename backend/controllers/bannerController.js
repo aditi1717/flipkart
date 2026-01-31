@@ -137,7 +137,7 @@ export const updateBanner = async (req, res) => {
 // @access  Private/Admin
 export const deleteBanner = async (req, res) => {
     try {
-        const banner = await Banner.findOne({ id: req.params.id });
+        const banner = await Banner.findById(req.params.id);
         if (banner) {
             await banner.deleteOne();
             res.json({ message: 'Banner removed' });

@@ -49,14 +49,14 @@ const useCouponStore = create((set) => ({
     deleteCoupon: async (id) => {
         try {
             await API.delete(`/coupons/${id}`);
-            set((state) => ({ coupons: state.coupons.filter(c => c.id !== id) }));
+            set((state) => ({ coupons: state.coupons.filter(c => c._id !== id) }));
         } catch (error) { console.error(error); }
     },
 
     deleteOffer: async (id) => {
         try {
             await API.delete(`/coupons/${id}`);
-             set((state) => ({ offers: state.offers.filter(o => o.id !== id) }));
+             set((state) => ({ offers: state.offers.filter(o => o._id !== id) }));
         } catch (error) { console.error(error); }
     },
 
@@ -65,12 +65,12 @@ const useCouponStore = create((set) => ({
          // Optimized: Update local first then sync? Or wait.
          // Let's find item first
          set(state => {
-             const coupon = state.coupons.find(c => c.id === id);
+             const coupon = state.coupons.find(c => c._id === id);
              if(!coupon) return state;
              // Toggle logic via API
              API.put(`/coupons/${id}`, { active: !coupon.active }).then(({data}) => {
                   set(curr => ({
-                      coupons: curr.coupons.map(c => c.id === id ? data : c)
+                      coupons: curr.coupons.map(c => c._id === id ? data : c)
                   }));
              });
              return state;
@@ -79,11 +79,11 @@ const useCouponStore = create((set) => ({
 
     toggleOfferStatus: async (id) => {
          set(state => {
-             const offer = state.offers.find(o => o.id === id);
+             const offer = state.offers.find(o => o._id === id);
              if(!offer) return state;
              API.put(`/coupons/${id}`, { active: !offer.active }).then(({data}) => {
                   set(curr => ({
-                      offers: curr.offers.map(o => o.id === id ? data : o)
+                      offers: curr.offers.map(o => o._id === id ? data : o)
                   }));
              });
              return state;
