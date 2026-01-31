@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import ProductSection from '../components/home/ProductSection';
 import { useProduct, useProducts } from '../../../hooks/useData';
+import API from '../../../services/api';
+import toast from 'react-hot-toast';
 
 const ProductSkeleton = () => {
     return (
@@ -114,14 +116,27 @@ const ProductDetails = () => {
         addToCart(product, selectedVariants);
         navigate('/checkout');
     };
-    const [reviews, setReviews] = useState([
-        { id: 1, user: 'Aditi Sharma', rating: 5, comment: 'Perfect match for my party wear! The quality is amazing.', date: '2 days ago' },
-        { id: 2, user: 'Rahul V.', rating: 4, comment: 'Very beautiful design, though slightly larger than expected.', date: '1 week ago' }
-    ]);
+    const [reviews, setReviews] = useState([]);
     const [questions, setQuestions] = useState([
         { id: 1, q: 'Is this skin friendly?', a: 'Yes, it is anti-allergic and safe for all skin types.', user: 'Sonal M.' }
     ]);
+
+    // Fetch Reviews from backend
+    useEffect(() => {
+        const fetchReviews = async () => {
+            if (!id) return;
+            try {
+                const { data } = await API.get(`/reviews/product/${id}`);
+                setReviews(data);
+            } catch (err) {
+                console.error("Error fetching reviews:", err);
+            }
+        };
+        fetchReviews();
+    }, [id]);
+
     const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+    const [submittingReview, setSubmittingReview] = useState(false);
     const [newQuestion, setNewQuestion] = useState('');
 
     const [expandedSections, setExpandedSections] = useState({
@@ -774,15 +789,17 @@ const ProductDetails = () => {
                         {/* Horizontal Reviews Slide - Narrower cards */}
                         <div className="flex overflow-x-auto gap-3 no-scrollbar px-4 md:px-0 mb-6">
                             {reviews.map(rev => (
-                                <div key={rev.id} className="min-w-[220px] w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex-shrink-0">
+                                <div key={rev._id || rev.id} className="min-w-[220px] w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex-shrink-0">
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="bg-[#388e3c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
                                             {rev.rating} <span className="material-icons text-[9px]">star</span>
                                         </div>
-                                        <span className="text-[13px] font-bold text-gray-800 line-clamp-1">{rev.user}</span>
+                                        <span className="text-[13px] font-bold text-gray-800 line-clamp-1">{rev.name || rev.user}</span>
                                     </div>
                                     <p className="text-[13px] text-gray-600 mb-2 line-clamp-3 leading-relaxed">{rev.comment}</p>
-                                    <span className="text-[10px] text-gray-400 font-medium">{rev.date}</span>
+                                    <span className="text-[10px] text-gray-400 font-medium">
+                                        {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : (rev.date || 'Recently')}
+                                    </span>
                                 </div>
                             ))}
                         </div>
@@ -811,14 +828,28 @@ const ProductDetails = () => {
                                 className="w-full bg-white border border-gray-100 rounded-2xl p-4 text-[13px] focus:ring-2 focus:ring-green-100 outline-none resize-none min-h-[90px] mb-4 shadow-inner"
                             />
                             <button
-                                onClick={() => {
+                                onClick={async () => {
                                     if (!newReview.comment) return;
-                                    setReviews([{ id: Date.now(), user: 'You', rating: newReview.rating, comment: newReview.comment, date: 'Just now' }, ...reviews]);
-                                    setNewReview({ rating: 5, comment: '' });
+                                    setSubmittingReview(true);
+                                    try {
+                                        await API.post('/reviews', {
+                                            productId: id,
+                                            rating: newReview.rating,
+                                            comment: newReview.comment
+                                        });
+                                        setNewReview({ rating: 5, comment: '' });
+                                        toast.success("Your review has been submitted for approval!");
+                                    } catch (err) {
+                                        console.error("Error posting review:", err);
+                                        toast.error(err.response?.data?.message || "Failed to post review. Please login.");
+                                    } finally {
+                                        setSubmittingReview(false);
+                                    }
                                 }}
-                                className="w-full bg-[#1084ea] text-white font-bold py-3 rounded-2xl text-[13px] active:scale-95 transition-all shadow-md"
+                                disabled={submittingReview}
+                                className={`w-full bg-[#1084ea] text-white font-bold py-3 rounded-2xl text-[13px] active:scale-95 transition-all shadow-md ${submittingReview ? 'opacity-50' : ''}`}
                             >
-                                Post Review
+                                {submittingReview ? 'Submitting...' : 'Post Review'}
                             </button>
                         </div>
                     </div>

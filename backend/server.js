@@ -27,6 +27,7 @@ import subCategoryRoutes from './routes/subCategoryRoutes.js';
 import homeLayoutRoutes from './routes/homeLayoutRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 
 const app = express();
@@ -59,6 +60,7 @@ app.use('/api/subcategories', subCategoryRoutes);
 app.use('/api/home-layout', homeLayoutRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

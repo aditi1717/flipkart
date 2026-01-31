@@ -20,6 +20,7 @@ import UserDetail from '../pages/Users/UserDetail';
 import PageManager from '../pages/PageManager';
 import SupportRequests from '../pages/Support/SupportRequests';
 import HomeContentManager from '../pages/Content/HomeContentManager';
+import ReviewList from '../pages/Reviews/ReviewList';
 
 const AdminRoutes = () => {
     return (
@@ -47,6 +48,7 @@ const AdminRoutes = () => {
                 <Route path="orders/:id" element={<OrderDetail />} />
                 <Route path="delivery-slip" element={<DeliverySlip />} />
                 <Route path="returns" element={<ReturnRequests />} />
+                <Route path="reviews" element={<ReviewList />} />
                 <Route path="coupons" element={<CouponManager />} />
                 <Route path="play" element={<PlayManager />} />
                 <Route path="homepage" element={<BannerManager />} />

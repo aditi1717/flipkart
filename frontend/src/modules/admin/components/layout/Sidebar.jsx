@@ -19,7 +19,8 @@ import {
     MdSupportAgent,
     MdLabel,
     MdViewAgenda,
-    MdViewCarousel
+    MdViewCarousel,
+    MdRateReview
 } from 'react-icons/md';
 
 import logo from '../../../../assets/indiankart-logo.png';
@@ -35,6 +36,7 @@ const Sidebar = () => {
         { name: 'Users', icon: MdPeople, path: '/admin/users' },
         { name: 'Orders', icon: MdShoppingCart, path: '/admin/orders' },
         { name: 'Delivery Slip', icon: MdLocalShipping, path: '/admin/delivery-slip' },
+        { name: 'Reviews', icon: MdRateReview, path: '/admin/reviews' },
         { name: 'Returns', icon: MdAssignmentReturn, path: '/admin/returns' },
         { name: 'Coupons & Offers', icon: MdLocalOffer, path: '/admin/coupons' },
         { name: 'Play (Reels)', icon: MdPlayCircle, path: '/admin/play' },
