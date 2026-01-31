@@ -9,11 +9,15 @@ const OrderList = () => {
     const [searchParams] = useSearchParams();
     const userEmailFilter = searchParams.get('user');
 
-    const { orders } = useOrderStore();
+    const { orders, fetchOrders } = useOrderStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 20;
+
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders]);
 
     const filteredOrders = orders.filter(order => {
         const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||

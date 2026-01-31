@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdClose, MdAdd, MdDelete, MdImage, MdExpandMore, MdExpandLess, MdArrowBack } from 'react-icons/md';
+import { MdClose, MdAdd, MdDelete, MdImage, MdExpandMore, MdExpandLess, MdArrowBack, MdOutlinePhotoCamera } from 'react-icons/md';
 import useProductStore from '../../store/productStore';
 import useCategoryStore from '../../store/categoryStore';
 import toast from 'react-hot-toast';
@@ -36,7 +36,8 @@ import toast from 'react-hot-toast';
 
     // Form State
     const [formData, setFormData] = useState({
-        images: [''],
+        thumbnail: null, // { type: 'url'|'file', content: string|File, preview: string }
+        galleryImages: [], // Array of image objects
         brand: '',
         name: '',
         shortDescription: '',
@@ -57,16 +58,19 @@ import toast from 'react-hot-toast';
     });
 
     // Populate form if editing
-    // Populate form if editing
     useEffect(() => {
         if (product) {
-            const initImages = product.images && product.images.length > 0 ? product.images : [product.image || ''];
+            // Logic to separate primary image from gallery
+            // Backend model: image (string), images (array of strings)
             
+            const initThumbnail = product.image ? { type: 'url', content: product.image, preview: product.image } : null;
+            const initGallery = (product.images || []).map(url => ({ type: 'url', content: url, preview: url }));
+
             setFormData({
                 ...formData,
                 ...product,
-                // Store images as objects: { type: 'url'|'file', content: string|File, preview: string }
-                images: initImages.map(url => ({ type: 'url', content: url, preview: url })).filter(i => i.content),
+                thumbnail: initThumbnail,
+                galleryImages: initGallery,
                 price: product.price || '',
                 originalPrice: product.originalPrice || '',
                 variantHeadings: product.variantHeadings || (product.colors?.length || product.sizes?.length ? [
@@ -92,12 +96,51 @@ import toast from 'react-hot-toast';
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleFileUpload = (e, callback) => {
+    // --- Image Handlers ---
+
+    const handleThumbnailUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
         
         const previewUrl = URL.createObjectURL(file);
-        // callback expects the stored image object
+        setFormData(prev => ({
+            ...prev,
+            thumbnail: { type: 'file', content: file, preview: previewUrl }
+        }));
+    };
+
+    const removeThumbnail = () => {
+        setFormData(prev => ({ ...prev, thumbnail: null }));
+    };
+
+    const handleGalleryUpload = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const newImages = files.map(file => ({
+            type: 'file',
+            content: file,
+            preview: URL.createObjectURL(file)
+        }));
+
+        setFormData(prev => ({
+            ...prev,
+            galleryImages: [...prev.galleryImages, ...newImages]
+        }));
+    };
+
+    const removeGalleryImage = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            galleryImages: prev.galleryImages.filter((_, i) => i !== index)
+        }));
+    };
+
+    // Helper for variant images
+    const handleVariantFileUpload = (e, callback) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const previewUrl = URL.createObjectURL(file);
         callback({ type: 'file', content: file, preview: previewUrl });
     };
 
@@ -108,7 +151,6 @@ import toast from 'react-hot-toast';
     };
 
     const addArrayItem = (field, emptyVal = '') => {
-        // If field is images, emptyVal should be compatible placeholder if we want
         setFormData(prev => ({ ...prev, [field]: [...prev[field], emptyVal] }));
     };
 
@@ -235,6 +277,12 @@ import toast from 'react-hot-toast';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validation: Thumbnail is required
+        if (!formData.thumbnail) {
+            toast.error("Please add a product thumbnail!");
+            return;
+        }
         
         const data = new FormData();
         data.append('name', formData.name);
@@ -302,26 +350,25 @@ import toast from 'react-hot-toast';
             data.append('variant_images', file);
         });
 
-        // Main Images
-        if (formData.images.length > 0) {
-            const mainImg = formData.images[0];
-             // If first image is file or string
-             if (mainImg.type === 'file') {
-                data.append('image', mainImg.content); // If file, multer handles
-             } else {
-                 data.append('image', mainImg.content); // If string, separate field? No, multer 'image' field can be string if not file? 
-                 // Multer puts files in req.files, text in req.body. 
-                 // If we append string to 'image', it goes to req.body.image.
-             }
-
-            formData.images.forEach(img => {
-                if (img.type === 'file') {
-                    data.append('images', img.content);
-                } else {
-                     data.append('images', img.content);
-                }
-            });
+        // --- Handle Main Images ---
+        
+        // 1. Thumbnail
+        if (formData.thumbnail.type === 'file') {
+            data.append('image', formData.thumbnail.content);
+        } else {
+            // If it's a URL, we might need to send it if backend expects 'image' field update?
+            // Usually backend keeps existing if not provided, or consumes string.
+            data.append('image', formData.thumbnail.content);
         }
+
+        // 2. Gallery Images
+        formData.galleryImages.forEach(img => {
+            if (img.type === 'file') {
+                data.append('images', img.content);
+            } else {
+                data.append('images', img.content); // Existing URL
+            }
+        });
 
 // ... (inside ProductForm component)
 
@@ -412,6 +459,107 @@ import toast from 'react-hot-toast';
                             <h2 className="text-lg font-bold text-gray-800">Basic Information</h2>
                         </div>
 
+                            
+                            {/* Improved Image Selection UI */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                                {/* Thumbnail Selection */}
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                        <MdImage className="text-blue-500" size={16} />
+                                        Primary Thumbnail
+                                        <span className="text-red-500">*</span>
+                                    </label>
+                                    
+                                    <div className="relative group w-full h-64 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all hover:border-blue-400 hover:bg-blue-50/30">
+                                        {formData.thumbnail ? (
+                                            <>
+                                                <img 
+                                                    src={formData.thumbnail.preview} 
+                                                    alt="Thumbnail" 
+                                                    className="w-full h-full object-contain p-2" 
+                                                />
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                                                    <label className="p-3 bg-white rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
+                                                        <MdImage className="text-blue-600" size={24} />
+                                                        <input 
+                                                            type="file" 
+                                                            className="hidden" 
+                                                            accept="image/*"
+                                                            onChange={handleThumbnailUpload} 
+                                                        />
+                                                    </label>
+                                                    <button 
+                                                        type="button"
+                                                        onClick={removeThumbnail}
+                                                        className="p-3 bg-white rounded-full hover:scale-110 transition-transform shadow-lg"
+                                                    >
+                                                        <MdDelete className="text-red-600" size={24} />
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                                                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                                                    <MdAdd size={32} />
+                                                </div>
+                                                <span className="text-sm font-bold text-gray-600">Click to upload Thumbnail</span>
+                                                <span className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Supports JPG, PNG, WEBP</span>
+                                                <input 
+                                                    type="file" 
+                                                    className="hidden" 
+                                                    accept="image/*"
+                                                    onChange={handleThumbnailUpload} 
+                                                />
+                                            </label>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Gallery Selection */}
+                                <div className="space-y-3">
+                                    <label className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                        <span className="flex items-center gap-2">
+                                            <MdOutlinePhotoCamera className="text-purple-500" size={16} />
+                                            Gallery Images
+                                        </span>
+                                        <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{formData.galleryImages.length} Images</span>
+                                    </label>
+
+                                    <div className="grid grid-cols-3 gap-2 h-64 overflow-y-auto pr-1">
+                                        {/* Upload Card */}
+                                        <label className="min-h-[100px] border-2 border-dashed border-gray-200 bg-gray-50 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50/10 transition-all">
+                                            <MdAdd className="text-gray-400 group-hover:text-purple-500" size={24} />
+                                            <span className="text-[10px] font-bold text-gray-400 mt-1">Add</span>
+                                            <input 
+                                                type="file" 
+                                                multiple 
+                                                className="hidden" 
+                                                accept="image/*"
+                                                onChange={handleGalleryUpload} 
+                                            />
+                                        </label>
+
+                                        {/* Gallery Items */}
+                                        {formData.galleryImages.map((img, idx) => (
+                                            <div key={idx} className="relative group rounded-xl overflow-hidden border border-gray-100 bg-white h-[100px] shadow-sm">
+                                                <img 
+                                                    src={img.preview} 
+                                                    alt={`Gallery ${idx}`} 
+                                                    className="w-full h-full object-cover" 
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeGalleryImage(idx)}
+                                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100"
+                                                >
+                                                    <MdClose size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Brand / Manufacturer</label>
@@ -447,10 +595,36 @@ import toast from 'react-hot-toast';
                                     value={formData.categoryPath[0] || ''}
                                     onChange={(e) => {
                                         const val = e.target.value; 
+                                        
+                                        // Auto-populate variants based on category
+                                        const selectedCat = categories.find(c => String(c.id) === String(val));
+                                        let newHeadings = [];
+                                        
+                                        if (selectedCat) {
+                                            const catName = selectedCat.name.toLowerCase();
+                                            
+                                            // Fashion: Color + Size
+                                            if (catName.includes('fashion') || catName.includes('clothing') || catName.includes('shirt') || catName.includes('shoe')) {
+                                                newHeadings = [
+                                                    { id: Date.now(), name: 'Color', hasImage: true, options: [{ name: '', image: '' }] },
+                                                    { id: Date.now() + 1, name: 'Size', hasImage: false, options: [{ name: '' }] }
+                                                ];
+                                            } 
+                                            // Mobile/Electronics: Color + Storage
+                                            else if (catName.includes('mobile') || catName.includes('phone') || catName.includes('electronics')) {
+                                                newHeadings = [
+                                                    { id: Date.now(), name: 'Color', hasImage: true, options: [{ name: '', image: '' }] },
+                                                    { id: Date.now() + 1, name: 'Storage', hasImage: false, options: [{ name: '' }] }
+                                                ];
+                                            }
+                                        }
+
                                         setFormData(prev => ({ 
                                             ...prev, 
                                             categoryPath: val ? [val] : [],
-                                            subCategories: [] // Reset subcategories when primary changes
+                                            subCategories: [], // Reset subcategories
+                                            // Apply new template if match found, otherwise keep existing (or clear if we want strict mode, but keeping existing is safer for unknown cats)
+                                            variantHeadings: newHeadings.length > 0 ? newHeadings : prev.variantHeadings
                                         }));
                                     }}
                                     className="w-full px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium text-gray-900"
@@ -669,7 +843,7 @@ import toast from 'react-hot-toast';
                                                                             type="file"
                                                                             className="hidden"
                                                                             accept="image/*"
-                                                                            onChange={(e) => handleFileUpload(e, (data) => updateVariantOption(vh.id, optIdx, 'image', data))}
+                                                                            onChange={(e) => handleVariantFileUpload(e, (data) => updateVariantOption(vh.id, optIdx, 'image', data))}
                                                                         />
                                                                     </label>
                                                                 </div>
@@ -807,59 +981,6 @@ import toast from 'react-hot-toast';
                 {/* Right Side: Media & Enhanced Metadata */}
                 <div className="lg:col-span-4 space-y-8">
 
-                    {/* Media Gallery Card */}
-                    <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
-                        <div className="flex justify-between items-center border-b border-gray-50 pb-3">
-                            <h2 className="text-sm font-black text-gray-800 uppercase tracking-widest">Media</h2>
-                            <button type="button" onClick={() => addArrayItem('images', { type: 'url', content: '', preview: '' })} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">+ Add Slot</button>
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-2">
-                            {formData.images.map((img, idx) => {
-                                return (
-                                    <div key={idx} className="relative group animate-in slide-in-from-right-2">
-                                        <div className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${idx === 0 ? 'border-blue-500 shadow-lg shadow-blue-100' : 'border-gray-50'}`}>
-                                            {img && (img.preview || img.content) ? (
-                                                <img src={img.preview || img.content} className="w-full h-full object-cover" alt="" />
-                                            ) : (
-                                                <label className="w-full h-full bg-gray-50 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
-                                                    <MdImage size={24} className="text-gray-300" />
-                                                    <span className="text-[8px] font-black text-gray-400 mt-1 uppercase">Upload</span>
-                                                    <input
-                                                        type="file"
-                                                        className="hidden"
-                                                        accept="image/*"
-                                                        onChange={(e) => handleFileUpload(e, (data) => updateArrayItem('images', idx, data))}
-                                                    />
-                                                </label>
-                                            )}
-                                            {img && (img.preview || img.content) && (
-                                                <label className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                                                    <span className="text-[10px] font-bold">Replace</span>
-                                                    <input
-                                                        type="file"
-                                                        className="hidden"
-                                                        accept="image/*"
-                                                        onChange={(e) => handleFileUpload(e, (data) => updateArrayItem('images', idx, data))}
-                                                    />
-                                                </label>
-                                            )}
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => removeArrayItem('images', idx)}
-                                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 z-10"
-                                        >
-                                            <MdClose size={10} />
-                                        </button>
-                                        {idx === 0 && (
-                                            <span className="absolute top-1 left-1 bg-blue-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm">CORE</span>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
 
                     {/* Metadata Card - Dynamic Toggles */}
                     <section className="space-y-4">

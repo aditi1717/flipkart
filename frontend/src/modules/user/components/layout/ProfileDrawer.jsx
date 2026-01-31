@@ -15,7 +15,7 @@ import HelpCenter from '../../pages/HelpCenter';
 
 const ProfileDrawer = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
-    const { user } = useAuthStore();
+    const { user, logout } = useAuthStore();
     const { userProfile, updateUserProfile } = useCartStore();
     const [isEditing, setIsEditing] = useState(false);
     const drawerRef = useRef(null);
@@ -217,7 +217,7 @@ const ProfileDrawer = ({ isOpen, onClose }) => {
                 <div className="p-4 border-t border-gray-100 mt-2">
                     <button
                         onClick={() => {
-                            useCartStore.getState().logout();
+                            logout();
                             onClose();
                             navigate('/');
                         }}

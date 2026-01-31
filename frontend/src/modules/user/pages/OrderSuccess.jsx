@@ -53,7 +53,7 @@ const OrderSuccess = () => {
                         </div>
                         <div className="flex justify-between mb-4">
                             <span className="text-gray-500 text-sm">Total Amount</span>
-                            <span className="font-bold text-sm">₹{latestOrder.totalAmount.toLocaleString()}</span>
+                            <span className="font-bold text-sm">₹{latestOrder.totalPrice.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-500 text-sm">Estimated Delivery</span>

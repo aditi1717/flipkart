@@ -6,8 +6,8 @@ import useAdminAuthStore from '../../admin/store/adminAuthStore';
 
 const Account = () => {
     const navigate = useNavigate();
-    const { user, updateProfile } = useAuthStore();
-    const { adminUser, updateProfile: updateAdminProfile } = useAdminAuthStore();
+    const { user, updateProfile, logout: userLogout } = useAuthStore();
+    const { adminUser, updateProfile: updateAdminProfile, logout: adminLogout } = useAdminAuthStore();
     const { userProfile } = useCartStore(); // Keep for fallback if needed, but don't use its update
     const [isEditing, setIsEditing] = useState(false);
 
@@ -167,7 +167,11 @@ const Account = () => {
                             <div className="py-2">
                                 <div
                                     onClick={() => {
-                                        useCartStore.getState().logout();
+                                        if (isAdmin) {
+                                            adminLogout();
+                                        } else {
+                                            userLogout();
+                                        }
                                         navigate('/');
                                     }}
                                     className="flex items-center gap-3 px-4 py-3 text-gray-600 font-semibold hover:bg-gray-50 cursor-pointer transition-colors"
@@ -416,7 +420,11 @@ const Account = () => {
                         <div className="mt-4 px-4 pb-8">
                             <button
                                 onClick={() => {
-                                    useCartStore.getState().logout();
+                                    if (isAdmin) {
+                                        adminLogout();
+                                    } else {
+                                        userLogout();
+                                    }
                                     navigate('/');
                                 }}
                                 className="w-full py-3 bg-white text-primary border border-gray-200 font-bold rounded shadow-sm active:bg-gray-50 transition-all"

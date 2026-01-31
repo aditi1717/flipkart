@@ -15,7 +15,7 @@ const Home = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center">
+            <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="animate-pulse flex flex-col items-center">
                     <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
                     <p className="text-gray-500 font-bold">Loading your experience...</p>

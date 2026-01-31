@@ -83,13 +83,19 @@ const Header = () => {
                 <div className="flex items-center justify-between mb-0 md:mb-0 w-full md:w-auto">
                     {/* Mobile Logo */}
                     {!isSpecialPage && (
-                        <div className="flex items-center md:hidden -my-4">
+                        <div
+                            className="flex items-center md:hidden -my-4 cursor-pointer"
+                            onClick={() => navigate('/')}
+                        >
                             <img src={logo} alt="IndianKart" className="h-24 object-contain" />
                         </div>
                     )}
 
                     {/* Desktop Logo */}
-                    <div className="hidden md:flex flex-col">
+                    <div
+                        className="hidden md:flex flex-col cursor-pointer"
+                        onClick={() => navigate('/')}
+                    >
                         <img src={logo} alt="IndianKart" className="h-[65px] lg:h-[100px] object-contain" />
                     </div>
                 </div>
