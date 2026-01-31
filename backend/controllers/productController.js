@@ -6,7 +6,7 @@ import Product from '../models/Product.js';
 export const getProducts = async (req, res) => {
     try {
         const products = await Product.find({})
-            .populate('subCategory', 'name') // Populate subCategory name
+            .populate('subCategories', 'name') // Populate multiple subcategory names
             .sort({ createdAt: -1 });
         res.json(products);
     } catch (error) {
@@ -19,7 +19,7 @@ export const getProducts = async (req, res) => {
 // @access  Public
 export const getProductById = async (req, res) => {
     try {
-        const product = await Product.findOne({ id: req.params.id }).populate('subCategory', 'name');
+        const product = await Product.findOne({ id: req.params.id }).populate('subCategories', 'name');
         if (product) {
             res.json(product);
         } else {
@@ -92,7 +92,7 @@ export const createProduct = async (req, res) => {
             images,
             category: body.category || 'Uncategorized',
             categoryId: body.categoryId ? Number(body.categoryId) : undefined,
-            subCategory: body.subCategory || null, // Handle subCategory
+            subCategories: parseJSON(body.subCategories) || [], // Handle multiple subcategories
             categoryPath: parseJSON(body.categoryPath),
             shortDescription: body.shortDescription,
             highlights: parseJSON(body.highlights),
@@ -196,8 +196,8 @@ export const updateProduct = async (req, res) => {
                 updateData.categoryId = isNaN(catId) ? undefined : catId;
             }
 
-            if (updateData.subCategory !== undefined) {
-                 updateData.subCategory = updateData.subCategory === '' ? null : updateData.subCategory;
+            if (updateData.subCategories !== undefined) {
+                 updateData.subCategories = parseJSON(updateData.subCategories) || [];
             }
 
             if (image) updateData.image = image;

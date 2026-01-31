@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { categories } from '../data/mockData';
+import { useCategories } from '../../../hooks/useData';
 import { IoSearch } from 'react-icons/io5';
 import {
     MdGridView,
@@ -16,12 +16,23 @@ import {
 
 const AllCategories = () => {
     const navigate = useNavigate();
+    const { categories, loading } = useCategories();
+    
     // Filter out "For You" category
     const displayCategories = categories.filter(cat => cat.name !== "For You");
-    const [selectedCategory, setSelectedCategory] = useState(displayCategories[0]?.id || categories[0].id);
+    
+    // Use the first category ID as default if none selected or selected one not in current list
+    const [selectedCategory, setSelectedCategory] = useState(null);
+
+    // Update selected category when categories load
+    React.useEffect(() => {
+        if (categories.length > 0 && !selectedCategory) {
+            setSelectedCategory(displayCategories[0]?.id || categories[0].id || displayCategories[0]?._id);
+        }
+    }, [categories, selectedCategory, displayCategories]);
 
     // Filter categories to show content based on selection
-    const activeData = categories.find(cat => cat.id === selectedCategory);
+    const activeData = categories.find(cat => (cat.id || cat._id) === selectedCategory);
 
     const iconMap = {
         'grid_view': MdGridView,
@@ -32,6 +43,10 @@ const AllCategories = () => {
         'home': MdHome,
         'shopping_basket': MdShoppingBasket,
     };
+
+    if (loading) {
+        return <div className="p-10 text-center">Loading categories...</div>;
+    }
 
     return (
         <div className="bg-white min-h-screen flex flex-col md:pb-0">

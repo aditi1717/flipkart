@@ -30,7 +30,7 @@ export const getSubCategoriesByCategory = async (req, res) => {
 // @access  Private/Admin
 export const createSubCategory = async (req, res) => {
     try {
-        const { name, category, description, image } = req.body;
+        const { name, category, parent, description, image } = req.body;
 
         const categoryExists = await Category.findById(category);
         if (!categoryExists) {
@@ -40,6 +40,7 @@ export const createSubCategory = async (req, res) => {
         const subCategory = new SubCategory({
             name,
             category,
+            parent: parent || null,
             description,
             image
         });
@@ -74,7 +75,7 @@ export const deleteSubCategory = async (req, res) => {
 // @access  Private/Admin
 export const updateSubCategory = async (req, res) => {
     try {
-        const { name, description, image, isActive } = req.body;
+        const { name, description, image, isActive, parent, category } = req.body;
         const subCategory = await SubCategory.findById(req.params.id);
 
         if (subCategory) {
@@ -82,6 +83,8 @@ export const updateSubCategory = async (req, res) => {
             subCategory.description = description || subCategory.description;
             subCategory.image = image || subCategory.image;
             if (isActive !== undefined) subCategory.isActive = isActive;
+            if (parent !== undefined) subCategory.parent = parent || null;
+            if (category !== undefined) subCategory.category = category;
 
             const updatedSubCategory = await subCategory.save();
             res.json(updatedSubCategory);

@@ -24,28 +24,24 @@ export const resolveCategoryPath = (categories, products, baseCategoryName, subP
 
     // 3. Filter Products
     const filteredProducts = products.filter(p => {
-        // Match Base Category
-        if (p.category === breadcrumbs[0].name) {
-            if (breadcrumbs.length > 1) {
-                const currentName = current.name.toLowerCase();
-                if (p.tags) {
-                    return p.tags.some(tag => tag.toLowerCase() === currentName);
-                }
-                return p.name.toLowerCase().includes(currentName);
-            }
-            return true;
-        }
+        const matchesBase = p.category === breadcrumbs[0].name || 
+                           (p.tags && p.tags.some(tag => tag.toLowerCase() === breadcrumbs[0].name.toLowerCase()));
+        
+        if (!matchesBase) return false;
 
-        // Also check tags for base category match
-        if (p.tags && p.tags.some(tag => tag.toLowerCase() === breadcrumbs[0].name.toLowerCase())) {
-            if (breadcrumbs.length > 1) {
-                const currentName = current.name.toLowerCase();
+        if (breadcrumbs.length > 1) {
+            const currentName = current.name.toLowerCase();
+            // Check new subCategories field (populated)
+            if (p.subCategories && p.subCategories.some(sub => (sub.name || '').toLowerCase() === currentName)) return true;
+            if (p.subCategory?.name?.toLowerCase() === currentName) return true; // Fallback for old data
+            
+            if (p.tags) {
                 return p.tags.some(tag => tag.toLowerCase() === currentName);
             }
-            return true;
+            return p.name?.toLowerCase().includes(currentName);
         }
-
-        return false;
+        
+        return true;
     });
 
     return {

@@ -12,7 +12,7 @@ const productSchema = mongoose.Schema({
     images: [{ type: String }], // Gallery images
     category: { type: String, required: true }, // Main category name (Legacy/Display)
     categoryId: { type: Number }, // Main category ID (Legacy)
-    subCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory' }, // New Hierarchical Reference
+    subCategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory' }], // Multiple Hierarchical References
     categoryPath: [{ type: String }], // Array of category IDs (breadcrumbs) - Supports both Number and ObjectId strings
     
     // Description & Meta

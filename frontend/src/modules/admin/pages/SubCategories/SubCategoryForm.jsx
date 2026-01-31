@@ -11,7 +11,8 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
         name: '',
         description: '',
         image: '',
-        category: '', // Parent Category ID
+        category: '', // Primary Category ID
+        parent: '',   // Parent SubCategory ID (optional)
         isActive: true,
         file: null
     });
@@ -29,6 +30,7 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                 description: subCategory.description || '',
                 image: subCategory.image || '',
                 category: subCategory.category?._id || subCategory.category || '',
+                parent: subCategory.parent?._id || subCategory.parent || '',
                 isActive: subCategory.isActive ?? true,
                 file: null
             });
@@ -64,11 +66,9 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
             name: formData.name,
             description: formData.description,
             category: formData.category,
+            parent: formData.parent || null,
             isActive: formData.isActive,
-            image: formData.image // For now we send the string URL or data URI if we handled file upload separately. 
-            // Note: The backend expects 'image' string. If we need file upload, we usually use FormData and backend handles multer.
-            // The SubCategory Controller expects JSON body with 'image' string url, NOT FormData/Multer right now?
-            // Let's re-check SubCategoryController. 
+            image: formData.image 
         };
         // Controller: const { name, category, description, image } = req.body;
         // It seems it expects a JSON body. If we want file upload, we need to upload first or change controller.
@@ -136,20 +136,39 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Parent Category *</label>
-                        <select
-                            name="category"
-                            value={formData.category}
-                            onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
-                            required
-                        >
-                            <option value="">-- Select Parent Category --</option>
-                            {categories.map(cat => (
-                                <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                        </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Primary Category *</label>
+                            <select
+                                name="category"
+                                value={formData.category}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
+                                required
+                            >
+                                <option value="">-- Select --</option>
+                                {categories.map(cat => (
+                                    <option key={cat.id || cat._id} value={cat._id || cat.id}>{cat.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Parent Subcategory</label>
+                            <select
+                                name="parent"
+                                value={formData.parent}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
+                            >
+                                <option value="">-- None (Top Level) --</option>
+                                {useSubCategoryStore.getState().subCategories
+                                    .filter(sub => String(sub.category?._id || sub.category) === String(formData.category) && 
+                                                 String(sub._id || sub.id) !== String(subCategory?._id || subCategory?.id))
+                                    .map(sub => (
+                                        <option key={sub._id || sub.id} value={sub._id || sub.id}>{sub.name}</option>
+                                    ))}
+                            </select>
+                        </div>
                     </div>
 
                     <div>

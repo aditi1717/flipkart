@@ -77,7 +77,7 @@ const DealGrid = ({
                                             {item[titleKey]}
                                         </p>
                                         <p className="text-xs md:text-base font-bold text-gray-900 dark:text-white truncate">
-                                            {item[subtitleKey]}
+                                            {subtitleKey === 'price' ? `₹${item[subtitleKey]?.toLocaleString()}` : item[subtitleKey]}
                                         </p>
                                     </div>
                                 </div>
@@ -108,7 +108,7 @@ const DealGrid = ({
                                             {item[titleKey]}
                                         </p>
                                         <p className="text-xs md:text-base font-bold text-gray-900 dark:text-white truncate">
-                                            {item[subtitleKey]}
+                                            {subtitleKey === 'price' ? `₹${item[subtitleKey]?.toLocaleString()}` : item[subtitleKey]}
                                         </p>
                                     </div>
                                 </div>
@@ -139,7 +139,7 @@ const DealGrid = ({
                                         {item[titleKey]}
                                     </p>
                                     <p className="text-xs md:text-base font-bold text-gray-900 truncate">
-                                        {item[subtitleKey]}
+                                        {subtitleKey === 'price' ? `₹${item[subtitleKey]?.toLocaleString()}` : item[subtitleKey]}
                                     </p>
                                 </div>
                             </div>

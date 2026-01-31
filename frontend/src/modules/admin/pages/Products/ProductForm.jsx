@@ -47,6 +47,7 @@ import toast from 'react-hot-toast';
         // Dynamic Variant System
         variantHeadings: [], // { name: 'Color', hasImage: true, options: [{ name: 'Red', image: '' }] }
         skus: [], // { combination: { Color: 'Red', Size: 'M' }, stock: 10 }
+        subCategories: [], // Selected subcategory ObjectIds
         // For backwards compatibility/standard fields
         highlights: [{ key: '', value: '' }],
         features: [''],
@@ -77,6 +78,7 @@ import toast from 'react-hot-toast';
                         ? (product.subCategory ? [product.categoryId, (product.subCategory._id || product.subCategory)] : [product.categoryId]) 
                         : []
                 ),
+                subCategories: product.subCategories?.map(s => s._id || s) || (product.subCategory ? [product.subCategory._id || product.subCategory] : []),
                 skus: product.skus || [],
                 highlights: product.highlights || [],
                 features: product.features || [],
@@ -122,6 +124,17 @@ import toast from 'react-hot-toast';
 
     const updateSpec = (index, key, val) => updateKV('specifications', index, key, val);
     const updateHighlight = (index, key, val) => updateKV('highlights', index, key, val);
+
+    const toggleSubCategory = (subId) => {
+        setFormData(prev => {
+            const current = prev.subCategories || [];
+            if (current.includes(subId)) {
+                return { ...prev, subCategories: current.filter(id => id !== subId) };
+            } else {
+                return { ...prev, subCategories: [...current, subId] };
+            }
+        });
+    };
 
     // --- Dynamic Variant Helpers ---
     const addVariantHeading = () => {
@@ -243,12 +256,14 @@ import toast from 'react-hot-toast';
         const primaryCategoryId = formData.categoryPath[0] || '';
         data.append('categoryId', String(primaryCategoryId)); // Parent ID
 
-        // 2. SubCategory (New ObjectId - String)
-        if (formData.categoryPath.length > 1) {
-             const subCategoryId = formData.categoryPath[formData.categoryPath.length - 1];
-             data.append('subCategory', String(subCategoryId));
+        // 2. SubCategories (New ObjectIds - Array)
+        data.append('subCategories', JSON.stringify(formData.subCategories));
+        
+        // Backward compatibility for old controllers/fields
+        if (formData.subCategories.length > 0) {
+            data.append('subCategory', String(formData.subCategories[0]));
         } else {
-             data.append('subCategory', ''); // Clear if no subcat
+            data.append('subCategory', '');
         }
         
         const discount = formData.originalPrice > formData.price
@@ -328,7 +343,7 @@ import toast from 'react-hot-toast';
 
     const findInTree = (items, targetId) => {
         for (const item of items) {
-            if (item.id === targetId) return item;
+            if (String(item.id || item._id) === String(targetId)) return item;
             if (item.children) {
                 const found = findInTree(item.children, targetId);
                 if (found) return found;
@@ -427,40 +442,59 @@ import toast from 'react-hot-toast';
                                 <span className="material-icons text-sm text-blue-500">category</span>
                                 Category Attachment
                             </label>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4">
                                 <select
                                     value={formData.categoryPath[0] || ''}
                                     onChange={(e) => {
-                                        // Allow string or number (for legacy IDs vs ObjectId)
                                         const val = e.target.value; 
-                                        setFormData(prev => ({ ...prev, categoryPath: val ? [val] : [] }));
+                                        setFormData(prev => ({ 
+                                            ...prev, 
+                                            categoryPath: val ? [val] : [],
+                                            subCategories: [] // Reset subcategories when primary changes
+                                        }));
                                     }}
-                                    className="px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium text-gray-900"
+                                    className="w-full px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium text-gray-900"
                                 >
                                     <option value="">Select Primary Category</option>
                                     {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                                 </select>
 
-                                {formData.categoryPath.map((id, index) => {
-                                    const currentCat = findInTree(categories, id);
-                                    if (!currentCat?.children?.length) return null;
-                                    return (
-                                        <select
-                                            key={index}
-                                            value={formData.categoryPath[index + 1] || ''}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                const newPath = formData.categoryPath.slice(0, index + 1);
-                                                if (val) newPath.push(val);
-                                                setFormData(prev => ({ ...prev, categoryPath: newPath }));
-                                            }}
-                                            className="px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium animate-in slide-in-from-left-2 text-gray-900"
-                                        >
-                                            <option value="">Select Subcategory</option>
-                                            {currentCat.children.map(sub => <option key={sub.id} value={sub.id}>{sub.name}</option>)}
-                                        </select>
-                                    );
-                                })}
+                                {formData.categoryPath[0] && (
+                                    <div className="mt-2 space-y-3">
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Select Subcategories</p>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto no-scrollbar p-1">
+                                            {(function() {
+                                                const primaryCat = categories.find(c => String(c.id) === String(formData.categoryPath[0]));
+                                                if (!primaryCat) return null;
+                                                
+                                                const flatten = (items) => {
+                                                    let flat = [];
+                                                    items.forEach(item => {
+                                                        flat.push(item);
+                                                        if (item.children) flat = [...flat, ...flatten(item.children)];
+                                                    });
+                                                    return flat;
+                                                };
+                                                
+                                                const allSubs = flatten(primaryCat.children || []);
+                                                
+                                                if (allSubs.length === 0) return <p className="text-[10px] text-gray-400 italic col-span-full">No subcategories found for this category.</p>;
+                                                
+                                                return allSubs.map(sub => (
+                                                    <label key={sub._id} className={`flex items-center gap-2 p-2 rounded-lg border transition-all cursor-pointer ${formData.subCategories.includes(sub._id) ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-100 hover:border-gray-200'}`}>
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={formData.subCategories.includes(sub._id)}
+                                                            onChange={() => toggleSubCategory(sub._id)}
+                                                            className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                        />
+                                                        <span className={`text-[11px] font-bold truncate ${formData.subCategories.includes(sub._id) ? 'text-blue-700' : 'text-gray-600'}`}>{sub.name}</span>
+                                                    </label>
+                                                ));
+                                            })()}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

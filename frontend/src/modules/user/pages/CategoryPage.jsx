@@ -16,6 +16,7 @@ const CategoryPage = () => {
     const { categories, loading: categoriesLoading } = useCategories();
     
     const [categoryData, setCategoryData] = useState(null);
+    const [breadcrumbs, setBreadcrumbs] = useState([]);
     const [categoryProducts, setCategoryProducts] = useState([]);
     const [sortedProducts, setSortedProducts] = useState([]);
     const [showSortModal, setShowSortModal] = useState(false);
@@ -41,10 +42,12 @@ const CategoryPage = () => {
 
         if (result && result.data) {
             setCategoryData(result.data);
+            setBreadcrumbs(result.breadcrumbs || []);
             setCategoryProducts(result.products);
             setSortedProducts(result.products);
         } else {
             setCategoryData(null);
+            setBreadcrumbs([]);
         }
     }, [categoryName, subPath, products, categories, productsLoading, categoriesLoading]);
 
@@ -191,11 +194,20 @@ const CategoryPage = () => {
                                 <div className="border-b border-gray-200 dark:border-zinc-800">
                                     <div className="px-4 py-3">
                                         <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">CATEGORIES</h4>
-                                        <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
-                                            <span className="material-icons text-sm">chevron_left</span>
-                                            <span className="text-gray-400">Mobiles & Accessories</span>
-                                        </div>
-                                        <div className="mt-1 font-medium text-gray-900 dark:text-white">
+                                        {breadcrumbs.length > 1 ? (
+                                             breadcrumbs.slice(0, -1).map((crumb, i) => (
+                                                <div key={i} className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 cursor-pointer hover:underline mb-1" onClick={() => navigate(`/category/${breadcrumbs.slice(0, i + 1).map(b => b.name).join('/')}`)}>
+                                                    <span className="material-icons text-sm">chevron_left</span>
+                                                    <span>{crumb.name}</span>
+                                                </div>
+                                             ))
+                                        ) : (
+                                            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
+                                                <span className="material-icons text-sm">grid_view</span>
+                                                <span className="text-gray-400">All Categories</span>
+                                            </div>
+                                        )}
+                                        <div className="mt-1 font-bold text-gray-900 dark:text-white pl-3 border-l-2 border-blue-600">
                                             {categoryData.name}
                                         </div>
                                     </div>

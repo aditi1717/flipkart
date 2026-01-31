@@ -31,6 +31,19 @@ const useUserStore = create((set) => ({
             set({ isLoading: false, error: error.message });
         }
     },
+
+    toggleUserStatus: async (id) => {
+        try {
+            const { data } = await API.patch(`/auth/users/${id}/toggle-status`);
+            set((state) => ({
+                users: state.users.map(u => 
+                    u._id === id ? { ...u, status: data.status } : u
+                )
+            }));
+        } catch (error) {
+            set({ error: error.response?.data?.message || error.message });
+        }
+    },
     
     // Potentially add updateUser if needed
 }));

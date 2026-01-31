@@ -16,6 +16,11 @@ const subCategorySchema = mongoose.Schema({
         ref: 'Category',
         required: true,
     },
+    parent: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'SubCategory',
+        default: null
+    },
     isActive: {
         type: Boolean,
         default: true

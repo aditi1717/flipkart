@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import Order from '../models/Order.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { sendOTP, verifyOTP } from '../utils/smsService.js';
@@ -128,8 +129,26 @@ export const updateUserProfile = async (req, res) => {
 // @route   GET /api/users
 // @access  Private/Admin
 export const getUsers = async (req, res) => {
-    const users = await User.find({});
-    res.json(users);
+    try {
+        const users = await User.find({}).select('-password');
+        
+        // Fetch order counts for each user
+        const usersWithStats = await Promise.all(users.map(async (user) => {
+            const orderCount = await Order.countDocuments({ user: user._id });
+            return {
+                ...user._doc,
+                joinedDate: user.createdAt,
+                status: user.status || 'active',
+                orderStats: {
+                    total: orderCount
+                }
+            };
+        }));
+
+        res.json(usersWithStats);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 // @desc    Delete user
@@ -154,9 +173,28 @@ export const updateUser = async (req, res) => {
         user.name = req.body.name || user.name;
         user.email = req.body.email || user.email;
         user.isAdmin = req.body.isAdmin !== undefined ? req.body.isAdmin : user.isAdmin;
+        user.status = req.body.status || user.status;
         const updatedUser = await user.save();
-        res.json({ _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, isAdmin: updatedUser.isAdmin });
+        res.json({ _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, isAdmin: updatedUser.isAdmin, status: updatedUser.status });
     } else {
         res.status(404).json({ message: 'User not found' });
+    }
+};
+
+// @desc    Toggle user status
+// @route   PATCH /api/auth/users/:id/toggle-status
+// @access  Private/Admin
+export const toggleUserStatus = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (user) {
+            user.status = user.status === 'active' ? 'disabled' : 'active';
+            const updatedUser = await user.save();
+            res.json({ message: `User status updated to ${updatedUser.status}`, status: updatedUser.status });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };

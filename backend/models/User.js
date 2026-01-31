@@ -26,6 +26,11 @@ const userSchema = mongoose.Schema({
     gender: {
         type: String,
         enum: ['Male', 'Female', 'Other', '']
+    },
+    status: {
+        type: String,
+        enum: ['active', 'disabled'],
+        default: 'active'
     }
 }, {
     timestamps: true,

@@ -43,3 +43,56 @@
 @utility animate-bounce-subtle {
   animation: bounce-subtle 2s infinite;
 }
+
+/* Swiper Custom Styling for Flipkart Look */
+.home-banner-swiper .swiper-button-next,
+.home-banner-swiper .swiper-button-prev {
+  background-color: white;
+  width: 40px !important;
+  height: 100px !important;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-top: 0;
+  box-shadow: 0 1px 15px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 20;
+}
+
+.home-banner-swiper:hover .swiper-button-next,
+.home-banner-swiper:hover .swiper-button-prev {
+  opacity: 1;
+}
+
+.home-banner-swiper .swiper-button-next {
+  right: 0 !important;
+  border-radius: 10px 0 0 10px;
+}
+
+.home-banner-swiper .swiper-button-prev {
+  left: 0 !important;
+  border-radius: 0 10px 10px 0;
+}
+
+.home-banner-swiper .swiper-button-next::after,
+.home-banner-swiper .swiper-button-prev::after {
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  color: #212121;
+}
+
+.home-banner-swiper .swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.home-banner-swiper .swiper-pagination-bullet-active {
+  background: #fff !important;
+  width: 24px !important;
+  border-radius: 4px !important;
+}
+
+.home-banner-swiper .swiper-button-disabled {
+  display: none !important;
+}

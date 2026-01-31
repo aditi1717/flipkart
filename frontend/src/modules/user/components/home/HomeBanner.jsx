@@ -143,10 +143,11 @@ const HomeBanner = ({ banner }) => {
             <section className="w-full mt-4 md:mt-8">
                 <Swiper
                     modules={[Autoplay, Pagination, Navigation]}
-                    autoplay={{ delay: 3000, disableOnInteraction: false }}
+                    autoplay={{ delay: 4000, disableOnInteraction: false }}
                     pagination={{ clickable: true }}
+                    navigation={true}
                     loop={true}
-                    className="md:rounded-2xl overflow-hidden shadow-sm"
+                    className="md:rounded-2xl overflow-hidden shadow-sm group home-banner-swiper"
                 >
                     {banner.slides.map((slide, index) => (
                         <SwiperSlide key={index}>

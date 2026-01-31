@@ -7,13 +7,28 @@ import SubCategory from '../models/SubCategory.js';
 export const getCategories = async (req, res) => {
     try {
         const categories = await Category.find({}).lean();
-        const subCategories = await SubCategory.find({}).lean(); // Fetch all subs
+        const subCategories = await SubCategory.find({}).lean();
 
-        // Map subcategories to their parent category
+        // Helper to build recursive tree
+        const buildTree = (parentId, categoryId) => {
+            return subCategories
+                .filter(sub => 
+                    String(sub.category) === String(categoryId) && 
+                    String(sub.parent || "") === String(parentId || "")
+                )
+                .map(sub => ({
+                    ...sub,
+                    subCategories: buildTree(sub._id, categoryId),
+                    children: buildTree(sub._id, categoryId) // Keep 'children' for admin compatibility
+                }));
+        };
+
         const categoriesWithChildren = categories.map(cat => {
+            const subs = buildTree(null, cat._id);
             return {
                 ...cat,
-                children: subCategories.filter(sub => sub.category.toString() === cat._id.toString())
+                subCategories: subs,
+                children: subs // Alias for compatibility
             };
         });
 

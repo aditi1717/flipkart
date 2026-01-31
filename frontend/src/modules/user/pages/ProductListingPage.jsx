@@ -37,7 +37,8 @@ const ProductListingPage = () => {
         // Filter by Subcategory/Tag
         if (subcategory) {
             results = results.filter(p =>
-                p.subcategory?.toLowerCase() === subcategory.toLowerCase() ||
+                (p.subCategories && p.subCategories.some(sub => (sub.name || '').toLowerCase() === subcategory.toLowerCase())) ||
+                (p.subCategory?.name || p.subcategory || '').toLowerCase() === subcategory.toLowerCase() ||
                 p.tags?.some(t => t.toLowerCase() === subcategory.toLowerCase()) ||
                 p.name?.toLowerCase().includes(subcategory.toLowerCase())
             );

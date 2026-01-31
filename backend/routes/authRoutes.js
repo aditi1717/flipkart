@@ -10,7 +10,8 @@ import {
     getUsers,
     deleteUser,
     updateUser,
-    updateUserProfile
+    updateUserProfile,
+    toggleUserStatus
 } from '../controllers/authController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -30,5 +31,7 @@ router.route('/users')
 router.route('/users/:id')
     .delete(protect, admin, deleteUser)
     .put(protect, admin, updateUser);
+
+router.patch('/users/:id/toggle-status', protect, admin, toggleUserStatus);
 
 export default router;

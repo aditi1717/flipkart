@@ -18,9 +18,9 @@ const UserList = () => {
 
     const filteredUsers = users.filter(user => {
         const matchesSearch =
-            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.phone.includes(searchTerm);
+            user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (user.phone || '').includes(searchTerm);
 
         const matchesStatus = statusFilter === 'All' || user.status === statusFilter.toLowerCase();
 
@@ -107,10 +107,10 @@ const UserList = () => {
                                 </tr>
                             ) : (
                                 paginatedUsers.map(user => (
-                                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={user._id || user.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <img src={user.avatar} className="w-10 h-10 rounded-full object-cover border border-gray-200" alt="" />
+                                                <img src={user.avatar || 'https://www.w3schools.com/howto/img_avatar.png'} className="w-10 h-10 rounded-full object-cover border border-gray-200" alt="" />
                                                 <div className="min-w-0">
                                                     <h4 className="font-semibold text-gray-900">{user.name}</h4>
                                                 </div>
@@ -118,28 +118,28 @@ const UserList = () => {
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-600">
                                             <p className="flex items-center gap-1.5"><MdMail className="text-gray-400" /> {user.email}</p>
-                                            <p className="flex items-center gap-1.5 mt-1"><MdPhone className="text-gray-400" /> +91 {user.phone}</p>
+                                            <p className="flex items-center gap-1.5 mt-1"><MdPhone className="text-gray-400" /> +91 {user.phone || 'N/A'}</p>
                                         </td>
                                         <td className="px-6 py-4 text-center text-sm text-gray-600">
-                                            {new Date(user.joinedDate).toLocaleDateString('en-IN')}
+                                            {new Date(user.joinedDate || user.createdAt).toLocaleDateString('en-IN')}
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <span className="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg font-bold text-sm">
-                                                {user.orderStats.total}
+                                                {user.orderStats?.total || 0}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${user.status === 'active'
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${(user.status || 'active') === 'active'
                                                 ? 'bg-green-50 text-green-700 border-green-100'
                                                 : 'bg-red-50 text-red-700 border-red-100'
                                                 }`}>
-                                                {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                                                {(user.status || 'active').charAt(0).toUpperCase() + (user.status || 'active').slice(1)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 <button
-                                                    onClick={() => navigate(`/admin/users/${user.id}`)}
+                                                    onClick={() => navigate(`/admin/users/${user._id || user.id}`)}
                                                     className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                                     title="View Profile"
                                                 >
@@ -154,18 +154,18 @@ const UserList = () => {
                                                 </button>
                                                 <button
                                                     onClick={() => {
-                                                        const action = user.status === 'active' ? 'Disable' : 'Enable';
+                                                        const action = (user.status || 'active') === 'active' ? 'Disable' : 'Enable';
                                                         if (window.confirm(`Are you sure you want to ${action.toLowerCase()} account for ${user.name}?`)) {
-                                                            toggleUserStatus(user.id);
+                                                            toggleUserStatus(user._id || user.id);
                                                         }
                                                     }}
-                                                    className={`p-2 rounded-lg transition-all ${user.status === 'active'
+                                                    className={`p-2 rounded-lg transition-all ${(user.status || 'active') === 'active'
                                                         ? 'text-gray-400 hover:text-red-600 hover:bg-red-50'
                                                         : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
                                                         }`}
-                                                    title={user.status === 'active' ? 'Disable Account' : 'Enable Account'}
+                                                    title={(user.status || 'active') === 'active' ? 'Disable Account' : 'Enable Account'}
                                                 >
-                                                    {user.status === 'active' ? <MdBlock size={20} /> : <MdCheckCircle size={20} />}
+                                                    {(user.status || 'active') === 'active' ? <MdBlock size={20} /> : <MdCheckCircle size={20} />}
                                                 </button>
                                             </div>
                                         </td>
