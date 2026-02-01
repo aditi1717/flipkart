@@ -248,9 +248,17 @@ const ProductDetails = () => {
             <div className="hidden md:block max-w-[1600px] mx-auto p-6 animate-in fade-in duration-500">
                 {/* Breadcrumbs */}
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
-                    <span className="hover:text-blue-600 cursor-pointer transition-colors">Home</span>
+                    <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate('/')}>Home</span>
                     <span className="material-icons text-[12px] text-gray-400">chevron_right</span>
-                    <span className="hover:text-blue-600 cursor-pointer transition-colors">{product.category}</span>
+                    <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate(`/search?category=${product.category}`)}>{product.category}</span>
+                    {product.subCategories && product.subCategories.length > 0 && (
+                        <>
+                            <span className="material-icons text-[12px] text-gray-400">chevron_right</span>
+                            <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate(`/search?subcategory=${product.subCategories[0].name}`)}>
+                                {product.subCategories[0].name}
+                            </span>
+                        </>
+                    )}
                     <span className="material-icons text-[12px] text-gray-400">chevron_right</span>
                     <span className="text-gray-800 font-bold truncate max-w-[300px]">{product.name}</span>
                 </div>

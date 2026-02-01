@@ -311,6 +311,10 @@ import toast from 'react-hot-toast';
         // 1. Primary Category (Legacy ID - Number)
         const primaryCategoryId = formData.categoryPath[0] || '';
         data.append('categoryId', String(primaryCategoryId)); // Parent ID
+        
+        // Find Category Name for display/legacy
+        const selectedCategory = categories.find(c => String(c.id) === String(primaryCategoryId));
+        data.append('category', selectedCategory ? selectedCategory.name : 'Uncategorized');
 
         // 2. SubCategories (New ObjectIds - Array)
         data.append('subCategories', JSON.stringify(formData.subCategories));
