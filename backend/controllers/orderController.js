@@ -139,7 +139,7 @@ export const updateOrderToDelivered = async (req, res) => {
 export const updateOrderStatus = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id);
-        const { status } = req.body;
+        const { status, serialNumbers } = req.body;
 
         if (order) {
             order.status = status;
@@ -147,6 +147,19 @@ export const updateOrderStatus = async (req, res) => {
                 order.isDelivered = true;
                 order.deliveredAt = Date.now();
             }
+
+            // If serialNumbers are provided (regardless of status change), update them
+            if (serialNumbers && Array.isArray(serialNumbers) && serialNumbers.length > 0) {
+                // serialNumbers expected to be array of objects: { itemId: "...", serial: "...", type: "..." }
+                serialNumbers.forEach(sItem => {
+                   const item = order.orderItems.find(i => i._id.toString() === sItem.itemId);
+                   if (item) {
+                       item.serialNumber = sItem.serial;
+                       item.serialType = sItem.type || 'Serial Number';
+                   }
+                });
+            }
+
             const updatedOrder = await order.save();
             res.json(updatedOrder);
         } else {

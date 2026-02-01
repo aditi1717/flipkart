@@ -191,15 +191,22 @@ const OrderDetails = () => {
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="text-sm font-bold text-gray-800 line-clamp-2">{item.name}</h3>
-                                            {item.variant && (
-                                                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
-                                                    {Object.entries(item.variant).map(([key, value]) => (
-                                                        <span key={key} className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">
-                                                            {key}: <span className="text-blue-600">{value}</span>
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            )}
+                                                    {item.variant && (
+                                                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                                                            {Object.entries(item.variant).map(([key, value]) => (
+                                                                <span key={key} className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">
+                                                                    {key}: <span className="text-blue-600">{value}</span>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {item.serialNumber && (
+                                                        <div className="mt-2">
+                                                            <span className="text-sm bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold font-mono border border-blue-200 shadow-sm flex items-center gap-2 w-max select-all">
+                                                    <span className="text-blue-400 select-none">{item.serialType === 'IMEI' ? 'IMEI:' : 'SN:'}</span> {item.serialNumber}
+                                                </span>
+                                                        </div>
+                                                    )}
                                             <p className="text-xs text-gray-500 mt-1">Quantity: {item.qty}</p>
                                             <p className="text-lg font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mt-1">
                                                 ₹{item.price.toLocaleString()}

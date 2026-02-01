@@ -17,10 +17,13 @@ const useOrderStore = create((set) => ({
                 date: order.createdAt,
                 items: order.orderItems?.map(item => ({
                     id: item.product,
+                    _id: item._id, // Order Item Subdocument ID
                     name: item.name,
                     image: item.image,
                     price: item.price,
-                    quantity: item.qty
+                    quantity: item.qty,
+                    serialNumber: item.serialNumber, // Mapping Serial Number
+                    serialType: item.serialType // Mapping Serial Type
                 })) || [],
                 total: order.totalPrice,
                 payment: {
@@ -53,10 +56,10 @@ const useOrderStore = create((set) => ({
         }
     },
 
-    updateOrderStatus: async (id, status, note) => {
+    updateOrderStatus: async (id, status, note, serialNumbers) => {
         set({ isLoading: true });
         try {
-            const { data } = await API.put(`/orders/${id}/status`, { status });
+            const { data } = await API.put(`/orders/${id}/status`, { status, serialNumbers });
             // Transform the updated order
             const transformedOrder = {
                 ...data,
@@ -64,10 +67,13 @@ const useOrderStore = create((set) => ({
                 date: data.createdAt,
                 items: data.orderItems?.map(item => ({
                     id: item.product,
+                    _id: item._id, // Order Item Subdocument ID
                     name: item.name,
                     image: item.image,
                     price: item.price,
-                    quantity: item.qty
+                    quantity: item.qty,
+                    serialNumber: item.serialNumber, // Mapping Serial Number
+                    serialType: item.serialType // Mapping Serial Type
                 })) || [],
                 total: data.totalPrice,
                 payment: {
@@ -113,6 +119,7 @@ const useOrderStore = create((set) => ({
                 date: data.createdAt,
                 items: data.orderItems?.map(item => ({
                     id: item.product,
+                    _id: item._id, // Order Item Subdocument ID
                     name: item.name,
                     image: item.image,
                     price: item.price,
@@ -144,6 +151,65 @@ const useOrderStore = create((set) => ({
                 orders: state.orders.map(o => o.id === id ? transformedOrder : o),
                 isLoading: false
             }));
+        } catch (error) {
+            set({ 
+                error: error.response?.data?.message || error.message, 
+                isLoading: false 
+            });
+        }
+    },
+
+    getOrderDetails: async (id) => {
+        set({ isLoading: true });
+        try {
+            const { data } = await API.get(`/orders/${id}`);
+            const transformedOrder = {
+                ...data,
+                id: data._id,
+                date: data.createdAt,
+                items: data.orderItems?.map(item => ({
+                    id: item.product,
+                    _id: item._id, // Order Item Subdocument ID
+                    name: item.name,
+                    image: item.image,
+                    price: item.price,
+                    quantity: item.qty,
+                    serialNumber: item.serialNumber, // Mapping Serial Number
+                    serialType: item.serialType // Mapping Serial Type
+                })) || [],
+                total: data.totalPrice,
+                payment: {
+                    method: data.paymentMethod === 'COD' ? 'COD' : data.paymentMethod,
+                    status: data.isPaid ? 'Paid' : 'Pending',
+                    transactionId: data.paymentResult?.razorpay_order_id || data.paymentResult?.id
+                },
+                address: {
+                    name: data.user?.name || 'N/A',
+                    line: data.shippingAddress?.street || '',
+                    city: data.shippingAddress?.city || '',
+                    state: data.shippingAddress?.state || '',
+                    pincode: data.shippingAddress?.postalCode || '',
+                    type: 'Home'
+                },
+                timeline: [
+                    {
+                        status: data.status,
+                        time: data.updatedAt || data.createdAt,
+                        note: ''
+                    }
+                ]
+            };
+
+            set((state) => {
+                const existingOrderIndex = state.orders.findIndex(o => o.id === id);
+                if (existingOrderIndex !== -1) {
+                    const newOrders = [...state.orders];
+                    newOrders[existingOrderIndex] = transformedOrder;
+                    return { orders: newOrders, isLoading: false };
+                } else {
+                    return { orders: [...state.orders, transformedOrder], isLoading: false };
+                }
+            });
         } catch (error) {
             set({ 
                 error: error.response?.data?.message || error.message, 

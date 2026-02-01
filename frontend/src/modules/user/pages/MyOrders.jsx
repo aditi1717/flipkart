@@ -172,6 +172,13 @@ const MyOrders = () => {
                                                             ))}
                                                         </div>
                                                     )}
+                                                    {item.serialNumber && (
+                                                        <div className="mt-2">
+                                                            <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-md font-bold font-mono border border-blue-200 shadow-sm flex items-center gap-1 w-max">
+                                                                <span className="text-blue-400 select-none">{item.serialType === 'IMEI' ? 'IMEI:' : 'SN:'}</span> {item.serialNumber}
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                     <p className="text-xs text-gray-500 mt-1">Quantity: {item.qty}</p>
                                                     <p className="text-base font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mt-1">
                                                         ₹{item.price.toLocaleString()}

@@ -13,7 +13,6 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
         description: '',
         image: '',
         category: '', // Primary Category ID
-        parent: '',   // Parent SubCategory ID (optional)
         isActive: true,
         file: null
     });
@@ -31,7 +30,6 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                 description: subCategory.description || '',
                 image: subCategory.image || '',
                 category: subCategory.category?._id || subCategory.category || '',
-                parent: subCategory.parent?._id || subCategory.parent || '',
                 isActive: subCategory.isActive ?? true,
                 file: null
             });
@@ -67,7 +65,7 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
             name: formData.name,
             description: formData.description,
             category: formData.category,
-            parent: formData.parent || null,
+            parent: null,
             isActive: formData.isActive,
             image: formData.image 
         };
@@ -150,7 +148,6 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">Primary Category *</label>
                             <select
@@ -166,24 +163,7 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                                 ))}
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Parent Subcategory</label>
-                            <select
-                                name="parent"
-                                value={formData.parent}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
-                            >
-                                <option value="">-- None (Top Level) --</option>
-                                {useSubCategoryStore.getState().subCategories
-                                    .filter(sub => String(sub.category?._id || sub.category) === String(formData.category) && 
-                                                 String(sub._id || sub.id) !== String(subCategory?._id || subCategory?.id))
-                                    .map(sub => (
-                                        <option key={sub._id || sub.id} value={sub._id || sub.id}>{sub.name}</option>
-                                    ))}
-                            </select>
-                        </div>
-                    </div>
+
 
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Image URL</label>
