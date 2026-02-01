@@ -33,6 +33,17 @@ const productSchema = mongoose.Schema({
     manufacturerInfo: { type: String },
     deliveryDays: { type: Number, default: 5 },
 
+    // Warranty & Returns
+    warranty: {
+        summary: { type: String }, // e.g. "1 Year Brand Warranty"
+        covered: { type: String }, // e.g. "Manufacturing Defects"
+        notCovered: { type: String } // e.g. "Physical Damage"
+    },
+    returnPolicy: {
+        days: { type: Number, default: 7 },
+        description: { type: String } // e.g. "Returns accepted for damaged/defective items only"
+    },
+
     // Inventory & Variants
     stock: { type: Number, default: 0 },
     variantLabel: { type: String }, // 'Size', 'Color' etc.

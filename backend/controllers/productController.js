@@ -116,10 +116,13 @@ export const createProduct = async (req, res) => {
             highlights: parseJSON(body.highlights),
             specifications: parseJSON(body.specifications),
             features: parseJSON(body.features),
+            features: parseJSON(body.features),
             stock: Number(body.stock),
             variantHeadings,
             skus: parseJSON(body.skus),
-            deliveryDays: Number(body.deliveryDays)
+            deliveryDays: Number(body.deliveryDays),
+            warranty: parseJSON(body.warranty),
+            returnPolicy: parseJSON(body.returnPolicy)
         });
 
 
@@ -172,6 +175,8 @@ export const updateProduct = async (req, res) => {
             if (updateData.specifications) updateData.specifications = parseJSON(updateData.specifications);
             if (updateData.features) updateData.features = parseJSON(updateData.features);
             if (updateData.skus) updateData.skus = parseJSON(updateData.skus);
+            if (updateData.warranty) updateData.warranty = parseJSON(updateData.warranty);
+            if (updateData.returnPolicy) updateData.returnPolicy = parseJSON(updateData.returnPolicy);
             
             if (updateData.variantHeadings) {
                 let variantHeadings = parseJSON(updateData.variantHeadings);

@@ -57,7 +57,11 @@ import toast from 'react-hot-toast';
         features: [''],
         specifications: [{ key: '', value: '' }],
         longDescription: '',
-        manufacturerInfo: ''
+        manufacturerInfo: '',
+        
+        // Warranty & Returns
+        warranty: { summary: '', covered: '', notCovered: '' },
+        returnPolicy: { days: 7, description: '' }
     });
 
     // Populate form if editing
@@ -89,7 +93,9 @@ import toast from 'react-hot-toast';
                 skus: product.skus || [],
                 highlights: product.highlights || [],
                 features: product.features || [],
-                specifications: product.specifications || [{ key: 'Material', value: '' }]
+                specifications: product.specifications || [{ key: 'Material', value: '' }],
+                warranty: product.warranty || { summary: '', covered: '', notCovered: '' },
+                returnPolicy: product.returnPolicy || { days: 7, description: '' }
             });
         }
     }, [product]);
@@ -329,6 +335,8 @@ import toast from 'react-hot-toast';
         data.append('specifications', JSON.stringify(formData.specifications));
         data.append('features', JSON.stringify(formData.features));
         data.append('skus', JSON.stringify(formData.skus));
+        data.append('warranty', JSON.stringify(formData.warranty));
+        data.append('returnPolicy', JSON.stringify(formData.returnPolicy));
 
         // Process Variant Headings (handle nested images)
         const variantImages = [];
@@ -713,10 +721,79 @@ import toast from 'react-hot-toast';
                         </div>
                     </section>
 
-                    {/* Inventory & Pricing Card */}
+                    {/* Warranty & Returns Policy Card */}
                     <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
                         <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
-                            <span className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center font-bold">2</span>
+                            <span className="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold">2</span>
+                            <h2 className="text-lg font-bold text-gray-800">Warranty & Returns Policy</h2>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Warranty Section */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b pb-2">Warranty Details</h3>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Warranty Summary</label>
+                                    <input
+                                        type="text"
+                                        value={formData.warranty.summary}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, summary: e.target.value } }))}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition-all text-sm"
+                                        placeholder="e.g. 1 Year Brand Warranty"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Covered in Warranty</label>
+                                    <input
+                                        type="text"
+                                        value={formData.warranty.covered}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, covered: e.target.value } }))}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition-all text-sm"
+                                        placeholder="e.g. Manufacturing Defects"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Not Covered in Warranty</label>
+                                    <input
+                                        type="text"
+                                        value={formData.warranty.notCovered}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, notCovered: e.target.value } }))}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition-all text-sm"
+                                        placeholder="e.g. Physical Damage"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Return Policy Section */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b pb-2">Return Policy</h3>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Return Window (Days)</label>
+                                    <input
+                                        type="number"
+                                        value={formData.returnPolicy.days}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, days: e.target.value } }))}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition-all text-sm"
+                                        placeholder="e.g. 7"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Return Description</label>
+                                    <textarea
+                                        value={formData.returnPolicy.description}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, description: e.target.value } }))}
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition-all text-sm h-32 resize-none"
+                                        placeholder="e.g. Returns accepted for damaged, defective, or wrong items only."
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Pricing & Inventory Card */}
+                    <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
+                        <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
+                            <span className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center font-bold">3</span>
                             <h2 className="text-lg font-bold text-gray-800">Pricing & Inventory</h2>
                         </div>
 
@@ -776,7 +853,7 @@ import toast from 'react-hot-toast';
                     <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-8">
                         <div className="flex items-center justify-between border-b border-gray-50 pb-4">
                             <div className="flex items-center gap-3">
-                                <span className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold">3</span>
+                                <span className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold">4</span>
                                 <h2 className="text-lg font-bold text-gray-800">Dynamic Variants & Stock</h2>
                             </div>
                             <button

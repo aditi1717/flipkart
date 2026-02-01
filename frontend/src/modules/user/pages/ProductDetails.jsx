@@ -762,7 +762,8 @@ const ProductDetails = () => {
                                     { id: 'Features', label: 'Features', icon: 'star_outline' },
                                     { id: 'Specifications', label: 'Specifications', icon: 'list_alt' },
                                     { id: 'Description', label: 'Description', icon: 'description' },
-                                    { id: 'Manufacturer', label: 'Manufacturer', icon: 'business' }
+                                    { id: 'Manufacturer', label: 'Manufacturer', icon: 'business' },
+                                    { id: 'Warranty', label: 'Warranty Policy', icon: 'verified_user' }
                                 ].map((tab) => (
                                     <button
                                         key={tab.id}
@@ -797,17 +798,76 @@ const ProductDetails = () => {
                                     )}
                                     {selectedDetailTab === 'Specifications' && (
                                         <div className="space-y-3">
-                                            {[
-                                                { k: 'Sales Package', v: '1 Pair of Earrings' },
-                                                { k: 'Material', v: 'Silver Alloy' },
-                                                { k: 'Gemstone', v: 'Artificial Stones' }
-                                            ].map((s, i) => (
-                                                <div key={i} className="flex justify-between items-center py-1 border-b border-gray-50 last:border-0">
-                                                    <span className="text-gray-400 font-medium">{s.k}</span>
-                                                    <span className="text-gray-800 font-bold text-right ml-4">{s.v}</span>
+                                            {/* ... Specs content ... */}
+                                            {product.specifications?.map((spec, i) => (
+                                                <div key={i} className="flex justify-between border-b border-gray-100 pb-2">
+                                                    <span className="text-gray-500 font-medium">{spec.key}</span>
+                                                    <span className="text-gray-900 font-bold text-right">{spec.value}</span>
                                                 </div>
                                             ))}
+                                            {(!product.specifications || product.specifications.length === 0) && <p>No specifications available.</p>}
                                         </div>
+                                    )}
+
+                                    {selectedDetailTab === 'Description' && (
+                                        <div className="prose prose-sm max-w-none text-gray-600">
+                                            <p>{product.longDescription || product.description || "No description available."}</p>
+                                        </div>
+                                    )}
+
+                                    {selectedDetailTab === 'Manufacturer' && (
+                                        <div className="text-sm text-gray-700">
+                                            <p className="font-bold mb-1">Manufacturer Information:</p>
+                                            <p>{product.manufacturerInfo || "Information not provided."}</p>
+                                        </div>
+                                    )}
+
+                                    {selectedDetailTab === 'Warranty' && (
+                                        <div className="space-y-4">
+                                            {product.warranty && (product.warranty.summary || product.warranty.covered) ? (
+                                                <>
+                                                    <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                                                        <h4 className="text-sm font-bold text-blue-800 uppercase mb-2 flex items-center gap-2">
+                                                            <span className="material-icons text-[16px]">verified</span> Warranty Summary
+                                                        </h4>
+                                                        <p className="font-medium text-gray-800 text-[15px]">{product.warranty.summary || 'Standard Brand Warranty'}</p>
+                                                    </div>
+                                                    
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="bg-green-50/50 p-4 rounded-xl border border-green-100">
+                                                            <span className="text-xs font-bold text-green-700 uppercase tracking-wide block mb-1">Covered</span>
+                                                            <p className="text-sm font-medium text-gray-800">{product.warranty.covered || 'Manufacturing Defects'}</p>
+                                                        </div>
+                                                        <div className="bg-red-50/50 p-4 rounded-xl border border-red-100">
+                                                            <span className="text-xs font-bold text-red-700 uppercase tracking-wide block mb-1">Not Covered</span>
+                                                            <p className="text-sm font-medium text-gray-800">{product.warranty.notCovered || 'Physical Damage'}</p>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="text-center py-6 text-gray-400 italic">
+                                                    No specific warranty information provided for this product.
+                                                </div>
+                                            )}
+
+                                            {product.returnPolicy && (
+                                                <div className="mt-6 pt-6 border-t border-gray-100">
+                                                    <h4 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                                        <span className="material-icons text-gray-400 text-[18px]">assignment_return</span> Return Policy
+                                                    </h4>
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="bg-gray-50 px-3 py-2 rounded-lg text-center min-w-[80px]">
+                                                            <span className="block text-lg font-black text-gray-900">{product.returnPolicy.days || 7}</span>
+                                                            <span className="block text-[10px] font-bold text-gray-500 uppercase">Days</span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-600 flex-1 py-1">
+                                                            {product.returnPolicy.description || 'Returns accepted for damaged, defective, or wrong items only.'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                     )}
                                     {selectedDetailTab === 'Description' && (
                                         <p className="italic">
