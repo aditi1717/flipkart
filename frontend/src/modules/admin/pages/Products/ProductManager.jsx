@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MdAdd, MdSearch, MdEdit, MdDelete, MdFilterList, MdImage, MdVisibility, MdChevronLeft, MdChevronRight } from 'react-icons/md';
+import { MdAdd, MdSearch, MdEdit, MdDelete, MdFilterList, MdImage, MdVisibility, MdChevronLeft, MdChevronRight, MdClose } from 'react-icons/md';
 import useProductStore from '../../store/productStore';
 import Pagination from '../../components/common/Pagination';
 
@@ -68,7 +68,7 @@ const ProductManager = () => {
                     <input
                         type="text"
                         placeholder="Search products by name or brand..."
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:border-blue-500 outline-none transition"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:border-blue-500 outline-none transition text-gray-800 placeholder:text-gray-400"
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);

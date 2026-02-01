@@ -21,6 +21,8 @@ import PageManager from '../pages/PageManager';
 import SupportRequests from '../pages/Support/SupportRequests';
 import HomeContentManager from '../pages/Content/HomeContentManager';
 import ReviewList from '../pages/Reviews/ReviewList';
+import PinCodeManager from '../pages/PinCodes/PinCodeManager';
+import BankOfferManager from '../pages/BankOffers/BankOfferManager';
 
 const AdminRoutes = () => {
     return (
@@ -57,6 +59,8 @@ const AdminRoutes = () => {
                 <Route path="pages" element={<PageManager />} />
                 <Route path="content/home" element={<HomeContentManager />} />
                 <Route path="content/banners" element={<HomeContentManager />} />
+                <Route path="pincodes" element={<PinCodeManager />} />
+                <Route path="bank-offers" element={<BankOfferManager />} />
                 <Route path="support" element={<SupportRequests />} />
                 <Route path="settings" element={<div className="text-2xl font-bold">Settings Page - Coming Soon</div>} />
             </Route>

@@ -89,6 +89,45 @@ const ProductDetails = () => {
     const [similarProducts, setSimilarProducts] = useState([]);
     const [highRatedProducts, setHighRatedProducts] = useState([]);
     const [showToast, setShowToast] = useState(false);
+    
+    // PIN Code State
+    const [pincode, setPincode] = useState('');
+    const [pincodeStatus, setPincodeStatus] = useState(null); // { message: '', isServiceable: bool, deliveryDate: '' }
+    const [checkingPincode, setCheckingPincode] = useState(false);
+
+    const handleCheckPincode = async () => {
+        if (!pincode || pincode.length < 6) {
+            toast.error('Please enter a valid 6-digit PIN code');
+            return;
+        }
+        setCheckingPincode(true);
+        try {
+            const { data } = await API.get(`/pincodes/check/${pincode}`);
+            if (data.isServiceable) {
+                setPincodeStatus({
+                    isServiceable: true,
+                    message: `Delivered in ${data.deliveryTime} ${data.unit}`,
+                    deliveryDate: data.deliveryTime + ' ' + data.unit
+                });
+            } else {
+                setPincodeStatus({
+                    isServiceable: false,
+                    message: data.message || 'Not serviceable',
+                    deliveryDate: '7 days' // Fallback as per requirement
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            setPincodeStatus({
+                isServiceable: false,
+                message: 'Error checking availability',
+                deliveryDate: '7 days'
+            });
+            toast.error('Failed to check PIN code');
+        } finally {
+            setCheckingPincode(false);
+        }
+    };
 
     const isInWishlist = product && wishlist.find(item => item.id === product.id);
 
@@ -148,11 +187,27 @@ const ProductDetails = () => {
     const [selectedDetailTab, setSelectedDetailTab] = useState('Description');
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [bankOffers, setBankOffers] = useState([]);
+
+    useEffect(() => {
+        if (id) {
+            const fetchBankOffers = async () => {
+                try {
+                    const { data } = await API.get(`/bank-offers/product/${id}`);
+                    setBankOffers(data);
+                } catch (error) {
+                    console.error('Error fetching bank offers', error);
+                }
+            };
+            fetchBankOffers();
+        }
+    }, [id]);
 
     const offers = [
-        { type: 'Bank Offer', text: '5% Unlimited Cashback on Flipkart Axis Bank Credit Card' },
-        { type: 'Bank Offer', text: '10% Off on Bank of Baroda Mastercard debit card first time transaction' },
-        { type: 'Special Price', text: 'Get extra 20% off (price inclusive of cashback/coupon)' },
+        ...bankOffers.map(offer => ({
+            type: `${offer.bankName} Offer`,
+            text: `${offer.offerName} - Get ${offer.discountType === 'flat' ? 'Flat ₹' + offer.discountValue : offer.discountValue + '%'} Off. ${offer.description || ''}`
+        })),
         { type: 'Partner Offer', text: 'Sign up for Flipkart Pay Later and get Flipkart Gift Card worth ₹100*' }
     ];
 
@@ -322,18 +377,37 @@ const ProductDetails = () => {
                                         <span className="material-icons text-[18px] text-gray-400">location_on</span>
                                         <input
                                             type="text"
-                                            value={product.pincode || '364515'}
-                                            readOnly
-                                            className="font-bold text-gray-900 text-sm outline-none w-full"
+                                            value={pincode}
+                                            onChange={(e) => setPincode(e.target.value)}
+                                            placeholder="Enter Pincode"
+                                            maxLength={6}
+                                            className="font-bold text-gray-900 text-sm outline-none w-full placeholder:text-gray-400"
                                         />
-                                        <button className="text-blue-600 text-[11px] font-bold uppercase whitespace-nowrap hover:text-blue-700">Check</button>
+                                        <button 
+                                            onClick={handleCheckPincode}
+                                            disabled={checkingPincode}
+                                            className="text-blue-600 text-[11px] font-bold uppercase whitespace-nowrap hover:text-blue-700 disabled:opacity-50"
+                                        >
+                                            {checkingPincode ? '...' : 'Check'}
+                                        </button>
                                     </div>
                                     <div className="text-sm">
-                                        <span className="font-bold text-gray-900">Delivery by {product.deliveryDate || '30 Jan, Fri'}</span>
-                                        <span className="text-gray-400 mx-1">|</span>
-                                        <span className="text-green-600 font-bold">Free</span>
-                                        <span className="text-gray-400 line-through text-xs ml-1">₹40</span>
+                                        <span className={`font-bold ${pincodeStatus?.isServiceable ? 'text-gray-900' : 'text-gray-500'}`}>
+                                            {pincodeStatus ? pincodeStatus.message : `Delivery by ${product.deliveryDate || '7 days'}`}
+                                        </span>
+                                        {(!pincodeStatus || pincodeStatus.isServiceable) && (
+                                            <>
+                                                <span className="text-gray-400 mx-1">|</span>
+                                                <span className="text-green-600 font-bold">Free</span>
+                                                <span className="text-gray-400 line-through text-xs ml-1">₹40</span>
+                                            </>
+                                        )}
                                     </div>
+                                    {!pincodeStatus?.isServiceable && pincodeStatus && (
+                                         <p className="text-xs text-orange-500 font-medium">
+                                            {pincodeStatus.message.includes('7 days') ? 'Estimated delivery in 7 days' : 'Currently not available at this location'}
+                                         </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -543,10 +617,21 @@ const ProductDetails = () => {
                         <div className="bg-[#f0f7ff] p-4 flex items-center justify-between">
                             <div className="flex items-center gap-2.5">
                                 <span className="material-icons-outlined text-gray-800 text-[20px]">location_on</span>
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[14px] font-bold text-gray-900">{product.pincode || '364515'}</span>
-                                    <button className="text-[14px] font-bold text-blue-600 flex items-center">
-                                        Select delivery location
+                                <div className="flex items-center gap-1.5 flex-1">
+                                    <input
+                                        type="text"
+                                        value={pincode}
+                                        onChange={(e) => setPincode(e.target.value)}
+                                        placeholder="Enter Pincode"
+                                        maxLength={6}
+                                        className="text-[14px] font-bold text-gray-900 bg-transparent outline-none w-full placeholder:text-gray-400"
+                                    />
+                                    <button 
+                                        onClick={handleCheckPincode}
+                                        disabled={checkingPincode}
+                                        className="text-[14px] font-bold text-blue-600 flex items-center whitespace-nowrap disabled:opacity-50"
+                                    >
+                                        {checkingPincode ? '...' : 'Check'}
                                         <span className="material-icons text-[14px] ml-0.5">chevron_right</span>
                                     </button>
                                 </div>
@@ -556,7 +641,9 @@ const ProductDetails = () => {
                         {/* Delivery Date */}
                         <div className="bg-[#f5f5f5] p-4 border-t border-white flex items-center gap-3">
                             <span className="material-icons-outlined text-gray-500 text-[20px]">local_shipping</span>
-                            <span className="text-[14px] font-bold text-gray-800">Delivery by {product.deliveryDate || '30 Jan, Fri'}</span>
+                            <span className="text-[14px] font-bold text-gray-800">
+                                {pincodeStatus ? pincodeStatus.message : `Delivery by ${product.deliveryDate || '7 days'}`}
+                            </span>
                         </div>
 
                     </div>

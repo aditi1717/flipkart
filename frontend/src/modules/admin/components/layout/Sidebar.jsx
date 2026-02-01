@@ -6,6 +6,7 @@ import {
     MdCategory,
     MdShoppingCart,
     MdAssignmentReturn,
+
     MdLocalOffer,
     MdLocalShipping,
     MdStorefront,
@@ -20,7 +21,8 @@ import {
     MdLabel,
     MdViewAgenda,
     MdViewCarousel,
-    MdRateReview
+    MdRateReview,
+    MdLocationOn
 } from 'react-icons/md';
 
 import logo from '../../../../assets/indiankart-logo.png';
@@ -30,16 +32,18 @@ const Sidebar = () => {
 
     const menuItems = [
         { name: 'Dashboard', icon: MdDashboard, path: '/admin/dashboard' },
+        { name: 'Orders', icon: MdShoppingCart, path: '/admin/orders' },
+        { name: 'Manage PIN Codes', icon: MdLocationOn, path: '/admin/pincodes' },
         { name: 'Products', icon: MdInventory, path: '/admin/products' },
         { name: 'Categories', icon: MdCategory, path: '/admin/categories' },
         { name: 'Subcategories', icon: MdCategory, path: '/admin/subcategories' },
         { name: 'Users', icon: MdPeople, path: '/admin/users' },
-        { name: 'Orders', icon: MdShoppingCart, path: '/admin/orders' },
         { name: 'Delivery Slip', icon: MdLocalShipping, path: '/admin/delivery-slip' },
         { name: 'Reviews', icon: MdRateReview, path: '/admin/reviews' },
         { name: 'Returns', icon: MdAssignmentReturn, path: '/admin/returns' },
         { name: 'Coupons & Offers', icon: MdLocalOffer, path: '/admin/coupons' },
         { name: 'Play (Reels)', icon: MdPlayCircle, path: '/admin/play' },
+        { name: 'Bank Offers', icon: MdLocalOffer, path: '/admin/bank-offers' },
         { name: 'Home Sections', icon: MdViewAgenda, path: '/admin/content/home' },
         // { name: 'Home Banners', icon: MdViewCarousel, path: '/admin/content/banners' },
         { name: 'Content Pages', icon: MdDescription, path: '/admin/pages' },
@@ -60,7 +64,7 @@ const Sidebar = () => {
             {/* Sidebar */}
             <aside
                 className={`fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 to-gray-800 text-white transition-all duration-300 z-40 ${isOpen ? 'w-64' : 'w-0 lg:w-20'
-                    } overflow-hidden shadow-2xl`}
+                    } overflow-y-auto overflow-x-hidden shadow-2xl custom-scrollbar`}
             >
                 {/* Logo */}
                 <div className="h-20 flex items-center px-3 border-b border-gray-700/50 bg-gray-900/50 backdrop-blur-sm overflow-hidden">

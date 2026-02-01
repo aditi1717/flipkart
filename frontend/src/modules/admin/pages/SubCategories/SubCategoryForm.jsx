@@ -65,30 +65,9 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
             name: formData.name,
             description: formData.description,
             category: formData.category,
-            parent: null,
             isActive: formData.isActive,
             image: formData.image 
         };
-        // Controller: const { name, category, description, image } = req.body;
-        // It seems it expects a JSON body. If we want file upload, we need to upload first or change controller.
-        // For now, let's assume we are sending a direct URL or base64 or maybe the user just inputs a URL if we don't have upload logic here.
-        // BUT, CategoryForm used FormData? No, CategoryController handles req.file?
-        
-        // Let's stick to what we see. CategoryForm uses FormData. 
-        // SubCategoryController seems to expect JSON: req.body.image. 
-        // If we want real file upload, we should probably modify the controller to support multer or upload elsewhere first.
-        // For this task, I will assume we might be restricted to existing controller logic, so I will send what I can.
-        // If the user wants to upload a file, we might need a separate upload endpoint or fix the controller.
-        // However, I see `image` in `req.body`, suggesting it might be a text URL.
-        
-        // Wait, `CategoryForm` does `data.append('icon', formData.file)`. 
-        // `productController` handles `req.files`.
-        // `subCategoryController` does NOT seem to use multer/req.file.
-        // So for now, I will treat image as a string (URL) input or base64 if I implement that. 
-        // I'll stick to string URL input + file selection that just sets a preview for now to be safe, 
-        // or check if I can fix the controller for upload. 
-        // Given the prompt is just "make a separate section", I should probably stick to existing capabilities.
-        // I will assume for now `image` is a URL string. I'll pass `formData.image`.
 
         if (subCategory?.id || subCategory?._id) {
             try {

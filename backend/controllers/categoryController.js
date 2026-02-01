@@ -1,38 +1,28 @@
 import Category from '../models/Category.js';
-import SubCategory from '../models/SubCategory.js';
 
 // @desc    Fetch all categories
 // @route   GET /api/categories
 // @access  Public
 export const getCategories = async (req, res) => {
     try {
-        const categories = await Category.find({}).lean();
-        const subCategories = await SubCategory.find({}).lean();
+        // Populate virtual 'subCategories'
+        const categories = await Category.find({})
+            .populate('subCategories')
+            .lean({ virtuals: true }); // Ensure virtuals are included in lean result
 
-        // Helper to build recursive tree
-        const buildTree = (parentId, categoryId) => {
-            return subCategories
-                .filter(sub => 
-                    String(sub.category) === String(categoryId) && 
-                    String(sub.parent || "") === String(parentId || "")
-                )
-                .map(sub => ({
-                    ...sub,
-                    subCategories: buildTree(sub._id, categoryId),
-                    children: buildTree(sub._id, categoryId) // Keep 'children' for admin compatibility
-                }));
-        };
+        // Transform if necessary to match frontend expectations (e.g. aliasing subCategories to children?)
+        // The virtual is named 'subCategories'.
+        // Frontend likely uses 'subCategories' or 'children'. 
+        // Admin ProductForm uses 'subCategories' store which fetches separately.
+        // Frontend Header/Menu might use 'children'.
+        // Let's keep 'children' as an alias for compatibility if needed.
 
-        const categoriesWithChildren = categories.map(cat => {
-            const subs = buildTree(null, cat._id);
-            return {
-                ...cat,
-                subCategories: subs,
-                children: subs // Alias for compatibility
-            };
-        });
+        const response = categories.map(cat => ({
+            ...cat,
+            children: cat.subCategories // Alias
+        }));
 
-        res.json(categoriesWithChildren);
+        res.json(response);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -53,11 +43,6 @@ export const createCategory = async (req, res) => {
             if (req.files.icon) icon = req.files.icon[0].path;
             if (req.files.bannerImage) bannerImage = req.files.bannerImage[0].path;
         }
-
-         // Parse subCategories if string
-        if (typeof subCategories === 'string') {
-            try { subCategories = JSON.parse(subCategories); } catch (e) {}
-        }
         
         const category = new Category({
             id: Date.now(), // Fallback for simple ID
@@ -65,8 +50,7 @@ export const createCategory = async (req, res) => {
             icon,
             bannerImage,
             bannerAlt,
-            active: req.body.active !== undefined ? req.body.active : true,
-            subCategories
+            active: req.body.active !== undefined ? req.body.active : true
         });
 
         const createdCategory = await category.save();
@@ -97,14 +81,6 @@ export const updateCategory = async (req, res) => {
             if (bannerImage) category.bannerImage = bannerImage;
             category.bannerAlt = req.body.bannerAlt || category.bannerAlt;
             if (req.body.active !== undefined) category.active = req.body.active;
-            
-            if (req.body.subCategories) {
-                 let subs = req.body.subCategories;
-                 if (typeof subs === 'string') {
-                    try { subs = JSON.parse(subs); } catch (e) {}
-                 }
-                 category.subCategories = subs;
-            }
 
             const updatedCategory = await category.save();
             res.json(updatedCategory);

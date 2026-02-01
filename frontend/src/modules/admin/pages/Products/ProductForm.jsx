@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MdClose, MdAdd, MdDelete, MdImage, MdExpandMore, MdExpandLess, MdArrowBack, MdOutlinePhotoCamera } from 'react-icons/md';
 import useProductStore from '../../store/productStore';
 import useCategoryStore from '../../store/categoryStore';
+import useSubCategoryStore from '../../store/subCategoryStore';
 import toast from 'react-hot-toast';
 
     const ProductForm = () => {
@@ -10,13 +11,15 @@ import toast from 'react-hot-toast';
     const navigate = useNavigate();
     const { addProduct, updateProduct, products, fetchProduct, isLoading } = useProductStore();
     const { categories, fetchCategories } = useCategoryStore();
+    const { subCategories, fetchSubCategories } = useSubCategoryStore();
 
     useEffect(() => {
         if (categories.length === 0) fetchCategories();
+        if (subCategories.length === 0) fetchSubCategories();
         if (id) {
             fetchProduct(id);
         }
-    }, [id, fetchProduct, fetchCategories, categories.length]);
+    }, [id, fetchProduct, fetchCategories, categories.length, fetchSubCategories, subCategories.length]);
 
     // Fetch product if editing
     const product = id ? products.find(p => p.id === parseInt(id)) : null;
@@ -180,7 +183,6 @@ import toast from 'react-hot-toast';
 
     // --- Dynamic Variant Helpers ---
     const addVariantHeading = () => {
-        if (formData.variantHeadings.length >= 2) return;
         setFormData(prev => ({
             ...prev,
             variantHeadings: [...prev.variantHeadings, { id: Date.now(), name: '', hasImage: false, options: [{ name: '' }] }]
@@ -656,20 +658,40 @@ import toast from 'react-hot-toast';
                                             <option value="">Select Sub Category</option>
                                             {(function() {
                                                 const primaryCat = categories.find(c => String(c.id) === String(formData.categoryPath[0]));
-                                                if (!primaryCat) return null;
+                                                if (!primaryCat) {
+                                                    console.log('ProductForm: No primary category found');
+                                                    return null;
+                                                }
+
+                                                console.log('Primary Category:', primaryCat.name, 'ID:', primaryCat.id, '_id:', primaryCat._id);
+                                                console.log('Total SubCategories:', subCategories.length);
                                                 
-                                                const flatten = (items) => {
-                                                    let flat = [];
-                                                    items.forEach(item => {
-                                                        flat.push(item);
-                                                        if (item.children) flat = [...flat, ...flatten(item.children)];
+                                                // Debug: Show first 5 subcategories and their category IDs
+                                                if (subCategories.length > 0) {
+                                                    console.log('Sample SubCategories (first 5):');
+                                                    subCategories.slice(0, 5).forEach(sub => {
+                                                        const catId = sub.category?._id || sub.category;
+                                                        console.log(`  - ${sub.name}: category=${catId}`);
                                                     });
-                                                    return flat;
-                                                };
-                                                
-                                                const allSubs = flatten(primaryCat.children || []);
-                                                
-                                                return allSubs.map(sub => (
+                                                }
+
+                                                const filtered = subCategories.filter(sub => {
+                                                    // Handle both populated (object) and unpopulated (ObjectId) category field
+                                                    const subCategoryId = sub.category?._id || sub.category;
+                                                    const primaryCategoryId = primaryCat._id;
+                                                    
+                                                    const match = String(subCategoryId) === String(primaryCategoryId);
+                                                    
+                                                    if (match) {
+                                                        console.log('Matched SubCategory:', sub.name, 'for category', primaryCat.name);
+                                                    }
+                                                    
+                                                    return match;
+                                                });
+
+                                                console.log('Filtered SubCategories:', filtered.length);
+
+                                                return filtered.map(sub => (
                                                     <option key={sub._id} value={sub._id}>{sub.name}</option>
                                                 ));
                                             })()}
@@ -757,15 +779,13 @@ import toast from 'react-hot-toast';
                                 <span className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold">3</span>
                                 <h2 className="text-lg font-bold text-gray-800">Dynamic Variants & Stock</h2>
                             </div>
-                            {formData.variantHeadings.length < 2 && (
-                                <button
-                                    type="button"
-                                    onClick={addVariantHeading}
-                                    className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition flex items-center gap-2"
-                                >
-                                    <MdAdd size={18} /> Add Variant Heading
-                                </button>
-                            )}
+                            <button
+                                type="button"
+                                onClick={addVariantHeading}
+                                className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition flex items-center gap-2"
+                            >
+                                <MdAdd size={18} /> Add Variant Heading
+                            </button>
                         </div>
 
                         {/* Variant Headings List */}
