@@ -96,14 +96,15 @@ const ProductDetails = () => {
     const [pincodeStatus, setPincodeStatus] = useState(null); // { message: '', isServiceable: bool, deliveryDate: '' }
     const [checkingPincode, setCheckingPincode] = useState(false);
 
-    const handleCheckPincode = async () => {
-        if (!pincode || pincode.length < 6) {
-            toast.error('Please enter a valid 6-digit PIN code');
+    const handleCheckPincode = async (codeOverride = null) => {
+        const codeToCheck = codeOverride || pincode;
+        if (!codeToCheck || codeToCheck.length < 6) {
+            if (!codeOverride) toast.error('Please enter a valid 6-digit PIN code');
             return;
         }
         setCheckingPincode(true);
         try {
-            const { data } = await API.get(`/pincodes/check/${pincode}`);
+            const { data } = await API.get(`/pincodes/check/${codeToCheck}`);
             if (data.isServiceable) {
                 setPincodeStatus({
                     isServiceable: true,
@@ -114,21 +115,33 @@ const ProductDetails = () => {
                 setPincodeStatus({
                     isServiceable: false,
                     message: data.message || 'Not serviceable',
-                    deliveryDate: '7 days' // Fallback as per requirement
+                    deliveryDate: '7 days'
                 });
             }
         } catch (error) {
             console.error(error);
             setPincodeStatus({
                 isServiceable: false,
-                message: 'Error checking availability',
+                message: 'Area not serviceable',
                 deliveryDate: '7 days'
             });
-            toast.error('Failed to check PIN code');
+            // Don't toast on auto-check
+            if (!codeOverride) toast.error('Service not available in this area');
         } finally {
             setCheckingPincode(false);
         }
     };
+
+    // Auto-check pincode if address exists
+    useEffect(() => {
+        if (addresses && addresses.length > 0 && !pincode && !pincodeStatus) {
+            const firstAddr = addresses[0];
+            if (firstAddr.pincode) {
+                setPincode(firstAddr.pincode);
+                handleCheckPincode(firstAddr.pincode);
+            }
+        }
+    }, [addresses, product]);
 
     const isInWishlist = product && wishlist.find(item => item.id === product.id);
 
@@ -379,30 +392,41 @@ const ProductDetails = () => {
 
                         {/* Desktop Action Buttons */}
                         <div className="flex gap-4 mt-6">
-                            <button 
-                                onClick={handleAddToCart} 
-                                disabled={currentStock <= 0}
-                                className={`flex-1 font-bold py-4 rounded-sm shadow-sm active:scale-[0.98] transition-all text-base uppercase tracking-wide flex items-center justify-center gap-2 ${
-                                    currentStock > 0 
-                                    ? 'bg-[#ff9f00] text-white hover:bg-[#f39801]' 
-                                    : 'bg-gray-200 text-gray-500 cursor-not-allowed shadow-none'
-                                }`}
-                            >
-                                <span className="material-icons text-[20px]">{currentStock > 0 ? 'shopping_cart' : 'info'}</span>
-                                {currentStock > 0 ? 'Add to Cart' : 'Out of Stock'}
-                            </button>
-                            <button 
-                                onClick={handleBuyNow} 
-                                disabled={currentStock <= 0}
-                                className={`flex-1 font-bold py-4 rounded-sm shadow-sm active:scale-[0.98] transition-all text-base uppercase tracking-wide flex items-center justify-center gap-2 ${
-                                    currentStock > 0 
-                                    ? 'bg-[#fb641b] text-white hover:bg-[#e85d19]' 
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
-                                }`}
-                            >
-                                <span className="material-icons text-[20px]">{currentStock > 0 ? 'flash_on' : 'remove_shopping_cart'}</span>
-                                {currentStock > 0 ? 'Buy Now' : 'Out of Stock'}
-                            </button>
+                            {pincodeStatus?.isServiceable === false ? (
+                                <div className="flex-1 bg-red-50 border border-red-100 p-4 rounded-sm text-center">
+                                    <p className="text-red-600 font-bold uppercase tracking-tight text-sm flex items-center justify-center gap-2">
+                                        <span className="material-icons text-red-500 text-[18px]">location_off</span>
+                                        Not deliverable in your area
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    <button 
+                                        onClick={handleAddToCart} 
+                                        disabled={currentStock <= 0}
+                                        className={`flex-1 font-bold py-4 rounded-sm shadow-sm active:scale-[0.98] transition-all text-base uppercase tracking-wide flex items-center justify-center gap-2 ${
+                                            currentStock > 0 
+                                            ? 'bg-[#ff9f00] text-white hover:bg-[#f39801]' 
+                                            : 'bg-gray-200 text-gray-500 cursor-not-allowed shadow-none'
+                                        }`}
+                                    >
+                                        <span className="material-icons text-[20px]">{currentStock > 0 ? 'shopping_cart' : 'info'}</span>
+                                        {currentStock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                                    </button>
+                                    <button 
+                                        onClick={handleBuyNow} 
+                                        disabled={currentStock <= 0}
+                                        className={`flex-1 font-bold py-4 rounded-sm shadow-sm active:scale-[0.98] transition-all text-base uppercase tracking-wide flex items-center justify-center gap-2 ${
+                                            currentStock > 0 
+                                            ? 'bg-[#fb641b] text-white hover:bg-[#e85d19]' 
+                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
+                                        }`}
+                                    >
+                                        <span className="material-icons text-[20px]">{currentStock > 0 ? 'flash_on' : 'remove_shopping_cart'}</span>
+                                        {currentStock > 0 ? 'Buy Now' : 'Out of Stock'}
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -1094,28 +1118,39 @@ const ProductDetails = () => {
 
             {/* Bottom Actions - Fixed Footer */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-2 flex gap-2 z-[100] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-                <button
-                    onClick={handleAddToCart}
-                    disabled={currentStock <= 0}
-                    className={`flex-1 font-bold py-3.5 rounded-xl text-sm active:scale-[0.98] transition-all ${
-                        currentStock > 0 
-                        ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' 
-                        : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
-                    }`}
-                >
-                    {currentStock > 0 ? 'Add to cart' : 'OUT OF STOCK'}
-                </button>
-                <button
-                    onClick={handleBuyNow}
-                    disabled={currentStock <= 0}
-                    className={`flex-1 font-bold py-3.5 rounded-xl text-sm shadow-sm active:scale-[0.98] transition-all ${
-                        currentStock > 0 
-                        ? 'bg-[#ffc200] text-black hover:bg-[#ffb300]' 
-                        : 'bg-gray-100 text-gray-300 shadow-none cursor-not-allowed'
-                    }`}
-                >
-                    {currentStock > 0 ? 'Buy now' : 'OUT OF STOCK'}
-                </button>
+                {pincodeStatus?.isServiceable === false ? (
+                    <div className="flex-1 bg-red-50 p-3 rounded-xl text-center">
+                        <p className="text-red-600 font-bold uppercase tracking-tight text-xs flex items-center justify-center gap-2">
+                            <span className="material-icons text-red-500 text-[16px]">location_off</span>
+                            Not deliverable in your area
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <button
+                            onClick={handleAddToCart}
+                            disabled={currentStock <= 0}
+                            className={`flex-1 font-bold py-3.5 rounded-xl text-sm active:scale-[0.98] transition-all ${
+                                currentStock > 0 
+                                ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' 
+                                : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
+                            }`}
+                        >
+                            {currentStock > 0 ? 'Add to cart' : 'OUT OF STOCK'}
+                        </button>
+                        <button
+                            onClick={handleBuyNow}
+                            disabled={currentStock <= 0}
+                            className={`flex-1 font-bold py-3.5 rounded-xl text-sm shadow-sm active:scale-[0.98] transition-all ${
+                                currentStock > 0 
+                                ? 'bg-[#ffc200] text-black hover:bg-[#ffb300]' 
+                                : 'bg-gray-100 text-gray-300 shadow-none cursor-not-allowed'
+                            }`}
+                        >
+                            {currentStock > 0 ? 'Buy now' : 'OUT OF STOCK'}
+                        </button>
+                    </>
+                )}
             </div>
 
             {/* Toast Notification */}

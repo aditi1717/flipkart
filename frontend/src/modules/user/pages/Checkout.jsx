@@ -28,6 +28,30 @@ const Checkout = () => {
     const [isChangingAddress, setIsChangingAddress] = useState(false);
     const [isAddingAddress, setIsAddingAddress] = useState(false);
 
+    const [isPincodeServiceable, setIsPincodeServiceable] = useState(true);
+    const [isPincodeChecking, setIsPincodeChecking] = useState(false);
+
+    useEffect(() => {
+        const checkServiceability = async () => {
+            const selectedAddrObj = addresses.find(a => a.id === selectedAddress);
+            if (selectedAddrObj && selectedAddrObj.pincode) {
+                setIsPincodeChecking(true);
+                try {
+                    const { data } = await API.get(`/pincodes/check/${selectedAddrObj.pincode}`);
+                    setIsPincodeServiceable(data.isServiceable);
+                } catch (error) {
+                    console.error('Error checking serviceability:', error);
+                    setIsPincodeServiceable(false);
+                } finally {
+                    setIsPincodeChecking(false);
+                }
+            }
+        };
+        if (selectedAddress) {
+            checkServiceability();
+        }
+    }, [selectedAddress, addresses]);
+
     // Redirect if cart is empty or no addresses exist
     useEffect(() => {
         if (checkoutItems.length === 0) {
@@ -451,21 +475,41 @@ const Checkout = () => {
                                     </div>
                                 ))}
                                 {/* Desktop Continue Button */}
-                                <div className="hidden md:flex justify-end gap-3 p-4 border-t sticky bottom-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-                                    <button
-                                        onClick={() => handlePlaceOrder('COD')}
-                                        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3.5 rounded-xl font-black text-sm shadow-lg hover:shadow-xl transition-all uppercase tracking-wide flex items-center gap-2"
-                                    >
-                                        <span className="material-icons text-lg">local_shipping</span>
-                                        Cash on Delivery
-                                    </button>
-                                    <button
-                                        onClick={() => setStep(3)}
-                                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-3.5 rounded-xl font-black text-sm shadow-lg hover:shadow-xl transition-all uppercase tracking-wide flex items-center gap-2"
-                                    >
-                                        <span className="material-icons text-lg">payment</span>
-                                        Pay Online
-                                    </button>
+                                <div className="hidden md:flex flex-col gap-3 p-4 border-t sticky bottom-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+                                    {!isPincodeServiceable && !isPincodeChecking && (
+                                        <div className="bg-red-50 p-3 rounded-lg border border-red-100 mb-2">
+                                            <p className="text-red-600 font-bold text-xs flex items-center gap-2 justify-center">
+                                                <span className="material-icons text-red-500 text-[18px]">location_off</span>
+                                                Sorry, we don't deliver to this pincode yet.
+                                            </p>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-end gap-3">
+                                        <button
+                                            onClick={() => handlePlaceOrder('COD')}
+                                            disabled={!isPincodeServiceable || isPincodeChecking}
+                                            className={`px-8 py-3.5 rounded-xl font-black text-sm shadow-lg hover:shadow-xl transition-all uppercase tracking-wide flex items-center gap-2 ${
+                                                isPincodeServiceable && !isPincodeChecking
+                                                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
+                                                : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed shadow-none'
+                                            }`}
+                                        >
+                                            <span className="material-icons text-lg">local_shipping</span>
+                                            Cash on Delivery
+                                        </button>
+                                        <button
+                                            onClick={() => setStep(3)}
+                                            disabled={!isPincodeServiceable || isPincodeChecking}
+                                            className={`px-10 py-3.5 rounded-xl font-black text-sm shadow-lg hover:shadow-xl transition-all uppercase tracking-wide flex items-center gap-2 ${
+                                                isPincodeServiceable && !isPincodeChecking
+                                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                                                : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed shadow-none'
+                                            }`}
+                                        >
+                                            <span className="material-icons text-lg">payment</span>
+                                            Pay Online
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -578,20 +622,37 @@ const Checkout = () => {
                                     <button className="text-[10px] text-blue-600 font-black uppercase tracking-tighter text-left w-fit">View Details</button>
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <button
-                                        onClick={() => handlePlaceOrder('COD')}
-                                        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3 rounded-xl font-black uppercase text-[11px] shadow-lg shadow-green-600/20 active:scale-[0.98] transition-all flex items-center gap-2"
-                                    >
-                                        <span className="material-icons text-sm">local_shipping</span>
-                                        Cash on Delivery
-                                    </button>
-                                    <button
-                                        onClick={() => setStep(3)}
-                                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-black uppercase text-[11px] shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center gap-2"
-                                    >
-                                        <span className="material-icons text-sm">payment</span>
-                                        Pay Online
-                                    </button>
+                                    {!isPincodeServiceable && !isPincodeChecking ? (
+                                        <span className="text-red-500 font-black text-[10px] uppercase text-right leading-tight mb-1">
+                                            Not deliverable here
+                                        </span>
+                                    ) : null}
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handlePlaceOrder('COD')}
+                                            disabled={!isPincodeServiceable || isPincodeChecking}
+                                            className={`px-6 py-3 rounded-xl font-black uppercase text-[11px] shadow-lg active:scale-[0.98] transition-all flex items-center gap-2 ${
+                                                isPincodeServiceable && !isPincodeChecking
+                                                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-green-600/20'
+                                                : 'bg-gray-100 text-gray-300 shadow-none cursor-not-allowed'
+                                            }`}
+                                        >
+                                            <span className="material-icons text-sm">local_shipping</span>
+                                            Cash on Delivery
+                                        </button>
+                                        <button
+                                            onClick={() => setStep(3)}
+                                            disabled={!isPincodeServiceable || isPincodeChecking}
+                                            className={`px-6 py-3 rounded-xl font-black uppercase text-[11px] shadow-lg active:scale-[0.98] transition-all flex items-center gap-2 ${
+                                                isPincodeServiceable && !isPincodeChecking
+                                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-blue-600/20'
+                                                : 'bg-gray-100 text-gray-300 shadow-none cursor-not-allowed'
+                                            }`}
+                                        >
+                                            <span className="material-icons text-sm">payment</span>
+                                            Pay Online
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

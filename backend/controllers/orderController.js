@@ -1,5 +1,6 @@
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
+import PinCode from '../models/PinCode.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -18,6 +19,17 @@ export const addOrderItems = async (req, res) => {
 
         if (!orderItems || orderItems.length === 0) {
             return res.status(400).json({ message: 'No order items' });
+        }
+
+        // Validate Pincode Serviceability
+        const pincode = shippingAddress.postalCode;
+        if (pincode) {
+            const pinCodeRecord = await PinCode.findOne({ code: pincode, isActive: true });
+            if (!pinCodeRecord) {
+                return res.status(400).json({ message: `Delivery not available for pincode ${pincode}` });
+            }
+        } else {
+            return res.status(400).json({ message: 'Shipping pincode is required' });
         }
 
         const order = new Order({
