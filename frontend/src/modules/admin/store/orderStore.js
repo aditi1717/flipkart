@@ -29,7 +29,10 @@ const useOrderStore = create((set) => ({
                 payment: {
                     method: order.paymentMethod === 'COD' ? 'COD' : order.paymentMethod,
                     status: order.isPaid ? 'Paid' : 'Pending',
-                    transactionId: order.paymentResult?.razorpay_order_id || order.paymentResult?.id
+                    transactionId: order.paymentResult?.razorpay_order_id || order.paymentResult?.id,
+                    cardType: order.paymentResult?.card_type,
+                    cardNetwork: order.paymentResult?.card_network,
+                    cardLast4: order.paymentResult?.card_last4
                 },
                 address: {
                     name: order.user?.name || 'N/A',
@@ -79,7 +82,10 @@ const useOrderStore = create((set) => ({
                 payment: {
                     method: data.paymentMethod === 'COD' ? 'COD' : data.paymentMethod,
                     status: data.isPaid ? 'Paid' : 'Pending',
-                    transactionId: data.paymentResult?.razorpay_order_id || data.paymentResult?.id
+                    transactionId: data.paymentResult?.razorpay_order_id || data.paymentResult?.id,
+                    cardType: data.paymentResult?.card_type,
+                    cardNetwork: data.paymentResult?.card_network,
+                    cardLast4: data.paymentResult?.card_last4
                 },
                 address: {
                     name: data.user?.name || 'N/A',
@@ -129,7 +135,10 @@ const useOrderStore = create((set) => ({
                 payment: {
                     method: data.paymentMethod === 'COD' ? 'COD' : data.paymentMethod,
                     status: data.isPaid ? 'Paid' : 'Pending',
-                    transactionId: data.paymentResult?.razorpay_order_id || data.paymentResult?.id
+                    transactionId: data.paymentResult?.razorpay_order_id || data.paymentResult?.id,
+                    cardType: data.paymentResult?.card_type,
+                    cardNetwork: data.paymentResult?.card_network,
+                    cardLast4: data.paymentResult?.card_last4
                 },
  address: {
                     name: data.user?.name || 'N/A',
@@ -181,7 +190,10 @@ const useOrderStore = create((set) => ({
                 payment: {
                     method: data.paymentMethod === 'COD' ? 'COD' : data.paymentMethod,
                     status: data.isPaid ? 'Paid' : 'Pending',
-                    transactionId: data.paymentResult?.razorpay_order_id || data.paymentResult?.id
+                    transactionId: data.paymentResult?.razorpay_order_id || data.paymentResult?.id,
+                    cardType: data.paymentResult?.card_type,
+                    cardNetwork: data.paymentResult?.card_network,
+                    cardLast4: data.paymentResult?.card_last4
                 },
                 address: {
                     name: data.user?.name || 'N/A',

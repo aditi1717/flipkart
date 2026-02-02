@@ -55,10 +55,27 @@ export const verifyPayment = async (req, res) => {
         const isAuthentic = expectedSignature === razorpay_signature;
 
         if (isAuthentic) {
-            // Success
+            // Success - Fetch full payment details from Razorpay to get card info
+            const instance = new Razorpay({
+                key_id: process.env.RAZORPAY_KEY_ID,
+                key_secret: process.env.RAZORPAY_KEY_SECRET,
+            });
+
+            const payment = await instance.payments.fetch(razorpay_payment_id);
+            
+            let cardInfo = null;
+            if (payment.method === 'card' && payment.card) {
+                cardInfo = {
+                    network: payment.card.network,
+                    last4: payment.card.last4,
+                    type: payment.card.type
+                };
+            }
+
             res.json({
                 message: "Payment verified successfully",
-                paymentId: razorpay_payment_id
+                paymentId: razorpay_payment_id,
+                cardInfo
             });
         } else {
             res.status(400).json({ message: "Invalid signature" });

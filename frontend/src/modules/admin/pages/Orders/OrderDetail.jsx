@@ -315,6 +315,23 @@ const OrderDetail = () => {
                                     <p className="text-[11px] font-bold text-gray-600 font-mono break-all bg-gray-50 p-2 rounded-lg">{order.payment.transactionId}</p>
                                 </div>
                             )}
+
+                            {order.payment?.cardNetwork && (
+                                <div className="pt-4 border-t border-gray-50 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Card Network</p>
+                                        <p className="text-[11px] font-black text-gray-800 uppercase tracking-wider">{order.payment.cardNetwork}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Card Type</p>
+                                        <p className="text-[11px] font-black text-gray-800 uppercase tracking-wider">{order.payment.cardType || 'N/A'}</p>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Card Number</p>
+                                        <p className="text-[11px] font-bold text-gray-600 font-mono">**** **** **** {order.payment.cardLast4}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

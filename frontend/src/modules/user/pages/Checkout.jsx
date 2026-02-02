@@ -224,6 +224,9 @@ const Checkout = () => {
                                         razorpay_order_id: response.razorpay_order_id,
                                         status: 'paid',
                                         update_time: new Date().toISOString(),
+                                        card_network: verification.cardInfo?.network,
+                                        card_last4: verification.cardInfo?.last4,
+                                        card_type: verification.cardInfo?.type
                                     },
                                     isPaid: true,
                                     paidAt: new Date().toISOString()
