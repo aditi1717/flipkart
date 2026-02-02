@@ -78,7 +78,7 @@ const ProductSkeleton = () => {
 const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { addToCart, wishlist, toggleWishlist } = useCartStore();
+    const { addToCart, wishlist, toggleWishlist, addresses } = useCartStore();
     
     // Fetch individual product
     const { product, loading } = useProduct(id);
@@ -152,6 +152,15 @@ const ProductDetails = () => {
     };
 
     const handleBuyNow = () => {
+        if (addresses.length === 0) {
+            const shouldRedirect = window.confirm(
+                '📍 Please add a delivery address before checkout.\n\nWould you like to add one now?'
+            );
+            if (shouldRedirect) {
+                navigate('/addresses');
+            }
+            return;
+        }
         addToCart(product, selectedVariants);
         navigate('/checkout');
     };
@@ -173,6 +182,12 @@ const ProductDetails = () => {
         };
         fetchReviews();
     }, [id]);
+    
+    // Derived State for Ratings
+    const totalRatings = reviews.length;
+    const averageRating = totalRatings > 0 
+        ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / totalRatings).toFixed(1)
+        : (product?.rating || 4.2);
 
     const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
     const [submittingReview, setSubmittingReview] = useState(false);
@@ -207,8 +222,7 @@ const ProductDetails = () => {
         ...bankOffers.map(offer => ({
             type: `${offer.bankName} Offer`,
             text: `${offer.offerName} - Get ${offer.discountType === 'flat' ? 'Flat ₹' + offer.discountValue : offer.discountValue + '%'} Off. ${offer.description || ''}`
-        })),
-        { type: 'Partner Offer', text: 'Sign up for Flipkart Pay Later and get Flipkart Gift Card worth ₹100*' }
+        }))
     ];
 
     const productImages = product ? [
@@ -314,9 +328,9 @@ const ProductDetails = () => {
 
                         <div className="flex items-center gap-3 mb-4">
                             <span className="bg-[#388e3c] text-white text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer">
-                                {product.rating || 4.2} <span className="material-icons text-[10px]">star</span>
+                                {averageRating} <span className="material-icons text-[10px]">star</span>
                             </span>
-                            <span className="text-gray-500 text-sm font-medium">1,245 Ratings & 189 Reviews</span>
+                            <span className="text-gray-500 text-sm font-medium">{totalRatings.toLocaleString()} Ratings & {totalRatings.toLocaleString()} Reviews</span>
                             <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" alt="Assured" className="h-5" />
                         </div>
 
@@ -874,20 +888,6 @@ const ProductDetails = () => {
                                                     </div>
                                                 </div>
                                             )}
-                                        </div>
-                                    )}
-                                    )}
-                                    {selectedDetailTab === 'Description' && (
-                                        <p className="italic">
-                                            This exquisite piece of jewelry is designed to reflect the elegance of traditional Indian heritage. Crafted with precision, it features intricate details that make it stand out. Whether it's a festive occasion or a formal event, these earrings provide a touch of grace and sophistication to your ensemble.
-                                        </p>
-                                    )}
-                                    {selectedDetailTab === 'Manufacturer' && (
-                                        <div className="space-y-1">
-                                            <p className="font-bold text-gray-800">RetailNet Exports Pvt Ltd</p>
-                                            <p>Plot No 42, GIDC Industrial Estate,</p>
-                                            <p>Ahmedabad, Gujarat - 380015</p>
-                                            <p className="text-blue-600 font-medium mt-2">contact@retailnetinc.com</p>
                                         </div>
                                     )}
                                 </div>

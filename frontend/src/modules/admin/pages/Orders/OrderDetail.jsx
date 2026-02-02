@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MdArrowBack, MdPrint, MdLocalShipping, MdCheckCircle, MdPendingActions, MdCancel, MdPerson, MdEmail, MdPhone, MdLocationOn, MdPayment, MdSchedule } from 'react-icons/md';
 import useOrderStore from '../../store/orderStore';
+import InvoiceGenerator from '../../components/orders/InvoiceGenerator';
+import API from '../../../../services/api';
 
 const OrderDetail = () => {
     const { id } = useParams();
@@ -15,11 +17,22 @@ const OrderDetail = () => {
     const [serialInputs, setSerialInputs] = useState({});
     const [serialTypes, setSerialTypes] = useState({});
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const [settings, setSettings] = useState(null);
 
     React.useEffect(() => {
         if (!order) {
             getOrderDetails(id);
         }
+        // Fetch settings for invoice
+        const fetchSettings = async () => {
+            try {
+                const { data } = await API.get('/settings');
+                setSettings(data);
+            } catch (error) {
+                console.error('Error fetching settings for invoice:', error);
+            }
+        };
+        fetchSettings();
     }, [id, order, getOrderDetails]);
 
     if (isLoading && !order) {
@@ -139,9 +152,16 @@ const OrderDetail = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 text-gray-600 font-black text-xs rounded-2xl hover:bg-gray-50 transition-all shadow-sm uppercase tracking-widest">
-                        <MdPrint size={18} /> Print Invoice
-                    </button>
+                    <InvoiceGenerator 
+                        order={order} 
+                        items={order.items} 
+                        settings={settings} 
+                        customTrigger={
+                            <button className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 text-gray-600 font-black text-xs rounded-2xl hover:bg-gray-50 transition-all shadow-sm uppercase tracking-widest">
+                                <MdPrint size={18} /> Print Invoice
+                            </button>
+                        }
+                    />
                     {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
                         <button
                             onClick={openUpdateModal}
@@ -180,6 +200,9 @@ const OrderDetail = () => {
                                                 </span>
                                             </div>
                                         )}
+                                        <div className="mt-3">
+                                            <InvoiceGenerator order={order} item={item} settings={settings} />
+                                        </div>
                                     </div>
                                     <div className="text-right">
                                         <div className="text-lg font-black text-gray-900">₹{item.price.toLocaleString()}</div>

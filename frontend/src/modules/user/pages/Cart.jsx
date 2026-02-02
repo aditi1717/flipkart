@@ -20,6 +20,19 @@ const Cart = () => {
         addresses
     } = useCartStore();
 
+    const handleCheckout = () => {
+        if (addresses.length === 0) {
+            const shouldRedirect = window.confirm(
+                '📍 Please add a delivery address before checkout.\n\nWould you like to add one now?'
+            );
+            if (shouldRedirect) {
+                navigate('/addresses');
+            }
+            return;
+        }
+        navigate('/checkout');
+    };
+
     const price = getTotalPrice();
     const originalPrice = getTotalOriginalPrice();
     const savings = getTotalSavings();
@@ -73,7 +86,7 @@ const Cart = () => {
                                         </div>
                                         <p className="text-xs text-gray-600 truncate mt-1 ml-7">{addresses[0]?.address}, {addresses[0]?.city}</p>
                                     </div>
-                                    <button onClick={() => navigate('/checkout')} className="text-blue-600 font-bold text-sm border-2 border-blue-600 px-5 py-2 rounded-lg active:bg-blue-50 hover:bg-blue-600 hover:text-white transition-all whitespace-nowrap shrink-0 shadow-sm">
+                                    <button onClick={handleCheckout} className="text-blue-600 font-bold text-sm border-2 border-blue-600 px-5 py-2 rounded-lg active:bg-blue-50 hover:bg-blue-600 hover:text-white transition-all whitespace-nowrap shrink-0 shadow-sm">
                                         Change
                                     </button>
                                 </div>
@@ -169,7 +182,7 @@ const Cart = () => {
                                     {/* Desktop Place Order Button */}
                                     <div className="hidden md:flex justify-end p-5 shadow-[0_-2px_10px_0_rgba(59,130,246,0.1)] sticky bottom-0 bg-gradient-to-r from-white to-blue-50">
                                         <button
-                                            onClick={() => navigate('/checkout')}
+                                            onClick={handleCheckout}
                                             className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-4 rounded-lg font-bold text-base shadow-lg hover:shadow-xl transform hover:scale-105 transition-all uppercase tracking-wide"
                                         >
                                             Place Order
@@ -319,7 +332,7 @@ const Cart = () => {
                             <span className="text-xs text-blue-600 font-bold cursor-pointer hover:underline" onClick={() => document.getElementById('price-details')?.scrollIntoView({ behavior: 'smooth' })}>View price details</span>
                         </div>
                         <button
-                            onClick={() => navigate('/checkout')}
+                            onClick={handleCheckout}
                             className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3.5 rounded-lg font-bold text-base shadow-lg hover:shadow-xl transform hover:scale-105 transition-all w-1/2 ml-4"
                         >
                             Place Order

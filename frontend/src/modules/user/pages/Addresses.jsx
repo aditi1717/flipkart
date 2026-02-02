@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
+import API from '../../../services/api';
 
 const Addresses = () => {
     const navigate = useNavigate();
@@ -10,6 +11,7 @@ const Addresses = () => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [showMenu, setShowMenu] = useState(null);
+    const [pincodeStatus, setPincodeStatus] = useState({}); // { addressId: { isServiceable, message, deliveryTime, unit } }
 
     const initialAddr = {
         name: '',
@@ -48,6 +50,44 @@ const Addresses = () => {
         }
         setShowMenu(null);
     };
+
+    // Check pincode serviceability
+    const checkPincodeServiceability = async (addressId, pincode) => {
+        if (!pincode || pincode.length < 6) return;
+        
+        try {
+            const { data } = await API.get(`/pincodes/check/${pincode}`);
+            setPincodeStatus(prev => ({
+                ...prev,
+                [addressId]: {
+                    isServiceable: data.isServiceable,
+                    message: data.isServiceable 
+                        ? `Delivery in ${data.deliveryTime} ${data.unit}` 
+                        : 'Not deliverable in your area',
+                    deliveryTime: data.deliveryTime,
+                    unit: data.unit
+                }
+            }));
+        } catch (error) {
+            console.error('Error checking pincode:', error);
+            setPincodeStatus(prev => ({
+                ...prev,
+                [addressId]: {
+                    isServiceable: false,
+                    message: 'Unable to check delivery availability'
+                }
+            }));
+        }
+    };
+
+    // Check all addresses on mount
+    useEffect(() => {
+        addresses.forEach(addr => {
+            if (addr.pincode) {
+                checkPincodeServiceability(addr.id, addr.pincode);
+            }
+        });
+    }, [addresses]);
 
     return (
         <div className="bg-[#f1f3f6] min-h-screen pb-10 md:py-6">
@@ -209,6 +249,26 @@ const Addresses = () => {
                                         <p className="text-[13px] text-gray-500 leading-relaxed max-w-[90%]">
                                             {addr.address}, {addr.city}, {addr.state} - <span className="font-bold">{addr.pincode}</span>
                                         </p>
+                                        {/* Delivery Status Badge */}
+                                        {pincodeStatus[addr.id] && (
+                                            <div className="flex items-center gap-2 mt-2">
+                                                {pincodeStatus[addr.id].isServiceable ? (
+                                                    <>
+                                                        <span className="material-icons text-green-600 text-sm">check_circle</span>
+                                                        <span className="text-xs font-bold text-green-600">
+                                                            {pincodeStatus[addr.id].message}
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span className="material-icons text-red-500 text-sm">cancel</span>
+                                                        <span className="text-xs font-bold text-red-500">
+                                                            {pincodeStatus[addr.id].message}
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

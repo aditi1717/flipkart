@@ -30,6 +30,7 @@ import searchRoutes from './routes/searchRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import pinCodeRoutes from './routes/pinCodeRoutes.js';
 import bankOfferRoutes from './routes/bankOfferRoutes.js';
+import settingRoutes from './routes/settingRoutes.js';
 
 
 const app = express();
@@ -65,6 +66,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/pincodes', pinCodeRoutes);
 app.use('/api/bank-offers', bankOfferRoutes);
+app.use('/api/settings', settingRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

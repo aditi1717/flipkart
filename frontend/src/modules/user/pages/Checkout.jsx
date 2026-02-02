@@ -21,6 +21,14 @@ const Checkout = () => {
     const [isChangingAddress, setIsChangingAddress] = useState(false);
     const [isAddingAddress, setIsAddingAddress] = useState(false);
 
+    // Redirect if no addresses exist
+    useEffect(() => {
+        if (addresses.length === 0) {
+            alert('📍 Please add a delivery address before placing an order.');
+            navigate('/addresses', { replace: true });
+        }
+    }, [addresses, navigate]);
+
     // Coupon State
     const [couponInput, setCouponInput] = useState('');
     const [couponError, setCouponError] = useState('');

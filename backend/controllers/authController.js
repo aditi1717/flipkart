@@ -44,8 +44,7 @@ export const verifyLoginOtp = async (req, res) => {
             name: user.name, 
             email: user.email, 
             phone: user.phone,
-            gender: user.gender,
-            isAdmin: user.isAdmin 
+            gender: user.gender
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -63,8 +62,7 @@ export const authUser = async (req, res) => {
             name: user.name, 
             email: user.email, 
             phone: user.phone,
-            gender: user.gender,
-            isAdmin: user.isAdmin 
+            gender: user.gender
         });
     } else {
         res.status(401).json({ message: 'Invalid email or password' });
@@ -86,8 +84,7 @@ export const registerUser = async (req, res) => {
             name: user.name, 
             email: user.email, 
             phone: user.phone,
-            gender: user.gender,
-            isAdmin: user.isAdmin 
+            gender: user.gender
         });
     } else {
         res.status(400).json({ message: 'Invalid user data' });
@@ -105,8 +102,7 @@ export const getUserProfile = async (req, res) => {
         name: req.user.name, 
         email: req.user.email, 
         phone: req.user.phone,
-        gender: req.user.gender,
-        isAdmin: req.user.isAdmin 
+        gender: req.user.gender
     };
     res.status(200).json(user);
 };
@@ -140,8 +136,7 @@ export const updateUserProfile = async (req, res) => {
                 name: updatedUser.name,
                 email: updatedUser.email,
                 phone: updatedUser.phone,
-                gender: updatedUser.gender,
-                isAdmin: updatedUser.isAdmin,
+                gender: updatedUser.gender
             });
         } else {
             res.status(404).json({ message: 'User not found' });
@@ -201,10 +196,9 @@ export const updateUser = async (req, res) => {
     if (user) {
         user.name = req.body.name || user.name;
         user.email = req.body.email || user.email;
-        user.isAdmin = req.body.isAdmin !== undefined ? req.body.isAdmin : user.isAdmin;
         user.status = req.body.status || user.status;
         const updatedUser = await user.save();
-        res.json({ _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, isAdmin: updatedUser.isAdmin, status: updatedUser.status });
+        res.json({ _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, status: updatedUser.status });
     } else {
         res.status(404).json({ message: 'User not found' });
     }
