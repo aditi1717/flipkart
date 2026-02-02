@@ -21,13 +21,15 @@ const Checkout = () => {
     const [isChangingAddress, setIsChangingAddress] = useState(false);
     const [isAddingAddress, setIsAddingAddress] = useState(false);
 
-    // Redirect if no addresses exist
+    // Redirect if cart is empty or no addresses exist
     useEffect(() => {
-        if (addresses.length === 0) {
+        if (cart.length === 0) {
+            navigate('/cart', { replace: true });
+        } else if (addresses.length === 0) {
             alert('📍 Please add a delivery address before placing an order.');
             navigate('/addresses', { replace: true });
         }
-    }, [addresses, navigate]);
+    }, [cart, addresses, navigate]);
 
     // Coupon State
     const [couponInput, setCouponInput] = useState('');
@@ -101,6 +103,13 @@ const Checkout = () => {
     const finalAmount = Math.max(0, totalPrice + delivery - discount);
 
     const handlePlaceOrder = async (paymentMethodOverride = 'COD') => {
+        // Validate cart is not empty
+        if (cart.length === 0) {
+            alert('Your cart is empty');
+            navigate('/cart');
+            return;
+        }
+
         // Validate address is selected
         if (!selectedAddress) {
             alert('Please select a delivery address');

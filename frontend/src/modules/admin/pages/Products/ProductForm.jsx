@@ -619,7 +619,7 @@ import toast from 'react-hot-toast';
                                     name="brand"
                                     value={formData.brand}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-700"
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900"
                                     placeholder="e.g. NIKE, ADIDAS"
                                 />
                             </div>
@@ -630,7 +630,7 @@ import toast from 'react-hot-toast';
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-blue-500 focus:bg-white outline-none transition-all text-gray-800"
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900"
                                     placeholder="Full product name..."
                                 />
                             </div>
@@ -838,7 +838,7 @@ import toast from 'react-hot-toast';
                                         name="price"
                                         value={formData.price}
                                         onChange={handleChange}
-                                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-green-50/30 border border-transparent focus:border-green-500 focus:bg-white outline-none transition-all font-black text-green-700 text-xl"
+                                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-green-50/30 border border-green-200 focus:border-green-500 focus:bg-white outline-none transition-all font-black text-green-900 text-xl"
                                         placeholder="0"
                                     />
                                 </div>
@@ -852,7 +852,7 @@ import toast from 'react-hot-toast';
                                         name="originalPrice"
                                         value={formData.originalPrice}
                                         onChange={handleChange}
-                                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-500 line-through"
+                                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 line-through"
                                         placeholder="0"
                                     />
                                 </div>
@@ -867,7 +867,7 @@ import toast from 'react-hot-toast';
                                         : formData.stock || 0}
                                     onChange={handleChange}
                                     disabled={formData.skus.length > 0 || formData.variantHeadings.length > 0}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent font-black text-gray-700 text-lg disabled:opacity-60"
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 font-black text-gray-900 text-lg disabled:opacity-60"
                                     placeholder="0"
                                 />
                                 {(formData.skus.length > 0 || formData.variantHeadings.length > 0) && (
@@ -911,13 +911,13 @@ import toast from 'react-hot-toast';
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Variant Heading (e.g. Color, Size, Storage)</label>
-                                            <input
-                                                type="text"
-                                                value={vh.name}
-                                                onChange={(e) => updateVariantHeading(vh.id, 'name', e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-200 outline-none focus:border-blue-500 font-bold text-gray-900"
-                                                placeholder="Enter heading..."
-                                            />
+                                                <input
+                                                    type="text"
+                                                    value={vh.name}
+                                                    onChange={(e) => updateVariantHeading(vh.id, 'name', e.target.value)}
+                                                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-200 outline-none focus:border-blue-500 font-bold text-gray-900 caret-black"
+                                                    placeholder="Enter heading..."
+                                                />
                                         </div>
                                         <div className="flex items-end pb-1">
                                             <label className="flex items-center gap-3 cursor-pointer group/toggle">
@@ -962,7 +962,7 @@ import toast from 'react-hot-toast';
                                                             placeholder="Option (e.g. Red, XL)"
                                                             value={opt.name}
                                                             onChange={(e) => updateVariantOption(vh.id, optIdx, 'name', e.target.value)}
-                                                            className="text-xs font-bold border-b border-gray-100 outline-none p-1 focus:border-blue-500 text-gray-900"
+                                                            className="text-xs font-bold border-b border-gray-200 outline-none p-1 focus:border-blue-500 text-gray-900 caret-black"
                                                         />
                                                         {vh.hasImage && (
                                                             <div className="flex items-center gap-2">
@@ -987,7 +987,7 @@ import toast from 'react-hot-toast';
                                                                     placeholder="Or URL..."
                                                                     value={opt.image?.content || (typeof opt.image === 'string' ? opt.image : '')}
                                                                     onChange={(e) => updateVariantOption(vh.id, optIdx, 'image', e.target.value)}
-                                                                    className="flex-1 text-[8px] bg-gray-50 px-2 py-1 rounded outline-none border border-transparent focus:border-blue-200 text-gray-900"
+                                                                    className="flex-1 text-[10px] bg-gray-50 px-2 py-1 rounded outline-none border border-gray-200 focus:border-blue-500 font-bold text-gray-900"
                                                                 />
                                                             </div>
                                                         )}
@@ -1064,7 +1064,7 @@ import toast from 'react-hot-toast';
                                                                                 min="0"
                                                                                 value={sku.stock}
                                                                                 onChange={(e) => updateSkuStock(originalIdx, Math.max(0, parseInt(e.target.value) || 0))}
-                                                                                className="w-20 text-right px-3 py-1.5 rounded-lg bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 outline-none text-xs font-black text-blue-600 transition-all shadow-inner"
+                                                                                className="w-20 text-right px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 outline-none text-sm font-black text-gray-900 transition-all shadow-inner caret-black"
                                                                             />
                                                                         </div>
                                                                     </td>
@@ -1166,7 +1166,7 @@ import toast from 'react-hot-toast';
                                                             <input
                                                                 value={point}
                                                                 onChange={(e) => updateDescriptionPoint(sectionIdx, pointIdx, e.target.value)}
-                                                                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold text-gray-800 focus:border-indigo-600 focus:bg-white outline-none transition-all"
+                                                                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all"
                                                                 placeholder="e.g. 16.97 cm (6.68 inch) Full HD+ Display"
                                                             />
                                                             {section.points.length > 1 && (
@@ -1220,7 +1220,7 @@ import toast from 'react-hot-toast';
                                                 type="text"
                                                 value={formData.warranty.summary}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, summary: e.target.value } }))}
-                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs"
+                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-blue-500 outline-none"
                                                 placeholder="e.g. 1 Year Manufacturer Warranty"
                                             />
                                         </div>
@@ -1229,7 +1229,7 @@ import toast from 'react-hot-toast';
                                             <textarea
                                                 value={formData.warranty.covered}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, covered: e.target.value } }))}
-                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20"
+                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20 font-bold text-gray-900 focus:border-blue-500 outline-none"
                                                 placeholder="Manufacturing defects, parts replacement..."
                                             />
                                         </div>
@@ -1238,7 +1238,7 @@ import toast from 'react-hot-toast';
                                             <textarea
                                                 value={formData.warranty.notCovered}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, notCovered: e.target.value } }))}
-                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20"
+                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20 font-bold text-gray-900 focus:border-blue-500 outline-none"
                                                 placeholder="Physical damage, water damage..."
                                             />
                                         </div>
@@ -1264,7 +1264,7 @@ import toast from 'react-hot-toast';
                                             type="number"
                                             value={formData.returnPolicy.days}
                                             onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, days: parseInt(e.target.value) || 0 } }))}
-                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs"
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-blue-500 outline-none"
                                             placeholder="7"
                                         />
                                     </div>
@@ -1273,7 +1273,7 @@ import toast from 'react-hot-toast';
                                         <textarea
                                             value={formData.returnPolicy.description}
                                             onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, description: e.target.value } }))}
-                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-24"
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-24 font-bold text-gray-900 focus:border-blue-500 outline-none"
                                             placeholder="Easy returns within 7 days. Product must be unused with original tags..."
                                         />
                                     </div>

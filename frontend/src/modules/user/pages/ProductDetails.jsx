@@ -87,6 +87,7 @@ const ProductDetails = () => {
     const { products, loading: productsLoading } = useProducts();
     
     const [similarProducts, setSimilarProducts] = useState([]);
+    const [similarStyles, setSimilarStyles] = useState([]);
     const [highRatedProducts, setHighRatedProducts] = useState([]);
     const [showToast, setShowToast] = useState(false);
     
@@ -133,17 +134,57 @@ const ProductDetails = () => {
 
     const [selectedVariants, setSelectedVariants] = useState({});
 
+    const displayVariantHeadings = React.useMemo(() => {
+        if (!product) return [];
+        if (product.variantHeadings && product.variantHeadings.length > 0) return product.variantHeadings;
+        
+        const fallback = [];
+        if (product.colors && product.colors.length > 0) {
+            fallback.push({ 
+                id: 'color-fallback', 
+                name: 'Color', 
+                hasImage: true, 
+                options: product.colors.map(c => typeof c === 'string' ? { name: c, image: '' } : c) 
+            });
+        }
+        if (product.sizes && product.sizes.length > 0) {
+            fallback.push({ 
+                id: 'size-fallback', 
+                name: product.variantLabel || 'Size', 
+                hasImage: false, 
+                options: product.sizes.map(s => typeof s === 'string' ? { name: s } : s) 
+            });
+        }
+        return fallback;
+    }, [product]);
+
     useEffect(() => {
-        if (product && product.variantHeadings && product.variantHeadings.length > 0) {
+        if (product && displayVariantHeadings.length > 0) {
             const initial = {};
-            product.variantHeadings.forEach(vh => {
+            displayVariantHeadings.forEach(vh => {
                 if (vh.options && vh.options.length > 0) {
                     initial[vh.name] = vh.options[0].name;
                 }
             });
             setSelectedVariants(initial);
         }
-    }, [product]);
+    }, [product, displayVariantHeadings]);
+
+    const currentStock = React.useMemo(() => {
+        if (!product) return 0;
+        
+        if (displayVariantHeadings.length > 0 && product.skus && product.skus.length > 0) {
+            const matchingSku = product.skus.find(sku => {
+                // Every selected variant must match the SKU combination
+                return displayVariantHeadings.every(vh => 
+                    sku.combination[vh.name] === selectedVariants[vh.name]
+                );
+            });
+            return matchingSku ? matchingSku.stock : 0;
+        }
+        
+        return product.stock || 0;
+    }, [product, selectedVariants, displayVariantHeadings]);
 
     const handleAddToCart = () => {
         addToCart(product, selectedVariants);
@@ -240,11 +281,25 @@ const ProductDetails = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
         if (product && products.length > 0) {
-             // Find similar products
+             // Find similar products by Category
             const similar = products.filter(p => p.category === product.category && p.id !== product.id);
             setSimilarProducts(similar);
-            // Find high rated products in Fashion/Jewelry
-            const highRated = products.filter(p => p.rating >= 4.0 && p.id !== product.id).slice(0, 6);
+
+            // Find similar products by Sub-Category (Styles)
+            if (product.subCategories && product.subCategories.length > 0) {
+                const subIds = product.subCategories.map(s => s._id || s.id);
+                const styles = products.filter(p => {
+                    if (p.id === product.id) return false;
+                    if (!p.subCategories || p.subCategories.length === 0) return false;
+                    return p.subCategories.some(s => subIds.includes(s._id || s.id));
+                });
+                setSimilarStyles(styles);
+            } else {
+                setSimilarStyles([]);
+            }
+
+            // Find high rated products in same category
+            const highRated = products.filter(p => p.category === product.category && p.rating >= 4.0 && p.id !== product.id).slice(0, 6);
             setHighRatedProducts(highRated);
         }
     }, [product, products]);
@@ -316,13 +371,29 @@ const ProductDetails = () => {
 
                         {/* Desktop Action Buttons */}
                         <div className="flex gap-4 mt-6">
-                            <button onClick={handleAddToCart} className="flex-1 bg-[#ff9f00] text-white font-bold py-4 rounded-sm shadow-sm hover:bg-[#f39801] active:scale-[0.98] transition-all text-base uppercase tracking-wide flex items-center justify-center gap-2">
-                                <span className="material-icons text-[20px]">shopping_cart</span>
-                                Add to Cart
+                            <button 
+                                onClick={handleAddToCart} 
+                                disabled={currentStock <= 0}
+                                className={`flex-1 font-bold py-4 rounded-sm shadow-sm active:scale-[0.98] transition-all text-base uppercase tracking-wide flex items-center justify-center gap-2 ${
+                                    currentStock > 0 
+                                    ? 'bg-[#ff9f00] text-white hover:bg-[#f39801]' 
+                                    : 'bg-gray-200 text-gray-500 cursor-not-allowed shadow-none'
+                                }`}
+                            >
+                                <span className="material-icons text-[20px]">{currentStock > 0 ? 'shopping_cart' : 'info'}</span>
+                                {currentStock > 0 ? 'Add to Cart' : 'Out of Stock'}
                             </button>
-                            <button onClick={handleBuyNow} className="flex-1 bg-[#fb641b] text-white font-bold py-4 rounded-sm shadow-sm hover:bg-[#e85d19] active:scale-[0.98] transition-all text-base uppercase tracking-wide flex items-center justify-center gap-2">
-                                <span className="material-icons text-[20px]">flash_on</span>
-                                Buy Now
+                            <button 
+                                onClick={handleBuyNow} 
+                                disabled={currentStock <= 0}
+                                className={`flex-1 font-bold py-4 rounded-sm shadow-sm active:scale-[0.98] transition-all text-base uppercase tracking-wide flex items-center justify-center gap-2 ${
+                                    currentStock > 0 
+                                    ? 'bg-[#fb641b] text-white hover:bg-[#e85d19]' 
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
+                                }`}
+                            >
+                                <span className="material-icons text-[20px]">{currentStock > 0 ? 'flash_on' : 'remove_shopping_cart'}</span>
+                                {currentStock > 0 ? 'Buy Now' : 'Out of Stock'}
                             </button>
                         </div>
                     </div>
@@ -331,7 +402,14 @@ const ProductDetails = () => {
                     <div className="flex-1 min-w-0">
                         <div className="mb-2">
                             <p className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-1 hover:text-blue-600 cursor-pointer w-fit">{product.brand || "Brand Name"}</p>
-                            <h1 className="text-2xl font-medium text-gray-900 leading-snug hover:text-blue-600 cursor-pointer transition-colors inline-block">{product.name}</h1>
+                            <h1 className="text-2xl font-medium text-gray-900 leading-snug hover:text-blue-600 cursor-pointer transition-colors inline-block">
+                                {product.name}
+                                {displayVariantHeadings.length > 0 && (
+                                    <span className="text-gray-500 ml-1">
+                                        ({displayVariantHeadings.map(vh => selectedVariants[vh.name]).filter(Boolean).join(', ')})
+                                    </span>
+                                )}
+                            </h1>
                         </div>
 
                         <div className="flex items-center gap-3 mb-4">
@@ -349,6 +427,41 @@ const ProductDetails = () => {
                             <span className="text-green-600 font-bold text-base">{discountPercentage}% off</span>
                         </div>
 
+                        {/* Dynamic Variants Desktop */}
+                        {displayVariantHeadings.length > 0 && (
+                            <div className="space-y-6 mb-8 mt-6">
+                                {displayVariantHeadings.map((vh) => (
+                                    <div key={vh.id} className="flex gap-4">
+                                        <span className="text-gray-500 font-medium text-sm w-20 pt-1 uppercase tracking-wider text-[11px] font-bold">{vh.name}</span>
+                                        <div className="flex flex-wrap gap-2 max-w-[500px]">
+                                            {vh.options?.map((opt, idx) => (
+                                                vh.hasImage ? (
+                                                    <div
+                                                        key={idx}
+                                                        onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                                        className={`w-14 h-16 rounded border-2 p-0.5 cursor-pointer transition-all hover:scale-105 ${selectedVariants[vh.name] === opt.name ? 'border-blue-600' : 'border-transparent'}`}
+                                                    >
+                                                        <img src={opt.image} alt={opt.name} className="w-full h-full object-cover rounded-[2px]" />
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                                        className={`min-w-[50px] h-10 px-4 rounded-sm border-2 font-bold text-sm transition-all ${selectedVariants[vh.name] === opt.name
+                                                            ? 'border-blue-600 text-blue-600 bg-blue-50/20'
+                                                            : 'border-gray-200 text-gray-900 hover:border-blue-400'
+                                                            }`}
+                                                    >
+                                                        {opt.name}
+                                                    </button>
+                                                )
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         {/* Offers - Desktop */}
                         <div className="mb-6 space-y-2">
                             <p className="text-sm font-bold text-gray-900 mb-2">Available offers</p>
@@ -359,39 +472,6 @@ const ProductDetails = () => {
                                         <span className="font-bold text-gray-800">{offer.type}</span>
                                         <span className="ml-1">{offer.text}</span>
                                         <span className="text-blue-600 font-medium cursor-pointer ml-1">T&C</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Dynamic Variants Desktop */}
-                        <div className="space-y-6 mb-8">
-                            {product.variantHeadings?.map((vh) => (
-                                <div key={vh.id} className="flex gap-4">
-                                    <span className="text-gray-500 font-medium text-sm w-12 pt-1">{vh.name}</span>
-                                    <div className="flex flex-wrap gap-2 max-w-[500px]">
-                                        {vh.options?.map((opt, idx) => (
-                                            vh.hasImage ? (
-                                                <div
-                                                    key={idx}
-                                                    onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
-                                                    className={`w-14 h-16 rounded border-2 p-0.5 cursor-pointer transition-all hover:scale-105 ${selectedVariants[vh.name] === opt.name ? 'border-blue-600' : 'border-transparent'}`}
-                                                >
-                                                    <img src={opt.image} alt={opt.name} className="w-full h-full object-cover rounded-[2px]" />
-                                                </div>
-                                            ) : (
-                                                <button
-                                                    key={idx}
-                                                    onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
-                                                    className={`min-w-[50px] h-10 px-3 rounded-sm border-2 font-bold text-sm transition-all ${selectedVariants[vh.name] === opt.name
-                                                        ? 'border-blue-600 text-blue-600 bg-blue-50/20'
-                                                        : 'border-gray-300 text-gray-900 hover:border-blue-400'
-                                                        }`}
-                                                >
-                                                    {opt.name}
-                                                </button>
-                                            )
-                                        ))}
                                     </div>
                                 </div>
                             ))}
@@ -444,18 +524,19 @@ const ProductDetails = () => {
 
 
 
-                        {/* Services */}
-                        {/* Services - Desktop (Replicating Mobile Style) */}
+                        {/* Services - Desktop */}
                         <div className="flex gap-8 mb-8 mt-2">
-                            <div className="flex items-center gap-4 group cursor-pointer">
-                                <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800 transition-colors group-hover:bg-blue-50">
-                                    <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">autorenew</span>
+                            {product.returnPolicy && (
+                                <div className="flex items-center gap-4 group cursor-pointer">
+                                    <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800 transition-colors group-hover:bg-blue-50">
+                                        <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">autorenew</span>
+                                    </div>
+                                    <div className="text-gray-800">
+                                        <span className="text-[14px] font-bold leading-tight block">{product.returnPolicy.days}-Day Return</span>
+                                        <span className="text-xs text-gray-500">Easy returns</span>
+                                    </div>
                                 </div>
-                                <div className="text-gray-800">
-                                    <span className="text-[14px] font-bold leading-tight block">10-Day Return</span>
-                                    <span className="text-xs text-gray-500">Easy returns</span>
-                                </div>
-                            </div>
+                            )}
 
                             <div className="flex items-center gap-4 group cursor-pointer">
                                 <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800 transition-colors group-hover:bg-blue-50">
@@ -469,11 +550,11 @@ const ProductDetails = () => {
 
                             <div className="flex items-center gap-4 group cursor-pointer">
                                 <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800 transition-colors group-hover:bg-blue-50">
-                                    <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">shield</span>
+                                    <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">verified_user</span>
                                 </div>
                                 <div className="text-gray-800">
-                                    <span className="text-[14px] font-bold leading-tight block">Flipkart Assured</span>
-                                    <span className="text-xs text-gray-500">Quality checked</span>
+                                    <span className="text-[14px] font-bold leading-tight block">{product.warranty?.summary || 'Brand Warranty'}</span>
+                                    <span className="text-xs text-gray-500">Warranty details</span>
                                 </div>
                             </div>
                         </div>
@@ -659,9 +740,51 @@ const ProductDetails = () => {
                     {!product.brand && <h2 className="text-gray-900 text-sm font-bold uppercase tracking-wide">Brand Name</h2>}
 
                     {/* Name & More Content */}
-                    <p className="text-gray-600 text-sm font-normal leading-relaxed">
+                    <p className="text-gray-900 text-[15px] font-medium leading-tight">
                         {product.name}
+                        {displayVariantHeadings.length > 0 && (
+                            <span className="text-gray-500 ml-1 font-normal">
+                                ({displayVariantHeadings.map(vh => selectedVariants[vh.name]).filter(Boolean).join(', ')})
+                            </span>
+                        )}
                     </p>
+
+                    {/* Dynamic Variants Mobile */}
+                    {displayVariantHeadings.length > 0 && (
+                        <div className="space-y-6 py-4">
+                            {displayVariantHeadings.map((vh) => (
+                                <div key={vh.id} className="mt-2">
+                                    <p className="text-[13px] font-bold text-gray-900 mb-3 uppercase tracking-tight">
+                                        {vh.name}: <span className="font-normal text-gray-500 normal-case">{selectedVariants[vh.name]}</span>
+                                    </p>
+                                    <div className="flex flex-wrap gap-3">
+                                        {vh.options?.map((opt, idx) => (
+                                            vh.hasImage ? (
+                                                <div
+                                                    key={idx}
+                                                    onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                                    className={`min-w-[70px] aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${selectedVariants[vh.name] === opt.name ? 'border-blue-600 shadow-sm' : 'border-gray-100'}`}
+                                                >
+                                                    <img src={opt.image} alt={opt.name} className="w-full h-full object-cover" />
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                                    className={`h-9 px-4 rounded-lg border-2 font-bold text-xs transition-all ${selectedVariants[vh.name] === opt.name
+                                                        ? 'border-blue-600 text-blue-600 bg-blue-50/20'
+                                                        : 'border-gray-200 text-gray-700'
+                                                        }`}
+                                                >
+                                                    {opt.name}
+                                                </button>
+                                            )
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
 
                     {/* Price */}
@@ -678,40 +801,6 @@ const ProductDetails = () => {
                     </div>
                 </div>
 
-                {/* Dynamic Variants Mobile */}
-                <div className="space-y-6">
-                    {product.variantHeadings?.map((vh) => (
-                        <div key={vh.id} className="px-4 mt-6">
-                            <p className="text-[14px] font-bold text-gray-900 mb-3 uppercase tracking-tight">
-                                {vh.name}: <span className="font-normal text-gray-600 normal-case">{selectedVariants[vh.name]}</span>
-                            </p>
-                            <div className="flex flex-wrap gap-3">
-                                {vh.options?.map((opt, idx) => (
-                                    vh.hasImage ? (
-                                        <div
-                                            key={idx}
-                                            onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
-                                            className={`min-w-[70px] aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${selectedVariants[vh.name] === opt.name ? 'border-black shadow-sm' : 'border-gray-100'}`}
-                                        >
-                                            <img src={opt.image} alt={opt.name} className="w-full h-full object-cover" />
-                                        </div>
-                                    ) : (
-                                        <button
-                                            key={idx}
-                                            onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
-                                            className={`min-w-[48px] h-[36px] px-3 rounded-lg flex items-center justify-center text-[12px] font-bold border transition-all ${selectedVariants[vh.name] === opt.name
-                                                ? 'border-black bg-white text-gray-900 shadow-sm'
-                                                : 'border-gray-200 text-gray-900'
-                                                }`}
-                                        >
-                                            {opt.name}
-                                        </button>
-                                    )
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
 
                 {/* Offers Section */}
                 <div className="px-4 mt-4">
@@ -770,17 +859,19 @@ const ProductDetails = () => {
 
                     </div>
 
-                    {/* Service Icons - More compact */}
+                    {/* Service Icons - Mobile */}
                     <div className="flex justify-between mt-6 mb-4 border-t border-gray-100 pt-4">
-                        <div className="flex flex-col items-center gap-2.5 w-1/3 group">
-                            <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800">
-                                <span className="material-icons-outlined text-[24px]">autorenew</span>
+                        {product.returnPolicy && (
+                            <div className="flex flex-col items-center gap-2.5 w-1/3 group">
+                                <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800">
+                                    <span className="material-icons-outlined text-[24px]">autorenew</span>
+                                </div>
+                                <div className="flex items-center text-gray-800">
+                                    <span className="text-[11px] font-bold text-center leading-tight">{product.returnPolicy.days}-Day<br />Return</span>
+                                    <span className="material-icons text-[14px] text-gray-400 ml-0.5">chevron_right</span>
+                                </div>
                             </div>
-                            <div className="flex items-center text-gray-800">
-                                <span className="text-[11px] font-bold text-center leading-tight">10-Day<br />Return</span>
-                                <span className="material-icons text-[14px] text-gray-400 ml-0.5">chevron_right</span>
-                            </div>
-                        </div>
+                        )}
 
                         <div className="flex flex-col items-center gap-2.5 w-1/3">
                             <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800">
@@ -794,10 +885,10 @@ const ProductDetails = () => {
 
                         <div className="flex flex-col items-center gap-2.5 w-1/3">
                             <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800">
-                                <span className="material-icons-outlined text-[24px]">shield</span>
+                                <span className="material-icons-outlined text-[24px]">verified_user</span>
                             </div>
                             <div className="flex items-center text-gray-800">
-                                <span className="text-[11px] font-bold text-center leading-tight">Flipkart<br />Assured</span>
+                                <span className="text-[11px] font-bold text-center leading-tight">Brand<br />Warranty</span>
                                 <span className="material-icons text-[14px] text-gray-400 ml-0.5">chevron_right</span>
                             </div>
                         </div>
@@ -895,11 +986,11 @@ const ProductDetails = () => {
                 {/* All Details Section - Tabbed Interface with Main Dropdown */}
                 
 
-                {/* Similar Oversized Studs Section */}
+                {/* Similar Styles Section */}
                 <div className="border-t border-gray-100 mt-4">
                     <ProductSection
-                        title={`Similar ${product.brand || ''} Styles`}
-                        products={similarProducts.slice(0, 6)}
+                        title={`Similar ${product.subCategories?.[0]?.name || product.brand || ''} Styles`}
+                        products={similarStyles}
                         loading={productsLoading}
                         containerClass="mt-2 pb-4 px-4 md:px-0"
                         onViewAll={() => console.log('View all similar styles')}
@@ -990,15 +1081,25 @@ const ProductDetails = () => {
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-2 flex gap-2 z-[100] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                 <button
                     onClick={handleAddToCart}
-                    className="flex-1 bg-white border border-gray-300 text-gray-900 font-bold py-3.5 rounded-xl text-sm hover:bg-gray-50 active:scale-[0.98] transition-all"
+                    disabled={currentStock <= 0}
+                    className={`flex-1 font-bold py-3.5 rounded-xl text-sm active:scale-[0.98] transition-all ${
+                        currentStock > 0 
+                        ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' 
+                        : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
+                    }`}
                 >
-                    Add to cart
+                    {currentStock > 0 ? 'Add to cart' : 'OUT OF STOCK'}
                 </button>
                 <button
                     onClick={handleBuyNow}
-                    className="flex-1 bg-[#ffc200] text-black font-bold py-3.5 rounded-xl text-sm shadow-sm hover:bg-[#ffb300] active:scale-[0.98] transition-all"
+                    disabled={currentStock <= 0}
+                    className={`flex-1 font-bold py-3.5 rounded-xl text-sm shadow-sm active:scale-[0.98] transition-all ${
+                        currentStock > 0 
+                        ? 'bg-[#ffc200] text-black hover:bg-[#ffb300]' 
+                        : 'bg-gray-100 text-gray-300 shadow-none cursor-not-allowed'
+                    }`}
                 >
-                    Buy now
+                    {currentStock > 0 ? 'Buy now' : 'OUT OF STOCK'}
                 </button>
             </div>
 

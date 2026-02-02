@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import ProductSection from '../components/home/ProductSection';
 import { products } from '../data/mockData';
+import toast from 'react-hot-toast';
 
 const Cart = () => {
     const navigate = useNavigate();
@@ -21,6 +22,10 @@ const Cart = () => {
     } = useCartStore();
 
     const handleCheckout = () => {
+        if (cart.length === 0) {
+            toast.error('🛒 Your cart is empty!');
+            return;
+        }
         if (addresses.length === 0) {
             const shouldRedirect = window.confirm(
                 '📍 Please add a delivery address before checkout.\n\nWould you like to add one now?'
@@ -180,14 +185,16 @@ const Cart = () => {
                                         </div>
                                     ))}
                                     {/* Desktop Place Order Button */}
-                                    <div className="hidden md:flex justify-end p-5 shadow-[0_-2px_10px_0_rgba(59,130,246,0.1)] sticky bottom-0 bg-gradient-to-r from-white to-blue-50">
-                                        <button
-                                            onClick={handleCheckout}
-                                            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-4 rounded-lg font-bold text-base shadow-lg hover:shadow-xl transform hover:scale-105 transition-all uppercase tracking-wide"
-                                        >
-                                            Place Order
-                                        </button>
-                                    </div>
+                                    {cart.length > 0 && (
+                                        <div className="hidden md:flex justify-end p-5 shadow-[0_-2px_10px_0_rgba(59,130,246,0.1)] sticky bottom-0 bg-gradient-to-r from-white to-blue-50">
+                                            <button
+                                                onClick={handleCheckout}
+                                                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-4 rounded-lg font-bold text-base shadow-lg hover:shadow-xl transform hover:scale-105 transition-all uppercase tracking-wide"
+                                            >
+                                                Place Order
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Saved for Later */}
