@@ -107,10 +107,7 @@ export const InvoiceDisplay = React.forwardRef(({ order, item, items, settings }
                 </div>
 
                  <div className="p-3 flex justify-between items-center">
-                     <div>
-                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Package Sort Code</div>
-                         <div className="text-4xl font-black p-2 border-4 border-black inline-block mt-1">B2-02</div>
-                     </div>
+                     
                      <div className="text-right">
                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Print Generation</div>
                          <div className="text-xs font-mono">{formatDate(new Date(), true)}</div>
