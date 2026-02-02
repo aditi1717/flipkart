@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    MdPerson, MdInventory2, MdLocationOn, MdLanguage, 
+    MdNotifications, MdFavoriteBorder, MdConfirmationNumber, 
+    MdHelpOutline, MdAccountBalanceWallet, MdPolicy, 
+    MdPowerSettingsNew, MdEdit, MdVerified, MdCameraAlt, MdArrowBack
+} from 'react-icons/md';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
 import useAdminAuthStore from '../../admin/store/adminAuthStore';
+import toast from 'react-hot-toast';
 
 const Account = () => {
     const navigate = useNavigate();
     const { user, updateProfile, logout: userLogout } = useAuthStore();
     const { adminUser, updateProfile: updateAdminProfile, logout: adminLogout } = useAdminAuthStore();
-    const { userProfile } = useCartStore(); // Keep for fallback if needed, but don't use its update
+    const { userProfile } = useCartStore();
     const [isEditing, setIsEditing] = useState(false);
 
-    // Determine which user to use (admin or regular user)
     const currentUser = adminUser || user;
     const isAdmin = !!adminUser;
 
-    // Local state for editing to avoid direct store mutation before save
     const [formData, setFormData] = useState({
         name: '',
         mobile: '',
@@ -27,418 +33,346 @@ const Account = () => {
         if (currentUser) {
             setFormData({
                 name: currentUser.name || '',
-                mobile: currentUser.phone || '', // Map phone to mobile for form
+                mobile: currentUser.phone || '',
                 email: currentUser.email || '',
                 gender: currentUser.gender || ''
             });
-        } else if (userProfile) { // Fallback to local profile
-            setFormData({
-                name: userProfile.name || '',
-                mobile: userProfile.mobile || '',
-                email: userProfile.email || '',
-                gender: userProfile.gender || ''
-            });
         }
-    }, [currentUser, userProfile]);
+    }, [currentUser]);
 
     const handleSave = async () => {
-        console.log('Saving profile...', formData);
         try {
-            // Use the appropriate update function based on user type
-            if (isAdmin) {
-                await updateAdminProfile(formData);
-            } else if (user) {
-                await updateProfile(formData);
-            }
+            const promise = isAdmin ? updateAdminProfile(formData) : updateProfile(formData);
+            await toast.promise(promise, {
+                loading: 'Updating profile...',
+                success: 'Profile updated successfully!',
+                error: (err) => `Update failed: ${err.message}`
+            });
             setIsEditing(false);
         } catch (error) {
             console.error('Error saving profile:', error);
-            alert(`Failed to save profile: ${error.response?.data?.message || error.message}`);
         }
     };
 
     const handleCancel = () => {
-        setFormData(userProfile);
         setIsEditing(false);
+        if (currentUser) {
+            setFormData({
+                name: currentUser.name || '',
+                mobile: currentUser.phone || '',
+                email: currentUser.email || '',
+                gender: currentUser.gender || ''
+            });
+        }
     };
 
     return (
-        <div className="bg-background-light min-h-screen pb-20 md:pb-8">
-            <div className="max-w-[1440px] mx-auto md:px-4 md:pt-4">
-                <div className="flex flex-col md:grid md:grid-cols-12 md:gap-4 items-start">
+        <div className="bg-[#f1f3f6] min-h-screen pb-24 md:pb-10 font-sans">
+            <div className="max-w-[1248px] mx-auto md:px-4 md:pt-6">
+                <div className="flex flex-col md:grid md:grid-cols-12 md:gap-6 items-start">
 
-                    {/* DESKTOP SIDEBAR (Left Side) - Strictly Matching Mobile Items */}
-                    <div className="hidden md:block md:col-span-4 lg:col-span-3 space-y-4">
+                    {/* DESKTOP SIDEBAR */}
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="hidden md:block md:col-span-4 lg:col-span-3 space-y-4 w-full"
+                    >
                         {/* Identity Card */}
-                        <div className="bg-white p-3 rounded-lg shadow-sm flex items-center gap-3 border border-gray-100">
-                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-primary">
-                                <span className="material-icons-outlined text-2xl">person</span>
+                        <div className="bg-white p-4 rounded-xl shadow-[0_2px_4px_0_rgba(0,0,0,0.08)] flex items-center gap-4 transition-all hover:shadow-md border border-white">
+                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
+                                <MdPerson size={32} />
                             </div>
-                            <div>
-                                <div className="text-xs text-gray-500">Hello,</div>
-                                <div className="font-bold text-gray-800">{currentUser?.name || userProfile?.name || 'User'}</div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">Welcome back,</p>
+                                <h2 className="font-black text-gray-900 truncate text-lg leading-tight uppercase italic">{currentUser?.name || 'Customer'}</h2>
                             </div>
                         </div>
 
-                        {/* Navigation Menu - Flattened/Grouped to match Mobile Items */}
-                        <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
-
-                            {/* MY ORDERS */}
+                        {/* Navigation Menu */}
+                        <div className="bg-white rounded-xl shadow-[0_2px_4px_0_rgba(0,0,0,0.08)] overflow-hidden border border-white">
                             <div
                                 onClick={() => navigate('/my-orders')}
-                                className="px-4 py-4 flex items-center justify-between border-b border-gray-100 cursor-pointer hover:bg-blue-50 transition-colors group"
+                                className="px-5 py-5 flex items-center justify-between border-b border-gray-50 cursor-pointer hover:bg-blue-50 transition-all group"
                             >
-                                <div className="flex items-center gap-3 text-gray-600 font-bold group-hover:text-blue-600">
-                                    <span className="material-icons-outlined text-blue-600">inventory_2</span>
-                                    <span>MY ORDERS</span>
+                                <div className="flex items-center gap-4 text-gray-700 font-black tracking-tight group-hover:text-blue-600 uppercase italic">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                        <MdInventory2 size={20} />
+                                    </div>
+                                    <span>My Orders</span>
                                 </div>
-                                <span className="material-icons-outlined text-gray-400">chevron_right</span>
+                                <span className="material-icons text-gray-300 group-hover:translate-x-1 transition-transform">chevron_right</span>
                             </div>
 
-                            {/* ACCOUNT SETTINGS (Addresses, Language, Notifications) */}
-                            <div className="border-b border-gray-100">
-                                <div className="flex items-center gap-3 px-4 py-3 text-gray-500 font-medium text-xs uppercase mt-2">
-                                    <span className="material-icons-outlined text-[18px]">person</span>
-                                    <span>Account Settings</span>
+                            {[
+                                { 
+                                    title: 'Account Settings', 
+                                    icon: <MdPerson />, 
+                                    items: [
+                                        { label: 'Saved Addresses', path: '/addresses' },
+                                        { label: 'Language Settings', path: '/select-language' },
+                                        { label: 'Notifications', path: '/notification-settings' }
+                                    ] 
+                                },
+                                { 
+                                    title: 'My Collections', 
+                                    icon: <MdFavoriteBorder />, 
+                                    items: [
+                                        { label: 'My Wishlist', path: '/wishlist' },
+                                        { label: 'Coupons & Offers', path: '/coupons' },
+                                        { label: 'Help & Support', path: '/help-center' }
+                                    ] 
+                                }
+                            ].map((section, idx) => (
+                                <div key={idx} className="border-b border-gray-50 pb-2">
+                                    <div className="flex items-center gap-4 px-5 py-4 text-gray-400 font-black text-[10px] uppercase tracking-[0.2em] mt-2 italic">
+                                        {section.icon}
+                                        <span>{section.title}</span>
+                                    </div>
+                                    <div className="space-y-1">
+                                        {section.items.map((item, i) => (
+                                            <div 
+                                                key={i} 
+                                                onClick={() => navigate(item.path)} 
+                                                className="px-14 py-3 text-sm font-bold text-gray-600 hover:text-blue-600 hover:bg-blue-50 cursor-pointer transition-all border-l-4 border-transparent hover:border-blue-600"
+                                            >
+                                                {item.label}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="text-sm">
-                                    <div onClick={() => navigate('/addresses')} className="px-12 py-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                        Saved Addresses
-                                    </div>
-                                    <div onClick={() => navigate('/select-language')} className="px-12 py-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                        Select Language
-                                    </div>
-                                    <div onClick={() => navigate('/notification-settings')} className="px-12 py-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                        Notification Settings
-                                    </div>
-                                </div>
-                            </div>
+                            ))}
 
-                            {/* MY STUFF (Wishlist, Coupons, Help) */}
-                            <div className="border-b border-gray-100 dark:border-zinc-800">
-                                <div className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 font-medium text-xs uppercase mt-2">
-                                    <span className="material-icons-outlined text-[18px]">folder_special</span>
-                                    <span>My Stuff</span>
-                                </div>
-                                <div className="text-sm">
-                                    <div onClick={() => navigate('/wishlist')} className="px-12 py-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                        My Wishlist
-                                    </div>
-                                    <div onClick={() => navigate('/coupons')} className="px-12 py-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                        My Coupons
-                                    </div>
-                                    <div onClick={() => navigate('/help-center')} className="px-12 py-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                        Help Center
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* FINANCE OPTIONS (From Mobile Banner) */}
-                            <div className="border-b border-gray-100 dark:border-zinc-800">
-                                <div className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 font-medium text-xs uppercase mt-2">
-                                    <span className="material-icons-outlined text-[18px]">account_balance_wallet</span>
-                                    <span>Finance</span>
-                                </div>
-                                <div className="text-sm">
-                                    <div className="px-12 py-3 text-gray-700 cursor-default flex flex-col">
-                                        <span className="font-medium text-green-600">Upto 15% discount</span>
-                                        <span className="text-xs text-gray-400">On PhonePe transactions</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* LEGAL & POLICIES */}
-                            <div className="border-b border-gray-100 dark:border-zinc-800">
-                                <div className="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 font-medium text-xs uppercase mt-2">
-                                    <span className="material-icons-outlined text-[18px]">policy</span>
-                                    <span>Legal & Policies</span>
-                                </div>
-                                <div className="text-sm">
-                                    <div onClick={() => navigate('/info?type=privacy')} className="px-12 py-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                        Privacy Policy
-                                    </div>
-                                    <div onClick={() => navigate('/info?type=about')} className="px-12 py-3 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                                        About Us
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Logout */}
-                            <div className="py-2">
-                                <div
+                            <div className="p-3">
+                                <button
                                     onClick={() => {
-                                        if (isAdmin) {
-                                            adminLogout();
-                                        } else {
-                                            userLogout();
-                                        }
+                                        isAdmin ? adminLogout() : userLogout();
                                         navigate('/');
                                     }}
-                                    className="flex items-center gap-3 px-4 py-3 text-gray-600 font-semibold hover:bg-gray-50 cursor-pointer transition-colors"
+                                    className="w-full flex items-center gap-4 px-4 py-4 text-red-500 font-black uppercase italic tracking-wider hover:bg-red-50 rounded-xl transition-all"
                                 >
-                                    <span className="material-icons-outlined text-[18px] text-primary">power_settings_new</span>
-                                    <span>Logout</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* MAIN CONTENT (Profile Section) - Center Stage */}
-                    <div className="w-full md:col-span-8 lg:col-span-9 md:bg-white md:rounded-lg md:shadow-sm md:border md:border-gray-100 overflow-hidden">
-                        {/* Matches existing Profile Section logic but desktop adapted container */}
-                        <div className="bg-white px-4 py-6 md:p-8">
-                            {/* Desktop Header for Profile Form */}
-                            <div className="hidden md:flex items-center gap-4 mb-8">
-                                <span className="text-lg font-bold text-gray-800">Personal Information</span>
-                                <button
-                                    onClick={() => setIsEditing(!isEditing)}
-                                    className="text-sm font-semibold text-blue-600 hover:underline"
-                                >
-                                    {isEditing ? 'Cancel' : 'Edit'}
+                                    <MdPowerSettingsNew size={22} />
+                                    <span>Logout Account</span>
                                 </button>
                             </div>
+                        </div>
+                    </motion.div>
 
-                            {!isEditing ? (
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-primary">
-                                            <span className="material-icons-outlined text-3xl">person</span>
+                    {/* MAIN CONTENT */}
+                    <div className="w-full md:col-span-8 lg:col-span-9">
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white md:rounded-2xl shadow-[0_2px_15px_rgba(0,0,0,0.05)] border border-white overflow-hidden"
+                        >
+                            <div className="bg-gradient-to-r from-[#2874f0] to-[#1e5bbd] px-6 py-10 md:px-10 md:py-14 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                                <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full -ml-24 -mb-24 blur-2xl"></div>
+                                
+                                <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                                    <div className="relative group">
+                                        <div className="w-28 h-28 md:w-32 md:h-32 rounded-[2.5rem] border-4 border-white shadow-2xl overflow-hidden bg-white rotate-3 transition-transform group-hover:rotate-0">
+                                            <img 
+                                                src={currentUser?.avatar || 'https://www.w3schools.com/howto/img_avatar.png'} 
+                                                className="w-full h-full object-cover -rotate-3 transition-transform group-hover:rotate-0 scale-110" 
+                                                alt="" 
+                                            />
                                         </div>
-                                        <div>
-                                            <h2 className="text-lg font-bold">{currentUser?.name || userProfile?.name || 'User'}</h2>
-                                            {(user?.phone || userProfile?.mobile) && (
-                                                <p className="text-sm text-gray-500">+91 {currentUser?.phone || userProfile?.mobile}</p>
-                                            )}
-                                        </div>
+                                        <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-2xl shadow-xl flex items-center justify-center text-blue-600 hover:bg-blue-600 hover:text-white transition-all active:scale-90">
+                                            <MdCameraAlt size={20} />
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => setIsEditing(true)}
-                                        className="md:hidden px-4 py-1.5 border border-primary text-primary text-sm font-semibold rounded hover:bg-blue-50 transition-colors"
-                                    >
-                                        Edit
-                                    </button>
+                                    
+                                    <div className="text-center md:text-left">
+                                        <div className="flex items-center justify-center md:justify-start gap-3">
+                                            <h1 className="text-2xl md:text-4xl font-black text-white italic uppercase tracking-tighter">
+                                                {currentUser?.name || 'Customer Profile'}
+                                            </h1>
+                                            <MdVerified size={24} className="text-blue-300" />
+                                        </div>
+                                        <p className="text-blue-100 font-bold mt-2 uppercase tracking-[0.2em] text-[10px] italic flex items-center justify-center md:justify-start gap-2">
+                                            {isAdmin ? 'System Administrator' : 'Privileged Member'}
+                                            <span className="w-8 h-0.5 bg-blue-300/30 rounded-full"></span>
+                                            Since {new Date(currentUser?.joinedDate || currentUser?.createdAt).getFullYear()}
+                                        </p>
+                                    </div>
+
+                                    {!isEditing && (
+                                        <button 
+                                            onClick={() => setIsEditing(true)}
+                                            className="md:ml-auto px-8 py-3 bg-white/20 backdrop-blur-md border border-white/30 text-white font-black uppercase italic text-[11px] rounded-2xl tracking-[0.3em] hover:bg-white hover:text-blue-600 transition-all active:scale-95"
+                                        >
+                                            Edit Details
+                                        </button>
+                                    )}
                                 </div>
-                            ) : (
-                                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                                        <div>
-                                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Full Name (Used for Shipping)</label>
-                                            <input
-                                                type="text"
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                className="w-full border border-gray-200 rounded p-2 text-sm focus:border-blue-600 outline-none text-gray-900 bg-transparent"
-                                            />
-                                        </div>
-                                        
-                                        {/* Only show mobile for regular users, not admins */}
-                                        {!user?.isAdmin && (
-                                            <div>
-                                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Mobile Number</label>
-                                                <input
-                                                    type="tel"
-                                                    value={formData.mobile}
-                                                    readOnly
-                                                    disabled
-                                                    className="w-full border border-gray-200 rounded p-2 text-sm text-gray-400 bg-gray-100 cursor-not-allowed"
-                                                />
-                                            </div>
-                                        )}
-                                        
-                                        <div>
-                                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Email ID</label>
-                                            <input
-                                                type="email"
-                                                value={formData.email}
-                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                className="w-full border border-gray-200 rounded p-2 text-sm focus:border-blue-600 outline-none text-gray-900 bg-transparent"
-                                            />
-                                        </div>
-                                        
-                                        {/* Only show gender for regular users, not admins */}
-                                        {!isAdmin && (
-                                            <div>
-                                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Gender</label>
-                                                <div className="flex gap-4 mt-1">
-                                                    {['Male', 'Female'].map(g => (
-                                                        <label key={g} className="flex items-center gap-2 cursor-pointer">
-                                                            <input
-                                                                type="radio"
-                                                                name="gender"
-                                                                checked={formData.gender === g}
-                                                                onChange={() => setFormData({ ...formData, gender: g })}
-                                                                className="accent-blue-600"
-                                                            />
-                                                            <span className="text-sm text-gray-700">{g}</span>
-                                                        </label>
-                                                    ))}
+                            </div>
+
+                            <div className="p-6 md:p-12 lg:p-16">
+                                <AnimatePresence mode="wait">
+                                    {!isEditing ? (
+                                        <motion.div 
+                                            key="view"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16"
+                                        >
+                                            {[
+                                                { label: 'Personal Name', value: currentUser?.name, icon: <MdPerson />, color: 'blue' },
+                                                { label: 'Communication Email', value: currentUser?.email, icon: <MdMail size={20} />, color: 'violet' },
+                                                { label: 'Mobile Contact', value: `+91 ${currentUser?.phone || 'N/A'}`, icon: <MdPhone size={20} />, color: 'emerald' },
+                                                { label: 'Account Type', value: isAdmin ? 'Administrator' : 'General Customer', icon: <MdPolicy size={20} />, color: 'amber' }
+                                            ].map((item, idx) => (
+                                                <div key={idx} className="group">
+                                                    <div className="flex items-center gap-4 mb-3">
+                                                        <div className={`w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white transition-all shadow-inner`}>
+                                                            {item.icon}
+                                                        </div>
+                                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">{item.label}</span>
+                                                    </div>
+                                                    <p className="text-xl font-black text-gray-900 ml-14 tracking-tight transition-colors group-hover:text-blue-600 block leading-none italic uppercase">
+                                                        {item.value}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div 
+                                            key="edit"
+                                            initial={{ opacity: 0, scale: 0.98 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.98 }}
+                                            className="space-y-8"
+                                        >
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <div>
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 block italic">Real Identity Name</label>
+                                                    <div className="relative">
+                                                        <MdPerson className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                        <input
+                                                            type="text"
+                                                            value={formData.name}
+                                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                            className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 pl-12 text-sm font-black italic text-gray-900 focus:bg-white focus:border-blue-600 focus:shadow-xl outline-none transition-all uppercase"
+                                                            placeholder="Full Name"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 block italic">Restricted Mobile Contact</label>
+                                                    <div className="relative">
+                                                        <MdPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
+                                                        <input
+                                                            type="tel"
+                                                            value={formData.mobile}
+                                                            disabled
+                                                            className="w-full bg-gray-100 border border-gray-200 rounded-2xl p-4 pl-12 text-sm font-black italic text-gray-300 outline-none cursor-not-allowed uppercase"
+                                                            placeholder="Phone Number"
+                                                        />
+                                                    </div>
+                                                    <p className="text-[9px] font-bold text-gray-400 mt-2 ml-1 italic capitalize">Contact number verification is required to change this</p>
+                                                </div>
+
+                                                <div className="md:col-span-2">
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 block italic">Verified Email Destination</label>
+                                                    <div className="relative">
+                                                        <MdMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                        <input
+                                                            type="email"
+                                                            value={formData.email}
+                                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                            className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 pl-12 text-sm font-black italic text-gray-900 focus:bg-white focus:border-blue-600 focus:shadow-xl outline-none transition-all uppercase"
+                                                            placeholder="Email Address"
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
-                                    <div className="flex gap-3 pt-4 md:pt-6">
-                                        <button
-                                            onClick={handleCancel}
-                                            className="flex-1 md:flex-none md:px-8 py-3 text-blue-600 font-bold text-sm border border-blue-600 rounded"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={handleSave}
-                                            className="flex-1 md:flex-none md:px-8 py-3 bg-blue-600 text-white font-bold text-sm rounded shadow-sm"
-                                        >
-                                            Save Details
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        {/* Desktop Only Footer for Profile Card */}
-                        <div className="hidden md:block px-8 py-4 bg-gray-50 border-t border-gray-100 text-xs text-gray-500 font-medium">
-                            FAQs?
-                        </div>
+
+                                            <div className="flex flex-col md:flex-row gap-4 pt-10">
+                                                <button
+                                                    onClick={handleSave}
+                                                    className="flex-1 bg-gray-900 text-white py-5 rounded-[1.5rem] text-[11px] font-black uppercase italic tracking-[0.4em] shadow-2xl hover:bg-blue-600 transition-all active:scale-95 flex items-center justify-center gap-3"
+                                                >
+                                                    Execute Updates
+                                                </button>
+                                                <button
+                                                    onClick={handleCancel}
+                                                    className="px-12 py-5 bg-white text-gray-400 border border-gray-100 rounded-[1.5rem] text-[11px] font-black uppercase italic tracking-[0.2em] hover:bg-gray-50 transition-all active:scale-95"
+                                                >
+                                                    Abandon
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </motion.div>
                     </div>
 
-
-                    {/* MOBILE LINKS (Hidden on Desktop, Preserved) */}
-                    <div className="md:hidden w-full space-y-2 mt-2">
-                        {/* Quick Links Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-[1px] bg-gray-200 mb-2">
-                            <button
-                                onClick={() => navigate('/my-orders')}
-                                className="bg-white py-4 flex flex-col items-center justify-center gap-1 active:bg-gray-50 transition-colors"
-                            >
-                                <span className="material-icons-outlined text-primary">inventory_2</span>
-                                <span className="text-sm font-medium">Orders</span>
-                            </button>
-                            <button
-                                onClick={() => navigate('/wishlist')}
-                                className="bg-white dark:bg-zinc-900 py-4 flex flex-col items-center justify-center gap-1 active:bg-gray-50 dark:active:bg-zinc-800 transition-colors"
-                            >
-                                <span className="material-icons-outlined text-primary">favorite_border</span>
-                                <span className="text-sm font-medium">Wishlist</span>
-                            </button>
-                            <button
-                                onClick={() => navigate('/coupons')}
-                                className="bg-white dark:bg-zinc-900 py-4 flex flex-col items-center justify-center gap-1 active:bg-gray-50 dark:active:bg-zinc-800 transition-colors"
-                            >
-                                <span className="material-icons-outlined text-primary">confirmation_number</span>
-                                <span className="text-sm font-medium">Coupons</span>
-                            </button>
-                            <button
-                                onClick={() => navigate('/help-center')}
-                                className="bg-white dark:bg-zinc-900 py-4 flex flex-col items-center justify-center gap-1 active:bg-gray-50 dark:active:bg-zinc-800 transition-colors"
-                            >
-                                <span className="material-icons-outlined text-primary">help_outline</span>
-                                <span className="text-sm font-medium">Help Center</span>
-                            </button>
+                    {/* MOBILE LINKS */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="md:hidden w-full space-y-4 px-4 mt-6 pb-10"
+                    >
+                        <div className="grid grid-cols-2 gap-4">
+                            {[
+                                { label: 'Orders', icon: <MdInventory2 />, path: '/my-orders' },
+                                { label: 'Wishlist', icon: <MdFavoriteBorder />, path: '/wishlist' },
+                                { label: 'Coupons', icon: <MdConfirmationNumber />, path: '/coupons' },
+                                { label: 'Support', icon: <MdHelpOutline />, path: '/help-center' }
+                            ].map((item, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => navigate(item.path)}
+                                    className="bg-white p-6 rounded-[2rem] shadow-sm flex flex-col items-center justify-center gap-3 active:scale-95 transition-all active:bg-blue-50 border border-white"
+                                >
+                                    <div className="text-blue-600 scale-125">{item.icon}</div>
+                                    <span className="text-[10px] font-black uppercase tracking-widest italic">{item.label}</span>
+                                </button>
+                            ))}
                         </div>
 
-                        {/* Finance Options */}
-                        <section className="mt-2 bg-white border-t border-b border-gray-100">
-                            <div className="px-4 py-3 border-b border-gray-100">
-                                <h3 className="font-bold text-base">Finance Options</h3>
-                            </div>
-                            <div className="p-4 flex items-start gap-3">
-                                <span className="material-icons-outlined text-green-600 text-2xl mt-1">account_balance_wallet</span>
-                                <div>
-                                    <p className="font-semibold text-sm text-gray-800">Upto 15% discount</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">On every PhonePe transaction</p>
-                                </div>
-                                <span className="material-icons-outlined text-gray-400 ml-auto self-center">chevron_right</span>
-                            </div>
-                        </section>
-
-                        {/* Legal & Policies (Mobile) */}
-                        <section className="mt-2 bg-white">
-                            <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-800">
-                                <h3 className="font-bold text-base">Legal & Policies</h3>
-                            </div>
-                            <div className="divide-y divide-gray-100">
-                                <div
-                                    onClick={() => navigate('/info?type=privacy')}
-                                    className="flex items-center justify-between px-4 py-4 active:bg-gray-50 transition-colors cursor-pointer"
+                        <div className="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-white">
+                            {[
+                                { label: 'Saved Addresses', icon: <MdLocationOn />, path: '/addresses' },
+                                { label: 'Language Options', icon: <MdLanguage />, path: '/select-language' },
+                                { label: 'System Policies', icon: <MdPolicy />, path: '/info?type=privacy' }
+                            ].map((item, i) => (
+                                <div 
+                                    key={i} 
+                                    onClick={() => navigate(item.path)}
+                                    className="flex items-center justify-between p-6 border-b border-gray-50 last:border-0 active:bg-blue-50 transition-colors"
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <span className="material-icons-outlined text-gray-500">privacy_tip</span>
-                                        <span className="font-medium">Privacy Policy</span>
+                                    <div className="flex items-center gap-5">
+                                        <div className="text-gray-400">{item.icon}</div>
+                                        <span className="text-sm font-black uppercase italic tracking-tighter text-gray-700">{item.label}</span>
                                     </div>
-                                    <span className="material-icons-outlined text-gray-400">chevron_right</span>
+                                    <MdArrowBack size={20} className="rotate-180 text-gray-300" />
                                 </div>
-                                <div
-                                    onClick={() => navigate('/info?type=about')}
-                                    className="flex items-center justify-between px-4 py-4 active:bg-gray-50 dark:active:bg-zinc-800 transition-colors cursor-pointer"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="material-icons-outlined text-gray-500">info</span>
-                                        <span className="font-medium">About Us</span>
-                                    </div>
-                                    <span className="material-icons-outlined text-gray-400">chevron_right</span>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Account Settings */}
-                        <section className="mt-2 bg-white dark:bg-zinc-900">
-                            <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-800">
-                                <h3 className="font-bold text-base">Account Settings</h3>
-                            </div>
-                            <div className="divide-y divide-gray-100 dark:divide-zinc-800">
-                                <div
-                                    onClick={() => navigate('/addresses')}
-                                    className="flex items-center justify-between px-4 py-4 active:bg-gray-50 dark:active:bg-zinc-800 transition-colors cursor-pointer"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="material-icons-outlined text-gray-500">location_on</span>
-                                        <span className="font-medium">Saved Addresses</span>
-                                    </div>
-                                    <span className="material-icons-outlined text-gray-400">chevron_right</span>
-                                </div>
-                                <div
-                                    onClick={() => navigate('/select-language')}
-                                    className="flex items-center justify-between px-4 py-4 active:bg-gray-50 dark:active:bg-zinc-800 transition-colors cursor-pointer"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="material-icons-outlined text-gray-500">language</span>
-                                        <span className="font-medium">Select Language</span>
-                                    </div>
-                                    <span className="material-icons-outlined text-gray-400">chevron_right</span>
-                                </div>
-                                <div
-                                    onClick={() => navigate('/notification-settings')}
-                                    className="flex items-center justify-between px-4 py-4 active:bg-gray-50 dark:active:bg-zinc-800 transition-colors cursor-pointer"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="material-icons-outlined text-gray-500">notifications</span>
-                                        <span className="font-medium">Notification Settings</span>
-                                    </div>
-                                    <span className="material-icons-outlined text-gray-400">chevron_right</span>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Logout button */}
-                        <div className="mt-4 px-4 pb-8">
-                            <button
-                                onClick={() => {
-                                    if (isAdmin) {
-                                        adminLogout();
-                                    } else {
-                                        userLogout();
-                                    }
-                                    navigate('/');
-                                }}
-                                className="w-full py-3 bg-white text-primary border border-gray-200 font-bold rounded shadow-sm active:bg-gray-50 transition-all"
-                            >
-                                Log Out
-                            </button>
-                            <p className="text-center text-xs text-gray-400 mt-6">Version 12.3.4 (4567)</p>
+                            ))}
                         </div>
-                    </div>
+
+                        <button
+                            onClick={() => {
+                                isAdmin ? adminLogout() : userLogout();
+                                navigate('/');
+                            }}
+                            className="w-full py-6 bg-white text-red-500 font-black uppercase tracking-[0.3em] rounded-[2rem] shadow-sm border border-red-50 flex items-center justify-center gap-3 active:scale-95 transition-all italic text-[11px]"
+                        >
+                            <MdPowerSettingsNew size={20} />
+                            Log Out Session
+                        </button>
+                    </motion.div>
                 </div>
             </div>
         </div>
     );
 };
+
+// Simplified icon component mappings since some were missing in original scope
+const MdMail = ({ size = 24 }) => <span className="material-icons-outlined" style={{ fontSize: size }}>mail</span>;
+const MdPhone = ({ size = 24 }) => <span className="material-icons-outlined" style={{ fontSize: size }}>phone</span>;
 
 export default Account;
