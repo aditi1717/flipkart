@@ -13,16 +13,18 @@ const OrderList = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 20;
+    const itemsPerPage = 10;
 
     useEffect(() => {
         fetchOrders();
     }, [fetchOrders]);
 
     const filteredOrders = orders.filter(order => {
-        const matchesSearch = (order.id?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        const matchesSearch = 
+            (order.id?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
             (order.user?.name?.toLowerCase() || order.shippingAddress?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.user?.email?.toLowerCase() || order.shippingAddress?.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+            (order.user?.email?.toLowerCase() || order.shippingAddress?.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.items || []).some(item => (item.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()));
 
         const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
 
@@ -79,8 +81,8 @@ const OrderList = () => {
                     <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                     <input
                         type="text"
-                        placeholder="Search by Order ID or Customer Name..."
-                        className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all text-sm font-medium"
+                        placeholder="Search by Order ID, Customer, or Product Name..."
+                        className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all text-sm font-bold text-gray-900 placeholder:text-gray-400 caret-blue-600 shadow-inner"
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
@@ -91,7 +93,7 @@ const OrderList = () => {
                 <div className="flex items-center gap-3 w-full md:w-auto">
                     <MdFilterList className="text-gray-400" size={20} />
                     <select
-                        className="px-4 py-2.5 bg-gray-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-blue-500 text-sm font-bold min-w-[150px] appearance-none"
+                        className="px-4 py-2.5 bg-gray-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-blue-500 text-sm font-bold text-gray-900 min-w-[150px] appearance-none shadow-sm cursor-pointer"
                         value={statusFilter}
                         onChange={(e) => {
                             setStatusFilter(e.target.value);
@@ -214,7 +216,7 @@ const OrderList = () => {
                     </div>
 
                     {/* Pagination */}
-                    {totalPages > 1 && (
+                    {totalPages >= 1 && (
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}

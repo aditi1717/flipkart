@@ -2,8 +2,6 @@ import React from 'react';
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-    if (totalPages <= 1) return null;
-
     const pages = [];
     // Basic logic to show some pages. Can be improved for many pages.
     for (let i = 1; i <= totalPages; i++) {

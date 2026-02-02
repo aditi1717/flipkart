@@ -1,4 +1,5 @@
 import Order from '../models/Order.js';
+import Product from '../models/Product.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -37,6 +38,35 @@ export const addOrderItems = async (req, res) => {
         });
 
         const createdOrder = await order.save();
+
+        // Reduce Stock for each item
+        for (const item of createdOrder.orderItems) {
+            const product = await Product.findOne({ id: item.product });
+            if (product) {
+                // 1. Reduce Variant (SKU) Stock if variant exists
+                if (item.variant && Object.keys(item.variant).length > 0) {
+                    const sku = product.skus.find(s => {
+                        const comb = s.combination instanceof Map ? Object.fromEntries(s.combination) : s.combination;
+                        const itemKeys = Object.keys(item.variant);
+                        const combKeys = Object.keys(comb);
+                        if (itemKeys.length !== combKeys.length) return false;
+                        return itemKeys.every(key => String(item.variant[key]) === String(comb[key]));
+                    });
+                    
+                    if (sku) {
+                        sku.stock -= item.qty;
+                    }
+                }
+
+                // 2. Reduce Overall Product Stock
+                product.stock -= item.qty;
+                
+                // Use markModified if using Map for combination to ensure Mongoose saves nested changes
+                product.markModified('skus');
+                await product.save();
+            }
+        }
+
         res.status(201).json(createdOrder);
     } catch (error) {
         console.error('Order creation error:', error);
