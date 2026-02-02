@@ -16,21 +16,13 @@ const productSchema = mongoose.Schema({
     categoryPath: [{ type: String }], // Array of category IDs (breadcrumbs) - Supports both Number and ObjectId strings
     
     // Description & Meta
-    shortDescription: { type: String },
-    longDescription: { type: String },
     tags: [{ type: String }],
     
-    // Specifications & Details
-    highlights: [{
-        key: { type: String },
-        value: { type: String }
+    // Product Description (Headings with Bullet Points)
+    description: [{
+        heading: { type: String },
+        points: [{ type: String }]
     }],
-    specifications: [{
-        key: { type: String },
-        value: { type: String }
-    }],
-    features: [{ type: String }],
-    manufacturerInfo: { type: String },
     deliveryDays: { type: Number, default: 5 },
 
     // Warranty & Returns

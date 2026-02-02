@@ -27,9 +27,9 @@ import toast from 'react-hot-toast';
 
     // Collapsible Sections State
     const [sections, setSections] = useState({
-        highlights: true,
-        details: true,
-        manufacturer: true
+        description: true,
+        warranty: true,
+        returnPolicy: true
     });
 
     const [variantPage, setVariantPage] = useState(1);
@@ -43,7 +43,6 @@ import toast from 'react-hot-toast';
         galleryImages: [], // Array of image objects
         brand: '',
         name: '',
-        shortDescription: '',
         categoryPath: [],
         price: '',
         originalPrice: '',
@@ -52,17 +51,23 @@ import toast from 'react-hot-toast';
         variantHeadings: [], // { name: 'Color', hasImage: true, options: [{ name: 'Red', image: '' }] }
         skus: [], // { combination: { Color: 'Red', Size: 'M' }, stock: 10 }
         subCategories: [], // Selected subcategory ObjectIds
-        // For backwards compatibility/standard fields
-        highlights: [{ key: '', value: '' }],
-        features: [''],
-        specifications: [{ key: '', value: '' }],
-        longDescription: '',
-        manufacturerInfo: '',
+        // Description with headings and points
+        description: [{
+            heading: '',
+            points: ['']
+        }],
         
         // Warranty & Returns
         warranty: { summary: '', covered: '', notCovered: '' },
         returnPolicy: { days: 7, description: '' }
     });
+
+    // Detect if category is Electronics for conditional warranty display
+    const selectedCategory = React.useMemo(() => 
+        categories.find(c => c._id === formData.categoryPath[0]), 
+        [categories, formData.categoryPath]
+    );
+    const isElectronics = selectedCategory?.name?.toLowerCase() === 'electronics';
 
     // Populate form if editing
     useEffect(() => {
@@ -91,9 +96,7 @@ import toast from 'react-hot-toast';
                 ),
                 subCategories: product.subCategories?.map(s => s._id || s) || (product.subCategory ? [product.subCategory._id || product.subCategory] : []),
                 skus: product.skus || [],
-                highlights: product.highlights || [],
-                features: product.features || [],
-                specifications: product.specifications || [{ key: 'Material', value: '' }],
+                description: product.description || [{ heading: '', points: [''] }],
                 warranty: product.warranty || { summary: '', covered: '', notCovered: '' },
                 returnPolicy: product.returnPolicy || { days: 7, description: '' }
             });
@@ -173,8 +176,44 @@ import toast from 'react-hot-toast';
         setFormData(prev => ({ ...prev, [field]: items }));
     };
 
-    const updateSpec = (index, key, val) => updateKV('specifications', index, key, val);
-    const updateHighlight = (index, key, val) => updateKV('highlights', index, key, val);
+    // Description Management Functions
+    const addDescriptionSection = () => {
+        setFormData(prev => ({
+            ...prev,
+            description: [...prev.description, { heading: '', points: [''] }]
+        }));
+    };
+
+    const removeDescriptionSection = (idx) => {
+        setFormData(prev => ({
+            ...prev,
+            description: prev.description.filter((_, i) => i !== idx)
+        }));
+    };
+
+    const updateDescriptionHeading = (idx, value) => {
+        const newDesc = [...formData.description];
+        newDesc[idx].heading = value;
+        setFormData(prev => ({ ...prev, description: newDesc }));
+    };
+
+    const addDescriptionPoint = (headingIdx) => {
+        const newDesc = [...formData.description];
+        newDesc[headingIdx].points.push('');
+        setFormData(prev => ({ ...prev, description: newDesc }));
+    };
+
+    const updateDescriptionPoint = (headingIdx, pointIdx, value) => {
+        const newDesc = [...formData.description];
+        newDesc[headingIdx].points[pointIdx] = value;
+        setFormData(prev => ({ ...prev, description: newDesc }));
+    };
+
+    const removeDescriptionPoint = (headingIdx, pointIdx) => {
+        const newDesc = [...formData.description];
+        newDesc[headingIdx].points = newDesc[headingIdx].points.filter((_, i) => i !== pointIdx);
+        setFormData(prev => ({ ...prev, description: newDesc }));
+    };
 
     const toggleSubCategory = (subId) => {
         setFormData(prev => {
@@ -297,9 +336,7 @@ import toast from 'react-hot-toast';
         data.append('brand', formData.brand);
         data.append('price', String(formData.price));
         data.append('originalPrice', String(formData.originalPrice));
-        data.append('shortDescription', formData.shortDescription);
-        data.append('longDescription', formData.longDescription || '');
-        data.append('manufacturerInfo', formData.manufacturerInfo || '');
+
         
         // Calculated fields
         const stock = formData.skus.length > 0
@@ -335,9 +372,7 @@ import toast from 'react-hot-toast';
 
         // Complex objects
         data.append('categoryPath', JSON.stringify(formData.categoryPath));
-        data.append('highlights', JSON.stringify(formData.highlights));
-        data.append('specifications', JSON.stringify(formData.specifications));
-        data.append('features', JSON.stringify(formData.features));
+        data.append('description', JSON.stringify(formData.description));
         data.append('skus', JSON.stringify(formData.skus));
         data.append('warranty', JSON.stringify(formData.warranty));
         data.append('returnPolicy', JSON.stringify(formData.returnPolicy));
@@ -394,7 +429,9 @@ import toast from 'react-hot-toast';
                 await addProduct(data);
                 toast.success('Product created successfully!');
             }
-            navigate('/admin/products');
+            if (!isEdit) {
+                navigate('/admin/products');
+            }
         } catch (error) {
             console.error("Failed to save product:", error);
             const message = error.response?.data?.message || "Failed to save product. Please try again.";
@@ -712,18 +749,8 @@ import toast from 'react-hot-toast';
                                 )}
                             </div>
                         </div>
-
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Short Teaser Description</label>
-                            <textarea
-                                name="shortDescription"
-                                value={formData.shortDescription}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-blue-500 focus:bg-white outline-none transition-all text-sm h-20 resize-none text-gray-900"
-                                placeholder="A 2-line summary for browse pages..."
-                            />
-                        </div>
                     </section>
+
 
                     {/* Warranty & Returns Policy Card */}
                     <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
@@ -737,32 +764,32 @@ import toast from 'react-hot-toast';
                             <div className="space-y-4">
                                 <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b pb-2">Warranty Details</h3>
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Warranty Summary</label>
+                                    <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Warranty Summary</label>
                                     <input
                                         type="text"
                                         value={formData.warranty.summary}
                                         onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, summary: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition-all text-sm"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900"
                                         placeholder="e.g. 1 Year Brand Warranty"
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Covered in Warranty</label>
+                                    <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Covered in Warranty</label>
                                     <input
                                         type="text"
                                         value={formData.warranty.covered}
                                         onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, covered: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition-all text-sm"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900"
                                         placeholder="e.g. Manufacturing Defects"
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Not Covered in Warranty</label>
+                                    <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Not Covered in Warranty</label>
                                     <input
                                         type="text"
                                         value={formData.warranty.notCovered}
                                         onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, notCovered: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition-all text-sm"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900"
                                         placeholder="e.g. Physical Damage"
                                     />
                                 </div>
@@ -772,21 +799,21 @@ import toast from 'react-hot-toast';
                             <div className="space-y-4">
                                 <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b pb-2">Return Policy</h3>
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Return Window (Days)</label>
+                                    <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Return Window (Days)</label>
                                     <input
                                         type="number"
                                         value={formData.returnPolicy.days}
                                         onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, days: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition-all text-sm"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900"
                                         placeholder="e.g. 7"
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Return Description</label>
+                                    <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Return Description</label>
                                     <textarea
                                         value={formData.returnPolicy.description}
                                         onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, description: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-transparent focus:border-orange-500 focus:bg-white outline-none transition-all text-sm h-32 resize-none"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 h-32 resize-none"
                                         placeholder="e.g. Returns accepted for damaged, defective, or wrong items only."
                                     />
                                 </div>
@@ -1090,127 +1117,166 @@ import toast from 'react-hot-toast';
                 <div className="lg:col-span-4 space-y-8">
 
 
-                    {/* Metadata Card - Dynamic Toggles */}
+                    {/* Metadata Card - Simplified */}
                     <section className="space-y-4">
-                        {/* Highlights */}
+                        {/* Description (Headings with Points) */}
                         <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
-                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('highlights')}>
+                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('description')}>
                                 <div className="flex items-center gap-3">
-                                    <span className="material-icons text-blue-500">list_alt</span>
-                                    <h3 className="font-bold text-gray-800 text-sm">Product Highlights (Key Facts)</h3>
+                                    <span className="material-icons text-indigo-500">description</span>
+                                    <h3 className="font-bold text-gray-800 text-sm">Product Description</h3>
                                 </div>
-                                {sections.highlights ? <MdExpandLess /> : <MdExpandMore />}
+                                {sections.description ? <MdExpandLess /> : <MdExpandMore />}
                             </div>
-                            {sections.highlights && (
-                                <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-3 animate-in fade-in slide-in-from-top-2">
-                                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-2">These appear in the main highlights section</p>
-                                    <div className="space-y-2">
-                                        {formData.highlights.map((item, idx) => (
-                                            <div key={idx} className="flex gap-2">
-                                                <input
-                                                    placeholder="e.g. Material"
-                                                    value={item.key}
-                                                    onChange={(e) => updateHighlight(idx, 'key', e.target.value)}
-                                                    className="w-1/3 bg-white border border-gray-200 rounded-lg px-2 py-2 text-[10px] font-black uppercase"
-                                                />
-                                                <input
-                                                    placeholder="e.g. Alloy"
-                                                    value={item.value}
-                                                    onChange={(e) => updateHighlight(idx, 'value', e.target.value)}
-                                                    className="flex-1 bg-white border border-gray-200 rounded-lg px-2 py-2 text-[10px] font-bold"
-                                                />
-                                                <button type="button" onClick={() => removeArrayItem('highlights', idx)} className="text-red-400"><MdDelete size={16} /></button>
+                            {sections.description && (
+                                <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-4 animate-in fade-in slide-in-from-top-2">
+                                    <p className="text-[11px] text-gray-500 font-bold uppercase mb-3">Add headings with bullet points for product details</p>
+                                    <div className="space-y-6">
+                                        {formData.description.map((section, sectionIdx) => (
+                                            <div key={sectionIdx} className="bg-white p-4 rounded-xl border border-gray-200 relative group/section">
+                                                {/* Remove Section Button */}
+                                                {formData.description.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeDescriptionSection(sectionIdx)}
+                                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover/section:opacity-100 transition-all scale-75 group-hover/section:scale-100 z-10"
+                                                    >
+                                                        <MdClose size={12} />
+                                                    </button>
+                                                )}
+                                                
+                                                {/* Heading Input */}
+                                                <div className="mb-3">
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Section Heading</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="e.g. Display, Camera, Battery"
+                                                        value={section.heading}
+                                                        onChange={(e) => updateDescriptionHeading(sectionIdx, e.target.value)}
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-black text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all"
+                                                    />
+                                                </div>
+
+                                                {/* Points */}
+                                                <div className="space-y-3">
+                                                    <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">Bullet Points</label>
+                                                    {section.points.map((point, pointIdx) => (
+                                                        <div key={pointIdx} className="flex gap-2 group/point">
+                                                            <span className="text-indigo-500 py-2.5 text-[20px] leading-none">•</span>
+                                                            <input
+                                                                value={point}
+                                                                onChange={(e) => updateDescriptionPoint(sectionIdx, pointIdx, e.target.value)}
+                                                                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold text-gray-800 focus:border-indigo-600 focus:bg-white outline-none transition-all"
+                                                                placeholder="e.g. 16.97 cm (6.68 inch) Full HD+ Display"
+                                                            />
+                                                            {section.points.length > 1 && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeDescriptionPoint(sectionIdx, pointIdx)}
+                                                                    className="text-red-400 opacity-0 group-hover/point:opacity-100 transition-all"
+                                                                >
+                                                                    <MdDelete size={16} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => addDescriptionPoint(sectionIdx)}
+                                                        className="text-[11px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-800 flex items-center gap-1 mt-1"
+                                                    >
+                                                        <MdAdd size={14} /> Add Point
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
-                                    <button type="button" onClick={() => addArrayItem('highlights', { key: '', value: '' })} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">+ Add Highlight Fact</button>
+                                    <button
+                                        type="button"
+                                        onClick={addDescriptionSection}
+                                        className="w-full py-3 bg-indigo-50 text-indigo-600 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <MdAdd size={16} /> Add New Section
+                                    </button>
                                 </div>
                             )}
                         </div>
 
-                        {/* Specifications */}
-                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
-                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('details')}>
-                                <div className="flex items-center gap-3">
-                                    <span className="material-icons text-indigo-500">settings_input_component</span>
-                                    <h3 className="font-bold text-gray-800 text-sm">Tech Specs (KV)</h3>
-                                </div>
-                                {sections.details ? <MdExpandLess /> : <MdExpandMore />}
-                            </div>
-                            {sections.details && (
-                                <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-4 animate-in fade-in slide-in-from-top-2">
-                                    <div className="space-y-2">
-                                        {formData.specifications.map((spec, idx) => (
-                                            <div key={idx} className="flex gap-2">
-                                                <input
-                                                    placeholder="Feature"
-                                                    value={spec.key}
-                                                    onChange={(e) => updateSpec(idx, 'key', e.target.value)}
-                                                    className="w-1/3 bg-white border border-gray-200 rounded-lg px-2 py-2 text-[10px] font-black uppercase"
-                                                />
-                                                <input
-                                                    placeholder="Detail"
-                                                    value={spec.value}
-                                                    onChange={(e) => updateSpec(idx, 'value', e.target.value)}
-                                                    className="flex-1 bg-white border border-gray-200 rounded-lg px-2 py-2 text-[10px] font-bold"
-                                                />
-                                                <button type="button" onClick={() => removeArrayItem('specifications', idx)} className="text-red-400"><MdDelete size={16} /></button>
-                                            </div>
-                                        ))}
+                        {/* Warranty - Only for Electronics */}
+                        {isElectronics && (
+                            <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
+                                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('warranty')}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-icons text-green-500">verified_user</span>
+                                        <h3 className="font-bold text-gray-800 text-sm">Warranty Information</h3>
                                     </div>
-                                    <button type="button" onClick={() => addArrayItem('specifications', { key: '', value: '' })} className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">+ Add Specification</button>
-
-                                    <div className="pt-4 border-t border-gray-200 space-y-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Key Features (Bullet Points)</label>
-                                            {formData.features.map((item, idx) => (
-                                                <div key={idx} className="flex gap-2 group">
-                                                    <span className="text-blue-500 py-2">•</span>
-                                                    <input
-                                                        value={item}
-                                                        onChange={(e) => updateArrayItem('features', idx, e.target.value)}
-                                                        className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:border-blue-500 outline-none"
-                                                        placeholder="e.g. Skin friendly and anti-allergic"
-                                                    />
-                                                    <button type="button" onClick={() => removeArrayItem('features', idx)} className="text-red-400 opacity-0 group-hover:opacity-100 transition-all"><MdDelete size={14} /></button>
-                                                </div>
-                                            ))}
-                                            <button type="button" onClick={() => addArrayItem('features')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest">+ Add Feature Bullet</button>
+                                    {sections.warranty ? <MdExpandLess /> : <MdExpandMore />}
+                                </div>
+                                {sections.warranty && (
+                                    <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-3 animate-in fade-in slide-in-from-top-2">
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Warranty Summary</label>
+                                            <input
+                                                type="text"
+                                                value={formData.warranty.summary}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, summary: e.target.value } }))}
+                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs"
+                                                placeholder="e.g. 1 Year Manufacturer Warranty"
+                                            />
                                         </div>
-
-                                        <div className="pt-2">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Complete Description (Normal Text)</label>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">What's Covered</label>
                                             <textarea
-                                                name="longDescription"
-                                                value={formData.longDescription}
-                                                onChange={handleChange}
-                                                className="w-full bg-white border border-gray-200 rounded-xl p-3 text-xs h-32 outline-none focus:border-indigo-500 transition-all"
-                                                placeholder="Write a detailed story or description here..."
+                                                value={formData.warranty.covered}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, covered: e.target.value } }))}
+                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20"
+                                                placeholder="Manufacturing defects, parts replacement..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">What's Not Covered</label>
+                                            <textarea
+                                                value={formData.warranty.notCovered}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, notCovered: e.target.value } }))}
+                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20"
+                                                placeholder="Physical damage, water damage..."
                                             />
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Manufacturer */}
-                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
-                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('manufacturer')}>
-                                <div className="flex items-center gap-3">
-                                    <span className="material-icons text-amber-500">factory</span>
-                                    <h3 className="font-bold text-gray-800 text-sm">Manufacturer Details</h3>
-                                </div>
-                                {sections.manufacturer ? <MdExpandLess /> : <MdExpandMore />}
+                                )}
                             </div>
-                            {sections.manufacturer && (
-                                <div className="p-4 bg-gray-50/50 border-t border-gray-100 animate-in fade-in slide-in-from-top-2">
-                                    <textarea
-                                        name="manufacturerInfo"
-                                        value={formData.manufacturerInfo}
-                                        onChange={handleChange}
-                                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-xs h-24 outline-none focus:border-amber-500 transition-all font-medium"
-                                        placeholder="Company details, address, contact..."
-                                    />
+                        )}
+
+                        {/* Return Policy - Always shown */}
+                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
+                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('returnPolicy')}>
+                                <div className="flex items-center gap-3">
+                                    <span className="material-icons text-orange-500">sync_alt</span>
+                                    <h3 className="font-bold text-gray-800 text-sm">Return Policy</h3>
+                                </div>
+                                {sections.returnPolicy ? <MdExpandLess /> : <MdExpandMore />}
+                            </div>
+                            {sections.returnPolicy && (
+                                <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-3 animate-in fade-in slide-in-from-top-2">
+                                    <div>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Return Window (Days)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.returnPolicy.days}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, days: parseInt(e.target.value) || 0 } }))}
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs"
+                                            placeholder="7"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Policy Description</label>
+                                        <textarea
+                                            value={formData.returnPolicy.description}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, description: e.target.value } }))}
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-24"
+                                            placeholder="Easy returns within 7 days. Product must be unused with original tags..."
+                                        />
+                                    </div>
                                 </div>
                             )}
                         </div>

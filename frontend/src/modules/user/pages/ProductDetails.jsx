@@ -199,7 +199,7 @@ const ProductDetails = () => {
         reviews: false,
         questions: false
     });
-    const [selectedDetailTab, setSelectedDetailTab] = useState('Description');
+    const [selectedDetailTab, setSelectedDetailTab] = useState('Manufacturer');
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [bankOffers, setBankOffers] = useState([]);
@@ -225,11 +225,10 @@ const ProductDetails = () => {
         }))
     ];
 
-    const productImages = product ? [
+    const productImages = product ? Array.from(new Set([
         product.image,
-        'https://rukminim2.flixcart.com/image/832/832/xif0q/earring/y/t/z/na-er-2023-455-p4-shining-diva-fashion-original-imagrvv4hfyhywhm.jpeg',
-        'https://rukminim2.flixcart.com/image/832/832/xif0q/earring/e/n/z/na-er-2023-455-p4-shining-diva-fashion-original-imagrvv4gy8nzmqy.jpeg'
-    ] : [];
+        ...(Array.isArray(product.images) ? product.images : [])
+    ])).filter(Boolean) : [];
 
     const toggleSection = (section) => {
         setExpandedSections(prev => ({
@@ -279,26 +278,38 @@ const ProductDetails = () => {
 
                 <div className="flex gap-10 items-start">
                     {/* LEFT COLUMN: Gallery & Buttons */}
-                    <div className="w-[40%] flex-shrink-0 sticky top-24">
+                    <div className="w-[40%] flex-shrink-0 sticky top-6 self-start">
                         <div className="flex gap-4">
                             {/* Thumbnails Strip */}
-                            <div className="flex flex-col gap-3 h-[450px] overflow-y-auto no-scrollbar w-16 flex-shrink-0">
-                                {productImages.map((img, idx) => (
-                                    <div
-                                        key={idx}
-                                        onMouseEnter={() => setCurrentImageIndex(idx)}
-                                        className={`w-16 h-16 border-2 rounded-lg p-1 cursor-pointer transition-all ${currentImageIndex === idx ? 'border-blue-600' : 'border-gray-200 hover:border-blue-400'}`}
-                                    >
-                                        <img src={img} alt="" className="w-full h-full object-contain" />
-                                    </div>
-                                ))}
-                            </div>
+                            {productImages.length > 1 && (
+                                <div className="flex flex-col gap-3 h-[450px] overflow-y-auto no-scrollbar w-16 flex-shrink-0">
+                                    {productImages.map((img, idx) => (
+                                        <div
+                                            key={idx}
+                                            onMouseEnter={() => setCurrentImageIndex(idx)}
+                                            className={`w-16 h-16 border-2 rounded-lg p-1 cursor-pointer transition-all ${currentImageIndex === idx ? 'border-blue-600' : 'border-gray-200 hover:border-blue-400'}`}
+                                        >
+                                            <img src={img} alt="" className="w-full h-full object-contain" />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
 
                             {/* Main Image */}
                             <div className="flex-1 h-[450px] border border-gray-100 rounded-xl flex items-center justify-center p-4 relative group bg-white shadow-sm hover:shadow-md transition-shadow">
-                                <img src={productImages[currentImageIndex]} alt={product.name} className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-500" />
+                                {productImages.length > 0 ? (
+                                    <img 
+                                        src={productImages[currentImageIndex] || productImages[0]} 
+                                        alt={product.name} 
+                                        className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-500" 
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400">
+                                        <span className="material-icons text-6xl">image_not_supported</span>
+                                    </div>
+                                )}
                                 <button onClick={() => toggleWishlist(product)} className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full shadow-md border border-gray-100 flex items-center justify-center hover:scale-110 transition-transform text-gray-400 hover:text-red-500">
-                                    <span className={`material-icons ${isInWishlist ? 'text-red-500' : ''}`}>{isInWishlist ? 'favorite' : 'favorite'}</span>
+                                    <span className={`material-icons ${isInWishlist ? 'text-red-500' : ''}`}>favorite</span>
                                 </button>
                             </div>
                         </div>
@@ -321,9 +332,6 @@ const ProductDetails = () => {
                         <div className="mb-2">
                             <p className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-1 hover:text-blue-600 cursor-pointer w-fit">{product.brand || "Brand Name"}</p>
                             <h1 className="text-2xl font-medium text-gray-900 leading-snug hover:text-blue-600 cursor-pointer transition-colors inline-block">{product.name}</h1>
-                            <p className="text-sm text-gray-500 mt-2 leading-relaxed">
-                                {product.description || "This premium product is crafted with high-quality materials to ensure durability and style. Perfect for daily wear or special occasions, it adds a touch of elegance to any outfit."}
-                            </p>
                         </div>
 
                         <div className="flex items-center gap-3 mb-4">
@@ -473,6 +481,110 @@ const ProductDetails = () => {
 
 
 
+                        {/* Product Description Section - Desktop Right Column */}
+                        {product.description && product.description.length > 0 && (
+                            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm mt-6">
+                                <h3 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-3">Product Description</h3>
+                                <div className="space-y-5">
+                                    {product.description.map((section, idx) => (
+                                        <div key={idx} className="space-y-2">
+                                            {section.heading && (
+                                                <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+                                                    {section.heading}
+                                                </h4>
+                                            )}
+                                            <ul className="space-y-1.5 pl-1">
+                                                {section.points?.map((point, pointIdx) => (
+                                                    point && (
+                                                        <li key={pointIdx} className="flex items-start gap-2 text-sm text-gray-900 font-medium">
+                                                            <span className="text-blue-600 mt-1 flex-shrink-0 font-bold">•</span>
+                                                            <span className="leading-relaxed">{point}</span>
+                                                        </li>
+                                                    )
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Ratings and Reviews Section - Desktop Right Column */}
+                        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm mt-6">
+                            <h3 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-3">Ratings and reviews</h3>
+                            
+                            {/* Reviews List */}
+                            <div className="space-y-4 mb-6">
+                                {reviews.length > 0 ? (
+                                    reviews.slice(0, 3).map(rev => (
+                                        <div key={rev._id || rev.id} className="bg-gray-50/50 rounded-xl p-4 border border-gray-100">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="bg-[#388e3c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                                    {rev.rating} <span className="material-icons text-[9px]">star</span>
+                                                </div>
+                                                <span className="text-[13px] font-bold text-gray-800 line-clamp-1">{rev.name || rev.user}</span>
+                                            </div>
+                                            <p className="text-[13px] text-gray-600 mb-1 leading-relaxed">{rev.comment}</p>
+                                            <span className="text-[10px] text-gray-400 font-medium lowercase">
+                                                {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : (rev.date || 'Recently')}
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-gray-500 italic pb-2">No reviews yet. Be the first to review!</p>
+                                )}
+                            </div>
+
+                            {/* Post Review Form - Compact */}
+                            <div className="p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                                <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider mb-3">Rate this product</h4>
+                                <div className="flex gap-1.5 mb-4">
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <button
+                                            key={star}
+                                            onClick={() => setNewReview(prev => ({ ...prev, rating: star }))}
+                                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${newReview.rating >= star
+                                                ? 'bg-[#388e3c] text-white shadow-sm'
+                                                : 'bg-white text-gray-300 border border-gray-100'
+                                                }`}
+                                        >
+                                            <span className="material-icons text-[18px]">star</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <textarea
+                                    placeholder="Share your experience..."
+                                    value={newReview.comment}
+                                    onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
+                                    className="w-full bg-white border border-gray-100 rounded-xl p-3 text-xs focus:ring-2 focus:ring-green-100 outline-none resize-none min-h-[70px] mb-3 shadow-inner"
+                                />
+                                <button
+                                    onClick={async () => {
+                                        if (!newReview.comment) return;
+                                        setSubmittingReview(true);
+                                        try {
+                                            await API.post('/reviews', {
+                                                productId: id,
+                                                rating: newReview.rating,
+                                                comment: newReview.comment
+                                            });
+                                            setNewReview({ rating: 5, comment: '' });
+                                            toast.success("Your review has been submitted for approval!");
+                                        } catch (err) {
+                                            console.error("Error posting review:", err);
+                                            toast.error(err.response?.data?.message || "Failed to post review. Please login.");
+                                        } finally {
+                                            setSubmittingReview(false);
+                                        }
+                                    }}
+                                    disabled={submittingReview}
+                                    className={`w-full bg-[#1084ea] text-white font-bold py-2.5 rounded-xl text-xs active:scale-95 transition-all shadow-sm ${submittingReview ? 'opacity-50' : ''}`}
+                                >
+                                    {submittingReview ? 'Submitting...' : 'Post Review'}
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -547,22 +659,10 @@ const ProductDetails = () => {
                     {!product.brand && <h2 className="text-gray-900 text-sm font-bold uppercase tracking-wide">Brand Name</h2>}
 
                     {/* Name & More Content */}
-                    <div className="text-gray-600 text-sm font-normal leading-relaxed">
-                        <p className={`${showFullDescription ? '' : 'line-clamp-2'}`}>
-                            {product.name}
-                            {product.description && <span className="block mt-1">{product.description}</span>}
-                            {!product.description && <span className="block mt-1">This premium product is crafted with high-quality materials to ensure durability and style. Perfect for daily wear or special occasions, it adds a touch of elegance to any outfit.</span>}
-                        </p>
-                        <button
-                            onClick={() => setShowFullDescription(!showFullDescription)}
-                            className="text-blue-600 font-bold text-xs mt-1 hover:underline flex items-center"
-                        >
-                            {showFullDescription ? 'Show less' : '...more'}
-                            <span className="material-icons text-[14px] ml-0.5">
-                                {showFullDescription ? 'expand_less' : 'expand_more'}
-                            </span>
-                        </button>
-                    </div>
+                    <p className="text-gray-600 text-sm font-normal leading-relaxed">
+                        {product.name}
+                    </p>
+
 
                     {/* Price */}
                     <div className="mt-2 flex items-baseline gap-2">
@@ -703,10 +803,84 @@ const ProductDetails = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile Description & Reviews */}
+                <div className="mt-4 px-4 space-y-4">
+                    {/* Description Section */}
+                    {product.description && product.description.length > 0 && (
+                        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+                            <h3 className="text-[16px] font-bold text-gray-900 mb-4">Product Description</h3>
+                            <div className="space-y-4">
+                                {product.description.map((section, idx) => (
+                                    <div key={idx} className="space-y-3">
+                                        {section.heading && (
+                                            <h4 className="text-[13px] font-bold text-gray-900 uppercase tracking-wide border-b border-gray-50 pb-2">
+                                                {section.heading}
+                                            </h4>
+                                        )}
+                                        <ul className="space-y-2">
+                                            {section.points?.map((point, pointIdx) => (
+                                                point && (
+                                                    <li key={pointIdx} className="flex items-start gap-2 text-[13px] text-gray-800">
+                                                        <span className="text-blue-600 mt-1 flex-shrink-0 font-bold">•</span>
+                                                        <span className="leading-relaxed font-medium">{point}</span>
+                                                    </li>
+                                                )
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Ratings Section */}
+                    <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+                        <div 
+                            className="p-5 flex items-center justify-between cursor-pointer"
+                            onClick={() => toggleSection('reviews')}
+                        >
+                            <div>
+                                <h3 className="text-[16px] font-bold text-gray-900">Ratings & Reviews</h3>
+                                <p className="text-[12px] text-gray-500 mt-0.5">
+                                    {reviews.length > 0 ? `${reviews.length} total reviews` : 'Be the first to review'}
+                                </p>
+                            </div>
+                            <span className={`material-icons transition-transform ${expandedSections.reviews ? 'rotate-180' : ''}`}>expand_more</span>
+                        </div>
+                        
+                        {expandedSections.reviews && (
+                            <div className="p-5 pt-0 border-t border-gray-50 space-y-4 animate-in fade-in slide-in-from-top-2">
+                                <div className="flex overflow-x-auto gap-3 no-scrollbar pb-2">
+                                    {reviews.map(rev => (
+                                        <div key={rev._id || rev.id} className="min-w-[200px] bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="bg-[#388e3c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                                                    {rev.rating} <span className="material-icons text-[9px]">star</span>
+                                                </div>
+                                                <span className="text-[12px] font-bold text-gray-800">{rev.name || rev.user}</span>
+                                            </div>
+                                            <p className="text-[12px] text-gray-600 line-clamp-2 leading-relaxed">{rev.comment}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button 
+                                    onClick={() => navigate(`/reviews/${id}`)}
+                                    className="w-full py-2.5 text-blue-600 text-xs font-bold border border-blue-50 bg-blue-50/30 rounded-xl"
+                                >
+                                    View All Reviews
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Close Mobile Wrapper */}
 
+
+            {/* Product Description Section - Above Similar Products */}
+            
 
             {/* Similar Products Section - Added as requested */}
             <div className="md:max-w-[1600px] md:mx-auto md:px-6">
@@ -718,183 +892,8 @@ const ProductDetails = () => {
                     onViewAll={() => console.log('View all similar products')}
                 />
 
-                {/* Product Highlights Section */}
-                <div className="border-t border-gray-100 mt-2">
-                    {/* Desktop Header */}
-                    <div className="hidden md:block px-4 md:px-0 py-4">
-                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900 leading-tight">Product highlights</h3>
-                    </div>
-                    {/* Mobile Header */}
-                    <div
-                        className="px-4 py-4 flex items-center justify-between cursor-pointer md:hidden"
-                        onClick={() => toggleSection('highlights')}
-                    >
-                        <div>
-                            <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Product highlights</h3>
-                            <p className="text-[13px] text-gray-400 mt-0.5">Key features and specifications</p>
-                        </div>
-                        <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.highlights ? 'rotate-180' : ''}`}>
-                            <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
-                        </div>
-                    </div>
-
-                    <div className={`px-4 md:px-0 pb-6 animate-in fade-in slide-in-from-top-2 duration-300 ${expandedSections.highlights ? '' : 'hidden'} md:block`}>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
-                            <div>
-                                <p className="text-[13px] text-gray-400 mb-0.5 font-medium">Base Material</p>
-                                <p className="text-[15px] text-gray-800 font-bold">Alloy</p>
-                            </div>
-                            <div>
-                                <p className="text-[13px] text-gray-400 mb-0.5 font-medium">Plating</p>
-                                <p className="text-[15px] text-gray-800 font-bold">Gold-plated</p>
-                            </div>
-                            <div>
-                                <p className="text-[13px] text-gray-400 mb-0.5 font-medium">Color</p>
-                                <p className="text-[15px] text-gray-800 font-bold">White</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 {/* All Details Section - Tabbed Interface with Main Dropdown */}
-                <div className="border-t border-gray-100 mt-2">
-                    {/* Desktop Header */}
-                    <div className="hidden md:block px-4 md:px-0 py-4">
-                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900 leading-tight">All details</h3>
-                    </div>
-                    {/* Mobile Header */}
-                    <div
-                        className="px-4 py-4 flex items-center justify-between cursor-pointer md:hidden"
-                        onClick={() => toggleSection('allDetails')}
-                    >
-                        <div>
-                            <h3 className="text-[17px] font-bold text-gray-900 leading-tight">All details</h3>
-                            <p className="text-[13px] text-gray-400 mt-0.5">Tabs for features, specs and more</p>
-                        </div>
-                        <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.allDetails ? 'rotate-180' : ''}`}>
-                            <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
-                        </div>
-                    </div>
-
-                    <div className={`pb-8 animate-in fade-in slide-in-from-top-2 duration-300 ${expandedSections.allDetails ? '' : 'hidden'} md:block`}>
-                        {/* Tab Headers */}
-                        <div className="px-4 md:px-0 mb-4">
-                            <div className="flex overflow-x-auto gap-2.5 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0 pb-2">
-                                {[
-                                    { id: 'Features', label: 'Features', icon: 'star_outline' },
-                                    { id: 'Specifications', label: 'Specifications', icon: 'list_alt' },
-                                    { id: 'Description', label: 'Description', icon: 'description' },
-                                    { id: 'Manufacturer', label: 'Manufacturer', icon: 'business' },
-                                    { id: 'Warranty', label: 'Warranty Policy', icon: 'verified_user' }
-                                ].map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedDetailTab(tab.id);
-                                        }}
-                                        className={`px-5 py-2.5 rounded-full text-[14px] font-bold whitespace-nowrap transition-all border ${selectedDetailTab === tab.id
-                                            ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                                            : 'bg-white text-gray-600 border-gray-200'
-                                            }`}
-                                    >
-                                        {tab.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Content Card */}
-                        <div className="px-4 md:px-0 animate-in fade-in zoom-in-95 duration-200">
-                            <div className="bg-white rounded-3xl border border-blue-100 p-5 shadow-sm ring-1 ring-blue-50/50 min-h-[120px]">
-                                <div className="text-[14px] text-gray-600 leading-relaxed">
-                                    {selectedDetailTab === 'Features' && (
-                                        <ul className="space-y-3">
-                                            {['Premium quality base material', 'Skin friendly and anti-allergic', 'Handcrafted by expert artisans', 'Perfect for weddings and parties'].map((f, i) => (
-                                                <li key={i} className="flex items-start gap-2">
-                                                    <span className="text-blue-400 mt-1">•</span>
-                                                    {f}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                    {selectedDetailTab === 'Specifications' && (
-                                        <div className="space-y-3">
-                                            {/* ... Specs content ... */}
-                                            {product.specifications?.map((spec, i) => (
-                                                <div key={i} className="flex justify-between border-b border-gray-100 pb-2">
-                                                    <span className="text-gray-500 font-medium">{spec.key}</span>
-                                                    <span className="text-gray-900 font-bold text-right">{spec.value}</span>
-                                                </div>
-                                            ))}
-                                            {(!product.specifications || product.specifications.length === 0) && <p>No specifications available.</p>}
-                                        </div>
-                                    )}
-
-                                    {selectedDetailTab === 'Description' && (
-                                        <div className="prose prose-sm max-w-none text-gray-600">
-                                            <p>{product.longDescription || product.description || "No description available."}</p>
-                                        </div>
-                                    )}
-
-                                    {selectedDetailTab === 'Manufacturer' && (
-                                        <div className="text-sm text-gray-700">
-                                            <p className="font-bold mb-1">Manufacturer Information:</p>
-                                            <p>{product.manufacturerInfo || "Information not provided."}</p>
-                                        </div>
-                                    )}
-
-                                    {selectedDetailTab === 'Warranty' && (
-                                        <div className="space-y-4">
-                                            {product.warranty && (product.warranty.summary || product.warranty.covered) ? (
-                                                <>
-                                                    <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                                                        <h4 className="text-sm font-bold text-blue-800 uppercase mb-2 flex items-center gap-2">
-                                                            <span className="material-icons text-[16px]">verified</span> Warranty Summary
-                                                        </h4>
-                                                        <p className="font-medium text-gray-800 text-[15px]">{product.warranty.summary || 'Standard Brand Warranty'}</p>
-                                                    </div>
-                                                    
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <div className="bg-green-50/50 p-4 rounded-xl border border-green-100">
-                                                            <span className="text-xs font-bold text-green-700 uppercase tracking-wide block mb-1">Covered</span>
-                                                            <p className="text-sm font-medium text-gray-800">{product.warranty.covered || 'Manufacturing Defects'}</p>
-                                                        </div>
-                                                        <div className="bg-red-50/50 p-4 rounded-xl border border-red-100">
-                                                            <span className="text-xs font-bold text-red-700 uppercase tracking-wide block mb-1">Not Covered</span>
-                                                            <p className="text-sm font-medium text-gray-800">{product.warranty.notCovered || 'Physical Damage'}</p>
-                                                        </div>
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <div className="text-center py-6 text-gray-400 italic">
-                                                    No specific warranty information provided for this product.
-                                                </div>
-                                            )}
-
-                                            {product.returnPolicy && (
-                                                <div className="mt-6 pt-6 border-t border-gray-100">
-                                                    <h4 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-                                                        <span className="material-icons text-gray-400 text-[18px]">assignment_return</span> Return Policy
-                                                    </h4>
-                                                    <div className="flex items-start gap-4">
-                                                        <div className="bg-gray-50 px-3 py-2 rounded-lg text-center min-w-[80px]">
-                                                            <span className="block text-lg font-black text-gray-900">{product.returnPolicy.days || 7}</span>
-                                                            <span className="block text-[10px] font-bold text-gray-500 uppercase">Days</span>
-                                                        </div>
-                                                        <p className="text-sm text-gray-600 flex-1 py-1">
-                                                            {product.returnPolicy.description || 'Returns accepted for damaged, defective, or wrong items only.'}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
 
                 {/* Similar Oversized Studs Section */}
                 <div className="border-t border-gray-100 mt-4">
@@ -918,97 +917,7 @@ const ProductDetails = () => {
                     />
                 </div>
 
-                {/* Ratings and Reviews Section */}
-                <div className="border-t border-gray-100 mt-2">
-                    {/* Desktop Header */}
-                    <div className="hidden md:block px-4 md:px-0 py-4">
-                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900 leading-tight">Ratings and reviews</h3>
-                    </div>
-                    {/* Mobile Header */}
-                    <div
-                        className="px-4 py-5 flex items-center justify-between cursor-pointer md:hidden"
-                        onClick={() => toggleSection('reviews')}
-                    >
-                        <div>
-                            <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Ratings and reviews</h3>
-                            <p className="text-[13px] text-gray-400 mt-0.5">
-                                {reviews.length > 0 ? `${reviews.length} ratings and reviews` : 'No ratings for this product yet'}
-                            </p>
-                        </div>
-                        <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.reviews ? 'rotate-180' : ''}`}>
-                            <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
-                        </div>
-                    </div>
 
-                    <div className={`pb-6 animate-in fade-in slide-in-from-top-2 duration-300 ${expandedSections.reviews ? '' : 'hidden'} md:block`}>
-                        {/* Horizontal Reviews Slide - Narrower cards */}
-                        <div className="flex overflow-x-auto gap-3 no-scrollbar px-4 md:px-0 mb-6">
-                            {reviews.map(rev => (
-                                <div key={rev._id || rev.id} className="min-w-[220px] w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex-shrink-0">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className="bg-[#388e3c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                                            {rev.rating} <span className="material-icons text-[9px]">star</span>
-                                        </div>
-                                        <span className="text-[13px] font-bold text-gray-800 line-clamp-1">{rev.name || rev.user}</span>
-                                    </div>
-                                    <p className="text-[13px] text-gray-600 mb-2 line-clamp-3 leading-relaxed">{rev.comment}</p>
-                                    <span className="text-[10px] text-gray-400 font-medium">
-                                        {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : (rev.date || 'Recently')}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Post Review Form - Smaller Stars */}
-                        <div className="mx-4 md:mx-0 p-5 bg-gray-50/50 rounded-3xl border border-gray-100 shadow-sm">
-                            <h4 className="text-[14px] font-bold text-gray-800 mb-4">Rate this product</h4>
-                            <div className="flex gap-2 mb-5">
-                                {[1, 2, 3, 4, 5].map(star => (
-                                    <button
-                                        key={star}
-                                        onClick={() => setNewReview(prev => ({ ...prev, rating: star }))}
-                                        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-sm ${newReview.rating >= star
-                                            ? 'bg-[#388e3c] text-white'
-                                            : 'bg-white text-gray-300 border border-gray-100'
-                                            }`}
-                                    >
-                                        <span className="material-icons text-[20px]">star</span>
-                                    </button>
-                                ))}
-                            </div>
-                            <textarea
-                                placeholder="What did you like or dislike?"
-                                value={newReview.comment}
-                                onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
-                                className="w-full bg-white border border-gray-100 rounded-2xl p-4 text-[13px] focus:ring-2 focus:ring-green-100 outline-none resize-none min-h-[90px] mb-4 shadow-inner"
-                            />
-                            <button
-                                onClick={async () => {
-                                    if (!newReview.comment) return;
-                                    setSubmittingReview(true);
-                                    try {
-                                        await API.post('/reviews', {
-                                            productId: id,
-                                            rating: newReview.rating,
-                                            comment: newReview.comment
-                                        });
-                                        setNewReview({ rating: 5, comment: '' });
-                                        toast.success("Your review has been submitted for approval!");
-                                    } catch (err) {
-                                        console.error("Error posting review:", err);
-                                        toast.error(err.response?.data?.message || "Failed to post review. Please login.");
-                                    } finally {
-                                        setSubmittingReview(false);
-                                    }
-                                }}
-                                disabled={submittingReview}
-                                className={`w-full bg-[#1084ea] text-white font-bold py-3 rounded-2xl text-[13px] active:scale-95 transition-all shadow-md ${submittingReview ? 'opacity-50' : ''}`}
-                            >
-                                {submittingReview ? 'Submitting...' : 'Post Review'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
                 {/* Questions and Answers Section - Input Only */}
                 <div className="border-t border-gray-100 pb-2">

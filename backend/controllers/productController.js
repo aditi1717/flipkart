@@ -106,17 +106,11 @@ export const createProduct = async (req, res) => {
             discount: body.discount,
             image,
             images,
-            image,
-            images,
             category: body.category || 'Uncategorized',
             categoryId: body.categoryId ? Number(body.categoryId) : undefined,
             subCategories: parseJSON(body.subCategories) || [], // Handle multiple subcategories
             categoryPath: parseJSON(body.categoryPath),
-            shortDescription: body.shortDescription,
-            highlights: parseJSON(body.highlights),
-            specifications: parseJSON(body.specifications),
-            features: parseJSON(body.features),
-            features: parseJSON(body.features),
+            description: parseJSON(body.description),
             stock: Number(body.stock),
             variantHeadings,
             skus: parseJSON(body.skus),
@@ -171,9 +165,7 @@ export const updateProduct = async (req, res) => {
             
             // Parse complex fields
             if (updateData.categoryPath) updateData.categoryPath = parseJSON(updateData.categoryPath);
-            if (updateData.highlights) updateData.highlights = parseJSON(updateData.highlights);
-            if (updateData.specifications) updateData.specifications = parseJSON(updateData.specifications);
-            if (updateData.features) updateData.features = parseJSON(updateData.features);
+            if (updateData.description) updateData.description = parseJSON(updateData.description);
             if (updateData.skus) updateData.skus = parseJSON(updateData.skus);
             if (updateData.warranty) updateData.warranty = parseJSON(updateData.warranty);
             if (updateData.returnPolicy) updateData.returnPolicy = parseJSON(updateData.returnPolicy);
