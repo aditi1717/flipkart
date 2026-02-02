@@ -113,7 +113,7 @@ const CouponManager = () => {
                         </div>
                     ) : (
                         coupons.map(coupon => (
-                            <div key={coupon.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition">
+                            <div key={coupon._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition">
                                 {/* Left Decoration Border */}
                                 <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${coupon.active ? 'bg-green-500' : 'bg-gray-300'}`}></div>
 
@@ -134,7 +134,7 @@ const CouponManager = () => {
                                                 </span>
                                             </div>
                                         </div>
-                                        <button onClick={() => toggleCouponStatus(coupon.id)}>
+                                        <button onClick={() => toggleCouponStatus(coupon._id)}>
                                             {coupon.active ? (
                                                 <MdToggleOn size={32} className="text-green-500 hover:text-green-600" />
                                             ) : (
@@ -184,7 +184,7 @@ const CouponManager = () => {
                                             Used {coupon.usageCount} times
                                         </div>
                                         <button
-                                            onClick={() => handleDelete(coupon.id)}
+                                            onClick={() => handleDelete(coupon._id)}
                                             className="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-50 transition"
                                         >
                                             <MdDelete size={18} />
@@ -208,7 +208,7 @@ const CouponManager = () => {
                         </div>
                     ) : (
                         offers.map(offer => (
-                            <div key={offer.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition">
+                            <div key={offer._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition">
                                 <div className="p-5">
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-2">
@@ -219,7 +219,7 @@ const CouponManager = () => {
                                         </div>
 
                                         <div className="flex items-center gap-2">
-                                            <button onClick={() => toggleOfferStatus(offer.id)}>
+                                            <button onClick={() => toggleOfferStatus(offer._id)}>
                                                 {offer.active ? (
                                                     <MdToggleOn size={32} className="text-green-500 hover:text-green-600" />
                                                 ) : (
@@ -227,7 +227,7 @@ const CouponManager = () => {
                                                 )}
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(offer.id)}
+                                                onClick={() => handleDelete(offer._id)}
                                                 className="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-red-50 transition"
                                             >
                                                 <MdDelete size={18} />

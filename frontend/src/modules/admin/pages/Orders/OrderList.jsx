@@ -21,8 +21,8 @@ const OrderList = () => {
 
     const filteredOrders = orders.filter(order => {
         const matchesSearch = (order.id?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.user?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.user?.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+            (order.user?.name?.toLowerCase() || order.shippingAddress?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.user?.email?.toLowerCase() || order.shippingAddress?.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
 
         const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
 
@@ -144,10 +144,16 @@ const OrderList = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="text-xs font-bold text-gray-800">{order.user?.name || 'Unknown'}</span>
+                                                    <span className="text-xs font-bold text-gray-800">
+                                                        {order.user?.name || order.shippingAddress?.name || 'Unknown'}
+                                                    </span>
                                                     <div className="flex flex-col mt-0.5 gap-0.5">
-                                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight hover:text-blue-500 transition-colors cursor-pointer">{order.user?.email || 'N/A'}</span>
-                                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight">{order.user?.phone || 'N/A'}</span>
+                                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight hover:text-blue-500 transition-colors cursor-pointer">
+                                                            {order.user?.email || order.shippingAddress?.email || 'N/A'}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400 font-medium tracking-tight">
+                                                            {order.user?.phone || 'N/A'}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </td>

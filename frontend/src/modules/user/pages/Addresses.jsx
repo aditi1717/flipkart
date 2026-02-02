@@ -28,10 +28,10 @@ const Addresses = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editingId) {
-            updateAddress(editingId, newAddr);
+            updateAddress(editingId, { ...newAddr, name: user?.name || newAddr.name });
             setEditingId(null);
         } else {
-            addAddress({ ...newAddr, id: Date.now() });
+            addAddress({ ...newAddr, name: user?.name || newAddr.name, id: Date.now() });
         }
         setIsAdding(false);
         setNewAddr(initialAddr);
@@ -160,8 +160,14 @@ const Addresses = () => {
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="col-span-2 md:col-span-1 space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase">Full Name</label>
-                                            <input required type="text" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.name} onChange={e => setNewAddr({ ...newAddr, name: e.target.value })} />
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase">Full Name (Linked to Account)</label>
+                                            <input 
+                                                required 
+                                                type="text" 
+                                                disabled
+                                                className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none bg-gray-50 text-gray-500 cursor-not-allowed font-medium" 
+                                                value={user?.name || newAddr.name} 
+                                            />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">Phone Number</label>
@@ -243,7 +249,7 @@ const Addresses = () => {
                                     </div>
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-3">
-                                            <span className="font-bold text-[14px] text-gray-800">{addr.name}</span>
+                                            <span className="font-bold text-[14px] text-gray-800">{user?.name || addr.name}</span>
                                             <span className="font-bold text-[14px] text-gray-800">{addr.mobile}</span>
                                         </div>
                                         <p className="text-[13px] text-gray-500 leading-relaxed max-w-[90%]">

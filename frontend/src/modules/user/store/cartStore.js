@@ -119,7 +119,7 @@ export const useCartStore = create()(
                 }));
             },
 
-            placeOrder: (order) => {
+            placeOrder: (order, shouldClearCart = true) => {
                 const normalizedOrder = {
                     ...order,
                     id: order._id || order.id,
@@ -133,7 +133,7 @@ export const useCartStore = create()(
                 };
                 set((state) => ({
                     orders: [normalizedOrder, ...state.orders],
-                    cart: []
+                    cart: shouldClearCart ? [] : state.cart
                 }));
             },
 

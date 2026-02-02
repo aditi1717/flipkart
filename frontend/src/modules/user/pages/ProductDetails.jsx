@@ -202,8 +202,16 @@ const ProductDetails = () => {
             }
             return;
         }
-        addToCart(product, selectedVariants);
-        navigate('/checkout');
+        // Instead of adding to cart, pass item directly to checkout via state
+        navigate('/checkout', { 
+            state: { 
+                buyNowItem: { 
+                    ...product, 
+                    variant: selectedVariants, 
+                    quantity: 1 
+                } 
+            } 
+        });
     };
     const [reviews, setReviews] = useState([]);
     const [questions, setQuestions] = useState([
@@ -333,7 +341,7 @@ const ProductDetails = () => {
 
                 <div className="flex gap-10 items-start">
                     {/* LEFT COLUMN: Gallery & Buttons */}
-                    <div className="w-[40%] flex-shrink-0 sticky top-6 self-start">
+                    <div className="w-[40%] flex-shrink-0 sticky top-[110px] self-start">
                         <div className="flex gap-4">
                             {/* Thumbnails Strip */}
                             {productImages.length > 1 && (
@@ -974,39 +982,46 @@ const ProductDetails = () => {
             
 
             {/* Similar Products Section - Added as requested */}
-            <div className="md:max-w-[1600px] md:mx-auto md:px-6">
-                <ProductSection
-                    title="Similar Products"
-                    products={similarProducts}
-                    loading={productsLoading}
-                    containerClass="mt-4 pb-4 px-4 md:px-0"
-                    onViewAll={() => console.log('View all similar products')}
-                />
+            {similarProducts.length > 0 && (
+                <div className="md:max-w-[1600px] md:mx-auto md:px-6">
+                    <ProductSection
+                        title="Similar Products"
+                        products={similarProducts}
+                        loading={productsLoading}
+                        containerClass="mt-4 pb-4 px-4 md:px-0"
+                        onViewAll={() => console.log('View all similar products')}
+                    />
+                </div>
+            )}
 
+            <div className="md:max-w-[1600px] md:mx-auto md:px-6">
                 {/* All Details Section - Tabbed Interface with Main Dropdown */}
                 
-
                 {/* Similar Styles Section */}
-                <div className="border-t border-gray-100 mt-4">
-                    <ProductSection
-                        title={`Similar ${product.subCategories?.[0]?.name || product.brand || ''} Styles`}
-                        products={similarStyles}
-                        loading={productsLoading}
-                        containerClass="mt-2 pb-4 px-4 md:px-0"
-                        onViewAll={() => console.log('View all similar styles')}
-                    />
-                </div>
+                {similarStyles.length > 0 && (
+                    <div className="border-t border-gray-100 mt-4">
+                        <ProductSection
+                            title={`Similar ${product.subCategories?.[0]?.name || product.brand || ''} Styles`}
+                            products={similarStyles}
+                            loading={productsLoading}
+                            containerClass="mt-2 pb-4 px-4 md:px-0"
+                            onViewAll={() => console.log('View all similar styles')}
+                        />
+                    </div>
+                )}
 
                 {/* Top Rated Section */}
-                <div className="border-t border-gray-100">
-                    <ProductSection
-                        title="Earrings rated 4 stars and above"
-                        products={highRatedProducts}
-                        loading={productsLoading}
-                        containerClass="mt-2 pb-8 px-4 md:px-0"
-                        onViewAll={() => console.log('View all top rated')}
-                    />
-                </div>
+                {highRatedProducts.length > 0 && (
+                    <div className="border-t border-gray-100">
+                        <ProductSection
+                            title={`${product.category} rated 4 stars and above`}
+                            products={highRatedProducts}
+                            loading={productsLoading}
+                            containerClass="mt-2 pb-8 px-4 md:px-0"
+                            onViewAll={() => console.log('View all top rated')}
+                        />
+                    </div>
+                )}
 
 
 

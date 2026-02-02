@@ -222,7 +222,7 @@ const Account = () => {
                                 <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                         <div>
-                                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Full Name</label>
+                                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Full Name (Used for Shipping)</label>
                                             <input
                                                 type="text"
                                                 value={formData.name}
@@ -238,8 +238,9 @@ const Account = () => {
                                                 <input
                                                     type="tel"
                                                     value={formData.mobile}
-                                                    onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                                                    className="w-full border border-gray-200 rounded p-2 text-sm focus:border-blue-600 outline-none text-gray-900 bg-transparent"
+                                                    readOnly
+                                                    disabled
+                                                    className="w-full border border-gray-200 rounded p-2 text-sm text-gray-400 bg-gray-100 cursor-not-allowed"
                                                 />
                                             </div>
                                         )}

@@ -70,11 +70,12 @@ export const InvoiceDisplay = React.forwardRef(({ order, item, items, settings }
 
                 <div className="p-2 border-b-2 border-black">
                     <div className="font-bold text-xs uppercase text-gray-400 mb-1 tracking-widest">Shipping/Customer address:</div>
-                    <div className="font-bold text-sm uppercase">{order.user?.name}</div>
-                    <div className="text-sm">
-                        {order.address?.line || order.shippingAddress?.address || i.shippingAddress?.street}, {order.address?.city || order.shippingAddress?.city}, {order.address?.state || order.shippingAddress?.state} - <b>{order.address?.pincode || order.shippingAddress?.postalCode}</b>
+                    <div className="font-bold text-sm uppercase">{order.shippingAddress?.name || order.user?.name || 'Unknown'}</div>
+                    <div className="text-[10px] text-gray-500 font-medium mb-1">{order.shippingAddress?.email || order.user?.email}</div>
+                    <div className="text-sm mb-1">
+                        {order.address?.line || order.shippingAddress?.address || order.shippingAddress?.street}, {order.address?.city || order.shippingAddress?.city}, {order.address?.state || order.shippingAddress?.state || order.shippingAddress?.country} - <b>{order.address?.pincode || order.shippingAddress?.postalCode || order.shippingAddress?.pincode}</b>
                     </div>
-                    <div>Phone: <b>{order.user?.phone || 'N/A'}</b></div>
+                    <div>Phone: <b>{order.shippingAddress?.phone || order.user?.phone || 'N/A'}</b></div>
                 </div>
 
                 <div className="p-2 border-b-2 border-black text-xs bg-gray-50/50">
@@ -96,7 +97,7 @@ export const InvoiceDisplay = React.forwardRef(({ order, item, items, settings }
                                     <td className="p-1 border-r border-black align-top font-bold">{settings.gstNumber}</td>
                                     <td className="p-1 border-r border-black align-top">
                                         <div className="font-bold uppercase leading-tight">{i.name}</div>
-                                        <div className="text-[9px] text-gray-500 mt-0.5">ID: {i.product || i.id} {i.serialNumber ? `| SN: ${i.serialNumber}` : ''}</div>
+                                        <div className="text-[9px] text-gray-500 mt-0.5">ID: {i.product || i.id} {i.serialNumber ? `| ${i.serialType === 'IMEI' ? 'IMEI' : 'SN'}: ${i.serialNumber}` : ''}</div>
                                     </td>
                                     <td className="p-1 text-center align-top font-bold">{i.quantity || i.qty}</td>
                                 </tr>
@@ -159,12 +160,12 @@ export const InvoiceDisplay = React.forwardRef(({ order, item, items, settings }
                      </div>
                      <div className="space-y-2">
                          <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b pb-1">Billing & Shipping</div>
-                         <div className="font-black text-sm text-gray-900 uppercase">{order.user?.name}</div>
+                         <div className="font-black text-sm text-gray-900 uppercase">{order.shippingAddress?.name || order.user?.name || 'Unknown'}</div>
                          <div className="text-gray-600 leading-relaxed">
-                            {order.address?.line || order.shippingAddress?.address},<br />
-                            {order.address?.city || order.shippingAddress?.city}, {order.address?.state || order.shippingAddress?.state} - {order.address?.pincode || order.shippingAddress?.postalCode}
+                            {order.address?.line || order.shippingAddress?.address || order.shippingAddress?.street},<br />
+                            {order.address?.city || order.shippingAddress?.city}, {order.address?.state || order.shippingAddress?.state || order.shippingAddress?.country} - {order.address?.pincode || order.shippingAddress?.postalCode || order.shippingAddress?.pincode}
                          </div>
-                         <div className="font-black text-gray-900">Mob: {order.user?.phone}</div>
+                         <div className="font-black text-gray-900">Mob: {order.shippingAddress?.phone || order.user?.phone || 'N/A'}</div>
                      </div>
                  </div>
 

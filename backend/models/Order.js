@@ -23,6 +23,9 @@ const orderSchema = mongoose.Schema({
         },
     ],
     shippingAddress: {
+        name: { type: String }, // Snapshot of user name
+        email: { type: String }, // Snapshot of user email
+        phone: { type: String }, // Snapshot of user phone
         street: { type: String, required: true },
         city: { type: String, required: true },
         postalCode: { type: String, required: true },

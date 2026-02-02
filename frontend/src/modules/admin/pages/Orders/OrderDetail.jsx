@@ -264,18 +264,17 @@ const OrderDetail = () => {
                                 {order.user?.name?.charAt(0) || 'U'}
                             </div>
                             <div className="min-w-0">
-                                <h4 className="text-sm font-black text-gray-900 truncate">{order.user?.name || 'Unknown User'}</h4>
-                                <p className="text-[10px] text-blue-600 font-black uppercase tracking-tighter">Gold Member</p>
+                                <h4 className="text-sm font-black text-gray-900 truncate">{order.user?.name || order.shippingAddress?.name || 'Unknown User'}</h4>
                             </div>
                         </div>
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 text-gray-600">
                                 <MdEmail className="text-gray-300" size={18} />
-                                <span className="text-xs font-medium truncate">{order.user?.email || 'N/A'}</span>
+                                <span className="text-xs font-medium truncate">{order.user?.email || order.shippingAddress?.email || 'N/A'}</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-600">
                                 <MdPhone className="text-gray-300" size={18} />
-                                <span className="text-xs font-medium">{order.user?.phone || 'N/A'}</span>
+                                <span className="text-xs font-medium">{order.shippingAddress?.phone || order.user?.phone || 'N/A'}</span>
                             </div>
                         </div>
                     </div>
@@ -289,7 +288,7 @@ const OrderDetail = () => {
                         <div className="flex gap-4">
                             <MdLocationOn className="text-blue-500 flex-shrink-0 mt-1" size={20} />
                             <div className="text-xs text-gray-600 leading-relaxed font-medium">
-                                <p className="font-black text-gray-900 mb-1">{order.address?.name || order.user?.name || 'N/A'}</p>
+                                <p className="font-black text-gray-900 mb-1">{order.shippingAddress?.name || order.address?.name || order.user?.name || 'N/A'}</p>
                                 <p>{order.address?.line || order.shippingAddress?.street || 'N/A'}</p>
                                 <p>{order.address?.city || order.shippingAddress?.city || 'N/A'}, {order.address?.state || order.shippingAddress?.state || 'N/A'}</p>
                                 <p className="font-black mt-1 text-gray-400">{order.address?.pincode || order.shippingAddress?.postalCode || 'N/A'}</p>
