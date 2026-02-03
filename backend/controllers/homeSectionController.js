@@ -6,8 +6,40 @@ import HomeLayout from '../models/HomeLayout.js';
 // @access  Public (App) / Private (Admin)
 export const getHomeSections = async (req, res) => {
     try {
-        const sections = await HomeSection.find({}).populate('products');
-        res.json(sections);
+        const sections = await HomeSection.find({}).populate({
+            path: 'products',
+            populate: {
+                path: 'subCategories',
+                select: 'isActive'
+            }
+        });
+
+        // Further filter products in each section based on category/subcategory status
+        const Category = (await import('../models/Category.js')).default;
+        const activeCategories = await Category.find({ active: true }).select('id');
+        const activeCategoryIds = new Set(activeCategories.map(c => c.id));
+
+        const SubCategory = (await import('../models/SubCategory.js')).default;
+        const activeSubCategories = await SubCategory.find({ isActive: true }).select('_id');
+        const activeSubCategoryIds = new Set(activeSubCategories.map(s => s._id.toString()));
+
+        const filteredSections = sections.map(section => {
+            const sectionObj = section.toObject();
+            sectionObj.products = sectionObj.products.filter(p => {
+                // Check category
+                if (!activeCategoryIds.has(p.categoryId)) return false;
+                
+                // Check subcategories (if any)
+                if (p.subCategories && p.subCategories.length > 0) {
+                    return p.subCategories.some(sub => activeSubCategoryIds.has(sub._id?.toString() || sub.toString()));
+                }
+                
+                return true;
+            });
+            return sectionObj;
+        });
+
+        res.json(filteredSections);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

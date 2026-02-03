@@ -48,11 +48,12 @@ const CategoryList = () => {
 
     const renderCategory = (category, level = 0) => {
         const hasChildren = category.children && category.children.length > 0;
-        const isExpanded = expandedIds.has(category.id);
+        const categoryId = category.id || category._id;
+        const isExpanded = expandedIds.has(categoryId);
         const indent = level * 32;
-
+        
         return (
-            <div key={category.id}>
+            <div key={categoryId}>
                 <div
                     className="flex items-center justify-between p-4 hover:bg-gray-50 border-b border-gray-100 transition"
                     style={{ paddingLeft: `${indent + 16}px` }}
@@ -60,7 +61,7 @@ const CategoryList = () => {
                     <div className="flex items-center gap-3 flex-1">
                         {hasChildren ? (
                             <button
-                                onClick={() => toggleExpand(category.id)}
+                                onClick={() => toggleExpand(categoryId)}
                                 className="p-1 hover:bg-gray-200 rounded transition"
                             >
                                 {isExpanded ? (
@@ -98,7 +99,7 @@ const CategoryList = () => {
                         <div
                             onClick={(e) => {
                                 e.stopPropagation();
-                                toggleCategoryStatus(category.id);
+                                toggleCategoryStatus(categoryId);
                             }}
                             className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${category.active ? 'bg-green-500' : 'bg-gray-300'}`}
                         >
@@ -109,7 +110,7 @@ const CategoryList = () => {
 
                         <button
                             onClick={() => {
-                                setEditingCategory({ parentId: category.id });
+                                setEditingCategory({ parentId: categoryId });
                                 setShowForm(true);
                             }}
                             className="p-2 hover:bg-green-50 rounded-lg text-green-600 transition"
@@ -127,7 +128,7 @@ const CategoryList = () => {
                         </button>
 
                         <button
-                            onClick={() => handleDelete(category.id, category.name)}
+                            onClick={() => handleDelete(categoryId, category.name)}
                             className="p-2 hover:bg-red-50 rounded-lg text-red-600 transition"
                             title="Delete"
                         >

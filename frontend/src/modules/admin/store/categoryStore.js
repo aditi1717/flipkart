@@ -31,7 +31,7 @@ const useCategoryStore = create((set, get) => ({
     fetchCategories: async () => {
         set({ isLoading: true });
         try {
-            const { data } = await API.get('/categories');
+            const { data } = await API.get('/categories?all=true');
             set({ categories: data, isLoading: false });
         } catch (error) {
             set({ 
@@ -113,28 +113,42 @@ const useCategoryStore = create((set, get) => ({
             
             // We need to implement a deep find if categories are nested.
              const findCategory = (cats) => {
+                if (!cats || !Array.isArray(cats)) return null;
                 for (const cat of cats) {
-                    if (cat.id === id) return cat;
-                    if (cat.items) { // Check 'items' or 'children' or 'subCategories' depending on structure
-                        const found = findCategory(cat.items || cat.children || cat.subCategories || []);
+                    if (cat.id === id || cat._id === id) return cat;
+                    const children = cat.children || cat.subCategories || cat.items;
+                    if (children && Array.isArray(children) && children.length > 0) {
+                        const found = findCategory(children);
                         if (found) return found;
                     }
                 }
                 return null;
             };
 
-            // Recursively find category to get current active status
+            // Determine current status and type
             const currentCat = findCategory(get().categories);
-            const currentStatus = currentCat?.active ?? true; // Default to true if not found to potentially fail gracefully or strict
+            const currentStatus = currentCat?.active ?? true;
+            
+            // Check if it's a subcategory (Mongo ObjectIDs are strings, root IDs are numbers in this project)
+            const isSubCategory = typeof id === 'string';
+            const endpoint = isSubCategory ? `/subcategories/${id}` : `/categories/${id}`;
+            const payload = isSubCategory ? { isActive: !currentStatus } : { active: !currentStatus };
 
             // Call update
-            const { data } = await API.put(`/categories/${id}`, { active: !currentStatus });
+            const { data } = await API.put(endpoint, payload);
             
+            // Transform subcategory data if returned from subcategory endpoint to match our flattened structure
+            const transformedData = isSubCategory ? {
+                ...data,
+                id: data._id,
+                active: data.isActive
+            } : data;
+
             // Update state recursively
              const updateRecursive = (cats) => {
                 return cats.map(cat => {
-                    if (cat.id === id) return data;
-                    if (cat.children) return { ...cat, children: updateRecursive(cat.children) }; // Assuming 'children' prop
+                    if (cat.id === id || cat._id === id) return transformedData;
+                    if (cat.children) return { ...cat, children: updateRecursive(cat.children) };
                     return cat;
                 });
             };

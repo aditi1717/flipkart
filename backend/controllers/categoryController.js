@@ -5,21 +5,20 @@ import Category from '../models/Category.js';
 // @access  Public
 export const getCategories = async (req, res) => {
     try {
+        const query = req.query.all === 'true' ? {} : { active: true };
+        
         // Populate virtual 'subCategories'
-        const categories = await Category.find({})
+        const categories = await Category.find(query)
             .populate('subCategories')
             .lean({ virtuals: true }); // Ensure virtuals are included in lean result
 
-        // Transform if necessary to match frontend expectations (e.g. aliasing subCategories to children?)
-        // The virtual is named 'subCategories'.
-        // Frontend likely uses 'subCategories' or 'children'. 
-        // Admin ProductForm uses 'subCategories' store which fetches separately.
-        // Frontend Header/Menu might use 'children'.
-        // Let's keep 'children' as an alias for compatibility if needed.
-
         const response = categories.map(cat => ({
             ...cat,
-            children: cat.subCategories // Alias
+            children: (cat.subCategories || []).map(sub => ({
+                ...sub,
+                id: sub._id, // Map _id to id for subcategories
+                active: sub.isActive // Map isActive to active for subcategories
+            }))
         }));
 
         res.json(response);
