@@ -352,6 +352,21 @@ const Header = () => {
                             <div
                                 key={cat.id}
                                 onClick={() => cat.name === "For You" ? navigate('/') : navigate(`/category/${cat.name}`)}
+                                onMouseEnter={() => {
+                                    if (window.innerWidth >= 768) { // Desktop only
+                                        setHoveredCategory(cat.name);
+                                        const subcats = cat.children || cat.subCategories || [];
+                                        if (subcats.length > 0) {
+                                            setHoveredSubcategory(subcats[0].name);
+                                        }
+                                    }
+                                }}
+                                onMouseLeave={() => {
+                                    if (window.innerWidth >= 768) {
+                                        setHoveredCategory(null);
+                                        setHoveredSubcategory(null);
+                                    }
+                                }}
                                 className={`flex flex-col items-center gap-1 min-w-[60px] cursor-pointer group relative ${cat.name === 'For You' ? 'md:hidden' : ''}`}
                             >
                                 <div className={`w-10 h-10 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all ${active ? 'bg-blue-600 text-white scale-105 shadow-md' : 'bg-gray-100 text-gray-600 group-hover:bg-blue-50 group-hover:text-blue-600'}`}>
@@ -362,14 +377,9 @@ const Header = () => {
                                 </span>
 
                                 {/* Enhanced Mega Menu with Products */}
-                                {(cat.children?.length > 0 || cat.subCategories?.length > 0) && (
+                                {hoveredCategory === cat.name && (cat.children?.length > 0 || cat.subCategories?.length > 0) && (
                                     <div 
-                                        className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 hidden md:group-hover:block z-50 animate-in fade-in slide-in-from-top-2"
-                                        onMouseEnter={() => setHoveredCategory(cat.name)}
-                                        onMouseLeave={() => {
-                                            setHoveredCategory(null);
-                                            setHoveredSubcategory(null);
-                                        }}
+                                        className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 hidden md:block z-50 animate-in fade-in slide-in-from-top-2"
                                     >
                                         {/* Triangle Pointer */}
                                         <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45 border-t border-l border-gray-100"></div>
