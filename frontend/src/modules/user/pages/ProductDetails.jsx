@@ -963,7 +963,16 @@ const ProductDetails = () => {
                                 <span className="material-icons-outlined text-[24px]">verified_user</span>
                             </div>
                             <div className="flex items-center text-gray-800">
-                                <span className="text-[11px] font-bold text-center leading-tight">Brand<br />Warranty</span>
+                                <span className="text-[11px] font-bold text-center leading-tight">
+                                    {product.warranty?.summary ? (
+                                        <>
+                                            {product.warranty.summary.split(' ').slice(0, 2).join(' ')}<br />
+                                            {product.warranty.summary.split(' ').slice(2).join(' ') || 'Warranty'}
+                                        </>
+                                    ) : (
+                                        <>Brand<br />Warranty</>
+                                    )}
+                                </span>
                                 <span className="material-icons text-[14px] text-gray-400 ml-0.5">chevron_right</span>
                             </div>
                         </div>
