@@ -107,6 +107,13 @@ export const createProduct = async (req, res) => {
         images = images.filter(img => img);
 
         const parseJSON = (data) => {
+            if (Array.isArray(data)) {
+                // Handle duplicate FormData entries (strings representing JSON)
+                if (data.length > 0 && typeof data[0] === 'string' && (data[0].trim().startsWith('[') || data[0].trim().startsWith('{'))) {
+                    return parseJSON(data[data.length - 1]);
+                }
+                return data;
+            }
             if (typeof data === 'string') {
                 try { return JSON.parse(data); } catch (e) { return data; }
             }
@@ -209,6 +216,13 @@ export const updateProduct = async (req, res) => {
             }
              
             const parseJSON = (data) => {
+                if (Array.isArray(data)) {
+                    // Handle duplicate FormData entries (strings representing JSON)
+                    if (data.length > 0 && typeof data[0] === 'string' && (data[0].trim().startsWith('[') || data[0].trim().startsWith('{'))) {
+                        return parseJSON(data[data.length - 1]);
+                    }
+                    return data;
+                }
                 if (typeof data === 'string') {
                     try { return JSON.parse(data); } catch (e) { return data; }
                 }
@@ -224,7 +238,10 @@ export const updateProduct = async (req, res) => {
                 let highlights = parseJSON(updateData.highlights);
                 // Filter to ensure only valid highlights with heading and points
                 if (Array.isArray(highlights)) {
-                    highlights = highlights.filter(h => h.heading || (h.points && h.points.length > 0));
+                    highlights = highlights.map(h => ({
+                        ...h,
+                        points: h.points ? h.points.filter(p => p && p.toString().trim().length > 0) : []
+                    })).filter(h => (h.heading && h.heading.trim().length > 0) || h.points.length > 0);
                 }
                 updateData.highlights = highlights;
             }

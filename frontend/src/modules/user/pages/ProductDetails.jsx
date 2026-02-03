@@ -1057,18 +1057,40 @@ const ProductDetails = () => {
 
                 {/* Mobile Description & Reviews */}
                 <div className="mt-4 px-4 space-y-4">
-                    {/* Highlights Section - Mobile */}
-                    {product.highlights && (
+                    {/* Highlights Section */}
+                    {product.highlights && product.highlights.length > 0 && (
                         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                             <h3 className="text-[16px] font-bold text-gray-900 mb-4">Highlights</h3>
-                            <div 
-                                className="prose prose-sm max-w-none text-gray-700 text-[13px]"
-                                dangerouslySetInnerHTML={{ __html: product.highlights }}
-                                style={{
-                                    lineHeight: '1.6'
-                                }}
-                            />
-                            <style jsx>{`
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                {Array.isArray(product.highlights) ? (
+                                    product.highlights.map((section, idx) => {
+                                        const validPoints = section.points?.filter(p => p && p.trim().length > 0) || [];
+                                        if (!section.heading && validPoints.length === 0) return null;
+                                        
+                                        return (
+                                            <div key={idx}>
+                                                {section.heading && <h4 className="font-bold text-gray-800 text-sm mb-2">{section.heading}</h4>}
+                                                {validPoints.length > 0 && (
+                                                    <ul className="list-disc pl-4 space-y-1">
+                                                        {validPoints.map((point, pIdx) => (
+                                                            <li key={pIdx} className="text-[13px] text-gray-700">{point}</li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    /* Fallback for legacy string data */
+                                    <div 
+                                        className="prose prose-sm max-w-none text-gray-700 text-[13px]"
+                                        dangerouslySetInnerHTML={{ __html: product.highlights }}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    <style jsx>{`
                                 .prose ul, .prose ol {
                                     padding-left: 1.25rem;
                                     margin: 0.5rem 0;
@@ -1101,8 +1123,6 @@ const ProductDetails = () => {
                                     margin: 0.5rem 0;
                                 }
                             `}</style>
-                        </div>
-                    )}
 
                     {/* Description Section */}
                     {product.description && product.description.length > 0 && (

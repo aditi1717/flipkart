@@ -190,6 +190,35 @@ import toast from 'react-hot-toast';
         setFormData(prev => ({ ...prev, [field]: items }));
     };
 
+    // Parse pasted text into highlights format
+    // First line = heading, subsequent lines = bullet points
+    const parseHighlightsFromText = (text) => {
+        const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+        if (lines.length === 0) return;
+        
+        const heading = lines[0];
+        const points = lines.slice(1);
+        
+        // Add as new highlight section
+        setFormData(prev => ({
+            ...prev,
+            highlights: [...prev.highlights, { heading, points: points.length > 0 ? points : [''] }]
+        }));
+    };
+
+    // State for paste modal
+    const [showPasteModal, setShowPasteModal] = useState(false);
+    const [pasteText, setPasteText] = useState('');
+
+    const handlePasteHighlights = () => {
+        if (pasteText.trim()) {
+            parseHighlightsFromText(pasteText);
+            setPasteText('');
+            setShowPasteModal(false);
+            toast.success('Highlights parsed successfully!');
+        }
+    };
+
     // Description Management Functions
     const addDescriptionSection = () => {
         setFormData(prev => ({
@@ -471,6 +500,7 @@ import toast from 'react-hot-toast';
             data.append('description_images', file);
         });
         data.append('skus', JSON.stringify(formData.skus));
+        data.append('highlights', JSON.stringify(formData.highlights));
         data.append('specifications', JSON.stringify(formData.specifications));
         data.append('warranty', JSON.stringify(formData.warranty));
         data.append('returnPolicy', JSON.stringify(formData.returnPolicy));
@@ -554,6 +584,7 @@ import toast from 'react-hot-toast';
     };
 
     return (
+        <>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -851,9 +882,19 @@ import toast from 'react-hot-toast';
 
                     {/* Product Highlights (Dynamic Sections) */}
                     <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-                        <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
-                            <span className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold"><span className="material-icons text-[18px]">star</span></span>
-                            <h2 className="text-lg font-bold text-gray-800">Product Highlights</h2>
+                        <div className="flex items-center justify-between border-b border-gray-50 pb-4">
+                            <div className="flex items-center gap-3">
+                                <span className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold"><span className="material-icons text-[18px]">star</span></span>
+                                <h2 className="text-lg font-bold text-gray-800">Product Highlights</h2>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowPasteModal(true)}
+                                className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-amber-200 transition-colors flex items-center gap-1"
+                            >
+                                <span className="material-icons text-sm">content_paste</span>
+                                Paste & Parse
+                            </button>
                         </div>
                         <div className="space-y-4">
                             <p className="text-[11px] text-gray-500 font-bold uppercase">Create multiple highlight sections (e.g., Specifications, Easy Payment Options)</p>
@@ -1310,6 +1351,7 @@ import toast from 'react-hot-toast';
                 <div className="lg:col-span-4 space-y-8">
 
 
+
                     {/* Metadata Card - Simplified */}
                     <section className="space-y-4">
                         {/* Description (Headings with Points) */}
@@ -1613,6 +1655,50 @@ import toast from 'react-hot-toast';
                 </div>
             </div>
         </div>
+
+        {/* Paste Highlights Modal */}
+        {showPasteModal && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-bold text-gray-900">Paste Highlights</h3>
+                        <button
+                            type="button"
+                            onClick={() => { setShowPasteModal(false); setPasteText(''); }}
+                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                            <MdClose size={20} />
+                        </button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                        Paste text with <strong>first line as heading</strong> and <strong>subsequent lines as bullet points</strong>.
+                    </p>
+                    <textarea
+                        value={pasteText}
+                        onChange={(e) => setPasteText(e.target.value)}
+                        className="w-full h-40 border border-gray-200 rounded-xl p-3 text-sm resize-none focus:border-yellow-500 outline-none"
+                        placeholder={`Easy Payment Options\nNo cost EMI starting from ₹6,667/month\nCash on Delivery\nNet banking & Credit/ Debit/ ATM card`}
+                    />
+                    <div className="flex gap-3">
+                        <button
+                            type="button"
+                            onClick={() => { setShowPasteModal(false); setPasteText(''); }}
+                            className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handlePasteHighlights}
+                            className="flex-1 py-2.5 bg-yellow-500 text-white rounded-xl text-sm font-bold hover:bg-yellow-600"
+                        >
+                            Parse & Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 };
 
