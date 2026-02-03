@@ -58,8 +58,13 @@ import toast from 'react-hot-toast';
         // Description with headings and points
         description: [{
             heading: '',
+            content: '',
+            image: null, // { type: 'url'|'file', content: string|File, preview: string }
             points: ['']
         }],
+        
+        // Specifications (Optional grouped specs)
+        specifications: [{ groupName: '', specs: [{ key: '', value: '' }] }],
         
         // Warranty & Returns
         warranty: { summary: '', covered: '', notCovered: '' },
@@ -101,7 +106,11 @@ import toast from 'react-hot-toast';
                 subCategories: product.subCategories?.map(s => s._id || s) || (product.subCategory ? [product.subCategory._id || product.subCategory] : []),
                 skus: product.skus || [],
                 highlights: Array.isArray(product.highlights) ? product.highlights : [{ heading: '', points: [''] }],
-                description: product.description || [{ heading: '', points: [''] }],
+                description: product.description ? product.description.map(d => ({
+                    ...d,
+                    image: d.image ? { type: 'url', content: d.image, preview: d.image } : null
+                })) : [{ heading: '', content: '', image: null, points: [''] }],
+                specifications: product.specifications || [{ groupName: '', specs: [{ key: '', value: '' }] }],
                 warranty: product.warranty || { summary: '', covered: '', notCovered: '' },
                 returnPolicy: product.returnPolicy || { days: 7, description: '' }
             });
@@ -220,6 +229,28 @@ import toast from 'react-hot-toast';
         setFormData(prev => ({ ...prev, description: newDesc }));
     };
 
+    const updateDescriptionContent = (idx, value) => {
+        const newDesc = [...formData.description];
+        newDesc[idx].content = value;
+        setFormData(prev => ({ ...prev, description: newDesc }));
+    };
+
+    const handleDescriptionImageUpload = (e, idx) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const previewUrl = URL.createObjectURL(file);
+        const newDesc = [...formData.description];
+        newDesc[idx].image = { type: 'file', content: file, preview: previewUrl };
+        setFormData(prev => ({ ...prev, description: newDesc }));
+    };
+
+    const removeDescriptionImage = (idx) => {
+        const newDesc = [...formData.description];
+        newDesc[idx].image = null;
+        setFormData(prev => ({ ...prev, description: newDesc }));
+    };
+
     const toggleSubCategory = (subId) => {
         setFormData(prev => {
             const current = prev.subCategories || [];
@@ -327,6 +358,45 @@ import toast from 'react-hot-toast';
         setFormData(prev => ({ ...prev, skus: newSkus }));
     };
 
+    // Specifications handlers
+    const addSpecificationGroup = () => {
+        setFormData(prev => ({
+            ...prev,
+            specifications: [...prev.specifications, { groupName: '', specs: [{ key: '', value: '' }] }]
+        }));
+    };
+
+    const removeSpecificationGroup = (groupIdx) => {
+        setFormData(prev => ({
+            ...prev,
+            specifications: prev.specifications.filter((_, idx) => idx !== groupIdx)
+        }));
+    };
+
+    const updateSpecificationGroupName = (groupIdx, value) => {
+        const newSpecs = [...formData.specifications];
+        newSpecs[groupIdx].groupName = value;
+        setFormData(prev => ({ ...prev, specifications: newSpecs }));
+    };
+
+    const addSpecToGroup = (groupIdx) => {
+        const newSpecs = [...formData.specifications];
+        newSpecs[groupIdx].specs.push({ key: '', value: '' });
+        setFormData(prev => ({ ...prev, specifications: newSpecs }));
+    };
+
+    const removeSpecFromGroup = (groupIdx, specIdx) => {
+        const newSpecs = [...formData.specifications];
+        newSpecs[groupIdx].specs = newSpecs[groupIdx].specs.filter((_, idx) => idx !== specIdx);
+        setFormData(prev => ({ ...prev, specifications: newSpecs }));
+    };
+
+    const updateSpec = (groupIdx, specIdx, field, value) => {
+        const newSpecs = [...formData.specifications];
+        newSpecs[groupIdx].specs[specIdx][field] = value;
+        setFormData(prev => ({ ...prev, specifications: newSpecs }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -378,8 +448,30 @@ import toast from 'react-hot-toast';
         // Complex objects
         data.append('categoryPath', JSON.stringify(formData.categoryPath));
         data.append('highlights', JSON.stringify(formData.highlights));
-        data.append('description', JSON.stringify(formData.description));
+        data.append('highlights', JSON.stringify(formData.highlights));
+        
+        // Process Description Images
+        const descriptionImages = [];
+        const processedDescription = formData.description.map(desc => {
+            const newDesc = { ...desc };
+            if (newDesc.image && newDesc.image.type === 'file') {
+                descriptionImages.push(newDesc.image.content);
+                newDesc.image = `DESCRIPTION_INDEX::${descriptionImages.length - 1}`;
+            } else if (newDesc.image && newDesc.image.type === 'url') {
+                newDesc.image = newDesc.image.content;
+            }
+             // Handle cleanup of null/undefined images
+             if (!newDesc.image) newDesc.image = '';
+             return newDesc;
+        });
+
+        data.append('description', JSON.stringify(processedDescription));
+        
+        descriptionImages.forEach(file => {
+            data.append('description_images', file);
+        });
         data.append('skus', JSON.stringify(formData.skus));
+        data.append('specifications', JSON.stringify(formData.specifications));
         data.append('warranty', JSON.stringify(formData.warranty));
         data.append('returnPolicy', JSON.stringify(formData.returnPolicy));
 
@@ -1289,6 +1381,64 @@ import toast from 'react-hot-toast';
                                                         <MdAdd size={14} /> Add Point
                                                     </button>
                                                 </div>
+
+                                                {/* Description Content */}
+                                                <div className="mt-4">
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Paragraph Content <span className="text-gray-300 font-medium normal-case tracking-normal">(Optional)</span></label>
+                                                    <textarea
+                                                        value={section.content || ''}
+                                                        onChange={(e) => updateDescriptionContent(sectionIdx, e.target.value)}
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all min-h-[100px]"
+                                                        placeholder="Detailed description paragraph..."
+                                                    />
+                                                </div>
+
+                                                {/* Description Image */}
+                                                <div className="mt-4">
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Section Image <span className="text-gray-300 font-medium normal-case tracking-normal">(Optional)</span></label>
+                                                    <div className="relative group w-full h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all hover:border-indigo-400 hover:bg-indigo-50/30">
+                                                        {section.image ? (
+                                                            <>
+                                                                <img 
+                                                                    src={section.image.preview} 
+                                                                    alt="Description" 
+                                                                    className="w-full h-full object-contain p-2" 
+                                                                />
+                                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                                                                    <label className="p-2 bg-white rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
+                                                                        <MdImage className="text-indigo-600" size={20} />
+                                                                        <input 
+                                                                            type="file" 
+                                                                            className="hidden" 
+                                                                            accept="image/*"
+                                                                            onChange={(e) => handleDescriptionImageUpload(e, sectionIdx)} 
+                                                                        />
+                                                                    </label>
+                                                                    <button 
+                                                                        type="button"
+                                                                        onClick={() => removeDescriptionImage(sectionIdx)}
+                                                                        className="p-2 bg-white rounded-full hover:scale-110 transition-transform shadow-lg"
+                                                                    >
+                                                                        <MdDelete className="text-red-600" size={20} />
+                                                                    </button>
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                                                                <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-2 shadow-sm group-hover:scale-110 transition-transform">
+                                                                    <MdAdd size={20} />
+                                                                </div>
+                                                                <span className="text-xs font-bold text-gray-600">Upload Image</span>
+                                                                <input 
+                                                                    type="file" 
+                                                                    className="hidden" 
+                                                                    accept="image/*"
+                                                                    onChange={(e) => handleDescriptionImageUpload(e, sectionIdx)} 
+                                                                />
+                                                            </label>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -1378,6 +1528,84 @@ import toast from 'react-hot-toast';
                                             placeholder="Easy returns within 7 days. Product must be unused with original tags..."
                                         />
                                     </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Specifications - Optional */}
+                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
+                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('specifications')}>
+                                <div className="flex items-center gap-3">
+                                    <span className="material-icons text-purple-500">fact_check</span>
+                                    <h3 className="font-bold text-gray-800 text-sm">Specifications (Optional)</h3>
+                                </div>
+                                {sections.specifications ? <MdExpandLess /> : <MdExpandMore />}
+                            </div>
+                            {sections.specifications && (
+                                <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-4 animate-in fade-in slide-in-from-top-2">
+                                    {formData.specifications.map((group, groupIdx) => (
+                                        <div key={groupIdx} className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <input
+                                                    type="text"
+                                                    value={group.groupName}
+                                                    onChange={(e) => updateSpecificationGroupName(groupIdx, e.target.value)}
+                                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 focus:border-purple-500 outline-none"
+                                                    placeholder="Group Name (e.g., Warranty, Battery Features)"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeSpecificationGroup(groupIdx)}
+                                                    className="p-2 hover:bg-red-50 rounded-lg text-red-500 transition-colors"
+                                                    title="Remove Group"
+                                                >
+                                                    <MdDelete size={20} />
+                                                </button>
+                                            </div>
+                                            
+                                            {group.specs.map((spec, specIdx) => (
+                                                <div key={specIdx} className="flex items-center gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={spec.key}
+                                                        onChange={(e) => updateSpec(groupIdx, specIdx, 'key', e.target.value)}
+                                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold text-gray-600 focus:border-purple-500 outline-none"
+                                                        placeholder="Key (e.g., Battery Capacity)"
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        value={spec.value}
+                                                        onChange={(e) => updateSpec(groupIdx, specIdx, 'value', e.target.value)}
+                                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-purple-500 outline-none"
+                                                        placeholder="Value (e.g., 6500 mAh)"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeSpecFromGroup(groupIdx, specIdx)}
+                                                        className="p-1.5 hover:bg-red-50 rounded-lg text-red-400 transition-colors"
+                                                    >
+                                                        <MdDelete size={16} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            
+                                            <button
+                                                type="button"
+                                                onClick={() => addSpecToGroup(groupIdx)}
+                                                className="w-full py-2 border border-dashed border-purple-300 rounded-lg text-purple-600 text-xs font-bold hover:bg-purple-50 transition-colors flex items-center justify-center gap-1"
+                                            >
+                                                <MdAdd size={16} /> Add Specification
+                                            </button>
+                                        </div>
+                                    ))}
+                                    
+                                    <button
+                                        type="button"
+                                        onClick={addSpecificationGroup}
+                                        className="w-full py-2.5 bg-purple-100 text-purple-600 rounded-xl font-bold hover:bg-purple-200 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <MdAdd size={20} /> Add Specification Group
+                                    </button>
                                 </div>
                             )}
                         </div>

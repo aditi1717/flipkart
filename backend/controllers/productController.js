@@ -134,6 +134,22 @@ export const createProduct = async (req, res) => {
              }
         }
 
+        let description = parseJSON(body.description);
+        if (req.files && req.files.description_images) {
+            const descFiles = req.files.description_images;
+            if (Array.isArray(description)) {
+                description = description.map(desc => {
+                    if (desc.image && typeof desc.image === 'string' && desc.image.startsWith('DESCRIPTION_INDEX::')) {
+                        const idx = parseInt(desc.image.split('::')[1]);
+                        if (descFiles[idx]) {
+                             return { ...desc, image: descFiles[idx].path };
+                        }
+                    }
+                    return desc;
+                });
+            }
+        }
+
         const product = new Product({
             id: body.id || Date.now(),
             name: body.name,
@@ -148,11 +164,12 @@ export const createProduct = async (req, res) => {
             subCategories: parseJSON(body.subCategories) || [], // Handle multiple subcategories
             categoryPath: parseJSON(body.categoryPath),
             highlights: parseJSON(body.highlights),
-            description: parseJSON(body.description),
+            description,
             stock: Number(body.stock),
             variantHeadings,
             skus: parseJSON(body.skus),
             deliveryDays: Number(body.deliveryDays),
+            specifications: parseJSON(body.specifications) || [],
             warranty: parseJSON(body.warranty),
             returnPolicy: parseJSON(body.returnPolicy)
         });
@@ -203,7 +220,14 @@ export const updateProduct = async (req, res) => {
             
             // Parse complex fields
             if (updateData.categoryPath) updateData.categoryPath = parseJSON(updateData.categoryPath);
-            if (updateData.description) updateData.description = parseJSON(updateData.description);
+            if (updateData.highlights) {
+                let highlights = parseJSON(updateData.highlights);
+                // Filter to ensure only valid highlights with heading and points
+                if (Array.isArray(highlights)) {
+                    highlights = highlights.filter(h => h.heading || (h.points && h.points.length > 0));
+                }
+                updateData.highlights = highlights;
+            }
             if (updateData.skus) updateData.skus = parseJSON(updateData.skus);
             if (updateData.warranty) updateData.warranty = parseJSON(updateData.warranty);
             if (updateData.returnPolicy) updateData.returnPolicy = parseJSON(updateData.returnPolicy);
@@ -211,7 +235,6 @@ export const updateProduct = async (req, res) => {
             if (updateData.variantHeadings) {
                 let variantHeadings = parseJSON(updateData.variantHeadings);
                 if (req.files && req.files.variant_images) {
-                    // ... (Variant image logic - kept same)
                      const variantFiles = req.files.variant_images;
                      if (Array.isArray(variantHeadings)) {
                          variantHeadings = variantHeadings.map(vh => ({
@@ -229,6 +252,25 @@ export const updateProduct = async (req, res) => {
                      }
                 }
                 updateData.variantHeadings = variantHeadings;
+            }
+
+            if (updateData.description) {
+                let description = parseJSON(updateData.description);
+                if (req.files && req.files.description_images) {
+                    const descFiles = req.files.description_images;
+                    if (Array.isArray(description)) {
+                        description = description.map(desc => {
+                            if (desc.image && typeof desc.image === 'string' && desc.image.startsWith('DESCRIPTION_INDEX::')) {
+                                const idx = parseInt(desc.image.split('::')[1]);
+                                if (descFiles[idx]) {
+                                    return { ...desc, image: descFiles[idx].path };
+                                }
+                            }
+                            return desc;
+                        });
+                    }
+                }
+                updateData.description = description;
             }
 
             // Safe Number Casting
@@ -253,8 +295,8 @@ export const updateProduct = async (req, res) => {
                  updateData.subCategories = parseJSON(updateData.subCategories) || [];
             }
 
-            if (updateData.highlights !== undefined) {
-                updateData.highlights = parseJSON(updateData.highlights);
+            if (updateData.specifications !== undefined) {
+                updateData.specifications = parseJSON(updateData.specifications) || [];
             }
 
             if (image) updateData.image = image;

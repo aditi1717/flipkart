@@ -25,9 +25,20 @@ const productSchema = mongoose.Schema({
     // Product Description (Headings with Bullet Points)
     description: [{
         heading: { type: String },
-        points: [{ type: String }]
+        points: [{ type: String }],
+        content: { type: String }, // Paragraph text
+        image: { type: String } // Image URL/Path
     }],
     deliveryDays: { type: Number, default: 5 },
+
+    // Specifications (Optional grouped key-value specs)
+    specifications: [{
+        groupName: { type: String },
+        specs: [{
+            key: { type: String },
+            value: { type: String }
+        }]
+    }],
 
     // Warranty & Returns
     warranty: {

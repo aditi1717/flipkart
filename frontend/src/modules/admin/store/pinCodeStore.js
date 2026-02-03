@@ -48,6 +48,29 @@ const usePinCodeStore = create((set, get) => ({
         } catch (error) {
             toast.error('Failed to delete PIN Code');
         }
+    },
+
+    bulkImportPinCodes: async (file) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const { data } = await API.post('/pincodes/bulk-import', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            // Refresh the pincode list
+            get().fetchPinCodes();
+            
+            toast.success(`Import completed: ${data.results.successful} added, ${data.results.skipped} skipped`);
+            return data.results;
+        } catch (error) {
+            const message = error.response?.data?.message || 'Failed to import Excel file';
+            toast.error(message);
+            return null;
+        }
     }
 }));
 

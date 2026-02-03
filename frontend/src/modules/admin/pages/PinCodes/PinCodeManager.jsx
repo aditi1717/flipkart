@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { MdLocationOn, MdDelete, MdAdd, MdTimer } from 'react-icons/md';
+import { MdLocationOn, MdDelete, MdAdd, MdTimer, MdUpload, MdDownload } from 'react-icons/md';
 import usePinCodeStore from '../../store/pinCodeStore';
 
 const PinCodeManager = () => {
-    const { pinCodes, fetchPinCodes, addPinCode, deletePinCode, isLoading } = usePinCodeStore();
+    const { pinCodes, fetchPinCodes, addPinCode, deletePinCode, bulkImportPinCodes, isLoading } = usePinCodeStore();
     const [formData, setFormData] = useState({
         code: '',
         deliveryTime: '',
         unit: 'days'
     });
+    const [importResults, setImportResults] = useState(null);
+    const [isImporting, setIsImporting] = useState(false);
 
     useEffect(() => {
         fetchPinCodes();
@@ -25,6 +27,32 @@ const PinCodeManager = () => {
         if (success) {
             setFormData({ code: '', deliveryTime: '', unit: 'days' });
         }
+    };
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setIsImporting(true);
+        setImportResults(null);
+
+        const result = await bulkImportPinCodes(file);
+        setImportResults(result);
+        setIsImporting(false);
+
+        // Reset file input
+        e.target.value = '';
+    };
+
+    const downloadTemplate = () => {
+        const csvContent = "Pincode,DeliveryTime,Unit\n110001,2,days\n400001,3,days\n560001,4,days";
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'pincode_template.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
     };
 
     return (
@@ -93,6 +121,58 @@ const PinCodeManager = () => {
                         </button>
                     </div>
                 </form>
+
+                {/* Import Results */}
+                {importResults && (
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <h3 className="font-bold text-blue-900 mb-2">Import Summary</h3>
+                        <div className="text-sm space-y-1">
+                            <p className="text-gray-700"><span className="font-bold">Total Rows:</span> {importResults.total}</p>
+                            <p className="text-green-700"><span className="font-bold">Successful:</span> {importResults.successful}</p>
+                            <p className="text-yellow-700"><span className="font-bold">Skipped (Duplicates):</span> {importResults.skipped}</p>
+                            {importResults.errors && importResults.errors.length > 0 && (
+                                <div className="mt-2">
+                                    <p className="text-red-700 font-bold">Errors:</p>
+                                    <ul className="list-disc list-inside text-red-600 text-xs">
+                                        {importResults.errors.map((err, idx) => (
+                                            <li key={idx}>{err}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Bulk Import Section */}
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-2xl shadow-sm border border-purple-100">
+                <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <MdUpload className="text-purple-500" /> Bulk Import from Excel
+                </h2>
+                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                    <div className="flex-1">
+                        <p className="text-sm text-gray-600 mb-2">Upload an Excel file (.xlsx, .xls) with columns: <span className="font-mono font-bold">Pincode, DeliveryTime, Unit</span></p>
+                        <label className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition shadow-lg shadow-purple-200 cursor-pointer">
+                            <MdUpload size={20} />
+                            {isImporting ? 'Importing...' : 'Choose Excel File'}
+                            <input 
+                                type="file" 
+                                accept=".xlsx,.xls,.csv" 
+                                onChange={handleFileUpload}
+                                disabled={isImporting}
+                                className="hidden" 
+                            />
+                        </label>
+                    </div>
+                    <button
+                        onClick={downloadTemplate}
+                        className="px-4 py-2.5 bg-white text-purple-600 border border-purple-300 font-bold rounded-xl hover:bg-purple-50 transition flex items-center gap-2"
+                    >
+                        <MdDownload size={18} />
+                        Download Template
+                    </button>
+                </div>
             </div>
 
             {/* List of PIN Codes */}

@@ -642,29 +642,85 @@ const ProductDetails = () => {
 
 
 
-                        {/* Product Description Section - Desktop Right Column */}
+                        {/* Product Description Section - Rich Zig-Zag Layout */}
                         {product.description && product.description.length > 0 && (
-                            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm mt-6">
-                                <h3 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-3">Product Description</h3>
-                                <div className="space-y-5">
-                                    {product.description.map((section, idx) => (
-                                        <div key={idx} className="space-y-2">
-                                            {section.heading && (
-                                                <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
-                                                    {section.heading}
-                                                </h4>
+                            <div className="space-y-12 mt-12 mb-12">
+                                <h3 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4">Product Description</h3>
+                                
+                                {product.description.map((section, idx) => {
+                                    const isEven = idx % 2 === 0;
+                                    const hasImage = !!section.image;
+
+                                    return (
+                                        <div key={idx} className={`flex flex-col md:flex-row gap-8 items-center ${!isEven && hasImage ? 'md:flex-row-reverse' : ''}`}>
+                                            
+                                            {/* Text Content */}
+                                            <div className={`flex-1 space-y-4 ${hasImage ? '' : 'w-full'}`}>
+                                                {section.heading && (
+                                                    <h4 className="text-2xl font-semibold text-gray-900 leading-tight">
+                                                        {section.heading}
+                                                    </h4>
+                                                )}
+                                                
+                                                {section.content && (
+                                                    <p className="text-amber-800 text-sm leading-relaxed whitespace-pre-line">
+                                                        {section.content}
+                                                    </p>
+                                                )}
+
+                                                {section.points && section.points.length > 0 && section.points[0] !== '' && (
+                                                    <ul className="space-y-2 mt-4">
+                                                        {section.points.map((point, pIdx) => (
+                                                            point && (
+                                                                <li key={pIdx} className="flex items-start gap-3 text-sm text-gray-700">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-2 flex-shrink-0"></span>
+                                                                    <span className="leading-relaxed">{point}</span>
+                                                                </li>
+                                                            )
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </div>
+
+                                            {/* Image Content */}
+                                            {hasImage && (
+                                                <div className="w-full md:w-auto md:max-w-[280px] flex-shrink-0">
+                                                    <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white">
+                                                        <img 
+                                                            src={section.image} 
+                                                            alt={section.heading || 'Product Detail'} 
+                                                            className="w-full h-auto object-contain" 
+                                                        />
+                                                    </div>
+                                                </div>
                                             )}
-                                            <ul className="space-y-1.5 pl-1">
-                                                {section.points?.map((point, pointIdx) => (
-                                                    point && (
-                                                        <li key={pointIdx} className="flex items-start gap-2 text-sm text-gray-900 font-medium">
-                                                            <span className="text-blue-600 mt-1 flex-shrink-0 font-bold">•</span>
-                                                            <span className="leading-relaxed">{point}</span>
-                                                        </li>
-                                                    )
-                                                ))}
-                                            </ul>
                                         </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Specifications Section */}
+                        {product.specifications && product.specifications.length > 0 && product.specifications[0].groupName && (
+                            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mt-6">
+                                <h3 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4 mb-6">Specifications</h3>
+                                <div className="space-y-6">
+                                    {product.specifications.map((group, idx) => (
+                                        group.groupName && (
+                                            <div key={idx} className="border-b border-gray-100 pb-4 last:border-0">
+                                                <h4 className="text-lg font-semibold text-gray-900 mb-3">{group.groupName}</h4>
+                                                <div className="space-y-2">
+                                                    {group.specs && group.specs.map((spec, specIdx) => (
+                                                        spec.key && spec.value && (
+                                                            <div key={specIdx} className="flex items-start gap-4">
+                                                                <span className="text-sm text-gray-500 min-w-[140px]">{spec.key}</span>
+                                                                <span className="text-sm text-gray-900 font-medium">{spec.value}</span>
+                                                            </div>
+                                                        )
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )
                                     ))}
                                 </div>
                             </div>
