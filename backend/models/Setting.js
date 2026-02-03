@@ -9,6 +9,7 @@ const settingSchema = mongoose.Schema({
     signatureUrl: { type: String, default: '' },
     contactEmail: { type: String, default: '' },
     contactPhone: { type: String, default: '' },
+    fssai: { type: String, default: '' },
 }, {
     timestamps: true,
 });

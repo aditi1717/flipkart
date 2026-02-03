@@ -147,6 +147,7 @@ export const createProduct = async (req, res) => {
             categoryId: body.categoryId ? Number(body.categoryId) : undefined,
             subCategories: parseJSON(body.subCategories) || [], // Handle multiple subcategories
             categoryPath: parseJSON(body.categoryPath),
+            highlights: parseJSON(body.highlights),
             description: parseJSON(body.description),
             stock: Number(body.stock),
             variantHeadings,
@@ -250,6 +251,10 @@ export const updateProduct = async (req, res) => {
 
             if (updateData.subCategories !== undefined) {
                  updateData.subCategories = parseJSON(updateData.subCategories) || [];
+            }
+
+            if (updateData.highlights !== undefined) {
+                updateData.highlights = parseJSON(updateData.highlights);
             }
 
             if (image) updateData.image = image;

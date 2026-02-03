@@ -30,7 +30,8 @@ const updateSettings = async (req, res) => {
             gstNumber,
             panNumber,
             contactEmail,
-            contactPhone
+            contactPhone,
+            fssai
         } = req.body;
 
         let settings = await Setting.findOne();
@@ -57,6 +58,7 @@ const updateSettings = async (req, res) => {
             settings.signatureUrl = signatureUrl || settings.signatureUrl;
             settings.contactEmail = contactEmail || settings.contactEmail;
             settings.contactPhone = contactPhone || settings.contactPhone;
+            settings.fssai = fssai || settings.fssai;
 
             const updatedSettings = await settings.save();
             res.json(updatedSettings);
@@ -70,7 +72,8 @@ const updateSettings = async (req, res) => {
                 logoUrl,
                 signatureUrl,
                 contactEmail,
-                contactPhone
+                contactPhone,
+                fssai
             });
             res.json(newSettings);
         }

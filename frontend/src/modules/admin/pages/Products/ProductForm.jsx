@@ -4,6 +4,7 @@ import { MdClose, MdAdd, MdDelete, MdImage, MdExpandMore, MdExpandLess, MdArrowB
 import useProductStore from '../../store/productStore';
 import useCategoryStore from '../../store/categoryStore';
 import useSubCategoryStore from '../../store/subCategoryStore';
+import RichTextEditor from '../../components/RichTextEditor';
 import toast from 'react-hot-toast';
 
     const ProductForm = () => {
@@ -27,6 +28,7 @@ import toast from 'react-hot-toast';
 
     // Collapsible Sections State
     const [sections, setSections] = useState({
+        highlights: true,
         description: true,
         warranty: true,
         returnPolicy: true
@@ -51,6 +53,8 @@ import toast from 'react-hot-toast';
         variantHeadings: [], // { name: 'Color', hasImage: true, options: [{ name: 'Red', image: '' }] }
         skus: [], // { combination: { Color: 'Red', Size: 'M' }, stock: 10 }
         subCategories: [], // Selected subcategory ObjectIds
+        // Product Highlights (Structured sections with heading and points)
+        highlights: [{ heading: '', points: [''] }],
         // Description with headings and points
         description: [{
             heading: '',
@@ -96,6 +100,7 @@ import toast from 'react-hot-toast';
                 ),
                 subCategories: product.subCategories?.map(s => s._id || s) || (product.subCategory ? [product.subCategory._id || product.subCategory] : []),
                 skus: product.skus || [],
+                highlights: Array.isArray(product.highlights) ? product.highlights : [{ heading: '', points: [''] }],
                 description: product.description || [{ heading: '', points: [''] }],
                 warranty: product.warranty || { summary: '', covered: '', notCovered: '' },
                 returnPolicy: product.returnPolicy || { days: 7, description: '' }
@@ -372,6 +377,7 @@ import toast from 'react-hot-toast';
 
         // Complex objects
         data.append('categoryPath', JSON.stringify(formData.categoryPath));
+        data.append('highlights', JSON.stringify(formData.highlights));
         data.append('description', JSON.stringify(formData.description));
         data.append('skus', JSON.stringify(formData.skus));
         data.append('warranty', JSON.stringify(formData.warranty));
@@ -748,6 +754,101 @@ import toast from 'react-hot-toast';
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    </section>
+
+                    {/* Product Highlights (Dynamic Sections) */}
+                    <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
+                        <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
+                            <span className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold"><span className="material-icons text-[18px]">star</span></span>
+                            <h2 className="text-lg font-bold text-gray-800">Product Highlights</h2>
+                        </div>
+                        <div className="space-y-4">
+                            <p className="text-[11px] text-gray-500 font-bold uppercase">Create multiple highlight sections (e.g., Specifications, Easy Payment Options)</p>
+                            
+                            {formData.highlights.map((section, sectionIdx) => (
+                                <div key={sectionIdx} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/50 space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="text"
+                                            value={section.heading}
+                                            onChange={(e) => {
+                                                const newHighlights = [...formData.highlights];
+                                                newHighlights[sectionIdx].heading = e.target.value;
+                                                setFormData(prev => ({ ...prev, highlights: newHighlights }));
+                                            }}
+                                            placeholder="Section Heading (e.g., Specifications)"
+                                            className="flex-1 px-4 py-2.5 rounded-xl bg-white border border-gray-300 focus:border-amber-500 outline-none transition-all font-bold text-gray-900"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData(prev => ({
+                                                ...prev,
+                                                highlights: prev.highlights.filter((_, i) => i !== sectionIdx)
+                                            }))}
+                                            className="px-4 py-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all font-bold text-sm"
+                                        >
+                                            Remove Section
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-gray-500 uppercase">Bullet Points</label>
+                                        {section.points.map((point, pointIdx) => (
+                                            <div key={pointIdx} className="flex items-center gap-2">
+                                                <span className="text-gray-400">•</span>
+                                                <input
+                                                    type="text"
+                                                    value={point}
+                                                    onChange={(e) => {
+                                                        const newHighlights = [...formData.highlights];
+                                                        newHighlights[sectionIdx].points[pointIdx] = e.target.value;
+                                                        setFormData(prev => ({ ...prev, highlights: newHighlights }));
+                                                    }}
+                                                    placeholder="Bullet point..."
+                                                    className="flex-1 px-4 py-2 rounded-lg bg-white border border-gray-200 focus:border-amber-500 outline-none transition-all text-sm text-gray-900"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const newHighlights = [...formData.highlights];
+                                                        newHighlights[sectionIdx].points.splice(pointIdx, 1);
+                                                        if (newHighlights[sectionIdx].points.length === 0) {
+                                                            newHighlights[sectionIdx].points = [''];
+                                                        }
+                                                        setFormData(prev => ({ ...prev, highlights: newHighlights }));
+                                                    }}
+                                                    className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-all text-sm font-bold"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const newHighlights = [...formData.highlights];
+                                                newHighlights[sectionIdx].points.push('');
+                                                setFormData(prev => ({ ...prev, highlights: newHighlights }));
+                                            }}
+                                            className="mt-2 px-4 py-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-all text-sm font-bold"
+                                        >
+                                            + Add Bullet Point
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+
+                            <button
+                                type="button"
+                                onClick={() => setFormData(prev => ({
+                                    ...prev,
+                                    highlights: [...prev.highlights, { heading: '', points: [''] }]
+                                }))}
+                                className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:shadow-lg transition-all font-bold"
+                            >
+                                + Add Highlight Section
+                            </button>
                         </div>
                     </section>
 

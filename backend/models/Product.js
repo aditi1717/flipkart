@@ -17,6 +17,10 @@ const productSchema = mongoose.Schema({
     
     // Description & Meta
     tags: [{ type: String }],
+    highlights: [{ // Structured highlights with sections
+        heading: { type: String },
+        points: [{ type: String }]
+    }],
     
     // Product Description (Headings with Bullet Points)
     description: [{

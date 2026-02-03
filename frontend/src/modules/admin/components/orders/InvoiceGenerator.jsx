@@ -1,272 +1,396 @@
-import React, { useRef } from 'react';
-import { useReactToPrint } from 'react-to-print';
+import React, { useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 
-export const InvoiceDisplay = React.forwardRef(({ order, item, items, settings }, ref) => {
-    // Helper to format currency
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            minimumFractionDigits: 2
-        }).format(amount);
+/* ============================================
+   INVOICE DISPLAY
+============================================ */
+
+export const InvoiceDisplay = React.forwardRef(
+  ({ order, item, items, settings: apiSettings }, ref) => {
+    if (!order) return null;
+
+    // Specific seller requirements - prioritize apiSettings from DB
+    const settings = {
+        sellerName: apiSettings?.sellerName || "IndianKart",
+        sellerAddress: apiSettings?.sellerAddress || "123 E-com St, Digital City",
+        gstNumber: apiSettings?.gstNumber || "123456789",
+        panNumber: apiSettings?.panNumber || "LBCPS9976F",
+        signatureUrl: apiSettings?.signatureUrl || "",
+        fssai: apiSettings?.fssai || "N/A"
     };
 
-    const formatDate = (dateString, time = false) => {
-        if (!dateString) return '';
-        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-        if (time) {
-            options.hour = '2-digit';
-            options.minute = '2-digit';
-        }
-        return new Date(dateString).toLocaleDateString('en-IN', options);
-    };
+    const format = (n) => Number(n || 0).toFixed(2);
 
-    const displayItems = items || (item ? [item] : []);
-    
-    // Calculate totals
-    let subtotal = 0;
-    displayItems.forEach(i => {
-        const price = i.price || 0;
-        const qty = i.quantity || i.qty || 1;
-        subtotal += price * qty;
-    });
+    // Robust list selection: items prop > item prop > order.items
+    const list = (items && items.length > 0) 
+      ? items 
+      : (item ? [item] : (order?.items || []));
 
-    const taxRate = 18;
-    const taxableValue = (subtotal / (1 + taxRate/100));
-    const igst = subtotal - taxableValue;
+    const totalQty = list.reduce((a, b) => a + (b.qty || b.quantity || 1), 0);
+    const subtotal = list.reduce((a, b) => a + (b.price * (b.qty || b.quantity || 1)), 0);
+    const handlingFee = 0.00;
+    const totalAmount = subtotal + handlingFee;
 
     return (
-        <div ref={ref} className="p-8 bg-white text-black font-sans max-w-[210mm] mx-auto" style={{ fontSize: '12px', minHeight: '297mm' }}>
-             {/* SHIPPING LABEL SECTION */}
-             <div className="border-2 border-black mb-8 p-0">
-                <div className="grid grid-cols-2 border-b-2 border-black">
-                     <div className="p-2 border-r-2 border-black">
-                         <div className="font-bold text-lg">STD</div>
-                         <div className="text-sm">E-Kart Logistics</div>
-                     </div>
-                     <div className="p-2 flex justify-between items-center">
-                         <div className="font-bold">PREPAID</div>
-                         <div className="font-bold text-xl border-l-2 border-black pl-2">E</div>
-                     </div>
-                </div>
-                
-                <div className="grid grid-cols-[1fr_2fr] border-b-2 border-black h-32">
-                    <div className="p-2 border-r-2 border-black flex flex-col justify-between">
-                         <div className="text-xs">Ordered through</div>
-                         <div className="font-bold text-lg">IndianKart</div>
-                         <div className="flex-1 flex items-center justify-center text-xs mt-2">
-                             <div className="font-bold text-sm tracking-widest break-all text-center">{order.paymentResult?.id || order._id?.substring(0, 10) || order.id?.substring(0, 10)}</div>
-                         </div>
-                    </div>
-                    <div className="p-4 flex items-center justify-center">
-                        <div className="text-center">
-                            <div className="text-[10px] font-bold mb-1 uppercase tracking-tight">Order Tracking ID</div>
-                            <div className="font-mono text-lg font-black border-2 border-black px-4 py-2 bg-gray-50 uppercase">
-                                {order.id || order._id}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <div ref={ref} className="invoice-root">
+        <style>{`
+          .invoice-root {
+            padding: 30px 40px;
+            background: white;
+            color: black;
+            font-family: sans-serif;
+            font-size: 9.5px;
+            max-width: 195mm;
+            margin: 0 auto;
+            box-sizing: border-box;
+          }
+          .label {
+            border: 1px solid black;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 20px auto;
+          }
+          .label table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          .label th, .label td {
+            border: 1px solid black;
+            padding: 3px 5px;
+            text-align: left;
+            vertical-align: top;
+          }
+          .label .brand {
+            font-size: 15px;
+            font-weight: bold;
+          }
+          .label .b2 {
+            width: 35px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            border-top: 1px solid black;
+          }
+          .label-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 5px;
+            font-size: 8px;
+            font-weight: bold;
+          }
+          .dashed {
+            border: none;
+            border-top: 1px dashed #999;
+            margin: 20px 0;
+            width: 100%;
+          }
+          .tax-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-top: 2px solid black;
+            padding-top: 8px;
+          }
+          .tax-header-item {
+            flex: 1;
+            padding-right: 5px;
+          }
+          .addr-grid {
+            display: grid;
+            grid-template-cols: 1.2fr 1fr 1.1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+          }
+          .addr-block {
+            line-height: 1.3;
+          }
+          .addr-title {
+            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 3px;
+            display: block;
+            text-transform: uppercase;
+            color: #444;
+          }
+          .tax-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5px;
+            border: 1px solid #ccc;
+          }
+          .tax-table th, .tax-table td {
+            border: 1px solid #ccc;
+            padding: 5px 4px;
+            text-align: left;
+          }
+          .tax-table th {
+            font-weight: bold;
+            background: #fcfcfc;
+          }
+          .text-right { text-align: right !important; }
+          .text-center { text-align: center !important; }
+          .font-bold { font-weight: bold; }
+          
+          @media print {
+            @page { 
+              size: A4; 
+              margin: 10mm; 
+            }
+            body { -webkit-print-color-adjust: exact; padding: 0; margin: 0; overflow: visible !important; }
+            .invoice-root { 
+              padding: 5mm 0;
+              max-width: none;
+              overflow: visible !important;
+            }
+            .dashed { margin: 15px 0; }
+          }
+        `}</style>
 
-                <div className="p-2 border-b-2 border-black">
-                    <div className="font-bold text-xs uppercase text-gray-400 mb-1 tracking-widest">Shipping/Customer address:</div>
-                    <div className="font-bold text-sm uppercase">{order.shippingAddress?.name || order.user?.name || 'Unknown'}</div>
-                    <div className="text-[10px] text-gray-500 font-medium mb-1">{order.shippingAddress?.email || order.user?.email}</div>
-                    <div className="text-sm mb-1">
-                        {order.address?.line || order.shippingAddress?.address || order.shippingAddress?.street}, {order.address?.city || order.shippingAddress?.city}, {order.address?.state || order.shippingAddress?.state || order.shippingAddress?.country} - <b>{order.address?.pincode || order.shippingAddress?.postalCode || order.shippingAddress?.pincode}</b>
-                    </div>
-                    <div>Phone: <b>{order.shippingAddress?.phone || order.user?.phone || 'N/A'}</b></div>
-                </div>
-
-                <div className="p-2 border-b-2 border-black text-xs bg-gray-50/50">
-                     Sold By: <b>{settings.sellerName}</b>, {settings.sellerAddress}
-                </div>
-                
-                <div className="border-b-2 border-black">
-                     <table className="w-full text-left text-xs">
-                         <thead>
-                             <tr className="border-b border-black bg-gray-100">
-                                 <th className="p-1 border-r border-black w-24">GSTIN</th>
-                                 <th className="p-1 border-r border-black">Product Details</th>
-                                 <th className="p-1 w-12 text-center">QTY</th>
-                             </tr>
-                         </thead>
-                         <tbody>
-                            {displayItems.map((i, idx) => (
-                                <tr key={idx} className={idx < displayItems.length - 1 ? "border-b border-black" : ""}>
-                                    <td className="p-1 border-r border-black align-top font-bold">{settings.gstNumber}</td>
-                                    <td className="p-1 border-r border-black align-top">
-                                        <div className="font-bold uppercase leading-tight">{i.name}</div>
-                                        <div className="text-[9px] text-gray-500 mt-0.5">ID: {i.product || i.id} {i.serialNumber ? `| ${i.serialType === 'IMEI' ? 'IMEI' : 'SN'}: ${i.serialNumber}` : ''}</div>
-                                    </td>
-                                    <td className="p-1 text-center align-top font-bold">{i.quantity || i.qty}</td>
-                                </tr>
-                            ))}
-                         </tbody>
-                     </table>
-                </div>
-
-                 <div className="p-3 flex justify-between items-center">
-                     
-                     <div className="text-right">
-                         <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Print Generation</div>
-                         <div className="text-xs font-mono">{formatDate(new Date(), true)}</div>
-                     </div>
-                 </div>
-                 
-                 <div className="p-1 bg-black text-white text-center text-[10px] font-black uppercase tracking-[0.2em]">
-                     Internal Label • Not for resale • IndianKart Logistics
-                 </div>
-             </div>
-             
-             {/* INVOICE SECTION */}
-             <div className="border-t-2 border-dashed border-gray-300 pt-12 mt-12 relative">
-                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-6 py-1 border border-gray-300 text-[10px] font-black uppercase text-gray-400 tracking-widest rounded-full">Official Tax Invoice</div>
-                 
-                 <div className="flex justify-between items-start mb-10">
-                     <div className="space-y-4">
-                        {settings.logoUrl && (
-                             <img src={settings.logoUrl} alt="Store Logo" className="h-14 object-contain" />
-                        )}
-                        <div>
-                            <h1 className="text-2xl font-black uppercase tracking-tight text-gray-900 leading-none">Tax Invoice</h1>
-                            <div className="mt-3 text-[11px] space-y-0.5 text-gray-500">
-                                <div>Order Ref: <b className="text-black font-mono">{order.id || order._id}</b></div>
-                                <div>Payment ID: <b className="text-black font-mono">{order.payment?.transactionId || 'COD'}</b></div>
-                                <div>Placed At: <b className="text-black">{formatDate(order.createdAt || order.date, true)}</b></div>
-                                <div>Invoice Date: <b className="text-black">{formatDate(new Date())}</b></div>
-                            </div>
-                        </div>
-                     </div>
-                     <div className="text-right bg-gray-50 p-4 rounded-xl border border-gray-100">
-                         <div className="text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Seller Compliance</div>
-                         <div className="text-xs space-y-1">
-                             <div className="flex justify-between gap-8"><span className="text-gray-500 font-bold uppercase">GSTIN</span> <b className="text-black">{settings.gstNumber}</b></div>
-                             <div className="flex justify-between gap-8"><span className="text-gray-500 font-bold uppercase">PAN</span> <b className="text-black">{settings.panNumber}</b></div>
-                             <div className="flex justify-between gap-8"><span className="text-gray-500 font-bold uppercase">Email</span> <b className="text-black">{settings.contactEmail}</b></div>
-                         </div>
-                     </div>
-                 </div>
-
-                 <div className="grid grid-cols-2 gap-12 mb-10 text-xs">
-                     <div className="space-y-2">
-                         <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b pb-1">Sold By</div>
-                         <div className="font-black text-sm text-gray-900 uppercase">{settings.sellerName}</div>
-                         <div className="text-gray-600 leading-relaxed">{settings.sellerAddress}</div>
-                         <div className="text-[10px] font-bold text-gray-400 uppercase">Registered Business Hub</div>
-                     </div>
-                     <div className="space-y-2">
-                         <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b pb-1">Billing & Shipping</div>
-                         <div className="font-black text-sm text-gray-900 uppercase">{order.shippingAddress?.name || order.user?.name || 'Unknown'}</div>
-                         <div className="text-gray-600 leading-relaxed">
-                            {order.address?.line || order.shippingAddress?.address || order.shippingAddress?.street},<br />
-                            {order.address?.city || order.shippingAddress?.city}, {order.address?.state || order.shippingAddress?.state || order.shippingAddress?.country} - {order.address?.pincode || order.shippingAddress?.postalCode || order.shippingAddress?.pincode}
-                         </div>
-                         <div className="font-black text-gray-900">Mob: {order.shippingAddress?.phone || order.user?.phone || 'N/A'}</div>
-                     </div>
-                 </div>
-
-                 <table className="w-full text-xs mb-10 border-collapse border border-gray-200">
-                     <thead>
-                         <tr className="bg-gray-100 border-b border-gray-200">
-                             <th className="p-3 text-left font-black uppercase tracking-widest text-[10px]">Product / HSN</th>
-                             <th className="p-3 text-center font-black uppercase tracking-widest text-[10px]">Qty</th>
-                             <th className="p-3 text-right font-black uppercase tracking-widest text-[10px]">Taxable</th>
-                             <th className="p-3 text-right font-black uppercase tracking-widest text-[10px]">GST (18%)</th>
-                             <th className="p-3 text-right font-black uppercase tracking-widest text-[10px]">Subtotal</th>
-                         </tr>
-                     </thead>
-                     <tbody className="divide-y divide-gray-100">
-                         {displayItems.map((i, idx) => {
-                             const p = i.price || 0;
-                             const q = i.quantity || i.qty || 1;
-                             const t = p * q;
-                             const tv = t / (1 + 18/100);
-                             const tax = t - tv;
-                             
-                             return (
-                                <tr key={idx} className="hover:bg-gray-50/50">
-                                    <td className="p-3">
-                                        <div className="font-black text-gray-900 uppercase">{i.name}</div>
-                                        <div className="text-[9px] text-gray-400 font-bold mt-0.5">HSN: 90029000 | SKU: {i.product || i.id}</div>
-                                    </td>
-                                    <td className="p-3 text-center font-bold text-gray-600">{q}</td>
-                                    <td className="p-3 text-right text-gray-600">{formatCurrency(tv)}</td>
-                                    <td className="p-3 text-right text-gray-600">{formatCurrency(tax)}</td>
-                                    <td className="p-3 text-right font-black text-gray-900">{formatCurrency(t)}</td>
-                                </tr>
-                             );
-                         })}
-                     </tbody>
-                     <tfoot>
-                        <tr className="border-t-2 border-gray-900 bg-gray-50">
-                             <td colSpan="4" className="p-3 text-right font-black text-gray-400 uppercase tracking-widest text-[10px]">Pre-Tax Total</td>
-                             <td className="p-3 text-right font-bold text-gray-600">{formatCurrency(taxableValue)}</td>
-                         </tr>
-                         <tr className="bg-gray-50">
-                             <td colSpan="4" className="p-3 text-right font-black text-gray-400 uppercase tracking-widest text-[10px]">Integrated Tax (18%)</td>
-                             <td className="p-3 text-right font-bold text-gray-600">{formatCurrency(igst)}</td>
-                         </tr>
-                         <tr className="bg-blue-600 text-white">
-                             <td colSpan="4" className="p-4 text-right font-black uppercase tracking-[0.2em] text-[11px]">Grand Total (Inclusive of all taxes)</td>
-                             <td className="p-4 text-right font-black text-lg">{formatCurrency(subtotal)}</td>
-                         </tr>
-                     </tfoot>
-                 </table>
-
-                 <div className="flex justify-between items-end mt-12 bg-gray-50/50 p-6 rounded-2xl border border-dashed border-gray-200">
-                     <div className="text-[11px] max-w-[50%] space-y-4">
-                         <div className="p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
-                            <p className="font-bold text-black mb-1 italic underline">Declaration / T&C:</p>
-                            <p className="text-gray-500 leading-relaxed text-[9px]">We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct. Goods once sold will not be taken back or exchanged. Interest @18% p.a. will be charged if payment is not made within the due date.</p>
-                         </div>
-                         <p className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Currency: Indian Rupee (INR)</p>
-                     </div>
-                     {settings.signatureUrl && (
-                         <div className="text-right">
-                             <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Authorized Signatory</p>
-                             <img src={settings.signatureUrl} alt="Signature" className="h-14 ml-auto object-contain mix-blend-multiply" />
-                             <div className="mt-2 pt-2 border-t border-gray-200">
-                                <p className="text-[11px] font-black text-gray-900 uppercase tracking-tight">For {settings.sellerName}</p>
-                                <p className="text-[9px] text-gray-500 font-bold uppercase">Store Manager / Proprietor</p>
-                             </div>
-                         </div>
-                     )}
-                 </div>
-                 
-                 <div className="mt-12 pt-6 border-t border-gray-100 text-[10px] text-gray-400 text-center uppercase tracking-[0.3em] font-black">
-                     • Electronic Invoice • No Signature Required •
-                 </div>
-             </div>
+        {/* ================= SHIPPING LABEL ================= */}
+        <div className="label">
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: "40px", textAlign: "center", fontSize: "14px" }}>STD</th>
+                <th>
+                  <div style={{ fontSize: "8px" }}>E-Kart Logistics</div>
+                  <div style={{ fontSize: "10px", fontWeight: "bold" }}>{order.id || order._id}</div>
+                </th>
+                <th style={{ width: "100px" }}>
+                  <div style={{ fontSize: "8px" }}>↑FRAGILE</div>
+                  <div style={{ fontSize: "10px", fontWeight: "bold" }}>PREPAID</div>
+                </th>
+                <th style={{ width: "30px", fontSize: "18px", textAlign: "center" }}>E</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan="4" style={{ padding: "8px 5px" }}>
+                   <div style={{ fontSize: "9px", marginBottom: "3px" }}>Ordered through</div>
+                   <div className="brand">IndianKart <span style={{ fontSize: "14px", transform: "scaleX(-1)", display: "inline-block" }}>f</span></div>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan="4" className="addr">
+                  <div style={{ marginBottom: "3px" }}><b>Shipping/Customer address:</b></div>
+                  <div>Name: <b>{order.shippingAddress?.name || order.address?.name || order.user?.name || 'Customer Name'}</b></div>
+                  <div style={{ maxWidth: "250px" }}>{order.address?.line || order.shippingAddress?.address || order.shippingAddress?.street || 'Address Not Available'}</div>
+                  <div>{order.address?.city || order.shippingAddress?.city || 'N/A'}, {order.address?.state || order.shippingAddress?.state || 'N/A'} - <b>{order.address?.pincode || order.shippingAddress?.pincode || order.shippingAddress?.postalCode || 'N/A'}</b>, IN-WB</div>
+                </td>
+              </tr>
+              <tr style={{ height: "35px" }}>
+                <td colSpan="2" style={{ borderRight: "1px solid black" }}>
+                  <div>HBD: {new Date(order.date || order.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: '2-digit' })}</div>
+                  <div>CPD: {new Date().toLocaleDateString("en-IN", { day: '2-digit', month: '2-digit' })}</div>
+                </td>
+                <td colSpan="2">
+                  <div style={{ fontSize: "8px" }}>Sold By:<b>{settings.sellerName}</b>, {settings.sellerAddress}</div>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan="4">
+                  <b>GSTIN: {settings.gstNumber}</b>
+                </td>
+              </tr>
+              <tr>
+                <th className="text-center" style={{ width: "20px" }}>#</th>
+                <th style={{ fontSize: "8px" }}><b>SKU ID | Description</b></th>
+                <th className="text-center" style={{ width: "40px" }}><b>QTY</b></th>
+                <th style={{ width: "40px" }}></th>
+              </tr>
+              {list.map((i, idx) => (
+                <tr key={idx} style={{ height: "45px" }}>
+                  <td className="text-center">{idx + 1}</td>
+                  <td><div className="font-bold">{i.name}</div></td>
+                  <td className="text-center font-bold">{i.qty || i.quantity}</td>
+                  <td></td>
+                </tr>
+              ))}
+              <tr>
+                <td colSpan="3" style={{ padding: "6px" }}>
+                  <div style={{ fontSize: "10px", fontWeight: "bold" }}>FMPP{String(order.id || order._id).slice(0, 8).toUpperCase()}</div>
+                </td>
+                <td className="b2">B2</td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="label-footer">
+            <span>Not for resale.</span>
+            <span>Printed at {new Date().getHours()}{String(new Date().getMinutes()).padStart(2, '0')} hrs, {new Date().toLocaleDateString("en-IN", { day: '2-digit', month: '2-digit', year: '2-digit' })}</span>
+          </div>
         </div>
-    );
-});
 
+        <hr className="dashed" />
+
+        {/* ================= TAX INVOICE ================= */}
+        <div className="tax">
+          <div className="tax-header">
+            <div className="tax-header-item">
+              <h2 style={{ fontSize: "12px", margin: "0 0 3px 0" }}>Tax Invoice</h2>
+            </div>
+            <div className="tax-header-item">
+              Order Id: <b>{order.id || order._id}</b><br />
+              <span style={{ fontSize: "7px" }}>{new Date(order.date || order.createdAt).toLocaleString()}</span>
+            </div>
+            <div className="tax-header-item">
+              Invoice: <b>INV-{String(order.id || order._id).slice(-8).toUpperCase()}</b><br />
+              <span style={{ fontSize: "7px" }}>{new Date().toLocaleString()}</span>
+            </div>
+            <div className="tax-header-item text-right">
+              GST: {settings.gstNumber}<br />
+              PAN: {settings.panNumber}
+            </div>
+          </div>
+
+          <div className="addr-grid">
+            <div className="addr-block">
+              <span className="addr-title">Sold By</span>
+              <div className="font-bold">{settings.sellerName}</div>
+              <div>{settings.sellerAddress}</div>
+              <div style={{ marginTop: "3px" }}>GST: {settings.gstNumber}</div>
+            </div>
+            <div className="addr-block">
+              <span className="addr-title">Billing Address</span>
+              <div className="font-bold">{order.shippingAddress?.name || order.address?.name || order.user?.name || 'Customer'}</div>
+              <div>{order.address?.line || order.shippingAddress?.address || order.shippingAddress?.street || 'N/A'}</div>
+              <div>{order.address?.city || order.shippingAddress?.city || 'N/A'}, {order.address?.state || order.shippingAddress?.state || 'N/A'} - {order.address?.pincode || order.shippingAddress?.pincode || order.shippingAddress?.postalCode || ''}</div>
+            </div>
+            <div className="addr-block">
+              <span className="addr-title">Shipping Address</span>
+              <div className="font-bold">{order.shippingAddress?.name || order.address?.name || order.user?.name || 'Customer'}</div>
+              <div>{order.address?.line || order.shippingAddress?.address || order.shippingAddress?.street || 'N/A'}</div>
+              <div>{order.address?.city || order.shippingAddress?.city || 'N/A'}, {order.address?.state || order.shippingAddress?.state || 'N/A'} - {order.address?.pincode || order.shippingAddress?.pincode || order.shippingAddress?.postalCode || ''}</div>
+            </div>
+          </div>
+
+          <table className="tax-table">
+            <thead>
+              <tr style={{ background: "#eee" }}>
+                <th>Product</th>
+                <th style={{ width: "150px" }}>Description</th>
+                <th className="text-center">Qty</th>
+                <th className="text-right">Gross</th>
+                <th className="text-right">Disc.</th>
+                <th className="text-right">Taxable</th>
+                <th className="text-right">IGST</th>
+                <th className="text-right">CESS</th>
+                <th className="text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((i, idx) => {
+                const gross = i.price * (i.qty || i.quantity || 1);
+                const taxable = gross / 1.18;
+                const tax = gross - taxable;
+
+                return (
+                  <tr key={idx}>
+                    <td>
+                      <div><b>{i.name}</b></div>
+                      {i.serialNumber && <div style={{ fontSize: "7px", color: "#666" }}>IMEI/SN: {i.serialNumber}</div>}
+                    </td>
+                    <td>HSN: 90029000 | 18.00% | 0%</td>
+                    <td className="text-center">{i.qty || i.quantity}</td>
+                    <td className="text-right">{format(gross)}</td>
+                    <td className="text-right">0.00</td>
+                    <td className="text-right">{format(taxable)}</td>
+                    <td className="text-right">{format(tax)}</td>
+                    <td className="text-right">0.00</td>
+                    <td className="text-right font-bold">{format(gross)}</td>
+                  </tr>
+                );
+              })}
+              <tr>
+                <td colSpan="2"><b>Handling Fee</b></td>
+                <td className="text-center">1</td>
+                <td className="text-right">0.00</td>
+                <td className="text-right">0</td>
+                <td className="text-right">0.00</td>
+                <td className="text-right">0.00</td>
+                <td className="text-right">0.00</td>
+                <td className="text-right">0.00</td>
+              </tr>
+              <tr style={{ background: "#f5f5f5", fontWeight: "bold" }}>
+                <td colSpan="2">TOTAL QTY: {totalQty}</td>
+                <td colSpan="6" className="text-right">TOTAL PRICE:</td>
+                <td className="text-right">₹{format(totalAmount)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="text-right" style={{ fontSize: "7px", marginTop: "2px", fontStyle: "italic", color: "#666" }}>
+             All values are in INR
+          </div>
+
+          <div style={{ marginTop: "25px", display: "flex", justifyBetween: "space-between", alignItems: "flex-end" }}>
+            <div style={{ fontSize: "8px", lineHeight: "1.5", color: "#444" }}>
+              <b>Seller Registered Address:</b><br />
+              {settings.sellerName}, {settings.sellerAddress}<br />
+              FSSAI: {settings.fssai || 'N/A'}
+            </div>
+            <div className="text-center" style={{ marginLeft: "auto", minWidth: "120px" }}>
+              {settings.signatureUrl && <img src={settings.signatureUrl} alt="Signature" style={{ height: "35px", marginBottom: "3px" }} />}
+              <div style={{ fontWeight: "bold", fontSize: "9px" }}>{settings.sellerName}</div>
+              <div style={{ borderTop: "1px solid black", paddingTop: "3px", fontSize: "8px", marginTop: "2px" }}>
+                Authorized Signature
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ marginTop: "20px", display: "flex", justifyContent: "space-between", fontSize: "9px", fontWeight: "bold", borderTop: "1px solid #eee", paddingTop: "10px" }}>
+             <span>E. & O.E.</span>
+             <span>Ordered Through IndianKart <span style={{ border: "1px solid black", padding: "0 1px", transform: "scaleX(-1)", display: "inline-block", fontSize: "8px" }}>f</span></span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
+/* ============================================
+   INVOICE GENERATOR WRAPPER
+============================================ */
 
 const InvoiceGenerator = ({ order, item, items, settings, customTrigger }) => {
-    const componentRef = useRef(null);
-    const handlePrint = useReactToPrint({
-        contentRef: componentRef,
-    });
+  const componentRef = useRef(null);
 
-    return (
-        <div>
-            <div style={{ display: 'none' }}>
-                <InvoiceDisplay ref={componentRef} order={order} item={item} items={items} settings={settings || {}} />
-            </div>
-            
-            {customTrigger ? (
-                React.cloneElement(customTrigger, { onClick: handlePrint })
-            ) : (
-                <button 
-                    onClick={handlePrint}
-                    className="text-blue-600 hover:text-blue-800 text-xs font-bold underline flex items-center gap-1"
-                >
-                    <span className="material-icons text-[14px]">print</span> Print Invoice
-                </button>
-            )}
-        </div>
-    );
+  const handlePrint = useReactToPrint({
+    contentRef: componentRef,
+  });
+
+  if (!order) return null;
+
+  const trigger = customTrigger ? (
+    React.cloneElement(customTrigger, { 
+      onClick: (e) => {
+        e.preventDefault();
+        handlePrint();
+      }
+    })
+  ) : (
+    <button
+      onClick={handlePrint}
+      className="bg-black text-white px-4 py-2 rounded font-bold text-sm hover:bg-gray-800 transition-colors"
+    >
+      Print Invoice
+    </button>
+  );
+
+  return (
+    <>
+      <div style={{ display: "none" }}>
+        <InvoiceDisplay
+          ref={componentRef}
+          order={order}
+          item={item}
+          items={items}
+          settings={settings || {}}
+        />
+      </div>
+      {trigger}
+    </>
+  );
 };
 
 export default InvoiceGenerator;

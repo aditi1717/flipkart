@@ -620,6 +620,26 @@ const ProductDetails = () => {
                         </div>
 
 
+                        {/* Product Highlights - Two Column Grid */}
+                        {product.highlights && product.highlights.length > 0 && (
+                            <div className="grid grid-cols-2 gap-12 mb-6 mt-6">
+                                {product.highlights.map((section, idx) => (
+                                    <div key={idx}>
+                                        <h3 className="text-gray-500 font-medium text-sm mb-3">{section.heading}</h3>
+                                        <ul className="space-y-2">
+                                            {section.points.filter(p => p.trim()).map((point, pIdx) => (
+                                                <li key={pIdx} className="flex items-start gap-2 text-sm text-gray-700">
+                                                    <span className="text-gray-400 mt-1.5 text-xs">●</span>
+                                                    <span className="flex-1">{point}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+
 
 
                         {/* Product Description Section - Desktop Right Column */}
@@ -981,6 +1001,53 @@ const ProductDetails = () => {
 
                 {/* Mobile Description & Reviews */}
                 <div className="mt-4 px-4 space-y-4">
+                    {/* Highlights Section - Mobile */}
+                    {product.highlights && (
+                        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+                            <h3 className="text-[16px] font-bold text-gray-900 mb-4">Highlights</h3>
+                            <div 
+                                className="prose prose-sm max-w-none text-gray-700 text-[13px]"
+                                dangerouslySetInnerHTML={{ __html: product.highlights }}
+                                style={{
+                                    lineHeight: '1.6'
+                                }}
+                            />
+                            <style jsx>{`
+                                .prose ul, .prose ol {
+                                    padding-left: 1.25rem;
+                                    margin: 0.5rem 0;
+                                }
+                                .prose li {
+                                    margin: 0.25rem 0;
+                                    color: #374151;
+                                    font-size: 13px;
+                                }
+                                .prose table {
+                                    border-collapse: collapse;
+                                    width: 100%;
+                                    margin: 1rem 0;
+                                    font-size: 12px;
+                                }
+                                .prose th, .prose td {
+                                    border: 1px solid #e5e7eb;
+                                    padding: 6px 8px;
+                                    text-align: left;
+                                }
+                                .prose th {
+                                    background-color: #f3f4f6;
+                                    font-weight: 600;
+                                }
+                                .prose strong {
+                                    font-weight: 700;
+                                    color: #111827;
+                                }
+                                .prose p {
+                                    margin: 0.5rem 0;
+                                }
+                            `}</style>
+                        </div>
+                    )}
+
                     {/* Description Section */}
                     {product.description && product.description.length > 0 && (
                         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
