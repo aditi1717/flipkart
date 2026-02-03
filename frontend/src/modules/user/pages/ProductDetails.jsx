@@ -199,6 +199,37 @@ const ProductDetails = () => {
         return product.stock || 0;
     }, [product, selectedVariants, displayVariantHeadings]);
 
+    const productImages = React.useMemo(() => {
+        if (!product) return [];
+        
+        const images = [
+            product.image,
+            ...(Array.isArray(product.images) ? product.images : [])
+        ];
+
+        // Add images from variant headings
+        displayVariantHeadings.forEach(vh => {
+            if (vh.hasImage && vh.options) {
+                vh.options.forEach(opt => {
+                    if (opt.image) images.push(opt.image);
+                });
+            }
+        });
+
+        return Array.from(new Set(images)).filter(Boolean);
+    }, [product, displayVariantHeadings]);
+
+    const handleVariantSelect = (vhName, optName, optImage) => {
+        setSelectedVariants(prev => ({ ...prev, [vhName]: optName }));
+        
+        if (optImage) {
+            const imgIndex = productImages.indexOf(optImage);
+            if (imgIndex !== -1) {
+                setCurrentImageIndex(imgIndex);
+            }
+        }
+    };
+
     const handleAddToCart = () => {
         addToCart(product, selectedVariants);
         setShowToast(true);
@@ -265,6 +296,20 @@ const ProductDetails = () => {
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [bankOffers, setBankOffers] = useState([]);
+    const mobileGalleryRef = React.useRef(null);
+
+    // Scroll mobile gallery when index changes
+    useEffect(() => {
+        if (mobileGalleryRef.current) {
+            const width = mobileGalleryRef.current.offsetWidth;
+            if (width > 0) {
+                mobileGalleryRef.current.scrollTo({
+                    left: currentImageIndex * width,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }, [currentImageIndex]);
 
     useEffect(() => {
         if (id) {
@@ -287,10 +332,7 @@ const ProductDetails = () => {
         }))
     ];
 
-    const productImages = product ? Array.from(new Set([
-        product.image,
-        ...(Array.isArray(product.images) ? product.images : [])
-    ])).filter(Boolean) : [];
+
 
     const toggleSection = (section) => {
         setExpandedSections(prev => ({
@@ -470,7 +512,7 @@ const ProductDetails = () => {
                                                 vh.hasImage ? (
                                                     <div
                                                         key={idx}
-                                                        onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                                        onClick={() => handleVariantSelect(vh.name, opt.name, opt.image)}
                                                         className={`w-14 h-16 rounded border-2 p-0.5 cursor-pointer transition-all hover:scale-105 ${selectedVariants[vh.name] === opt.name ? 'border-blue-600' : 'border-transparent'}`}
                                                     >
                                                         <img src={opt.image} alt={opt.name} className="w-full h-full object-cover rounded-[2px]" />
@@ -478,7 +520,7 @@ const ProductDetails = () => {
                                                 ) : (
                                                     <button
                                                         key={idx}
-                                                        onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                                        onClick={() => handleVariantSelect(vh.name, opt.name)}
                                                         className={`min-w-[50px] h-10 px-4 rounded-sm border-2 font-bold text-sm transition-all ${selectedVariants[vh.name] === opt.name
                                                             ? 'border-blue-600 text-blue-600 bg-blue-50/20'
                                                             : 'border-gray-200 text-gray-900 hover:border-blue-400'
@@ -720,11 +762,14 @@ const ProductDetails = () => {
                 {/* Product Image Section - Swipable Gallery - No top gap */}
                 <div className="relative w-full aspect-[3/2] bg-[#f9f9f9] border-b border-gray-100 group">
                     <div
+                        ref={mobileGalleryRef}
                         className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-full w-full"
                         onScroll={(e) => {
                             const width = e.target.offsetWidth;
                             const index = Math.round(e.target.scrollLeft / width);
-                            setCurrentImageIndex(index);
+                            if (index !== currentImageIndex) {
+                                setCurrentImageIndex(index);
+                            }
                         }}
                     >
                         {productImages.map((img, idx) => (
@@ -794,7 +839,7 @@ const ProductDetails = () => {
                                             vh.hasImage ? (
                                                 <div
                                                     key={idx}
-                                                    onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                                    onClick={() => handleVariantSelect(vh.name, opt.name, opt.image)}
                                                     className={`min-w-[70px] aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${selectedVariants[vh.name] === opt.name ? 'border-blue-600 shadow-sm' : 'border-gray-100'}`}
                                                 >
                                                     <img src={opt.image} alt={opt.name} className="w-full h-full object-cover" />
@@ -802,7 +847,7 @@ const ProductDetails = () => {
                                             ) : (
                                                 <button
                                                     key={idx}
-                                                    onClick={() => setSelectedVariants(prev => ({ ...prev, [vh.name]: opt.name }))}
+                                                    onClick={() => handleVariantSelect(vh.name, opt.name)}
                                                     className={`h-9 px-4 rounded-lg border-2 font-bold text-xs transition-all ${selectedVariants[vh.name] === opt.name
                                                         ? 'border-blue-600 text-blue-600 bg-blue-50/20'
                                                         : 'border-gray-200 text-gray-700'
