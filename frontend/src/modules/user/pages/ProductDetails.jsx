@@ -108,24 +108,24 @@ const ProductDetails = () => {
             if (data.isServiceable) {
                 setPincodeStatus({
                     isServiceable: true,
-                    message: `Delivered in ${data.deliveryTime} ${data.unit}`,
+                    message: data.message || `Delivered in ${data.deliveryTime} ${data.unit}`,
                     deliveryDate: data.deliveryTime + ' ' + data.unit
                 });
             } else {
                 setPincodeStatus({
                     isServiceable: false,
-                    message: data.message || 'Not serviceable',
-                    deliveryDate: '7 days'
+                    message: data.message || 'Not deliverable to this location',
+                    deliveryDate: null
                 });
+                if (!codeOverride) toast.error(data.message || 'Not deliverable to this location');
             }
         } catch (error) {
-            console.error(error);
+            console.error('Pincode Check Error:', error);
             setPincodeStatus({
                 isServiceable: false,
                 message: 'Area not serviceable',
-                deliveryDate: '7 days'
+                deliveryDate: null
             });
-            // Don't toast on auto-check
             if (!codeOverride) toast.error('Service not available in this area');
         } finally {
             setCheckingPincode(false);
@@ -526,7 +526,7 @@ const ProductDetails = () => {
                                             className="font-bold text-gray-900 text-sm outline-none w-full placeholder:text-gray-400"
                                         />
                                         <button 
-                                            onClick={handleCheckPincode}
+                                            onClick={() => handleCheckPincode()}
                                             disabled={checkingPincode}
                                             className="text-blue-600 text-[11px] font-bold uppercase whitespace-nowrap hover:text-blue-700 disabled:opacity-50"
                                         >
@@ -534,10 +534,10 @@ const ProductDetails = () => {
                                         </button>
                                     </div>
                                     <div className="text-sm">
-                                        <span className={`font-bold ${pincodeStatus?.isServiceable ? 'text-gray-900' : 'text-gray-500'}`}>
+                                        <span className={`font-bold ${pincodeStatus ? (pincodeStatus.isServiceable ? 'text-gray-900' : 'text-red-600') : 'text-gray-500'}`}>
                                             {pincodeStatus ? pincodeStatus.message : `Delivery by ${product.deliveryDate || '7 days'}`}
                                         </span>
-                                        {(!pincodeStatus || pincodeStatus.isServiceable) && (
+                                        {pincodeStatus?.isServiceable && (
                                             <>
                                                 <span className="text-gray-400 mx-1">|</span>
                                                 <span className="text-green-600 font-bold">Free</span>
@@ -546,8 +546,8 @@ const ProductDetails = () => {
                                         )}
                                     </div>
                                     {!pincodeStatus?.isServiceable && pincodeStatus && (
-                                         <p className="text-xs text-orange-500 font-medium">
-                                            {pincodeStatus.message.includes('7 days') ? 'Estimated delivery in 7 days' : 'Currently not available at this location'}
+                                         <p className="text-xs text-red-500 font-medium">
+                                            Currently not available at this location
                                          </p>
                                     )}
                                 </div>
@@ -870,7 +870,7 @@ const ProductDetails = () => {
                                         className="text-[14px] font-bold text-gray-900 bg-transparent outline-none w-full placeholder:text-gray-400"
                                     />
                                     <button 
-                                        onClick={handleCheckPincode}
+                                        onClick={() => handleCheckPincode()}
                                         disabled={checkingPincode}
                                         className="text-[14px] font-bold text-blue-600 flex items-center whitespace-nowrap disabled:opacity-50"
                                     >

@@ -57,19 +57,25 @@ const deletePinCode = async (req, res) => {
 // @access  Public
 const checkPinCode = async (req, res) => {
     const { code } = req.params;
-    const pinCode = await PinCode.findOne({ code });
+    try {
+        const pinCode = await PinCode.findOne({ code: code.trim() });
 
-    if (pinCode && pinCode.isActive) {
-        res.json({
-            isServiceable: true,
-            deliveryTime: pinCode.deliveryTime,
-            unit: pinCode.unit
-        });
-    } else {
-        res.json({
-            isServiceable: false,
-            message: 'Estimated delivery in 7 days'
-        });
+        if (pinCode && pinCode.isActive) {
+            res.json({
+                isServiceable: true,
+                deliveryTime: pinCode.deliveryTime,
+                unit: pinCode.unit,
+                message: `Delivered in ${pinCode.deliveryTime} ${pinCode.unit}`
+            });
+        } else {
+            res.json({
+                isServiceable: false,
+                message: 'Not deliverable to this location'
+            });
+        }
+    } catch (error) {
+        console.error(`Error checking pincode:`, error);
+        res.status(500).json({ message: 'Error checking pincode' });
     }
 };
 
