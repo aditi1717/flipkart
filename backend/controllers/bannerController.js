@@ -5,7 +5,9 @@ import Banner from '../models/Banner.js';
 // @access  Public (for App) / Private (Admin)
 export const getBanners = async (req, res) => {
     try {
-        const banners = await Banner.find({});
+        const { all } = req.query;
+        const query = all === 'true' ? {} : { active: true };
+        const banners = await Banner.find(query);
         res.json(banners);
     } catch (error) {
         res.status(500).json({ message: error.message });

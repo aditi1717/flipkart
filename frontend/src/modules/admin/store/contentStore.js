@@ -46,7 +46,7 @@ export const useContentStore = create((set, get) => ({
     fetchHomeSections: async () => {
         set({ isLoading: true });
         try {
-            const { data } = await API.get('/home-sections');
+            const { data } = await API.get('/home-sections?all=true');
             set({ homeSections: data, isLoading: false });
         } catch (error) {
             set({ isLoading: false });

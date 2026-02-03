@@ -6,6 +6,7 @@ import HomeLayout from '../models/HomeLayout.js';
 // @access  Public (App) / Private (Admin)
 export const getHomeSections = async (req, res) => {
     try {
+        const { all } = req.query;
         const sections = await HomeSection.find({}).populate({
             path: 'products',
             populate: {
@@ -13,6 +14,10 @@ export const getHomeSections = async (req, res) => {
                 select: 'isActive'
             }
         });
+
+        if (all === 'true') {
+            return res.json(sections);
+        }
 
         // Further filter products in each section based on category/subcategory status
         const Category = (await import('../models/Category.js')).default;
@@ -25,13 +30,21 @@ export const getHomeSections = async (req, res) => {
 
         const filteredSections = sections.map(section => {
             const sectionObj = section.toObject();
-            sectionObj.products = sectionObj.products.filter(p => {
-                // Check category
-                if (!activeCategoryIds.has(p.categoryId)) return false;
+            sectionObj.products = (sectionObj.products || []).filter(p => {
+                if (!p) return false;
                 
-                // Check subcategories (if any)
+                // Only filter out if we have a categoryId and it is NOT in the active list
+                if (p.categoryId !== undefined && p.categoryId !== null) {
+                    if (!activeCategoryIds.has(p.categoryId)) return false;
+                }
+                
+                // Only filter out if it has subcategories and NONE are active
                 if (p.subCategories && p.subCategories.length > 0) {
-                    return p.subCategories.some(sub => activeSubCategoryIds.has(sub._id?.toString() || sub.toString()));
+                    const hasActiveSub = p.subCategories.some(sub => {
+                        const subId = sub._id?.toString() || sub.toString();
+                        return activeSubCategoryIds.has(subId);
+                    });
+                    if (!hasActiveSub) return false;
                 }
                 
                 return true;
@@ -99,7 +112,13 @@ export const updateHomeSection = async (req, res) => {
                 );
             }
 
-            await updatedSection.populate('products');
+            await updatedSection.populate({
+                path: 'products',
+                populate: {
+                    path: 'subCategories',
+                    select: 'isActive'
+                }
+            });
             res.json(updatedSection);
         } else {
             res.status(404).json({ message: 'Section not found' });

@@ -5,50 +5,42 @@ import Product from '../models/Product.js';
 // @access  Public
 export const getProducts = async (req, res) => {
     try {
-        const { category, subcategory } = req.query;
-        
-        // Build filter object
+        const { category, subcategory, all } = req.query;
         let filter = {};
-        
-        // Always filter by active categories and subcategories for public requests
-        const Category = (await import('../models/Category.js')).default;
-        const SubCategory = (await import('../models/SubCategory.js')).default;
 
-        const activeCategories = await Category.find({ active: true }).select('id');
-        const activeCategoryIds = activeCategories.map(c => c.id);
+        if (all !== 'true') {
+            // Always filter by active categories and subcategories for public requests
+            const Category = (await import('../models/Category.js')).default;
+            const SubCategory = (await import('../models/SubCategory.js')).default;
 
-        filter.categoryId = { $in: activeCategoryIds };
+            const activeCategories = await Category.find({ active: true }).select('id');
+            const activeCategoryIds = activeCategories.map(c => c.id);
+
+            filter.categoryId = { $in: activeCategoryIds };
+
+            if (subcategory) {
+                const subCat = await SubCategory.findOne({ name: subcategory, isActive: true });
+                if (subCat) {
+                    filter.subCategories = subCat._id;
+                } else {
+                    return res.json([]);
+                }
+            } else {
+                 const activeSubCategories = await SubCategory.find({ isActive: true }).select('_id');
+                 const activeSubCategoryIds = activeSubCategories.map(s => s._id);
+                 
+                 filter.$or = [
+                     { subCategories: { $exists: false } },
+                     { subCategories: { $size: 0 } },
+                     { subCategories: { $in: activeSubCategoryIds } }
+                 ];
+            }
+        }
 
         if (category) {
             filter.category = category;
         }
-        
-        if (subcategory) {
-            // Search for products that have this subcategory
-            const subCat = await SubCategory.findOne({ name: subcategory, isActive: true });
-            if (subCat) {
-                filter.subCategories = subCat._id;
-            } else {
-                // If subcategory is requested but not found or inactive, return empty
-                return res.json([]);
-            }
-        } else {
-             // If no specific subcategory is requested, ensure products belong to at least one active subcategory 
-             // OR have no subcategories if that's allowed (depending on business logic)
-             // For now, we'll just ensure if they HAVE subcategories, they are active.
-             // But actually, it's safer to just filter the result later or use a more complex query.
-             // Let's refine the filter to only show products where IF subcategories exist, at least one is active.
-             const activeSubCategories = await SubCategory.find({ isActive: true }).select('_id');
-             const activeSubCategoryIds = activeSubCategories.map(s => s._id);
-             
-             // Products must either have no subcategories OR at least one active subcategory
-             filter.$or = [
-                 { subCategories: { $exists: false } },
-                 { subCategories: { $size: 0 } },
-                 { subCategories: { $in: activeSubCategoryIds } }
-             ];
-        }
-        
+
         const products = await Product.find(filter)
             .populate('subCategories', 'name isActive')
             .sort({ createdAt: -1 });
@@ -64,21 +56,23 @@ export const getProducts = async (req, res) => {
 // @access  Public
 export const getProductById = async (req, res) => {
     try {
+        const { all } = req.query;
         const product = await Product.findOne({ id: req.params.id }).populate('subCategories', 'name isActive');
         
         if (product) {
-            const Category = (await import('../models/Category.js')).default;
-            const category = await Category.findOne({ id: product.categoryId });
-            
-            if (!category || !category.active) {
-                return res.status(404).json({ message: 'Product not found (category inactive)' });
-            }
+            if (all !== 'true') {
+                const Category = (await import('../models/Category.js')).default;
+                const category = await Category.findOne({ id: product.categoryId });
+                
+                if (!category || !category.active) {
+                    return res.status(404).json({ message: 'Product not found (category inactive)' });
+                }
 
-            // If product has subcategories, ensure at least one is active
-            if (product.subCategories && product.subCategories.length > 0) {
-                const hasActiveSub = product.subCategories.some(sub => sub.isActive);
-                if (!hasActiveSub) {
-                    return res.status(404).json({ message: 'Product not found (subcategories inactive)' });
+                if (product.subCategories && product.subCategories.length > 0) {
+                    const hasActiveSub = product.subCategories.some(sub => sub.isActive);
+                    if (!hasActiveSub) {
+                        return res.status(404).json({ message: 'Product not found (subcategories inactive)' });
+                    }
                 }
             }
 
