@@ -296,20 +296,6 @@ const ProductDetails = () => {
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [bankOffers, setBankOffers] = useState([]);
-    const mobileGalleryRef = React.useRef(null);
-
-    // Scroll mobile gallery when index changes
-    useEffect(() => {
-        if (mobileGalleryRef.current) {
-            const width = mobileGalleryRef.current.offsetWidth;
-            if (width > 0) {
-                mobileGalleryRef.current.scrollTo({
-                    left: currentImageIndex * width,
-                    behavior: 'smooth'
-                });
-            }
-        }
-    }, [currentImageIndex]);
 
     useEffect(() => {
         if (id) {
@@ -759,99 +745,123 @@ const ProductDetails = () => {
                     </button>
                 </div>
 
-                {/* Product Image Section - Swipable Gallery - No top gap */}
-                <div className="relative w-full aspect-[3/2] bg-[#f9f9f9] border-b border-gray-100 group">
-                    <div
-                        ref={mobileGalleryRef}
-                        className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-full w-full"
-                        onScroll={(e) => {
-                            const width = e.target.offsetWidth;
-                            const index = Math.round(e.target.scrollLeft / width);
-                            if (index !== currentImageIndex) {
-                                setCurrentImageIndex(index);
-                            }
-                        }}
-                    >
-                        {productImages.map((img, idx) => (
-                            <div key={idx} className="min-w-full h-full snap-center flex items-center justify-center px-4 pb-4 pt-1">
-                                <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-contain" />
+                {/* Product Image Section - Single Image with Thumbnail Gallery */}
+                <div className="bg-white">
+                    {/* Main Image */}
+                    <div className="relative w-full aspect-square bg-white flex items-center justify-center p-4">
+                        <img 
+                            src={productImages[currentImageIndex] || productImages[0]} 
+                            alt={product.name} 
+                            className="w-full h-full object-contain" 
+                        />
+                        
+                        {/* Icons - Top Right */}
+                        <div className="absolute top-4 right-4 flex gap-2 z-10">
+                            <button
+                                onClick={() => toggleWishlist(product)}
+                                className="w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center border border-gray-100"
+                            >
+                                <span className={`material-icons text-[20px] ${isInWishlist ? 'text-red-500' : 'text-gray-600'}`}>
+                                    {isInWishlist ? 'favorite' : 'favorite_border'}
+                                </span>
+                            </button>
+                            <button className="w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center border border-gray-100">
+                                <span className="material-icons-outlined text-gray-600 text-[20px]">share</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Thumbnail Gallery */}
+                    {productImages.length > 1 && (
+                        <div className="px-4 pb-4">
+                            <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                                {productImages.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setCurrentImageIndex(idx)}
+                                        className={`flex-shrink-0 w-14 h-14 rounded border-2 p-0.5 transition-all ${
+                                            currentImageIndex === idx 
+                                                ? 'border-blue-600' 
+                                                : 'border-gray-200'
+                                        }`}
+                                    >
+                                        <img src={img} alt="" className="w-full h-full object-contain" />
+                                    </button>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-
-                    {/* Icons - Top Right */}
-                    <div className="absolute top-4 right-4 flex flex-col gap-3 z-10">
-                        <button
-                            onClick={() => toggleWishlist(product)}
-                            className="w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full shadow-sm flex items-center justify-center border border-white/50"
-                        >
-                            <span className={`material-icons text-xl ${isInWishlist ? 'text-red-500' : 'text-gray-700'}`}>
-                                {isInWishlist ? 'favorite' : 'favorite_border'}
-                            </span>
-                        </button>
-                        <button className="w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full shadow-sm flex items-center justify-center border border-white/50">
-                            <span className="material-icons-outlined text-gray-700 text-xl">share</span>
-                        </button>
-                    </div>
-
-                    {/* Pagination Dots - Bottom Center */}
-                    <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
-                        {productImages.map((_, idx) => (
-                            <div
-                                key={idx}
-                                className={`h-1.5 rounded-full transition-all duration-300 ${currentImageIndex === idx ? 'w-6 bg-gray-800' : 'w-1.5 bg-gray-300'
-                                    }`}
-                            />
-                        ))}
-                    </div>
+                        </div>
+                    )}
                 </div>
 
-                {/* Product Info - More compact */}
-                <div className="px-4 py-3 space-y-1">
+                {/* Product Info - Redesigned */}
+                <div className="bg-white border-t-8 border-gray-100 px-4 py-4">
                     {/* Brand */}
-                    {product.brand && (
-                        <h2 className="text-gray-900 text-sm font-bold uppercase tracking-wide">
-                            {product.brand}
-                        </h2>
-                    )}
-                    {!product.brand && <h2 className="text-gray-900 text-sm font-bold uppercase tracking-wide">Brand Name</h2>}
+                    <div className="mb-1">
+                        <span className="text-gray-500 text-xs font-medium uppercase tracking-wide">
+                            {product.brand || 'Brand'}
+                        </span>
+                    </div>
 
-                    {/* Name & More Content */}
-                    <p className="text-gray-900 text-[15px] font-medium leading-tight">
+                    {/* Product Name */}
+                    <h1 className="text-gray-900 text-base font-medium leading-snug mb-2">
                         {product.name}
-                        {displayVariantHeadings.length > 0 && (
-                            <span className="text-gray-500 ml-1 font-normal">
-                                ({displayVariantHeadings.map(vh => selectedVariants[vh.name]).filter(Boolean).join(', ')})
-                            </span>
+                    </h1>
+
+                    {/* Rating */}
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="flex items-center gap-1 bg-green-600 text-white text-xs font-semibold px-2 py-0.5 rounded">
+                            {averageRating}
+                            <span className="material-icons text-[10px]">star</span>
+                        </div>
+                        <span className="text-gray-500 text-xs">
+                            {totalRatings.toLocaleString()} Ratings & {totalRatings.toLocaleString()} Reviews
+                        </span>
+                    </div>
+
+                    {/* Price */}
+                    <div className="flex items-baseline gap-2 mb-4">
+                        <span className="text-2xl font-medium text-gray-900">₹{product.price.toLocaleString()}</span>
+                        {product.originalPrice > product.price && (
+                            <>
+                                <span className="text-sm text-gray-400 line-through">₹{product.originalPrice.toLocaleString()}</span>
+                                <span className="text-sm text-green-600 font-semibold">
+                                    {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% off
+                                </span>
+                            </>
                         )}
-                    </p>
+                    </div>
 
                     {/* Dynamic Variants Mobile */}
                     {displayVariantHeadings.length > 0 && (
-                        <div className="space-y-6 py-4">
+                        <div className="space-y-4 pb-2">
                             {displayVariantHeadings.map((vh) => (
-                                <div key={vh.id} className="mt-2">
-                                    <p className="text-[13px] font-bold text-gray-900 mb-3 uppercase tracking-tight">
-                                        {vh.name}: <span className="font-normal text-gray-500 normal-case">{selectedVariants[vh.name]}</span>
+                                <div key={vh.id}>
+                                    <p className="text-xs font-semibold text-gray-900 mb-2 uppercase tracking-wide">
+                                        {vh.name}: <span className="font-normal text-gray-600 normal-case">{selectedVariants[vh.name]}</span>
                                     </p>
-                                    <div className="flex flex-wrap gap-3">
+                                    <div className="flex flex-wrap gap-2">
                                         {vh.options?.map((opt, idx) => (
                                             vh.hasImage ? (
-                                                <div
+                                                <button
                                                     key={idx}
                                                     onClick={() => handleVariantSelect(vh.name, opt.name, opt.image)}
-                                                    className={`min-w-[70px] aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${selectedVariants[vh.name] === opt.name ? 'border-blue-600 shadow-sm' : 'border-gray-100'}`}
+                                                    className={`w-12 h-14 rounded border-2 p-0.5 transition-all ${
+                                                        selectedVariants[vh.name] === opt.name 
+                                                            ? 'border-blue-600' 
+                                                            : 'border-gray-200'
+                                                    }`}
                                                 >
-                                                    <img src={opt.image} alt={opt.name} className="w-full h-full object-cover" />
-                                                </div>
+                                                    <img src={opt.image} alt={opt.name} className="w-full h-full object-cover rounded-sm" />
+                                                </button>
                                             ) : (
                                                 <button
                                                     key={idx}
                                                     onClick={() => handleVariantSelect(vh.name, opt.name)}
-                                                    className={`h-9 px-4 rounded-lg border-2 font-bold text-xs transition-all ${selectedVariants[vh.name] === opt.name
-                                                        ? 'border-blue-600 text-blue-600 bg-blue-50/20'
-                                                        : 'border-gray-200 text-gray-700'
-                                                        }`}
+                                                    className={`h-9 px-3 rounded border-2 font-medium text-xs transition-all ${
+                                                        selectedVariants[vh.name] === opt.name
+                                                            ? 'border-blue-600 text-blue-600 bg-blue-50'
+                                                            : 'border-gray-200 text-gray-700'
+                                                    }`}
                                                 >
                                                     {opt.name}
                                                 </button>
@@ -862,82 +872,70 @@ const ProductDetails = () => {
                             ))}
                         </div>
                     )}
-
-
-                    {/* Price */}
-                    <div className="mt-2 flex items-baseline gap-2">
-                        <span className="text-[22px] font-bold text-gray-900">₹{product.price.toLocaleString()}</span>
-                        {product.originalPrice > product.price && (
-                            <>
-                                <span className="text-sm text-gray-400 line-through">₹{product.originalPrice.toLocaleString()}</span>
-                                <span className="text-sm text-green-700 font-bold">
-                                    {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% off
-                                </span>
-                            </>
-                        )}
-                    </div>
                 </div>
 
-
                 {/* Offers Section */}
-                <div className="px-4 mt-4">
-                    <h3 className="text-[15px] font-bold text-gray-900 mb-3">Available offers</h3>
-                    <div className="space-y-3">
+                <div className="bg-white border-t-8 border-gray-100 px-4 py-4">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Available offers</h3>
+                    <div className="space-y-2">
                         {offers.slice(0, 4).map((offer, idx) => (
-                            <div key={idx} className="flex gap-2 items-start text-sm text-gray-700">
-                                <span className="material-icons text-[#388e3c] text-[16px] mt-0.5 shrink-0">local_offer</span>
-                                <div>
-                                    <span className="font-bold text-gray-800">{offer.type}</span>
-                                    <span className="ml-1 leading-snug">{offer.text}</span>
-                                    <span className="text-blue-600 font-medium cursor-pointer ml-1 whitespace-nowrap">T&C</span>
+                            <div key={idx} className="flex gap-2 items-start text-xs text-gray-700">
+                                <span className="material-icons text-green-600 text-[16px] mt-0.5 shrink-0">local_offer</span>
+                                <div className="flex-1">
+                                    <span className="font-semibold text-gray-900">{offer.type}</span>
+                                    <span className="ml-1">{offer.text}</span>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Delivery Details Section - More compact */}
-                <div className="px-4 mt-6">
-                    <h3 className="text-[15px] font-bold text-gray-900 mb-4">Delivery details</h3>
+                {/* Delivery Details Section */}
+                <div className="bg-white border-t-8 border-gray-100 px-4 py-4">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Delivery</h3>
 
-                    <div className="rounded-2xl overflow-hidden border border-gray-50 shadow-sm">
+                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                         {/* Location Bar */}
-                        <div className="bg-[#f0f7ff] p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                                <span className="material-icons-outlined text-gray-800 text-[20px]">location_on</span>
-                                <div className="flex items-center gap-1.5 flex-1">
-                                    <input
-                                        type="text"
-                                        value={pincode}
-                                        onChange={(e) => setPincode(e.target.value)}
-                                        placeholder="Enter Pincode"
-                                        maxLength={6}
-                                        className="text-[14px] font-bold text-gray-900 bg-transparent outline-none w-full placeholder:text-gray-400"
-                                    />
-                                    <button 
-                                        onClick={() => handleCheckPincode()}
-                                        disabled={checkingPincode}
-                                        className="text-[14px] font-bold text-blue-600 flex items-center whitespace-nowrap disabled:opacity-50"
-                                    >
-                                        {checkingPincode ? '...' : 'Check'}
-                                        <span className="material-icons text-[14px] ml-0.5">chevron_right</span>
-                                    </button>
-                                </div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="material-icons-outlined text-gray-600 text-[18px]">location_on</span>
+                            <div className="flex items-center gap-2 flex-1">
+                                <input
+                                    type="text"
+                                    value={pincode}
+                                    onChange={(e) => setPincode(e.target.value)}
+                                    placeholder="Enter Pincode"
+                                    maxLength={6}
+                                    className="text-xs font-semibold text-gray-900 bg-transparent outline-none w-full placeholder:text-gray-400"
+                                />
+                                <button 
+                                    onClick={() => handleCheckPincode()}
+                                    disabled={checkingPincode}
+                                    className="text-xs font-bold text-blue-600 whitespace-nowrap disabled:opacity-50"
+                                >
+                                    {checkingPincode ? '...' : 'Check'}
+                                </button>
                             </div>
                         </div>
 
-                        {/* Delivery Date */}
-                        <div className="bg-[#f5f5f5] p-4 border-t border-white flex items-center gap-3">
-                            <span className="material-icons-outlined text-gray-500 text-[20px]">local_shipping</span>
-                            <span className="text-[14px] font-bold text-gray-800">
+                        {/* Delivery Status */}
+                        <div className="flex items-center gap-2 text-xs">
+                            <span className="material-icons-outlined text-gray-500 text-[18px]">local_shipping</span>
+                            <span className={`font-semibold ${pincodeStatus ? (pincodeStatus.isServiceable ? 'text-gray-900' : 'text-red-600') : 'text-gray-700'}`}>
                                 {pincodeStatus ? pincodeStatus.message : `Delivery by ${product.deliveryDate || '7 days'}`}
                             </span>
                         </div>
-
+                        
+                        {pincodeStatus?.isServiceable && (
+                            <div className="mt-2 text-xs text-green-600 font-medium">
+                                Free Delivery
+                            </div>
+                        )}
                     </div>
+                </div>
 
-                    {/* Service Icons - Mobile */}
-                    <div className="flex justify-between mt-6 mb-4 border-t border-gray-100 pt-4">
+                {/* Service Icons - Mobile */}
+                <div className="bg-white border-t-8 border-gray-100 px-4 py-4">
+                    <div className="flex justify-between">
                         {product.returnPolicy && (
                             <div className="flex flex-col items-center gap-2.5 w-1/3 group">
                                 <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800">
@@ -1215,7 +1213,7 @@ const ProductDetails = () => {
                     </div>
                 )
             }
-        </div >
+        </div>
     );
 };
 
