@@ -305,26 +305,26 @@ const ReturnRequests = () => {
                                     <div className="grid grid-cols-2 gap-3">
                                         {selectedReturn.status === 'Pending' && (
                                             <>
-                                                <button onClick={() => handleStatusUpdate(selectedReturn.id, 'Approved')} className="py-3 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">Approve Request</button>
-                                                <button onClick={() => handleStatusUpdate(selectedReturn.id, 'Rejected')} className="py-3 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition">Reject Request</button>
+                                                <button onClick={() => handleStatusUpdate(selectedReturn._id, 'Approved')} className="py-3 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">Approve Request</button>
+                                                <button onClick={() => handleStatusUpdate(selectedReturn._id, 'Rejected')} className="py-3 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition">Reject Request</button>
                                             </>
                                         )}
                                         {selectedReturn.status === 'Approved' && (
-                                            <button onClick={() => handleStatusUpdate(selectedReturn.id, 'Pickup Scheduled')} className="col-span-2 py-3 bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-purple-700 transition shadow-lg shadow-purple-100 flex items-center justify-center gap-2"><MdLocalShipping size={16} /> Schedule Pickup</button>
+                                            <button onClick={() => handleStatusUpdate(selectedReturn._id, 'Pickup Scheduled')} className="col-span-2 py-3 bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-purple-700 transition shadow-lg shadow-purple-100 flex items-center justify-center gap-2"><MdLocalShipping size={16} /> Schedule Pickup</button>
                                         )}
                                         {selectedReturn.status === 'Pickup Scheduled' && (
-                                            <button onClick={() => handleStatusUpdate(selectedReturn.id, 'Received at Warehouse')} className="col-span-2 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2"><MdInventory size={16} /> Confirm Item Received</button>
+                                            <button onClick={() => handleStatusUpdate(selectedReturn._id, 'Received at Warehouse')} className="col-span-2 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2"><MdInventory size={16} /> Confirm Item Received</button>
                                         )}
                                         {selectedReturn.status === 'Received at Warehouse' && (
                                             <button
-                                                onClick={() => handleStatusUpdate(selectedReturn.id, selectedReturn.type === 'Return' ? 'Refund Initiated' : 'Replacement Dispatched')}
+                                                onClick={() => handleStatusUpdate(selectedReturn._id, selectedReturn.type === 'Return' ? 'Refund Initiated' : 'Replacement Dispatched')}
                                                 className="col-span-2 py-3 bg-cyan-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-cyan-700 transition shadow-lg shadow-cyan-100 flex items-center justify-center gap-2"
                                             >
                                                 <MdAssignmentReturn size={16} /> {selectedReturn.type === 'Return' ? 'Initiate Refund' : 'Dispatch Replacement'}
                                             </button>
                                         )}
                                         {(selectedReturn.status === 'Refund Initiated' || selectedReturn.status === 'Replacement Dispatched') && (
-                                            <button onClick={() => handleStatusUpdate(selectedReturn.id, 'Completed')} className="col-span-2 py-3 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-100 flex items-center justify-center gap-2"><MdCheckCircle size={16} /> Mark as Completed</button>
+                                            <button onClick={() => handleStatusUpdate(selectedReturn._id, 'Completed')} className="col-span-2 py-3 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-100 flex items-center justify-center gap-2"><MdCheckCircle size={16} /> Mark as Completed</button>
                                         )}
                                     </div>
                                 </div>

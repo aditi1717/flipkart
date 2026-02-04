@@ -20,7 +20,7 @@ const useReturnStore = create((set) => ({
         try {
             const { data } = await API.put(`/returns/${id}`, { status, note });
             set((state) => ({
-                returns: state.returns.map(r => r.id === id ? data : r),
+                returns: state.returns.map(r => (r.id === id || r._id === id) ? data : r),
                 isLoading: false
             }));
         } catch (error) {

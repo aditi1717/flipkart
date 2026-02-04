@@ -20,6 +20,7 @@ const orderSchema = mongoose.Schema({
                 required: true,
                 ref: 'Product',
             },
+            status: { type: String }, // Item-level status (e.g., 'Return Requested', 'Returned')
         },
     ],
     shippingAddress: {

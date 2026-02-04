@@ -40,7 +40,17 @@ const MyOrders = () => {
             'Dispatched': 'bg-purple-100 text-purple-800 border-purple-200',
             'Out for Delivery': 'bg-orange-100 text-orange-800 border-orange-200',
             'Delivered': 'bg-green-100 text-green-800 border-green-200',
-            'Cancelled': 'bg-red-100 text-red-800 border-red-200'
+            'Cancelled': 'bg-red-100 text-red-800 border-red-200',
+            'Return Requested': 'bg-orange-100 text-orange-800 border-orange-200',
+            'Replacement Requested': 'bg-orange-100 text-orange-800 border-orange-200',
+            'Approved': 'bg-teal-100 text-teal-800 border-teal-200',
+            'Pickup Scheduled': 'bg-purple-100 text-purple-800 border-purple-200',
+            'Received at Warehouse': 'bg-blue-100 text-blue-800 border-blue-200',
+            'Refund Initiated': 'bg-green-100 text-green-800 border-green-200',
+            'Replacement Dispatched': 'bg-purple-100 text-purple-800 border-purple-200',
+            'Returned': 'bg-green-100 text-green-800 border-green-200',
+            'Replaced': 'bg-green-100 text-green-800 border-green-200',
+            'Return Rejected': 'bg-red-100 text-red-800 border-red-200'
         };
         return colors[status] || 'bg-gray-100 text-gray-800 border-gray-200';
     };
@@ -53,7 +63,17 @@ const MyOrders = () => {
             'Dispatched': 'local_shipping',
             'Out for Delivery': 'delivery_dining',
             'Delivered': 'done_all',
-            'Cancelled': 'cancel'
+            'Cancelled': 'cancel',
+            'Return Requested': 'assignment_return',
+            'Replacement Requested': 'sync',
+            'Approved': 'thumb_up',
+            'Pickup Scheduled': 'local_shipping',
+            'Received at Warehouse': 'warehouse',
+            'Refund Initiated': 'currency_rupee',
+            'Replacement Dispatched': 'local_shipping',
+            'Returned': 'check_circle',
+            'Replaced': 'check_circle',
+            'Return Rejected': 'cancel'
         };
         return icons[status] || 'info';
     };
@@ -172,17 +192,26 @@ const MyOrders = () => {
                                                             ))}
                                                         </div>
                                                     )}
-                                                    {item.serialNumber && (
+                                                    <p className="text-base font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mt-1">
+                                                        ₹{item.price.toLocaleString()}
+                                                    </p>
+
+                                                    {/* Serial Number / IMEI - Only if Delivered */}
+                                                    {(item.serialNumber && (order.status === 'Delivered' || order.isDelivered)) && (
                                                         <div className="mt-2">
                                                             <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-md font-bold font-mono border border-blue-200 shadow-sm flex items-center gap-1 w-max">
                                                                 <span className="text-blue-400 select-none">{item.serialType === 'IMEI' ? 'IMEI:' : 'SN:'}</span> {item.serialNumber}
                                                             </span>
                                                         </div>
                                                     )}
-                                                    <p className="text-xs text-gray-500 mt-1">Quantity: {item.qty}</p>
-                                                    <p className="text-base font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mt-1">
-                                                        ₹{item.price.toLocaleString()}
-                                                    </p>
+
+                                                    {/* Item Status Badge */}
+                                                    {item.status && item.status !== order.status && (
+                                                        <div className={`mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStatusColor(item.status)}`}>
+                                                            <span className="material-icons text-[12px]">{getStatusIcon(item.status)}</span>
+                                                            {item.status}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}

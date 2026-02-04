@@ -16,6 +16,9 @@ const OrderDetail = () => {
     const [selectedStatus, setSelectedStatus] = useState('');
     const [serialInputs, setSerialInputs] = useState({});
     const [serialTypes, setSerialTypes] = useState({});
+    const [showSerialModal, setShowSerialModal] = useState(false);
+
+    // Initialize selected status when modal opens
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
     const [settings, setSettings] = useState(null);
 
@@ -56,9 +59,6 @@ const OrderDetail = () => {
         );
     }
 
-
-
-    // Initialize selected status when modal opens
     const openUpdateModal = () => {
         setUpdating(true);
         setShowCancelConfirm(false);
@@ -71,6 +71,32 @@ const OrderDetail = () => {
         } else {
             setSelectedStatus(order.status);
         }
+    };
+
+    const openSerialModal = () => {
+        // Pre-fill serial inputs
+        const initialInputs = {};
+        const initialTypes = {};
+        order.items.forEach(item => {
+            if (item.serialNumber) initialInputs[item._id] = item.serialNumber;
+            if (item.serialType) initialTypes[item._id] = item.serialType;
+        });
+        setSerialInputs(initialInputs);
+        setSerialTypes(initialTypes);
+        setShowSerialModal(true);
+    };
+
+    const handleSerialSave = () => {
+        const serialNumbers = order.items.map(item => ({
+            itemId: item._id,
+            serial: serialInputs[item._id] !== undefined ? serialInputs[item._id] : item.serialNumber,
+            type: serialTypes[item._id] !== undefined ? serialTypes[item._id] : (item.serialType || 'Serial Number')
+        })).filter(s => s.serial);
+
+        // Update with CURRENT status to just save serials
+        updateOrderStatus(id, order.status, '', serialNumbers);
+        setShowSerialModal(false);
+        setSerialInputs({});
     };
 
     const handleUpdateClick = () => {
@@ -162,6 +188,17 @@ const OrderDetail = () => {
                             </button>
                         }
                     />
+                    
+                    {/* Separate Serial/IMEI Button */}
+                     {order.status !== 'Cancelled' && (
+                        <button
+                            onClick={openSerialModal}
+                            className="flex items-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 border border-indigo-100 font-black text-xs rounded-2xl hover:bg-indigo-100 transition-all shadow-sm uppercase tracking-widest"
+                        >
+                            <MdPendingActions size={18} /> Manage Serials
+                        </button>
+                    )}
+
                     {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
                         <button
                             onClick={openUpdateModal}
@@ -470,6 +507,60 @@ const OrderDetail = () => {
                             </div>
                         )}
                     </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Serial Only Modal */}
+            {showSerialModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
+                        <div className="p-8 space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xl font-black text-gray-900">Manage Serial/IMEI Numbers</h3>
+                                <button onClick={() => setShowSerialModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400"><MdCancel size={24} /></button>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                        <MdLocalShipping size={14} /> 
+                                        Update Product Identification
+                                    </p>
+                                    <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100 max-h-[60vh] overflow-y-auto">
+                                        {order.items.map(item => (
+                                        <div key={item._id} className="space-y-1">
+                                            <label className="text-xs font-bold text-gray-700 truncate block">{item.name}</label>
+                                            <div className="flex gap-2">
+                                                <select
+                                                    className="bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-3 py-3 text-xs font-bold outline-none transition-all text-gray-700 shadow-sm w-1/3 appearance-none"
+                                                    value={serialTypes[item._id] || (item.serialType || 'Serial Number')}
+                                                    onChange={(e) => setSerialTypes(prev => ({ ...prev, [item._id]: e.target.value }))}
+                                                >
+                                                    <option>Serial Number</option>
+                                                    <option>IMEI</option>
+                                                </select>
+                                                <input 
+                                                    type="text"
+                                                    placeholder={`Enter Number...`}
+                                                    className="flex-1 bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-gray-400 font-mono text-gray-900 shadow-sm"
+                                                    value={serialInputs[item._id] !== undefined ? serialInputs[item._id] : (item.serialNumber || '')}
+                                                    onChange={(e) => setSerialInputs(prev => ({ ...prev, [item._id]: e.target.value }))}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                    </div>
+                                </div>
+                                
+                                <button
+                                    onClick={handleSerialSave}
+                                    className="w-full mt-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] transition-all"
+                                >
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
