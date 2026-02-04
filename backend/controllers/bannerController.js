@@ -9,7 +9,8 @@ export const getBanners = async (req, res) => {
         const query = all === 'true' ? {} : { active: true };
         const banners = await Banner.find(query)
             .populate('slides.linkedOffer')
-            .populate('content.linkedOffer');
+            .populate('content.linkedOffer')
+            .populate('content.featuredProducts.productId');
         res.json(banners);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -65,6 +66,11 @@ export const createBanner = async (req, res) => {
         // Handle Hero Image
         if (req.files && req.files.hero_image) {
             content.imageUrl = req.files.hero_image[0].path;
+        }
+
+        // Handle Background Image
+        if (req.files && req.files.background_image) {
+            content.backgroundImageUrl = req.files.background_image[0].path;
         }
 
         const banner = new Banner({
@@ -134,6 +140,12 @@ export const updateBanner = async (req, res) => {
                 } else if (req.body.hero_image_url) {
                     // Start of fallback if image url is passed directly
                      content.imageUrl = req.body.hero_image_url;
+                }
+
+                if (req.files && req.files.background_image) {
+                    content.backgroundImageUrl = req.files.background_image[0].path;
+                } else if (req.body.background_image_url) {
+                    content.backgroundImageUrl = req.body.background_image_url;
                 }
                 
                 // Merge content or replace? Replace feels safer for now as form sends full object

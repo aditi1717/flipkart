@@ -26,6 +26,30 @@ const bannerSchema = mongoose.Schema({
         offerText: String,
         offerBank: String,
         backgroundColor: String, // Optional gradient/color class
+        backgroundImageUrl: String, 
+        textColor: String,
+        textAlign: { type: String, enum: ['left', 'center', 'right'], default: 'left' },
+        verticalAlign: { type: String, enum: ['top', 'center', 'bottom'], default: 'center' },
+        imageAlign: { type: String, enum: ['left', 'right', 'center', 'none'], default: 'right' },
+        buttonText: String,
+        // Custom positioning
+        useCustomPosition: { type: Boolean, default: false },
+        textPosition: {
+            x: { type: Number, min: 0, max: 100, default: 10 }, // percentage
+            y: { type: Number, min: 0, max: 100, default: 50 }  // percentage
+        },
+        imagePosition: {
+            x: { type: Number, min: 0, max: 100, default: 70 }, // percentage
+            y: { type: Number, min: 0, max: 100, default: 50 }  // percentage
+        },
+        // Featured products to display in banner
+        featuredProducts: [{
+            productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            position: {
+                x: { type: Number, min: 0, max: 100 }, // percentage
+                y: { type: Number, min: 0, max: 100 }  // percentage
+            }
+        }],
         link: { type: String },
         linkedProduct: { type: mongoose.Schema.Types.Mixed },
         linkedOffer: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer' },
