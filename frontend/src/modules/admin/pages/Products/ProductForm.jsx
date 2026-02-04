@@ -748,7 +748,7 @@ import toast from 'react-hot-toast';
                                     name="brand"
                                     value={formData.brand}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900"
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 caret-black"
                                     placeholder="e.g. NIKE, ADIDAS"
                                 />
                             </div>
@@ -759,7 +759,7 @@ import toast from 'react-hot-toast';
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900"
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 caret-black"
                                     placeholder="Full product name..."
                                 />
                             </div>
@@ -911,7 +911,7 @@ import toast from 'react-hot-toast';
                                                 setFormData(prev => ({ ...prev, highlights: newHighlights }));
                                             }}
                                             placeholder="Section Heading (e.g., Specifications)"
-                                            className="flex-1 px-4 py-2.5 rounded-xl bg-white border border-gray-300 focus:border-amber-500 outline-none transition-all font-bold text-gray-900"
+                                            className="flex-1 px-4 py-2.5 rounded-xl bg-white border border-gray-300 focus:border-amber-500 outline-none transition-all font-bold text-gray-900 caret-black"
                                         />
                                         <button
                                             type="button"
@@ -939,7 +939,7 @@ import toast from 'react-hot-toast';
                                                         setFormData(prev => ({ ...prev, highlights: newHighlights }));
                                                     }}
                                                     placeholder="Bullet point..."
-                                                    className="flex-1 px-4 py-2 rounded-lg bg-white border border-gray-200 focus:border-amber-500 outline-none transition-all text-sm text-gray-900"
+                                                    className="flex-1 px-4 py-2 rounded-lg bg-white border border-gray-200 focus:border-amber-500 outline-none transition-all text-sm text-gray-900 caret-black"
                                                 />
                                                 <button
                                                     type="button"
@@ -1003,7 +1003,7 @@ import toast from 'react-hot-toast';
                                         type="text"
                                         value={formData.warranty.summary}
                                         onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, summary: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 caret-black"
                                         placeholder="e.g. 1 Year Brand Warranty"
                                     />
                                 </div>
@@ -1013,7 +1013,7 @@ import toast from 'react-hot-toast';
                                         type="text"
                                         value={formData.warranty.covered}
                                         onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, covered: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 caret-black"
                                         placeholder="e.g. Manufacturing Defects"
                                     />
                                 </div>
@@ -1023,7 +1023,7 @@ import toast from 'react-hot-toast';
                                         type="text"
                                         value={formData.warranty.notCovered}
                                         onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, notCovered: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 caret-black"
                                         placeholder="e.g. Physical Damage"
                                     />
                                 </div>
@@ -1038,7 +1038,7 @@ import toast from 'react-hot-toast';
                                         type="number"
                                         value={formData.returnPolicy.days}
                                         onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, days: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 caret-black"
                                         placeholder="e.g. 7"
                                     />
                                 </div>
@@ -1047,7 +1047,7 @@ import toast from 'react-hot-toast';
                                     <textarea
                                         value={formData.returnPolicy.description}
                                         onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, description: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 h-32 resize-none"
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 h-32 resize-none caret-black"
                                         placeholder="e.g. Returns accepted for damaged, defective, or wrong items only."
                                     />
                                 </div>
@@ -1072,7 +1072,7 @@ import toast from 'react-hot-toast';
                                         name="price"
                                         value={formData.price}
                                         onChange={handleChange}
-                                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-green-50/30 border border-green-200 focus:border-green-500 focus:bg-white outline-none transition-all font-black text-green-900 text-xl"
+                                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-green-50/30 border border-green-200 focus:border-green-500 focus:bg-white outline-none transition-all font-black text-green-900 caret-black text-xl"
                                         placeholder="0"
                                     />
                                 </div>
@@ -1086,7 +1086,7 @@ import toast from 'react-hot-toast';
                                         name="originalPrice"
                                         value={formData.originalPrice}
                                         onChange={handleChange}
-                                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 line-through"
+                                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 caret-black line-through"
                                         placeholder="0"
                                     />
                                 </div>
@@ -1101,7 +1101,7 @@ import toast from 'react-hot-toast';
                                         : formData.stock || 0}
                                     onChange={handleChange}
                                     disabled={formData.skus.length > 0 || formData.variantHeadings.length > 0}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 font-black text-gray-900 text-lg disabled:opacity-60"
+                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 font-black text-gray-900 caret-black text-lg disabled:opacity-60"
                                     placeholder="0"
                                 />
                                 {(formData.skus.length > 0 || formData.variantHeadings.length > 0) && (
@@ -1221,7 +1221,7 @@ import toast from 'react-hot-toast';
                                                                     placeholder="Or URL..."
                                                                     value={opt.image?.content || (typeof opt.image === 'string' ? opt.image : '')}
                                                                     onChange={(e) => updateVariantOption(vh.id, optIdx, 'image', e.target.value)}
-                                                                    className="flex-1 text-[10px] bg-gray-50 px-2 py-1 rounded outline-none border border-gray-200 focus:border-blue-500 font-bold text-gray-900"
+                                                                    className="flex-1 text-[10px] bg-gray-50 px-2 py-1 rounded outline-none border border-gray-200 focus:border-blue-500 font-bold text-gray-900 caret-black"
                                                                 />
                                                             </div>
                                                         )}
@@ -1388,7 +1388,7 @@ import toast from 'react-hot-toast';
                                                         placeholder="e.g. Display, Camera, Battery"
                                                         value={section.heading}
                                                         onChange={(e) => updateDescriptionHeading(sectionIdx, e.target.value)}
-                                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-black text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all"
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-black text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all caret-black"
                                                     />
                                                 </div>
 
@@ -1401,7 +1401,7 @@ import toast from 'react-hot-toast';
                                                             <input
                                                                 value={point}
                                                                 onChange={(e) => updateDescriptionPoint(sectionIdx, pointIdx, e.target.value)}
-                                                                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all"
+                                                                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all caret-black"
                                                                 placeholder="e.g. 16.97 cm (6.68 inch) Full HD+ Display"
                                                             />
                                                             {section.points.length > 1 && (
@@ -1430,7 +1430,7 @@ import toast from 'react-hot-toast';
                                                     <textarea
                                                         value={section.content || ''}
                                                         onChange={(e) => updateDescriptionContent(sectionIdx, e.target.value)}
-                                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all min-h-[100px]"
+                                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all min-h-[100px] caret-black"
                                                         placeholder="Detailed description paragraph..."
                                                     />
                                                 </div>
@@ -1513,7 +1513,7 @@ import toast from 'react-hot-toast';
                                                 type="text"
                                                 value={formData.warranty.summary}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, summary: e.target.value } }))}
-                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-blue-500 outline-none"
+                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-blue-500 outline-none caret-black"
                                                 placeholder="e.g. 1 Year Manufacturer Warranty"
                                             />
                                         </div>
@@ -1522,7 +1522,7 @@ import toast from 'react-hot-toast';
                                             <textarea
                                                 value={formData.warranty.covered}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, covered: e.target.value } }))}
-                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20 font-bold text-gray-900 focus:border-blue-500 outline-none"
+                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20 font-bold text-gray-900 focus:border-blue-500 outline-none caret-black"
                                                 placeholder="Manufacturing defects, parts replacement..."
                                             />
                                         </div>
@@ -1531,7 +1531,7 @@ import toast from 'react-hot-toast';
                                             <textarea
                                                 value={formData.warranty.notCovered}
                                                 onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, notCovered: e.target.value } }))}
-                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20 font-bold text-gray-900 focus:border-blue-500 outline-none"
+                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20 font-bold text-gray-900 focus:border-blue-500 outline-none caret-black"
                                                 placeholder="Physical damage, water damage..."
                                             />
                                         </div>
@@ -1557,7 +1557,7 @@ import toast from 'react-hot-toast';
                                             type="number"
                                             value={formData.returnPolicy.days}
                                             onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, days: parseInt(e.target.value) || 0 } }))}
-                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-blue-500 outline-none"
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-blue-500 outline-none caret-black"
                                             placeholder="7"
                                         />
                                     </div>
@@ -1566,7 +1566,7 @@ import toast from 'react-hot-toast';
                                         <textarea
                                             value={formData.returnPolicy.description}
                                             onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, description: e.target.value } }))}
-                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-24 font-bold text-gray-900 focus:border-blue-500 outline-none"
+                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-24 font-bold text-gray-900 focus:border-blue-500 outline-none caret-black"
                                             placeholder="Easy returns within 7 days. Product must be unused with original tags..."
                                         />
                                     </div>
@@ -1592,7 +1592,7 @@ import toast from 'react-hot-toast';
                                                     type="text"
                                                     value={group.groupName}
                                                     onChange={(e) => updateSpecificationGroupName(groupIdx, e.target.value)}
-                                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 focus:border-purple-500 outline-none"
+                                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 focus:border-purple-500 outline-none caret-black"
                                                     placeholder="Group Name (e.g., Warranty, Battery Features)"
                                                 />
                                                 <button
@@ -1611,14 +1611,14 @@ import toast from 'react-hot-toast';
                                                         type="text"
                                                         value={spec.key}
                                                         onChange={(e) => updateSpec(groupIdx, specIdx, 'key', e.target.value)}
-                                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold text-gray-600 focus:border-purple-500 outline-none"
+                                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold text-gray-900 focus:border-purple-500 outline-none caret-black"
                                                         placeholder="Key (e.g., Battery Capacity)"
                                                     />
                                                     <input
                                                         type="text"
                                                         value={spec.value}
                                                         onChange={(e) => updateSpec(groupIdx, specIdx, 'value', e.target.value)}
-                                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-purple-500 outline-none"
+                                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-purple-500 outline-none caret-black"
                                                         placeholder="Value (e.g., 6500 mAh)"
                                                     />
                                                     <button
@@ -1676,7 +1676,7 @@ import toast from 'react-hot-toast';
                     <textarea
                         value={pasteText}
                         onChange={(e) => setPasteText(e.target.value)}
-                        className="w-full h-40 border border-gray-200 rounded-xl p-3 text-sm resize-none focus:border-yellow-500 outline-none"
+                        className="w-full h-40 border border-gray-200 rounded-xl p-3 text-sm resize-none focus:border-yellow-500 outline-none text-gray-900 caret-black"
                         placeholder={`Easy Payment Options\nNo cost EMI starting from ₹6,667/month\nCash on Delivery\nNet banking & Credit/ Debit/ ATM card`}
                     />
                     <div className="flex gap-3">

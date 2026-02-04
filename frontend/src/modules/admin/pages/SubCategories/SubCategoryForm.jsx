@@ -111,7 +111,7 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 caret-black"
                             required
                         />
                     </div>
@@ -122,7 +122,7 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 caret-black"
                             rows="3"
                         />
                     </div>
@@ -153,7 +153,7 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                             value={formData.image}
                             onChange={handleChange}
                             placeholder="https://..."
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 caret-black"
                         />
                     </div>
 
