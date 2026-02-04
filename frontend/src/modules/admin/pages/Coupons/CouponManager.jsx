@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { MdAdd, MdClose, MdLocalOffer, MdDelete, MdToggleOn, MdToggleOff, MdContentCopy } from 'react-icons/md';
 import useCouponStore from '../../store/couponStore';
 
@@ -61,7 +62,7 @@ const CouponManager = () => {
 
     const copyCode = (code) => {
         navigator.clipboard.writeText(code);
-        alert('Copied: ' + code);
+        toast.success('Copied: ' + code);
     };
 
     const getSegmentLabel = (segment) => {

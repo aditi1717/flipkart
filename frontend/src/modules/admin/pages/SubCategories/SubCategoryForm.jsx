@@ -57,7 +57,7 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
 
         // Basic validation
         if (!formData.category) {
-            alert("Please select a parent category.");
+            toast.error("Please select a parent category.");
             return;
         }
 

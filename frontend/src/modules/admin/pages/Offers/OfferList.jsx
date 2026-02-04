@@ -10,6 +10,7 @@ import {
     MdSearch,
     MdLabel
 } from 'react-icons/md';
+import toast from 'react-hot-toast';
 import useOfferStore from '../../store/offerStore';
 
 const OfferList = () => {
@@ -39,7 +40,7 @@ const OfferList = () => {
             try {
                 await deleteOffer(id);
             } catch (error) {
-                alert('Failed to delete offer');
+                toast.error('Failed to delete offer');
             }
         }
     };
@@ -48,7 +49,7 @@ const OfferList = () => {
         try {
             await toggleOfferStatus(id);
         } catch (error) {
-            alert('Failed to toggle offer status');
+            toast.error('Failed to toggle offer status');
         }
     };
 

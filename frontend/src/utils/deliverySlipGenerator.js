@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import toast from 'react-hot-toast';
 
 /**
  * Generate and download delivery slip PDF for an order
@@ -239,7 +240,7 @@ export const generateDeliverySlip = (order) => {
  */
 export const generateBulkDeliverySlips = (orders) => {
     if (!orders || orders.length === 0) {
-        alert('No orders selected');
+        toast.error('No orders selected');
         return;
     }
 

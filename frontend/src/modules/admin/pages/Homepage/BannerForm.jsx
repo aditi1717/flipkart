@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MdClose, MdCloudUpload, MdAdd, MdDelete } from 'react-icons/md';
+import toast from 'react-hot-toast';
 import useBannerStore from '../../store/bannerStore';
 import API from '../../../../services/api';
 
@@ -60,7 +61,7 @@ const BannerForm = ({ banner, onClose }) => {
         const validSlides = formData.slides.filter(s => s.imageUrl);
 
         if (validSlides.length === 0) {
-            alert('Please add at least one slide with an image.');
+            toast.error('Please add at least one slide with an image.');
             return;
         }
 

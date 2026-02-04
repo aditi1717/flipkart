@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import API from '../../../services/api';
+import { toast } from 'react-hot-toast';
+import Loader from '../../../components/common/Loader';
 
 const ReturnOrder = () => {
     const { orderId, productId } = useParams();
@@ -110,11 +112,11 @@ const ReturnOrder = () => {
                 updateItemStatus(order.id, item.id, itemStatus);
             }
 
-            alert('Return Request Submitted Successfully!');
+            toast.success('Return Request Submitted Successfully!');
             navigate(`/my-orders/${order.id}`);
         } catch (error) {
             console.error(error);
-            alert(error.response?.data?.message || 'Failed to submit return request.');
+            toast.error(error.response?.data?.message || 'Failed to submit return request.');
         } finally {
             setLoading(false);
         }

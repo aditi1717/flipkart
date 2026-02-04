@@ -5,6 +5,8 @@ import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
 import useCouponStore from '../../admin/store/couponStore';
 import API from '../../../services/api';
+import { toast } from 'react-hot-toast';
+import Loader from '../../../components/common/Loader';
 
 const Checkout = () => {
     const navigate = useNavigate();
@@ -25,6 +27,7 @@ const Checkout = () => {
     const [selectedAddress, setSelectedAddress] = useState(addresses[0]?.id || null);
     const [paymentMethod, setPaymentMethod] = useState('UPI');
     const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+    const [isOrderSuccess, setIsOrderSuccess] = useState(false);
     const [isChangingAddress, setIsChangingAddress] = useState(false);
     const [isAddingAddress, setIsAddingAddress] = useState(false);
 
@@ -57,7 +60,7 @@ const Checkout = () => {
         if (checkoutItems.length === 0) {
             navigate('/cart', { replace: true });
         } else if (addresses.length === 0) {
-            alert('📍 Please add a delivery address before placing an order.');
+            toast.error('📍 Please add a delivery address before placing an order.');
             navigate('/addresses', { replace: true });
         }
     }, [cart, addresses, navigate]);
@@ -139,14 +142,14 @@ const Checkout = () => {
     const handlePlaceOrder = async (paymentMethodOverride = 'COD') => {
         // Validate cart is not empty
         if (checkoutItems.length === 0) {
-            alert('Your cart is empty');
+            toast.error('Your cart is empty');
             navigate('/cart');
             return;
         }
 
         // Validate address is selected
         if (!selectedAddress) {
-            alert('Please select a delivery address');
+            toast.error('Please select a delivery address');
             return;
         }
 
@@ -154,7 +157,7 @@ const Checkout = () => {
         
         // Validate address object exists and has required fields
         if (!selectedAddrObj || !selectedAddrObj.address || !selectedAddrObj.city || !selectedAddrObj.pincode) {
-            alert('Please add a complete delivery address with all required fields');
+            toast.error('Please add a complete delivery address with all required fields');
             return;
         }
 
@@ -192,13 +195,15 @@ const Checkout = () => {
                 // If buying now, do NOT clear the main cart. Pass false.
                 // If purchasing from cart, clear it. Pass true.
                 placeOrder(data, !buyNowItem);
-                setIsPlacingOrder(false);
                 if (appliedCoupon) removeCoupon();
-                navigate('/order-success', { replace: true });
+                setIsOrderSuccess(true);
+                setTimeout(() => {
+                    navigate(`/my-orders/${data._id || data.id}`, { replace: true });
+                }, 2000);
             } catch (error) {
                 console.error(error);
                 setIsPlacingOrder(false);
-                alert(error.response?.data?.message || "Order failed!");
+                toast.error(error.response?.data?.message || "Order failed!");
             }
         } else {
             // Razorpay flow
@@ -233,13 +238,15 @@ const Checkout = () => {
                                 };
                                 const { data } = await API.post('/orders', paidOrderData);
                                 placeOrder(data, !buyNowItem);
-                                setIsPlacingOrder(false);
                                 if (appliedCoupon) removeCoupon();
-                                navigate('/order-success', { replace: true });
+                                setIsOrderSuccess(true);
+                                setTimeout(() => {
+                                    navigate(`/my-orders/${data._id || data.id}`, { replace: true });
+                                }, 2000);
                             }
                         } catch (error) {
                             console.error(error);
-                            alert("Payment verification failed!");
+                            toast.error("Payment verification failed!");
                             setIsPlacingOrder(false);
                         }
                     },
@@ -261,23 +268,18 @@ const Checkout = () => {
             } catch (error) {
                 console.error(error);
                 setIsPlacingOrder(false);
-                alert("Failed to initialize payment!");
+                toast.error("Failed to initialize payment!");
             }
         }
     };
 
-    if (isPlacingOrder) {
+    if (isPlacingOrder || isOrderSuccess) {
         return (
-            <div className="fixed inset-0 bg-white z-[1000] flex flex-col items-center justify-center p-10 text-center">
-                <div className="w-16 h-16 border-[3px] border-blue-600 border-t-transparent rounded-full animate-spin mb-8"></div>
-                <h2 className="text-xl font-bold mb-2 text-gray-800">Processing Payment...</h2>
-                <p className="text-gray-500 text-sm">Finishing your order safely.</p>
-                <div className="mt-12 flex items-center gap-4 grayscale opacity-30">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo.png" alt="upi" className="h-4" />
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" alt="visa" className="h-3" />
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" alt="mc" className="h-4" />
-                </div>
-            </div>
+            <Loader 
+                fullPage={true} 
+                message={isOrderSuccess ? "Order Placed Successfully!" : "Processing Payment... Finishing your order safely."} 
+                isSuccess={isOrderSuccess}
+            />
         );
     }
 

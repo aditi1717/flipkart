@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MdArrowBack, MdPrint, MdLocalShipping, MdCheckCircle, MdPendingActions, MdCancel, MdPerson, MdEmail, MdPhone, MdLocationOn, MdPayment, MdSchedule } from 'react-icons/md';
+import toast from 'react-hot-toast';
 import useOrderStore from '../../store/orderStore';
 import InvoiceGenerator from '../../components/orders/InvoiceGenerator';
 import API from '../../../../services/api';
@@ -109,7 +110,7 @@ const OrderDetail = () => {
             // Check if serial is present in input OR already exists in item
             const missingSerials = order.items.some(item => !serialInputs[item._id] && !item.serialNumber);
             if (missingSerials) {
-                alert('Please enter Serial Number / IMEI for all items before packing.');
+                toast.error('Please enter Serial Number / IMEI for all items before packing.');
                 return;
             }
             

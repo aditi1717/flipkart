@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MdSearch, MdFilterList, MdCheckCircle, MdCancel, MdPendingActions, MdStar } from 'react-icons/md';
+import toast from 'react-hot-toast';
 import API from '../../../../services/api';
 
 const ReviewList = () => {
@@ -33,7 +34,7 @@ const ReviewList = () => {
             setReviews(prev => prev.map(r => r._id === id ? { ...r, status } : r));
         } catch (error) {
             console.error("Error updating status:", error);
-            alert("Failed to update status");
+            toast.error("Failed to update status");
         } finally {
             setUpdatingId(null);
         }

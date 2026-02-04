@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { MdLocalShipping, MdSearch, MdFilterList, MdDownload, MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
 import useOrderStore from '../../store/orderStore';
@@ -63,7 +64,7 @@ const DeliverySlip = () => {
     const handleGenerateBulk = () => {
         const ordersToGenerate = orders.filter(order => selectedOrders.includes(order.id));
         if (ordersToGenerate.length === 0) {
-            alert('Please select at least one order');
+            toast.error('Please select at least one order');
             return;
         }
         generateBulkDeliverySlips(ordersToGenerate);
