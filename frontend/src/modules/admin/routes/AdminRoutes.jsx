@@ -29,6 +29,7 @@ import BankOfferManager from '../pages/BankOffers/BankOfferManager';
 import SettingsPage from '../pages/Settings/SettingsPage';
 import OfferList from '../pages/Offers/OfferList';
 import OfferForm from '../pages/Offers/OfferForm';
+import StockManagement from '../pages/StockManagement/StockManagement';
 
 const AdminRoutes = () => {
     return (
@@ -50,6 +51,7 @@ const AdminRoutes = () => {
                 <Route path="products" element={<ProductManager />} />
                 <Route path="products/new" element={<ProductForm />} />
                 <Route path="products/edit/:id" element={<ProductForm />} />
+                <Route path="stock" element={<StockManagement />} />
                 <Route path="categories" element={<CategoryList />} />
                 <Route path="subcategories" element={<SubCategoryList />} />
                 <Route path="orders" element={<OrderList />} />

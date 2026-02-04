@@ -5,7 +5,8 @@ import {
     getProductById, 
     createProduct, 
     updateProduct, 
-    deleteProduct 
+    deleteProduct,
+    updateProductStock
 } from '../controllers/productController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -24,10 +25,12 @@ const uploadMiddleware = (req, res, next) => {
 router.route('/')
     .get(getProducts)
     .post(protect, admin, uploadMiddleware, createProduct);
-
 router.route('/:id')
     .get(getProductById)
     .put(protect, admin, uploadMiddleware, updateProduct)
     .delete(protect, admin, deleteProduct);
+
+router.route('/:id/stock')
+    .put(protect, admin, updateProductStock);
 
 export default router;

@@ -36,6 +36,7 @@ const Sidebar = () => {
         { name: 'Orders', icon: MdShoppingCart, path: '/admin/orders' },
         { name: 'Manage PIN Codes', icon: MdLocationOn, path: '/admin/pincodes' },
         { name: 'Products', icon: MdInventory, path: '/admin/products' },
+        { name: 'Stock Management', icon: MdInventory, path: '/admin/stock' },
         { name: 'Categories', icon: MdCategory, path: '/admin/categories' },
         { name: 'Subcategories', icon: MdCategory, path: '/admin/subcategories' },
         { name: 'Users', icon: MdPeople, path: '/admin/users' },
