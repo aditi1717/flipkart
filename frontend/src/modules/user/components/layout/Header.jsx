@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
 import { useCategories } from '../../../../hooks/useData';
@@ -44,6 +44,7 @@ const Header = () => {
     const [hoveredSubcategory, setHoveredSubcategory] = useState(null);
     const [subcategoryProducts, setSubcategoryProducts] = useState([]);
     const [loadingProducts, setLoadingProducts] = useState(false);
+    const hoverTimeoutRef = useRef(null);
 
     // Search state
     const [searchQuery, setSearchQuery] = useState('');
@@ -136,20 +137,12 @@ const Header = () => {
         return location.pathname.includes(`/category/${catName}`);
     };
 
-    const navItems = [
-        { name: 'Home', icon: 'home', path: '/' },
-        { name: 'Play', icon: 'play_circle_outline', path: '/play' },
-        { name: 'Categories', icon: 'grid_view', path: '/categories' },
-        { name: 'Account', icon: 'person_outline', path: '/account' },
-        { name: 'Cart', icon: 'shopping_cart', path: '/cart', badge: totalItems },
-    ];
-
     const isPDP = location.pathname.includes('/product/');
     const isCategory = location.pathname.includes('/category/');
     const isSpecialPage = isPDP || isCategory;
 
     return (
-        <header className={`bg-gradient-to-b from-white to-blue-100 px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-sm border-b border-blue-100 md:border-gray-100 transition-all duration-300 ${isSpecialPage ? 'py-2' : 'py-0.5 md:py-0'}`}>
+        <header className={`bg-white/95 backdrop-blur-md px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border-b border-blue-50/50 md:border-gray-100 transition-all duration-300 ${isSpecialPage ? 'py-2' : 'py-0.5 md:py-0'}`}>
             <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center md:gap-8">
 
                 {/* Mobile Top Row: Logo (Left) + Seller Button (Right) */}
@@ -344,150 +337,169 @@ const Header = () => {
 
             {/* Category Navigation - Hidden on PDP/List */}
             {!isSpecialPage && !categoriesLoading && (
-                <div className="max-w-7xl mx-auto flex overflow-x-auto no-scrollbar gap-4 py-2 md:py-0 px-2 md:justify-between mt-0 md:-mt-2 border-t border-gray-100 pb-2 md:pb-1">
-                    {categories.map((cat) => {
-                        const active = isActiveCategory(cat.name);
-                        const IconComponent = iconMap[cat.icon] || MdGridView;
-                        return (
-                            <div
-                                key={cat.id}
-                                onClick={() => cat.name === "For You" ? navigate('/') : navigate(`/category/${cat.name}`)}
-                                onMouseEnter={() => {
-                                    if (window.innerWidth >= 768) { // Desktop only
-                                        setHoveredCategory(cat.name);
-                                        const subcats = cat.children || cat.subCategories || [];
-                                        if (subcats.length > 0) {
-                                            setHoveredSubcategory(subcats[0].name);
+                <div className="max-w-[1200px] mx-auto relative px-2">
+                    <div className="flex overflow-x-auto md:overflow-visible no-scrollbar gap-4 py-2 md:py-1 md:justify-between mt-0 md:-mt-2 border-t border-gray-100 pb-2 md:pb-1">
+                        {categories.map((cat, index) => {
+                            const active = isActiveCategory(cat.name);
+                            const IconComponent = iconMap[cat.icon] || MdGridView;
+                            const isHovered = hoveredCategory === cat.name;
+                            const isRightSide = index > categories.length / 2;
+                            
+                            return (
+                                <div
+                                    key={cat.id}
+                                    onClick={() => cat.name === "For You" ? navigate('/') : navigate(`/category/${cat.name}`)}
+                                    onMouseEnter={() => {
+                                        if (window.innerWidth >= 768) { // Desktop only
+                                            if (hoverTimeoutRef.current) {
+                                                clearTimeout(hoverTimeoutRef.current);
+                                                hoverTimeoutRef.current = null;
+                                            }
+                                            setHoveredCategory(cat.name);
+                                            const subcats = cat.children || cat.subCategories || [];
+                                            if (subcats.length > 0) {
+                                                setHoveredSubcategory(subcats[0].name);
+                                            }
                                         }
-                                    }
-                                }}
-                                onMouseLeave={() => {
-                                    if (window.innerWidth >= 768) {
-                                        setHoveredCategory(null);
-                                        setHoveredSubcategory(null);
-                                    }
-                                }}
-                                className={`flex flex-col items-center gap-1 min-w-[60px] cursor-pointer group relative ${cat.name === 'For You' ? 'md:hidden' : ''}`}
-                            >
-                                <div className={`w-10 h-10 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all ${active ? 'bg-blue-600 text-white scale-105 shadow-md' : 'bg-gray-100 text-gray-600 group-hover:bg-blue-50 group-hover:text-blue-600'}`}>
-                                    <IconComponent className="text-[20px] md:text-2xl" />
-                                </div>
-                                <span className={`text-[10px] md:text-sm font-bold transition-colors ${active ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
-                                    {cat.name}
-                                </span>
+                                    }}
+                                    onMouseLeave={() => {
+                                        if (window.innerWidth >= 768) {
+                                            hoverTimeoutRef.current = setTimeout(() => {
+                                                setHoveredCategory(null);
+                                                setHoveredSubcategory(null);
+                                            }, 150); // Small delay to prevent accidental closure
+                                        }
+                                    }}
+                                    className={`relative flex flex-col items-center gap-1 min-w-[60px] cursor-pointer group ${cat.name === 'For You' ? 'md:hidden' : ''}`}
+                                >
+                                    <div className={`w-10 h-10 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all ${active ? 'bg-blue-600 text-white scale-105 shadow-md' : 'bg-gray-100 text-gray-600 group-hover:bg-blue-50 group-hover:text-blue-600'}`}>
+                                        <IconComponent className="text-[20px] md:text-2xl" />
+                                    </div>
+                                    <span className={`text-[10px] md:text-sm font-bold transition-colors ${active ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
+                                        {cat.name}
+                                    </span>
 
-                                {/* Enhanced Mega Menu with Products */}
-                                {hoveredCategory === cat.name && (cat.children?.length > 0 || cat.subCategories?.length > 0) && (
-                                    <div 
-                                        className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 hidden md:block z-50 animate-in fade-in slide-in-from-top-2"
-                                    >
-                                        {/* Triangle Pointer */}
-                                        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45 border-t border-l border-gray-100"></div>
-                                        
-                                        <div className="flex relative bg-white rounded-xl overflow-hidden">
-                                            {/* Subcategories Column */}
-                                            <div className="w-56 py-2 border-r border-gray-100">
-                                                {(cat.children || cat.subCategories).map((sub) => (
-                                                    <div 
-                                                        key={sub.id || sub._id}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            navigate(`/category/${cat.name}/${sub.name}`);
-                                                        }}
-                                                        onMouseEnter={() => setHoveredSubcategory(sub.name)}
-                                                        className={`px-4 py-2.5 text-sm font-medium transition-all cursor-pointer flex items-center justify-between group/sub ${
-                                                            hoveredSubcategory === sub.name 
-                                                                ? 'bg-blue-50 text-blue-600' 
-                                                                : 'text-gray-700 hover:bg-gray-50'
-                                                        }`}
-                                                    >
-                                                        <span>{sub.name}</span>
-                                                        <MdKeyboardArrowRight className={`text-lg transition-transform ${hoveredSubcategory === sub.name ? 'translate-x-1' : ''}`} />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            
-                                            {/* Products Panel */}
-                                            {hoveredSubcategory && hoveredCategory === cat.name && (
-                                                <div className="w-[500px] p-4 bg-gray-50/50">
-                                                    <div className="flex items-center justify-between mb-3">
-                                                        <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">
-                                                            {hoveredSubcategory}
-                                                        </h3>
+                                    {/* Mega Menu - Positioned under specific item */}
+                                    {isHovered && (cat.children?.length > 0 || cat.subCategories?.length > 0) && (
+                                        <div 
+                                            className={`absolute top-full ${isRightSide ? 'right-0' : 'left-0'} pt-2 bg-transparent hidden md:block z-[100] animate-in fade-in slide-in-from-top-2`}
+                                            style={{ minWidth: '700px' }} // Ensure enough width for columns
+                                        >
+                                            <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden flex relative w-full">
+                                                {/* Subcategories Column */}
+                                                <div className="w-64 py-2 border-r border-gray-100 bg-gray-50/30">
+                                                    <h3 className="px-4 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 mb-1">
+                                                        Categories
+                                                    </h3>
+                                                    {(cat.children || cat.subCategories).map((sub) => (
+                                                        <div 
+                                                            key={sub.id || sub._id}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                navigate(`/category/${cat.name}/${sub.name}`);
+                                                            }}
+                                                            onMouseEnter={() => setHoveredSubcategory(sub.name)}
+                                                            className={`px-4 py-2.5 text-sm font-medium transition-all cursor-pointer flex items-center justify-between group/sub ${
+                                                                hoveredSubcategory === sub.name 
+                                                                    ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' 
+                                                                    : 'text-gray-700 hover:bg-gray-50'
+                                                            }`}
+                                                        >
+                                                            <span>{sub.name}</span>
+                                                            <MdKeyboardArrowRight className={`text-lg transition-transform ${hoveredSubcategory === sub.name ? 'translate-x-1' : ''}`} />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                
+                                                {/* Products Panel */}
+                                                <div className="flex-1 p-6 bg-white overflow-y-auto max-h-[500px]">
+                                                    <div className="flex items-center justify-between mb-5 border-b border-gray-100 pb-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+                                                            <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">
+                                                                {hoveredSubcategory || cat.name}
+                                                            </h3>
+                                                        </div>
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                navigate(`/category/${cat.name}/${hoveredSubcategory}`);
+                                                                navigate(`/category/${cat.name}/${hoveredSubcategory || ''}`);
                                                             }}
-                                                            className="text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wide"
+                                                            className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full transition-colors uppercase tracking-wide"
                                                         >
-                                                            View All →
+                                                            Explore All →
                                                         </button>
                                                     </div>
                                                     
                                                     {loadingProducts ? (
-                                                        <div className="grid grid-cols-3 gap-3">
+                                                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                                                             {[1, 2, 3, 4, 5, 6].map((i) => (
-                                                                <div key={i} className="bg-white rounded-lg p-3 animate-pulse">
-                                                                    <div className="bg-gray-200 h-28 rounded-lg mb-2"></div>
-                                                                    <div className="bg-gray-200 h-3 rounded mb-1"></div>
-                                                                    <div className="bg-gray-200 h-3 rounded w-2/3"></div>
+                                                                <div key={i} className="bg-gray-50 rounded-xl p-4 animate-pulse">
+                                                                    <div className="bg-gray-200 h-32 rounded-lg mb-3"></div>
+                                                                    <div className="bg-gray-200 h-4 rounded w-3/4 mb-2"></div>
+                                                                    <div className="bg-gray-200 h-4 rounded w-1/2"></div>
                                                                 </div>
                                                             ))}
                                                         </div>
                                                     ) : subcategoryProducts.length > 0 ? (
-                                                        <div className="grid grid-cols-3 gap-3">
+                                                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                                                             {subcategoryProducts.map((product) => (
                                                                 <div
                                                                     key={product.id || product._id}
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         navigate(`/product/${product.id || product._id}`);
+                                                                        setHoveredCategory(null);
                                                                     }}
-                                                                    className="bg-white rounded-lg p-2 hover:shadow-lg transition-all cursor-pointer group/product border border-transparent hover:border-blue-200"
+                                                                    className="bg-white rounded-xl p-3 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group/product border border-gray-100 hover:border-blue-100"
                                                                 >
-                                                                    <div className="aspect-square bg-gray-100 rounded-lg mb-2 overflow-hidden">
+                                                                    <div className="aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden relative">
                                                                         <img 
                                                                             src={product.images?.[0]?.url || product.image} 
                                                                             alt={product.name}
-                                                                            className="w-full h-full object-contain group-hover/product:scale-105 transition-transform"
+                                                                            className="w-full h-full object-contain p-2 group-hover/product:scale-110 transition-transform duration-500"
                                                                         />
-                                                                    </div>
-                                                                    <h4 className="text-xs font-medium text-gray-800 line-clamp-2 mb-1 group-hover/product:text-blue-600 transition-colors">
-                                                                        {product.name}
-                                                                    </h4>
-                                                                    <div className="flex items-center gap-1">
-                                                                        <span className="text-sm font-black text-gray-900">
-                                                                            ₹{product.price?.toLocaleString()}
-                                                                        </span>
-                                                                        {product.originalPrice && product.originalPrice > product.price && (
-                                                                            <span className="text-xs text-gray-400 line-through">
-                                                                                ₹{product.originalPrice?.toLocaleString()}
-                                                                            </span>
+                                                                        {product.discount && (
+                                                                            <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-sm">
+                                                                                {product.discount}% OFF
+                                                                            </div>
                                                                         )}
                                                                     </div>
-                                                                    {product.discount && (
-                                                                        <span className="inline-block text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded mt-1">
-                                                                            {product.discount}% OFF
-                                                                        </span>
-                                                                    )}
+                                                                    <h4 className="text-xs font-bold text-gray-800 line-clamp-2 mb-2 group-hover/product:text-blue-600 transition-colors min-h-[32px]">
+                                                                        {product.name}
+                                                                    </h4>
+                                                                    <div className="flex items-center justify-between mt-auto">
+                                                                        <div className="flex flex-col">
+                                                                            <span className="text-sm font-black text-gray-900">
+                                                                                ₹{product.price?.toLocaleString()}
+                                                                            </span>
+                                                                            {product.originalPrice && product.originalPrice > product.price && (
+                                                                                <span className="text-[10px] text-gray-400 line-through">
+                                                                                    ₹{product.originalPrice?.toLocaleString()}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="w-7 h-7 bg-blue-50 group-hover/product:bg-blue-600 text-blue-600 group-hover/product:text-white rounded-full flex items-center justify-center transition-colors">
+                                                                            <MdShoppingCart size={14} />
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             ))}
                                                         </div>
                                                     ) : (
-                                                        <div className="text-center py-8 text-sm text-gray-500">
-                                                            <MdShoppingBasket className="mx-auto text-4xl text-gray-300 mb-2" />
-                                                            <p>No products available</p>
+                                                        <div className="text-center py-12 bg-gray-50 rounded-2xl">
+                                                            <MdShoppingBasket className="mx-auto text-5xl text-gray-200 mb-3" />
+                                                            <p className="text-gray-400 font-medium italic">Discover amazing deals soon!</p>
                                                         </div>
                                                     )}
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             )}
         </header>

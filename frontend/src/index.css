@@ -18,9 +18,18 @@
 
   input,
   textarea,
-  select {
+  select,
+  [contenteditable] {
     caret-color: black !important;
-    color: #111827;
+  }
+
+  /* Force black cursor everywhere just in case */
+  * {
+    caret-color: inherit;
+  }
+
+  html {
+    caret-color: black !important;
   }
 }
 
