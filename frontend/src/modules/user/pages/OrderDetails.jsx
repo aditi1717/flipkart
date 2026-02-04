@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import API from '../../../services/api';
+import { toast } from 'react-hot-toast';
+import Loader from '../../../components/common/Loader';
 
 const OrderDetails = () => {
     const { orderId } = useParams();
@@ -24,6 +26,24 @@ const OrderDetails = () => {
             setError(err.response?.data?.message || 'Failed to fetch order details');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCancelOrder = async () => {
+        if (!window.confirm('Are you sure you want to cancel this order? It will be sent to the admin for approval.')) return;
+
+        try {
+            toast.loading('Requesting cancellation...', { id: 'cancel-order' });
+            await API.post(`/returns`, { 
+                orderId: order._id,
+                type: 'Cancellation',
+                reason: 'User requested cancellation'
+            });
+            toast.success('Cancellation request sent!', { id: 'cancel-order' });
+            fetchOrderDetails(); // Refresh details
+        } catch (err) {
+            console.error('Cancel order error:', err);
+            toast.error(err.response?.data?.message || 'Failed to request cancellation', { id: 'cancel-order' });
         }
     };
 
@@ -461,6 +481,17 @@ const OrderDetails = () => {
                             >
                                 <span className="material-icons">assignment_return</span>
                                 Request Return / Replacement
+                            </button>
+                        )}
+
+                        {/* Cancel Order Button */}
+                        {['Pending', 'Confirmed'].includes(order.status) && (
+                            <button
+                                onClick={handleCancelOrder}
+                                className="w-full bg-red-50 border-2 border-red-100 text-red-600 px-6 py-4 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center justify-center gap-2"
+                            >
+                                <span className="material-icons">cancel</span>
+                                Request Cancellation
                             </button>
                         )}
 

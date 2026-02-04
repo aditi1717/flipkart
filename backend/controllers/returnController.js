@@ -20,67 +20,97 @@ export const createReturnRequest = async (req, res) => {
              return res.status(401).json({ message: 'Not authorized to return items for this order' });
         }
 
-        const itemIndex = order.orderItems.findIndex(item => 
-            String(item.product) === String(productId) || 
-            String(item._id) === String(productId)
-        );
+        if (type !== 'Cancellation') {
+            const itemIndex = order.orderItems.findIndex(item => 
+                String(item.product) === String(productId) || 
+                String(item._id) === String(productId)
+            );
 
-        if (itemIndex === -1) {
-             return res.status(404).json({ message: 'Product not found in order' });
-        }
+            if (itemIndex === -1) {
+                return res.status(404).json({ message: 'Product not found in order' });
+            }
 
-        const item = order.orderItems[itemIndex];
-        
-        // Create Return Record
-        const newReturn = new Return({
-            id: `RET-${Date.now()}`,
-            orderId: order._id,
-            customer: req.user.name,
-            product: {
-                name: item.name,
-                image: item.image,
-                price: item.price
-            },
-            type,
-            reason,
-            comment,
-            images,
-            status: 'Pending',
-            timeline: [{
+            const item = order.orderItems[itemIndex];
+            
+            // Create Return Record
+            const newReturn = new Return({
+                id: `RET-${Date.now()}`,
+                orderId: order._id,
+                customer: req.user.name,
+                product: {
+                    name: item.name,
+                    image: item.image,
+                    price: item.price
+                },
+                type,
+                reason,
+                comment,
+                images,
                 status: 'Pending',
-                note: 'Return request initiated'
-            }]
-        });
+                timeline: [{
+                    status: 'Pending',
+                    note: `${type} request initiated`
+                }]
+            });
 
-        const createdReturn = await newReturn.save();
+            const createdReturn = await newReturn.save();
 
-        // Update Order Item Status
-        order.orderItems[itemIndex].status = type === 'Return' ? 'Return Requested' : 'Replacement Requested';
-        
-        // If it's a replacement, we might want to store the requested variants somewhere, 
-        // but for now, we'll just note it in the return comment or dedicated fields if model supported it.
-        // The Return model has 'comment', so we can append details there if needed, 
-        // but for a robust system, we should have stored replacement details in the Return model.
-        // Assuming the detailed requirements, we'll rely on the 'comment' or add fields if strictly needed by schema.
-        // The current schema doesn't have replacementVariant fields, so I will stick to what's available or suggest schema update if needed.
-        // Looking at the Schema again: It has `comment`.
-        
-        if (selectedReplacementSize || selectedReplacementColor) {
-             createdReturn.comment = `${createdReturn.comment || ''} [Replacement: Size ${selectedReplacementSize}, Color ${selectedReplacementColor}]`;
-             await createdReturn.save();
+            // Update Order Item Status
+            order.orderItems[itemIndex].status = type === 'Return' ? 'Return Requested' : 'Replacement Requested';
+            
+            if (selectedReplacementSize || selectedReplacementColor) {
+                createdReturn.comment = `${createdReturn.comment || ''} [Replacement: Size ${selectedReplacementSize}, Color ${selectedReplacementColor}]`;
+                await createdReturn.save();
+            }
+
+            await order.save();
+
+            // Create Return Notification
+            await Notification.create({
+                type: 'return',
+                title: `New ${type} Request`,
+                message: `${type} requested for Order #${order._id.toString().slice(-6).toUpperCase()}`,
+                relatedId: createdReturn._id
+            });
+
+            return res.status(201).json(createdReturn);
+        } else {
+            // CANCELLATION Flow
+            const newReturn = new Return({
+                id: `CAN-${Date.now()}`,
+                orderId: order._id,
+                customer: req.user.name,
+                product: {
+                    name: 'Whole Order Cancellation',
+                    image: order.orderItems[0]?.image || '', // Use first item image as placeholder
+                    price: order.totalPrice
+                },
+                type: 'Cancellation',
+                reason: reason || 'User requested cancellation',
+                comment,
+                status: 'Pending',
+                timeline: [{
+                    status: 'Pending',
+                    note: 'Cancellation request initiated'
+                }]
+            });
+
+            const createdReturn = await newReturn.save();
+
+            // Update Order Status
+            order.status = 'Cancellation Requested';
+            await order.save();
+
+            // Create Notification
+            await Notification.create({
+                type: 'return',
+                title: 'New Cancellation Request',
+                message: `Cancellation requested for Order #${order._id.toString().slice(-6).toUpperCase()}`,
+                relatedId: createdReturn._id
+            });
+
+            return res.status(201).json(createdReturn);
         }
-
-        await order.save();
-
-        // Create Return Notification
-        await Notification.create({
-            type: 'return',
-            title: 'New Return Request',
-            message: `Return requested for Order #${order._id.toString().slice(-6).toUpperCase()}`,
-            relatedId: createdReturn._id
-        });
-
-        res.status(201).json(createdReturn);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error: ' + error.message });
@@ -105,14 +135,6 @@ export const getReturns = async (req, res) => {
 // @access  Private
 export const getUserReturnRequests = async (req, res) => {
     try {
-        // Find returns where the order's user matches the logged in user
-        // But Return model doesn't link to User ID directly, only customer name. 
-        // Ideally it should link to User ID. 
-        // Current Schema: `customer: { type: String, required: true }`
-        // However, we saved `orderId`. We can find orders by this user, then find returns for those orders.
-        // OR, relies on the `customer` name which is flaky.
-        // Let's rely on finding orders first.
-        
         const userOrders = await Order.find({ user: req.user._id }).select('_id');
         const orderIds = userOrders.map(order => order._id.toString());
         
@@ -126,12 +148,6 @@ export const getUserReturnRequests = async (req, res) => {
 // @desc    Update return status
 // @route   PUT /api/returns/:id
 // @access  Private/Admin
-// @access  Private/Admin
-
-// ... (keep imports)
-
-// ...
-
 export const updateReturnStatus = async (req, res) => {
     try {
         let returnRequest;
@@ -144,6 +160,7 @@ export const updateReturnStatus = async (req, res) => {
         }
 
         if (returnRequest) {
+            const oldStatus = returnRequest.status;
             returnRequest.status = req.body.status || returnRequest.status;
             
             // Push to timeline
@@ -157,36 +174,61 @@ export const updateReturnStatus = async (req, res) => {
             // Sync with Order Status
             const order = await Order.findById(returnRequest.orderId);
             if (order) {
-                // Find item by name and price (imperfect but schema lacks item ID reference in Return model)
-                // Wait, Return model stores product.name, but what if multiple same items?
-                // The implementation plan didn't change the model. 
-                // Let's try to match by name/price, or if we improved the creation to store granular info.
-                // In createReturnRequest, we didn't store item ID in Return model.
-                // WE SHOULD STORE ITEM ID.
-                // BUT, without modifying schema, I have to guess or assume unique items.
-                // I will try to match the first item with that name that has a 'Requested' status or matches logic.
-                
-                const itemToUpdate = order.orderItems.find(i => 
-                    i.name === returnRequest.product.name
-                );
-                
-                if (itemToUpdate) {
-                     // Map return status to order item status
-                     // Return Statuses: 'Pending', 'Approved', 'Pickup Scheduled', 'Received at Warehouse', 'Refund Initiated', 'Replacement Dispatched', 'Completed', 'Rejected'
-                     // Order Item Statuses: custom strings
-                     
-                     let newItemStatus = itemToUpdate.status;
-                     
-                     if (req.body.status === 'Rejected') {
-                         newItemStatus = 'Delivered'; // Revert to delivered? or 'Return Rejected'
-                     } else if (req.body.status === 'Completed') {
-                         newItemStatus = returnRequest.type === 'Return' ? 'Returned' : 'Replaced';
-                     } else {
-                         newItemStatus = req.body.status; // Most map directly
-                     }
-                     
-                     itemToUpdate.status = newItemStatus;
-                     await order.save();
+                if (returnRequest.type === 'Cancellation') {
+                    // CANCELLATION ACTION
+                    if (req.body.status === 'Approved' || req.body.status === 'Completed') {
+                        // Restore Stock and Set Order to Cancelled
+                        if (order.status !== 'Cancelled') {
+                            order.status = 'Cancelled';
+                            
+                            // Restore Stock Logic (Reused from previous orderController attempt)
+                            const ProductModel = mongoose.model('Product');
+                            for (const item of order.orderItems) {
+                                const product = await ProductModel.findOne({ id: item.product });
+                                if (product) {
+                                    // 1. Restore Variant Stock
+                                    if (item.variant && Object.keys(item.variant).length > 0) {
+                                        const sku = product.skus.find(s => {
+                                            const comb = s.combination instanceof Map ? Object.fromEntries(s.combination) : s.combination;
+                                            const itemKeys = Object.keys(item.variant);
+                                            const combKeys = Object.keys(comb);
+                                            if (itemKeys.length !== combKeys.length) return false;
+                                            return itemKeys.every(key => String(item.variant[key]) === String(comb[key]));
+                                        });
+                                        if (sku) sku.stock += item.qty;
+                                    }
+                                    // 2. Restore Overall Stock
+                                    product.stock += item.qty;
+                                    product.markModified('skus');
+                                    await product.save();
+                                }
+                            }
+                            await order.save();
+                        }
+                    } else if (req.body.status === 'Rejected') {
+                        // Revert order status back to Pending/Confirmed (we'll guess Pending or just use a fixed logic)
+                        // Ideally we'd store the original status, but for now we'll set back to 'Pending' or leave as is.
+                        order.status = 'Pending'; 
+                        await order.save();
+                    }
+                } else {
+                    // RETURN / REPLACEMENT ACTION
+                    const itemToUpdate = order.orderItems.find(i => 
+                        i.name === returnRequest.product.name
+                    );
+                    
+                    if (itemToUpdate) {
+                        let newItemStatus = itemToUpdate.status;
+                        if (req.body.status === 'Rejected') {
+                            newItemStatus = 'Delivered';
+                        } else if (req.body.status === 'Completed') {
+                            newItemStatus = returnRequest.type === 'Return' ? 'Returned' : 'Replaced';
+                        } else {
+                            newItemStatus = req.body.status;
+                        }
+                        itemToUpdate.status = newItemStatus;
+                        await order.save();
+                    }
                 }
             }
 

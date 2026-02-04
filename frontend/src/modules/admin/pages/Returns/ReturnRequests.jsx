@@ -90,6 +90,7 @@ const ReturnRequests = () => {
                         <option value="All">All Types</option>
                         <option value="Return">Return</option>
                         <option value="Replacement">Replacement</option>
+                        <option value="Cancellation">Cancellation</option>
                     </select>
                     <select
                         className="flex-1 lg:flex-none px-4 py-2.5 bg-gray-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-blue-500 text-sm font-bold min-w-[150px]"
@@ -132,7 +133,11 @@ const ReturnRequests = () => {
                                         <div className="flex flex-col">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-xs font-black text-gray-900">{ret.id}</span>
-                                                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${ret.type === 'Return' ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'}`}>
+                                                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${
+                                                    ret.type === 'Return' ? 'bg-orange-100 text-orange-600' : 
+                                                    ret.type === 'Replacement' ? 'bg-purple-100 text-purple-600' : 
+                                                    'bg-red-100 text-red-600'
+                                                }`}>
                                                     {ret.type}
                                                 </span>
                                             </div>
@@ -219,7 +224,11 @@ const ReturnRequests = () => {
                         {/* Left Side: Info */}
                         <div className="md:w-1/2 p-8 border-b md:border-b-0 md:border-r border-gray-100 overflow-y-auto">
                             <div className="flex items-center justify-between mb-6">
-                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${selectedReturn.type === 'Return' ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'}`}>
+                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
+                                    selectedReturn.type === 'Return' ? 'bg-orange-100 text-orange-600' : 
+                                    selectedReturn.type === 'Replacement' ? 'bg-purple-100 text-purple-600' : 
+                                    'bg-red-100 text-red-600'
+                                }`}>
                                     {selectedReturn.type} Request
                                 </span>
                                 <button onClick={() => setSelectedReturn(null)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 md:hidden"><MdCancel size={24} /></button>
