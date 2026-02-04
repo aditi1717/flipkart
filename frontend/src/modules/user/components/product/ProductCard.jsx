@@ -22,7 +22,7 @@ const ProductCard = ({ product, footerText }) => {
 
     return (
         <div
-            className={`flex flex-col h-full cursor-pointer group transition-opacity duration-300 ${isNavigating ? 'opacity-70' : ''}`}
+            className={`flex flex-col h-full cursor-pointer group/card transition-opacity duration-300 ${isNavigating ? 'opacity-70' : ''}`}
             onClick={handleNavigate}
         >
             <div className="relative aspect-square mb-2 bg-[#f8f8f8] rounded-2xl overflow-hidden flex items-center justify-center border border-gray-50 shadow-sm">
@@ -33,7 +33,7 @@ const ProductCard = ({ product, footerText }) => {
                 )}
                 <img
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500"
                     src={product.image}
                     onError={(e) => {
                         e.target.onerror = null;

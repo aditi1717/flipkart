@@ -48,11 +48,11 @@ const ProductSection = ({
             </div>
 
             {isScrollable ? (
-                <div className="relative group">
+                <div className="relative group/section">
                     {/* Left Scroll Button */}
                     <button
                         onClick={() => scroll('left')}
-                        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg items-center justify-center border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 -ml-5"
+                        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg items-center justify-center border border-gray-100 opacity-0 group-hover/section:opacity-100 transition-opacity disabled:opacity-0 -ml-5"
                     >
                         <span className="material-icons text-gray-700">chevron_left</span>
                     </button>
@@ -78,7 +78,7 @@ const ProductSection = ({
                     {/* Right Scroll Button */}
                     <button
                         onClick={() => scroll('right')}
-                        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg items-center justify-center border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 -mr-5"
+                        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg items-center justify-center border border-gray-100 opacity-0 group-hover/section:opacity-100 transition-opacity disabled:opacity-0 -mr-5"
                     >
                         <span className="material-icons text-gray-700">chevron_right</span>
                     </button>

@@ -70,13 +70,24 @@ const Checkout = () => {
 
     const handleApplyCoupon = (codeOverride = null) => {
         setCouponError('');
-        const codeToApply = codeOverride || couponInput;
+        const codeToApply = (codeOverride || couponInput).trim();
         if (!codeToApply) return;
 
         // Find coupon in the store
-        const coupon = coupons.find(c => c.code === codeToApply && c.active);
+        // console.log('Available Coupons:', coupons);
+        // console.log('Code to Apply:', codeToApply);
+        
+        // Find by code first to give better error messages
+        const coupon = coupons.find(c => c.code === codeToApply);
+
+        // console.log('Found Coupon:', coupon);
 
         if (coupon) {
+            if (!coupon.active) {
+                setCouponError('This coupon is inactive or expired');
+                return;
+            }
+
             // Basic Validation Logic
             const price = buyNowItem 
                 ? buyNowItem.price * buyNowItem.quantity
@@ -87,21 +98,32 @@ const Checkout = () => {
                 return;
             }
 
-            // Calculate Discount
+            // Calculate Discount - Robust Calculation
             let discountAmount = 0;
+            const couponValue = parseFloat(coupon.value) || 0;
+            const maxDiscount = parseFloat(coupon.maxDiscount) || 0;
+            
+            if (couponValue < 0) {
+                 setCouponError('Invalid coupon value');
+                 return;
+            }
+
             if (coupon.type === 'percentage') {
-                discountAmount = (price * coupon.value) / 100;
-                if (coupon.maxDiscount > 0) {
-                    discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+                discountAmount = (price * couponValue) / 100;
+                if (maxDiscount > 0) {
+                    discountAmount = Math.min(discountAmount, maxDiscount);
                 }
             } else {
-                discountAmount = coupon.value;
+                discountAmount = couponValue;
             }
+
+            // Safety: Ensure discount doesn't exceed order price and is not negative
+            discountAmount = Math.max(0, Math.min(discountAmount, price));
 
             applyCoupon({ code: coupon.code, discount: Math.round(discountAmount), type: coupon.type });
             setCouponInput('');
         } else {
-            setCouponError('Invalid or Expired Coupon Code');
+            setCouponError('Invalid Coupon Code');
         }
     };
 
@@ -567,7 +589,7 @@ const Checkout = () => {
                                         <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-1">Available Coupons</h4>
                                         <div className="space-y-3">
                                             {coupons.filter(c => c.active).map((coupon) => (
-                                                <div key={coupon.id} className="bg-white rounded-xl p-3 border border-dashed border-blue-200 hover:border-blue-400 transition-colors flex items-center justify-between group">
+                                                <div key={coupon._id} className="bg-white rounded-xl p-3 border border-dashed border-blue-200 hover:border-blue-400 transition-colors flex items-center justify-between group">
                                                     <div>
                                                         <div className="flex items-center gap-2">
                                                             <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-[11px]">{coupon.code}</span>
@@ -786,7 +808,7 @@ const Checkout = () => {
                                     <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Available Coupons</h4>
                                     <div className="space-y-3">
                                         {coupons.filter(c => c.active).map((coupon) => (
-                                            <div key={coupon.id} className="p-3 rounded-xl border border-dashed border-blue-100 bg-blue-50/10 hover:border-blue-300 hover:bg-blue-50/30 transition-all group">
+                                            <div key={coupon._id} className="p-3 rounded-xl border border-dashed border-blue-100 bg-blue-50/10 hover:border-blue-300 hover:bg-blue-50/30 transition-all group">
                                                 <div className="flex items-center justify-between mb-1">
                                                     <span className="font-mono font-bold text-blue-600 text-[11px] uppercase tracking-wider">{coupon.code}</span>
                                                     <button

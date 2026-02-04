@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import './RichTextEditor.css';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Table from '@tiptap/extension-table';
@@ -338,124 +339,12 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Enter product highligh
             </div>
 
             {/* Editor Content */}
-            <EditorContent 
-                editor={editor} 
-                className="prose prose-sm max-w-none p-6 min-h-[400px] focus:outline-none"
-            />
-
-            <style jsx global>{`
-                .ProseMirror {
-                    outline: none;
-                    min-height: 400px;
-                    color: #111827;
-                    font-size: 14px;
-                    line-height: 1.6;
-                    caret-color: #2563EB;
-                }
-
-                .ProseMirror-focused {
-                    caret-color: #2563EB;
-                }
-
-                .ProseMirror::selection {
-                    background-color: #BFDBFE;
-                }
-
-                .ProseMirror *::selection {
-                    background-color: #BFDBFE;
-                }
-
-                .ProseMirror p.is-editor-empty:first-child::before {
-                    content: '${placeholder}';
-                    float: left;
-                    color: #9CA3AF;
-                    pointer-events: none;
-                    height: 0;
-                    font-style: italic;
-                }
-
-                .ProseMirror p {
-                    color: #111827;
-                    margin: 0.5rem 0;
-                }
-
-                .tiptap-table {
-                    border-collapse: collapse;
-                    margin: 1rem 0;
-                    overflow: hidden;
-                    table-layout: fixed;
-                    width: 100%;
-                }
-
-                .tiptap-table td,
-                .tiptap-table th {
-                    border: 2px solid #E5E7EB;
-                    padding: 8px 12px;
-                    position: relative;
-                    vertical-align: top;
-                    box-sizing: border-box;
-                    min-width: 100px;
-                    color: #111827;
-                }
-
-                .tiptap-table th {
-                    background-color: #F3F4F6;
-                    font-weight: bold;
-                    text-align: left;
-                }
-
-                .tiptap-table .selectedCell {
-                    background-color: #DBEAFE;
-                }
-
-                .ProseMirror ul,
-                .ProseMirror ol {
-                    padding-left: 1.5rem;
-                    margin: 0.5rem 0;
-                }
-
-                .ProseMirror li {
-                    margin: 0.25rem 0;
-                    color: #111827;
-                }
-
-                .ProseMirror strong {
-                    font-weight: 700;
-                    color: #000000;
-                }
-
-                .ProseMirror em {
-                    font-style: italic;
-                }
-
-                .ProseMirror u {
-                    text-decoration: underline;
-                }
-
-                .ProseMirror h1 {
-                    font-size: 24px;
-                    font-weight: 700;
-                    color: #111827;
-                    margin: 16px 0 12px 0;
-                    line-height: 1.3;
-                }
-
-                .ProseMirror h2 {
-                    font-size: 20px;
-                    font-weight: 600;
-                    color: #111827;
-                    margin: 14px 0 10px 0;
-                    line-height: 1.4;
-                }
-
-                .ProseMirror h3 {
-                    font-size: 16px;
-                    font-weight: 600;
-                    color: #374151;
-                    margin: 12px 0 8px 0;
-                    line-height: 1.5;
-                }
-            `}</style>
+            <div data-placeholder={placeholder}>
+                <EditorContent 
+                    editor={editor} 
+                    className="prose prose-sm max-w-none p-6 min-h-[400px] focus:outline-none"
+                />
+            </div>
         </div>
     );
 };

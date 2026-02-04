@@ -5,6 +5,7 @@ import ProductSection from '../components/home/ProductSection';
 import { useProduct, useProducts } from '../../../hooks/useData';
 import API from '../../../services/api';
 import toast from 'react-hot-toast';
+import './ProductDetails.css';
 
 const ProductSkeleton = () => {
     return (
@@ -477,7 +478,6 @@ const ProductDetails = () => {
                                 {averageRating} <span className="material-icons text-[10px]">star</span>
                             </span>
                             <span className="text-gray-500 text-sm font-medium">{totalRatings.toLocaleString()} Ratings & {totalRatings.toLocaleString()} Reviews</span>
-                            <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" alt="Assured" className="h-5" />
                         </div>
 
                         <p className="text-green-600 text-sm font-bold mb-1">Special Price</p>
@@ -1090,39 +1090,6 @@ const ProductDetails = () => {
                             </div>
                         </div>
                     )}
-                    <style jsx>{`
-                                .prose ul, .prose ol {
-                                    padding-left: 1.25rem;
-                                    margin: 0.5rem 0;
-                                }
-                                .prose li {
-                                    margin: 0.25rem 0;
-                                    color: #374151;
-                                    font-size: 13px;
-                                }
-                                .prose table {
-                                    border-collapse: collapse;
-                                    width: 100%;
-                                    margin: 1rem 0;
-                                    font-size: 12px;
-                                }
-                                .prose th, .prose td {
-                                    border: 1px solid #e5e7eb;
-                                    padding: 6px 8px;
-                                    text-align: left;
-                                }
-                                .prose th {
-                                    background-color: #f3f4f6;
-                                    font-weight: 600;
-                                }
-                                .prose strong {
-                                    font-weight: 700;
-                                    color: #111827;
-                                }
-                                .prose p {
-                                    margin: 0.5rem 0;
-                                }
-                            `}</style>
 
                     {/* Description Section */}
                     {product.description && product.description.length > 0 && (

@@ -8,15 +8,25 @@ import Order from '../models/Order.js';
 export const createRazorpayOrder = async (req, res) => {
     const { amount } = req.body;
     console.log(`Processing Razorpay order request - Amount: ₹${amount}`);
+    
+    // Debug Logging
+    console.log('Razorpay Config Check:', {
+        keyIdPresent: !!process.env.RAZORPAY_KEY_ID,
+        keySecretPresent: !!process.env.RAZORPAY_KEY_SECRET
+    });
 
     try {
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            throw new Error("Razorpay credentials missing in backend environment");
+        }
+
         const instance = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_KEY_SECRET,
+            key_id: process.env.RAZORPAY_KEY_ID.trim(),
+            key_secret: process.env.RAZORPAY_KEY_SECRET.trim(),
         });
 
         const options = {
-            amount: amount * 100, // amount in the smallest currency unit (paise)
+            amount: Math.round(amount * 100), // Ensure integer paise
             currency: "INR",
             receipt: `receipt_${Date.now()}`,
         };
@@ -30,7 +40,7 @@ export const createRazorpayOrder = async (req, res) => {
         res.json(order);
     } catch (error) {
         console.error('Razorpay Order Creation Error:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message, details: error.error });
     }
 };
 

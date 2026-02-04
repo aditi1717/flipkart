@@ -65,16 +65,68 @@ const Cart = () => {
 
             {/* Main Content Grid */}
             <div className="md:max-w-[1248px] md:mx-auto md:px-0">
-                {cart.length === 0 && savedForLater.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center pt-20 px-10 text-center bg-white h-[70vh] md:rounded-xl md:shadow-lg md:h-auto md:py-20 md:border md:border-blue-100">
-                        <div className="w-24 h-24 md:w-32 md:h-32 bg-blue-50 rounded-full flex items-center justify-center mb-6 shadow-inner ring-8 ring-blue-50/50">
-                            <span className="material-icons text-blue-600 text-6xl md:text-7xl">shopping_cart_checkout</span>
+                {cart.length === 0 ? (
+                    <div className="space-y-6">
+                        <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-white min-h-[60vh] md:rounded-2xl md:shadow-sm md:py-24 md:border border-gray-100 mx-4 md:mx-0">
+                            <div className="relative mb-8 group">
+                                <div className="absolute inset-0 bg-blue-100 rounded-full animate-ping opacity-20 duration-[2s]"></div>
+                                <div className="relative w-32 h-32 bg-gradient-to-tr from-blue-50 to-blue-100 rounded-full flex items-center justify-center shadow-inner hover:scale-105 transition-transform duration-300">
+                                    <span className="material-icons text-blue-600 text-[64px] md:text-[80px] drop-shadow-sm -ml-2">remove_shopping_cart</span>
+                                </div>
+                                <div className="absolute -bottom-2 -right-2 bg-white p-2 rounded-full shadow-md border border-gray-100">
+                                    <span className="material-icons text-orange-500 text-2xl">sentiment_dissatisfied</span>
+                                </div>
+                            </div>
+                            
+                            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-3 tracking-tight">Your cart is feeling light</h2>
+                            <p className="text-gray-500 text-base md:text-lg mb-8 max-w-md mx-auto leading-relaxed">
+                                There is nothing in your bag. Let's add some items.
+                            </p>
+                            
+                            <button 
+                                onClick={() => navigate('/')} 
+                                className="group relative inline-flex items-center gap-2 bg-blue-600 text-white px-10 py-4 rounded-full font-bold shadow-blue-200 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                            >
+                                <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                                <span className="material-icons relative z-10 transition-transform group-hover:rotate-12">shopping_bag</span>
+                                <span className="relative z-10">Start Shopping</span>
+                            </button>
                         </div>
-                        <h2 className="text-2xl font-bold mb-2 text-gray-800">Your cart is empty!</h2>
-                        <p className="text-gray-600 text-base mb-6">Add items to it now and start shopping.</p>
-                        <button onClick={() => navigate('/')} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-3.5 rounded-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
-                            Shop Now
-                        </button>
+
+                         {/* Saved for Later - Displayed even when cart is empty */}
+                        {savedForLater.length > 0 && (
+                            <div className="bg-white md:rounded-lg md:shadow-lg border border-blue-100 mx-4 md:mx-0">
+                                <div className="px-5 py-4 border-b border-blue-100 bg-gradient-to-r from-white to-purple-50">
+                                    <div className="flex items-center gap-2">
+                                        <span className="material-icons text-purple-600">bookmark</span>
+                                        <h3 className="text-base font-extrabold text-gray-800 uppercase">Saved for later ({savedForLater.length})</h3>
+                                    </div>
+                                </div>
+                                {savedForLater.map((item) => (
+                                    <div key={item.id} className="p-5 border-b border-blue-50 last:border-b-0 flex gap-4 opacity-80 hover:opacity-100 transition-all hover:bg-purple-50/50">
+                                        <div className="w-24 h-28 flex-shrink-0 bg-gradient-to-br from-gray-50 to-purple-50 rounded-lg border-2 border-purple-100 p-2 grayscale hover:grayscale-0 transition-all">
+                                            <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h2 className="text-base font-bold text-gray-700 line-clamp-2 hover:text-purple-600 cursor-pointer transition-colors" onClick={() => navigate(`/product/${item.id}`)}>{item.name}</h2>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <span className="text-xl font-extrabold text-gray-700">₹{item.price.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex items-center gap-6 mt-4 text-sm font-bold uppercase">
+                                                <button onClick={() => moveToCart(item)} className="text-blue-600 hover:text-purple-600 transition-colors flex items-center gap-1">
+                                                    <span className="material-icons text-base">add_shopping_cart</span>
+                                                    Move to Cart
+                                                </button>
+                                                <button onClick={() => removeFromSavedForLater(item.id)} className="text-red-500 hover:text-red-700 transition-colors flex items-center gap-1">
+                                                    <span className="material-icons text-base">delete</span>
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <>
