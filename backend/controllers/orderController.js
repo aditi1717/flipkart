@@ -1,6 +1,7 @@
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import PinCode from '../models/PinCode.js';
+import Notification from '../models/Notification.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -67,17 +68,41 @@ export const addOrderItems = async (req, res) => {
                     
                     if (sku) {
                         sku.stock -= item.qty;
+                        if (sku.stock <= 5) {
+                             await Notification.create({
+                                type: 'stock',
+                                title: 'Low Stock Alert (Variant)',
+                                message: `Product "${product.name}" variant has low stock (${sku.stock} remaining).`,
+                                relatedId: product._id
+                            });
+                        }
                     }
                 }
 
                 // 2. Reduce Overall Product Stock
                 product.stock -= item.qty;
+                if (product.stock <= 5) {
+                    await Notification.create({
+                        type: 'stock',
+                        title: 'Low Stock Alert',
+                        message: `Product "${product.name}" is running low on stock (${product.stock} remaining).`,
+                        relatedId: product._id
+                    });
+                }
                 
                 // Use markModified if using Map for combination to ensure Mongoose saves nested changes
                 product.markModified('skus');
                 await product.save();
             }
         }
+
+        // Create Order Notification
+        await Notification.create({
+            type: 'order',
+            title: 'New Order Received',
+            message: `Order #${createdOrder._id.toString().slice(-6).toUpperCase()} placed by ${req.user.name} for ₹${totalPrice}`,
+            relatedId: createdOrder._id
+        });
 
         res.status(201).json(createdOrder);
     } catch (error) {

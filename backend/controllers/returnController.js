@@ -1,5 +1,7 @@
 import Return from '../models/Return.js';
 import Order from '../models/Order.js';
+import Notification from '../models/Notification.js';
+import mongoose from 'mongoose';
 
 // @desc    Create a new return request
 // @route   POST /api/returns
@@ -70,6 +72,14 @@ export const createReturnRequest = async (req, res) => {
 
         await order.save();
 
+        // Create Return Notification
+        await Notification.create({
+            type: 'return',
+            title: 'New Return Request',
+            message: `Return requested for Order #${order._id.toString().slice(-6).toUpperCase()}`,
+            relatedId: createdReturn._id
+        });
+
         res.status(201).json(createdReturn);
     } catch (error) {
         console.error(error);
@@ -116,7 +126,7 @@ export const getUserReturnRequests = async (req, res) => {
 // @desc    Update return status
 // @route   PUT /api/returns/:id
 // @access  Private/Admin
-import mongoose from 'mongoose';
+// @access  Private/Admin
 
 // ... (keep imports)
 
