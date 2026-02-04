@@ -9,7 +9,9 @@ const bannerSchema = mongoose.Schema({
     slides: [{
         imageUrl: { type: String },
         link: { type: String },
-        linkedProduct: { type: mongoose.Schema.Types.Mixed } // Store minimal product info or ID
+        linkedProduct: { type: mongoose.Schema.Types.Mixed }, // Store minimal product info or ID
+        linkedOffer: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer' }, // Link to offer
+        targetType: { type: String, enum: ['product', 'offer', 'url'], default: 'product' }
     }],
 
     // For 'hero' type
@@ -23,7 +25,11 @@ const bannerSchema = mongoose.Schema({
         badgeText: String,
         offerText: String,
         offerBank: String,
-        backgroundColor: String // Optional gradient/color class
+        backgroundColor: String, // Optional gradient/color class
+        link: { type: String },
+        linkedProduct: { type: mongoose.Schema.Types.Mixed },
+        linkedOffer: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer' },
+        targetType: { type: String, enum: ['product', 'offer', 'url'], default: 'product' }
     }
 }, {
     timestamps: true,

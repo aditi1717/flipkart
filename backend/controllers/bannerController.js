@@ -7,7 +7,9 @@ export const getBanners = async (req, res) => {
     try {
         const { all } = req.query;
         const query = all === 'true' ? {} : { active: true };
-        const banners = await Banner.find(query);
+        const banners = await Banner.find(query)
+            .populate('slides.linkedOffer')
+            .populate('content.linkedOffer');
         res.json(banners);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -30,6 +32,19 @@ export const createBanner = async (req, res) => {
             try { content = JSON.parse(content); } catch (e) {}
         }
 
+        // Sanitize linkedOffer in slides
+        if (Array.isArray(slides)) {
+            slides = slides.map(slide => ({
+                ...slide,
+                linkedOffer: slide.linkedOffer || null
+            }));
+        }
+
+        // Sanitize linkedOffer in content
+        if (content && content.linkedOffer === "") {
+            content.linkedOffer = null;
+        }
+
         // Handle Slides Images
         if (req.files && req.files.slide_images) {
             const slideFiles = req.files.slide_images;
@@ -38,9 +53,6 @@ export const createBanner = async (req, res) => {
                     if (slide.imageUrl && slide.imageUrl.startsWith('SLIDE_IMG_INDEX::')) {
                         const idx = parseInt(slide.imageUrl.split('::')[1]);
                         const file = slideFiles.find(f => f.fieldname === 'slide_images' && f.originalname === slide.originalName); 
-                        // Multer array doesn't guarantee order if uploaded in parallel? 
-                        // Actually with multer array, they come in order. But let's trust index if simple.
-                        // Better: frontend sends index. Backend matches index in req.files array.
                         if (slideFiles[idx]) {
                              return { ...slide, imageUrl: slideFiles[idx].path };
                         }
@@ -87,6 +99,11 @@ export const updateBanner = async (req, res) => {
                     try { slides = JSON.parse(slides); } catch (e) {}
                  }
 
+                 // Sanitize linkedOffer
+                 if (Array.isArray(slides)) {
+                     slides = slides.map(s => ({...s, linkedOffer: s.linkedOffer || null}));
+                 }
+
                  if (req.files && req.files.slide_images) {
                     const slideFiles = req.files.slide_images;
                     if (Array.isArray(slides)) {
@@ -109,6 +126,9 @@ export const updateBanner = async (req, res) => {
                     try { content = JSON.parse(content); } catch (e) {}
                 }
                 
+                // Sanitize linkedOffer
+                if (content.linkedOffer === "") content.linkedOffer = null;
+
                 if (req.files && req.files.hero_image) {
                     content.imageUrl = req.files.hero_image[0].path;
                 } else if (req.body.hero_image_url) {

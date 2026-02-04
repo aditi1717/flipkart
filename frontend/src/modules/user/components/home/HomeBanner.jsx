@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
@@ -6,13 +7,50 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
 const HomeBanner = ({ banner }) => {
+    const navigate = useNavigate();
+    
     if (!banner || !banner.active) return null;
+
+    const handleSlideClick = (slide) => {
+        console.log('Banner slide clicked:', slide); // Debug log
+        
+        // Check if linkedOffer exists (can be string ID or object)
+        const offerId = slide.linkedOffer?._id || slide.linkedOffer;
+        
+        if (offerId) {
+            console.log('Navigating to offer:', offerId);
+            navigate(`/offers/${offerId}`);
+        } else if (slide.targetValue && slide.targetType === 'offer') {
+            // Fallback: check old format
+            console.log('Navigating to offer (fallback):', slide.targetValue);
+            navigate(`/offers/${slide.targetValue}`);
+        } else if (slide.link) {
+            window.location.href = slide.link;
+        }
+    };
+
+    const handleBannerContentClick = () => {
+        console.log('Banner content clicked:', banner.content);
+        
+        // Check for linkedOffer in banner content
+        const offerId = banner.content?.linkedOffer?._id || banner.content?.linkedOffer;
+        
+        if (offerId) {
+            console.log('Navigating to offer:', offerId);
+            navigate(`/offers/${offerId}`);
+        } else if (banner.content?.link) {
+            window.location.href = banner.content.link;
+        }
+    };
 
     // --- Hero Banner Style ---
     if (banner.type === 'hero') {
         return (
             <section className="w-full mt-4 md:mt-8">
-                <div className={`relative md:rounded-2xl overflow-hidden h-[180px] md:h-[300px] shadow-xl border border-white/5 group cursor-pointer ${banner.content.backgroundColor || 'bg-gradient-to-br from-[#0a0a1a] via-[#1a1a3a] to-[#0a0a1a]'}`}>
+                <div 
+                    onClick={handleBannerContentClick}
+                    className={`relative md:rounded-2xl overflow-hidden h-[180px] md:h-[300px] shadow-xl border border-white/5 group cursor-pointer ${banner.content.backgroundColor || 'bg-gradient-to-br from-[#0a0a1a] via-[#1a1a3a] to-[#0a0a1a]'}`}
+                >
                     <div className="absolute inset-0 flex">
                         <div className="w-1/2 md:w-2/5 p-5 md:pl-16 flex flex-col justify-center z-10">
                             {(banner.content.brand || banner.content.brandTag) && (
@@ -64,7 +102,10 @@ const HomeBanner = ({ banner }) => {
     if (banner.type === 'card') {
         return (
             <section className="w-full mt-6 md:mt-8">
-                <div className="md:rounded-2xl overflow-hidden border border-gray-100 shadow-sm cursor-pointer active:scale-[0.98] transition-transform group relative h-[180px] md:h-[300px]">
+                <div 
+                    onClick={handleBannerContentClick}
+                    className="md:rounded-2xl overflow-hidden border border-gray-100 shadow-sm cursor-pointer active:scale-[0.98] transition-transform group relative h-[180px] md:h-[300px]"
+                >
                     <img
                         src={banner.content.imageUrl}
                         alt={banner.content.title}
@@ -96,7 +137,10 @@ const HomeBanner = ({ banner }) => {
                  <div className="flex items-center gap-2 mb-3 px-4 md:px-0">
                     <h3 className="text-lg md:text-2xl font-bold text-gray-900">Sponsored</h3>
                 </div>
-                <div className={`relative md:rounded-3xl overflow-hidden h-[200px] md:h-[360px] cursor-pointer group hover:shadow-xl transition-shadow ${banner.content.backgroundColor || 'bg-gradient-to-b from-white to-blue-100'} border-y md:border border-blue-200`}>
+                <div 
+                    onClick={handleBannerContentClick}
+                    className={`relative md:rounded-3xl overflow-hidden h-[200px] md:h-[360px] cursor-pointer group hover:shadow-xl transition-shadow ${banner.content.backgroundColor || 'bg-gradient-to-b from-white to-blue-100'} border-y md:border border-blue-200`}
+                >
                     <div className="absolute inset-0 p-6 md:p-12 flex items-center">
                         <div className="w-1/2 md:w-1/3 z-10">
                             {banner.content.brand && (
@@ -151,7 +195,10 @@ const HomeBanner = ({ banner }) => {
                 >
                     {banner.slides.map((slide, index) => (
                         <SwiperSlide key={index}>
-                            <div className="relative aspect-[21/9] md:aspect-[3/1] w-full bg-gray-100">
+                            <div 
+                                className="relative aspect-[21/9] md:aspect-[3/1] w-full bg-gray-100 cursor-pointer"
+                                onClick={() => handleSlideClick(slide)}
+                            >
                                 <img 
                                     src={slide.imageUrl} 
                                     className="w-full h-full object-cover" 

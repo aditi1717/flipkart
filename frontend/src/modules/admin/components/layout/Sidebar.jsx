@@ -22,7 +22,8 @@ import {
     MdViewAgenda,
     MdViewCarousel,
     MdRateReview,
-    MdLocationOn
+    MdLocationOn,
+    MdLayers
 } from 'react-icons/md';
 
 import logo from '../../../../assets/indiankart-logo.png';
@@ -42,10 +43,12 @@ const Sidebar = () => {
         { name: 'Reviews', icon: MdRateReview, path: '/admin/reviews' },
         { name: 'Returns', icon: MdAssignmentReturn, path: '/admin/returns' },
         { name: 'Coupons & Offers', icon: MdLocalOffer, path: '/admin/coupons' },
+        { name: 'Offers', icon: MdLabel, path: '/admin/offers' },
         { name: 'Play (Reels)', icon: MdPlayCircle, path: '/admin/play' },
         { name: 'Bank Offers', icon: MdLocalOffer, path: '/admin/bank-offers' },
-        { name: 'Home Sections', icon: MdViewAgenda, path: '/admin/content/home' },
-        // { name: 'Home Banners', icon: MdViewCarousel, path: '/admin/content/banners' },
+        { name: 'Home Layout', icon: MdLayers, path: '/admin/content/layout' },
+        { name: 'Home Sections', icon: MdViewAgenda, path: '/admin/content/sections' },
+        { name: 'Home Banners', icon: MdViewCarousel, path: '/admin/content/banners' },
         { name: 'Content Pages', icon: MdDescription, path: '/admin/pages' },
         { name: 'Support Requests', icon: MdSupportAgent, path: '/admin/support' },
         { name: 'Settings', icon: MdSettings, path: '/admin/settings' },

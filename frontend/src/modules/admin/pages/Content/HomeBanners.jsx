@@ -12,24 +12,63 @@ import {
     MdLink,
     MdImage
 } from 'react-icons/md';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import useBannerStore from '../../store/bannerStore';
 import useProductStore from '../../store/productStore';
 import { useContentStore } from '../../store/contentStore';
+import API from '../../../../services/api';
 
 const HomeBanners = () => {
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    
     // Correct store usage
     const { banners, addBanner, updateBanner, deleteBanner, fetchBanners } = useBannerStore();
     const { products } = useProductStore();
     const { homeSections, fetchHomeSections } = useContentStore();
+    const [offers, setOffers] = useState([]);
 
+    // Fetch data on mount
     useEffect(() => {
         fetchBanners();
         fetchHomeSections();
+        // Fetch offers
+        API.get('/offers').then(({ data }) => setOffers(data)).catch(console.error);
     }, [fetchBanners, fetchHomeSections]);
+    
+    // Handle URL-based form opening after banners are loaded
+    useEffect(() => {
+        const view = searchParams.get('view');
+        const bannerId = searchParams.get('id');
+        
+        if (view === 'edit' && bannerId && banners.length > 0) {
+            const banner = banners.find(b => (b.id || b._id) === bannerId);
+            if (banner) {
+                // Set form data directly
+                setFormData({
+                    ...banner,
+                    slides: banner.slides || [],
+                    content: banner.content || {
+                        brand: '', brandTag: '', title: '', subtitle: '', description: '',
+                        imageUrl: '', badgeText: '', offerText: '', offerBank: '', backgroundColor: ''
+                    }
+                });
+                setHeroImagePreview(banner.content?.imageUrl || '');
+            }
+        } else if (view === 'new') {
+            setFormData({ 
+                section: 'HomeHero', type: 'slides', active: true, slides: [],
+                content: { brand: '', brandTag: '', title: '', subtitle: '', description: '', imageUrl: '', badgeText: '', offerText: '', offerBank: '', backgroundColor: '' } 
+            });
+            setHeroImageFile(null);
+            setHeroImagePreview('');
+        }
+    }, [searchParams, banners]);
 
-    // UI State
-    const [showForm, setShowForm] = useState(false);
-    const [selectedBannerId, setSelectedBannerId] = useState(null);
+    // UI State - controlled by URL
+    const showForm = searchParams.get('view') === 'edit' || searchParams.get('view') === 'new';
+    const selectedBannerId = searchParams.get('id') || 'new';
 
     // Form State
     const [formData, setFormData] = useState({
@@ -56,6 +95,7 @@ const HomeBanners = () => {
 
     const [showProductPicker, setShowProductPicker] = useState(null); // stores slide index
     const [searchTerm, setSearchTerm] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef(null);
     const heroFileInputRef = useRef(null);
 
@@ -63,11 +103,13 @@ const HomeBanners = () => {
         const files = Array.from(e.target.files);
         const newSlides = files.map(file => ({
             id: Date.now() + Math.random(),
-            imageUrl: 'SLIDE_IMG_INDEX::' + (formData.slides.length), // Placeholder for backend mapping (needs improvement but works if sequential)
-            originalName: file.name, // To match file in backend
-            preview: URL.createObjectURL(file), // Local preview
-            file: file, // Store file object for upload
-            linkedProduct: null
+            imageUrl: 'SLIDE_IMG_INDEX::' + (formData.slides.length),
+            originalName: file.name,
+            preview: URL.createObjectURL(file),
+            file: file,
+            linkedProduct: null,
+            targetType: 'product', // Default to product
+            linkedOffer: null
         }));
         // Note: Real index mapping needs to account for existing slides. 
         // For simplicity here, we will just start index based on current length, but this is flaky for multiple batches.
@@ -85,56 +127,81 @@ const HomeBanners = () => {
     };
 
     const handleSaveBanner = async () => {
-        const data = new FormData();
-        data.append('section', formData.section);
-        data.append('type', formData.type);
-        data.append('active', String(formData.active));
+        setIsSaving(true);
+        const loadingToast = toast.loading('Saving banner...');
+        
+        try {
+            const data = new FormData();
+            data.append('section', formData.section);
+            data.append('type', formData.type);
+            data.append('active', String(formData.active));
 
-        if (formData.type === 'slides') {
-             // Handle Slides
-             // We need to re-index the image placeholders or just send them as is and hope backend logic aligns
-             // A safer way: send slides metadata JSON, and separate files with matching fieldnames/indices?
-             // The backend logic: `if (slide.imageUrl.startsWith('SLIDE_IMG_INDEX::'))` looks for `slideFiles[idx]`.
-             // We need to ensure `slide_images` array aligns with these indices.
-             // This is tricky.
-             // Let's assume for now user only adds NEW slides in one go or we don't support mixed partial edits well without better logic.
-             // Simplified: new slides have file objects attached.
-             
-             const slidesMetadata = formData.slides.map((s, i) => {
-                 if (s.file) {
-                     return { ...s, imageUrl: `SLIDE_IMG_INDEX::${i}`, file: undefined, preview: undefined }; 
+            if (formData.type === 'slides') {
+                 // Handle Slides (Same logic as before)
+                 const slidesMetadata = formData.slides.map((s, i) => {
+                     if (s.file) {
+                         return { 
+                             ...s, 
+                             imageUrl: `SLIDE_IMG_INDEX::${i}`, 
+                             targetType: s.targetType || 'product',
+                             linkedOffer: s.linkedOffer || null,
+                             file: undefined, 
+                             preview: undefined 
+                         }; 
+                     }
+                     return s;
+                 });
+
+                 data.append('slides', JSON.stringify(slidesMetadata));
+                 
+                 formData.slides.forEach((s) => {
+                     if (s.file) {
+                         data.append('slide_images', s.file);
+                     }
+                 });
+
+            } else {
+                 // Handle Hero
+                 data.append('content', JSON.stringify(formData.content));
+                 if (heroImageFile) {
+                     data.append('hero_image', heroImageFile);
+                 } else if (formData.content.imageUrl) {
+                      data.append('hero_image_url', formData.content.imageUrl);
                  }
-                 return s;
-             });
+            }
 
-             data.append('slides', JSON.stringify(slidesMetadata));
-             
-             formData.slides.forEach((s) => {
-                 if (s.file) {
-                     data.append('slide_images', s.file);
-                 }
-             });
 
-        } else {
-             // Handle Hero
-             data.append('content', JSON.stringify(formData.content));
-             if (heroImageFile) {
-                 data.append('hero_image', heroImageFile);
-             } else if (formData.content.imageUrl) {
-                 // Keep existing URL
-                  data.append('hero_image_url', formData.content.imageUrl);
-             }
+            if (selectedBannerId && selectedBannerId !== 'new') {
+                await updateBanner(selectedBannerId, data);
+            } else {
+                await addBanner(data);
+            }
+            
+            await fetchBanners(); // Refresh list
+            toast.success('Banner saved successfully!', { id: loadingToast });
+            
+            // Do NOT close form - user wants to stay
+            // But we might want to update URL if it was 'new' to 'edit' state?
+            // For now, simple stay is fine. If it was 'new', it remains 'new' in URL but saves new copies?
+            // Ideally if 'new', we should switch to edit mode with new ID.
+            // But for now, let's just keep form open as requested.
+            
+        } catch (error) {
+            console.error(error);
+            toast.error(error.message || 'Failed to save banner', { id: loadingToast });
+        } finally {
+            setIsSaving(false);
         }
+    };
 
-
-        if (selectedBannerId && selectedBannerId !== 'new') {
-            await updateBanner(selectedBannerId, data);
-        } else {
-            await addBanner(data);
-        }
-        setShowForm(false);
+    const openNewBannerForm = () => {
+        setFormData({ 
+            section: 'HomeHero', type: 'slides', active: true, slides: [],
+            content: { brand: '', brandTag: '', title: '', subtitle: '', description: '', imageUrl: '', badgeText: '', offerText: '', offerBank: '', backgroundColor: '' } 
+        }); 
         setHeroImageFile(null);
         setHeroImagePreview('');
+        setSearchParams({ view: 'new' });
     };
 
     const handleEdit = (banner) => {
@@ -148,8 +215,7 @@ const HomeBanners = () => {
             }
         });
         setHeroImagePreview(banner.content?.imageUrl || '');
-        setSelectedBannerId(banner.id || banner._id);
-        setShowForm(true);
+        setSearchParams({ view: 'edit', id: banner.id || banner._id });
     };
 
     const removeSlide = (index) => {
@@ -173,16 +239,7 @@ const HomeBanners = () => {
             <div className="space-y-4 animate-in fade-in duration-300">
                 <div className="flex justify-end">
                     <button
-                        onClick={() => { 
-                            setFormData({ 
-                                section: 'HomeHero', type: 'slides', active: true, slides: [],
-                                content: { brand: '', brandTag: '', title: '', subtitle: '', description: '', imageUrl: '', badgeText: '', offerText: '', offerBank: '', backgroundColor: '' } 
-                            }); 
-                            setHeroImageFile(null);
-                            setHeroImagePreview('');
-                            setShowForm(true); 
-                            setSelectedBannerId('new'); 
-                        }}
+                        onClick={openNewBannerForm}
                         className="px-4 py-2 bg-purple-600 text-white rounded-xl text-[10px] font-bold hover:bg-purple-700 transition shadow-sm"
                     >
                         NEW BANNER
@@ -226,10 +283,16 @@ const HomeBanners = () => {
         <div className="space-y-6 animate-in fade-in duration-300 max-w-4xl mx-auto pb-12">
             <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-gray-100 shadow-sm sticky top-4 z-20">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><MdArrowBack size={24} /></button>
+                    <button onClick={() => setSearchParams({})} className="text-gray-400 hover:text-gray-600"><MdArrowBack size={24} /></button>
                     <h2 className="text-lg font-black text-gray-800 tracking-tight">{selectedBannerId === 'new' ? 'New Banner' : 'Edit Banner'}</h2>
                 </div>
-                <button onClick={handleSaveBanner} className="px-8 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black hover:bg-blue-700 transition shadow-lg shadow-blue-200 uppercase tracking-wider">SAVE CHANGES</button>
+                <button 
+                    onClick={handleSaveBanner} 
+                    disabled={isSaving}
+                    className="px-8 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black hover:bg-blue-700 transition shadow-lg shadow-blue-200 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                    {isSaving ? 'SAVING...' : 'SAVE CHANGES'}
+                </button>
             </div>
 
             {/* Configuration */}
@@ -246,8 +309,8 @@ const HomeBanners = () => {
                             {homeSections.map(section => (
                                 <option key={section.id} value={section.id}>{section.title} ({section.id})</option>
                             ))}
-                            {!homeSections.some(s => s.id === 'Electronics') && <option value="Electronics">Electronics (Legacy)</option>}
-                            {!homeSections.some(s => s.id === 'Fashion') && <option value="Fashion">Fashion (Legacy)</option>}
+                            {!homeSections.some(s => s.id === 'Electronics') && <option key="electronics-legacy" value="Electronics">Electronics (Legacy)</option>}
+                            {!homeSections.some(s => s.id === 'Fashion') && <option key="fashion-legacy" value="Fashion">Fashion (Legacy)</option>}
                         </select>
                     </div>
                     <div className="space-y-2 col-span-2 md:col-span-1">
@@ -300,24 +363,126 @@ const HomeBanners = () => {
                          <div className="space-y-6">
                             <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest border-b border-gray-50 pb-2">Offers & Badge</h3>
                              <div className="space-y-4">
-                                <input type="text" placeholder="Offer Bank (e.g. HDFC BANK)" value={formData.content.offerBank} onChange={(e) => setFormData({...formData, content: {...formData.content, offerBank: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
-                                <input type="text" placeholder="Offer Text (e.g. Flat ₹3,000 Off)" value={formData.content.offerText} onChange={(e) => setFormData({...formData, content: {...formData.content, offerText: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
-                                <input type="text" placeholder="Image Badge (e.g. 3X Periscope Camera)" value={formData.content.badgeText} onChange={(e) => setFormData({...formData, content: {...formData.content, badgeText: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
+                               <input type="text" placeholder="Offer Bank (e.g. HDFC BANK)" value={formData.content.offerBank} onChange={(e) => setFormData({...formData, content: {...formData.content, offerBank: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
+                               <input type="text" placeholder="Offer Text (e.g. Flat ₹3,000 Off)" value={formData.content.offerText} onChange={(e) => setFormData({...formData, content: {...formData.content, offerText: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
+                               <input type="text" placeholder="Image Badge (e.g. 3X Periscope Camera)" value={formData.content.badgeText} onChange={(e) => setFormData({...formData, content: {...formData.content, badgeText: e.target.value}})} className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" />
+                            </div>
+
+                            {/* Click Action for Hero Banners */}
+                             <div className="space-y-3 pt-2 border-t border-gray-50">
+                                <label className="text-xs font-semibold text-gray-500 mb-1 block uppercase tracking-wider">Click Action</label>
+                                <div className="flex gap-2 flex-wrap">
+                                    <label className={`flex items-center gap-1 cursor-pointer px-3 py-1.5 rounded-lg border text-xs font-bold transition ${formData.content.targetType === 'product' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-gray-50 border-transparent text-gray-400'}`}>
+                                        <input
+                                            type="radio"
+                                            checked={!formData.content.targetType || formData.content.targetType === 'product'}
+                                            onChange={() => setFormData({...formData, content: {...formData.content, targetType: 'product'}})}
+                                            className="hidden"
+                                        />
+                                        Product
+                                    </label>
+                                    <label className={`flex items-center gap-1 cursor-pointer px-3 py-1.5 rounded-lg border text-xs font-bold transition ${formData.content.targetType === 'offer' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-gray-50 border-transparent text-gray-400'}`}>
+                                        <input
+                                            type="radio"
+                                            checked={formData.content.targetType === 'offer'}
+                                            onChange={() => setFormData({...formData, content: {...formData.content, targetType: 'offer'}})}
+                                            className="hidden"
+                                        />
+                                        Offer
+                                    </label>
+                                    <label className={`flex items-center gap-1 cursor-pointer px-3 py-1.5 rounded-lg border text-xs font-bold transition ${formData.content.targetType === 'url' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-gray-50 border-transparent text-gray-400'}`}>
+                                        <input
+                                            type="radio"
+                                            checked={formData.content.targetType === 'url'}
+                                            onChange={() => setFormData({...formData, content: {...formData.content, targetType: 'url'}})}
+                                            className="hidden"
+                                        />
+                                        URL
+                                    </label>
+                                </div>
+
+                                {/* Conditional Inputs */}
+                                {(formData.content.targetType === 'offer') && (
+                                    <select
+                                        value={formData.content.linkedOffer || ''}
+                                        onChange={(e) => {
+                                             const selectedOffer = offers.find(o => o._id === e.target.value);
+                                             
+                                             const newContent = {
+                                                 ...formData.content,
+                                                 linkedOffer: e.target.value
+                                             };
+                                             
+                                             // Auto-populate logic
+                                             if (selectedOffer) {
+                                                  // Auto-fill texts if empty
+                                                  if (!newContent.title) newContent.title = selectedOffer.title;
+                                                  if (!newContent.offerText) newContent.offerText = `${selectedOffer.discountValue}${selectedOffer.discountType === 'percentage' ? '% OFF' : ' OFF'}`;
+                                                  
+                                                  // Auto-fill image
+                                                  if (selectedOffer.bannerImage) {
+                                                      newContent.imageUrl = selectedOffer.bannerImage;
+                                                      setHeroImagePreview(selectedOffer.bannerImage);
+                                                      setHeroImageFile(null); // Clear manual upload
+                                                  }
+                                             }
+                                             
+                                             setFormData({...formData, content: newContent});
+                                        }}
+                                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm text-gray-800"
+                                    >
+                                        <option value="">Select Offer...</option>
+                                        {offers.map(offer => (
+                                            <option key={offer._id} value={offer._id}>
+                                                {offer.title} ({offer.discountType === 'percentage' ? `${offer.discountValue}%` : `₹${offer.discountValue}`} OFF)
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
+
+                                {(!formData.content.targetType || formData.content.targetType === 'product') && (
+                                     <input 
+                                        type="text" 
+                                        placeholder="Product Name or ID" 
+                                        value={formData.content.linkedProduct || ''} 
+                                        onChange={(e) => setFormData({...formData, content: {...formData.content, linkedProduct: e.target.value}})} 
+                                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" 
+                                    />
+                                )}
+                                
+                                {(formData.content.targetType === 'url') && (
+                                     <input 
+                                        type="text" 
+                                        placeholder="https://..." 
+                                        value={formData.content.link || ''} 
+                                        onChange={(e) => setFormData({...formData, content: {...formData.content, link: e.target.value}})} 
+                                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border-transparent focus:bg-white focus:border-blue-500 outline-none text-base text-gray-800" 
+                                    />
+                                )}
                              </div>
 
                              <div className="pt-4">
-                                <label className="block w-full aspect-video rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer relative overflow-hidden group">
-                                    {heroImagePreview ? (
-                                        <img src={heroImagePreview} className="w-full h-full object-contain p-4" />
-                                    ) : (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-300">
-                                            <MdCloudUpload size={48} />
-                                            <span className="text-xs font-black uppercase mt-2">Upload Hero Image</span>
+                                {(formData.content.linkedOffer && offers.find(o => o._id === formData.content.linkedOffer)?.bannerImage) ? (
+                                    <div className="w-full aspect-video rounded-2xl border-2 border-green-500 relative overflow-hidden group">
+                                         <div className="absolute top-2 right-2 flex items-center gap-1 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm z-10">
+                                            <MdLocalOffer size={12} /> Image from Offer
                                         </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-bold uppercase transition-opacity">Change Image</div>
-                                    <input type="file" ref={heroFileInputRef} hidden onChange={handleHeroImageUpload} accept="image/*" />
-                                </label>
+                                        <img src={heroImagePreview} className="w-full h-full object-contain p-4 bg-green-50/30" />
+                                    </div>
+                                ) : (
+                                    <label className="block w-full aspect-video rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer relative overflow-hidden group">
+                                        {heroImagePreview ? (
+                                            <img src={heroImagePreview} className="w-full h-full object-contain p-4" />
+                                        ) : (
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-300">
+                                                <MdCloudUpload size={48} />
+                                                <span className="text-xs font-black uppercase mt-2">Upload Hero Image</span>
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-bold uppercase transition-opacity">Change Image</div>
+                                        <input type="file" ref={heroFileInputRef} hidden onChange={handleHeroImageUpload} accept="image/*" />
+                                    </label>
+                                )}
                              </div>
                          </div>
                      </div>
@@ -328,11 +493,86 @@ const HomeBanners = () => {
             {formData.type === 'slides' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {formData.slides.map((slide, idx) => (
-                        <div key={slide.id} className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm relative group">
-                            <div className="h-36 bg-gray-50 rounded-lg overflow-hidden border border-gray-50 mb-3">
+                        <div key={slide.id} className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm relative group space-y-3">
+                            <div className="h-36 bg-gray-50 rounded-lg overflow-hidden border border-gray-50">
                                 <img src={slide.preview || slide.imageUrl} className="w-full h-full object-cover" />
                             </div>
-                            <button onClick={() => removeSlide(idx)} className="absolute top-2 right-2 p-1.5 bg-white text-red-500 rounded-lg shadow-sm hover:bg-red-50 transition"><MdDelete size={14} /></button>
+                            <button onClick={() => removeSlide(idx)} className="absolute top-2 right-2 p-1.5 bg-white text-red-500 rounded-lg shadow-sm hover:bg-red-50 transition z-10"><MdDelete size={14} /></button>
+                            
+                            {/* Click Action Selection */}
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-bold text-gray-400 uppercase">Click Action</label>
+                                <div className="flex gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const newSlides = [...formData.slides];
+                                            newSlides[idx].targetType = 'product';
+                                            setFormData({...formData, slides: newSlides});
+                                        }}
+                                        className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition ${slide.targetType === 'product' ? 'bg-blue-100 text-blue-700' : 'bg-gray-50 text-gray-400'}`}
+                                    >
+                                        Product
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const newSlides = [...formData.slides];
+                                            newSlides[idx].targetType = 'offer';
+                                            setFormData({...formData, slides: newSlides});
+                                        }}
+                                        className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition ${slide.targetType === 'offer' ? 'bg-green-100 text-green-700' : 'bg-gray-50 text-gray-400'}`}
+                                    >
+                                        Offer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const newSlides = [...formData.slides];
+                                            newSlides[idx].targetType = 'url';
+                                            setFormData({...formData, slides: newSlides});
+                                        }}
+                                        className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition ${slide.targetType === 'url' ? 'bg-purple-100 text-purple-700' : 'bg-gray-50 text-gray-400'}`}
+                                    >
+                                        URL
+                                    </button>
+                                </div>
+                                
+                                {/* Conditional Inputs */}
+                                {slide.targetType === 'offer' && (
+                                    <select
+                                        value={slide.linkedOffer || ''}
+                                        onChange={(e) => {
+                                            const newSlides = [...formData.slides];
+                                            newSlides[idx].linkedOffer = e.target.value;
+                                            // Auto-load offer image
+                                            const selectedOffer = offers.find(o => o._id === e.target.value);
+                                            if (selectedOffer?.bannerImage) {
+                                                newSlides[idx].imageUrl = selectedOffer.bannerImage;
+                                                newSlides[idx].preview = selectedOffer.bannerImage;
+                                            }
+                                            setFormData({...formData, slides: newSlides});
+                                        }}
+                                        className="w-full p-1.5 text-[10px] border border-gray-200 rounded bg-white"
+                                    >
+                                        <option value="">Select Offer...</option>
+                                        {offers.map(offer => (
+                                            <option key={offer._id} value={offer._id}>
+                                                {offer.title} ({offer.discountType === 'percentage' ? `${offer.discountValue}%` : `₹${offer.discountValue}`} OFF)
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
+                                {slide.targetType === 'product' && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowProductPicker(idx)}
+                                        className="w-full p-1.5 text-[10px] bg-gray-50 border border-gray-200 rounded text-left hover:bg-gray-100"
+                                    >
+                                        {slide.linkedProduct ? slide.linkedProduct.name : 'Select Product...'}
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     ))}
                     <button
