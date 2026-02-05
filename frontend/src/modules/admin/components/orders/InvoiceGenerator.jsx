@@ -15,6 +15,7 @@ export const InvoiceDisplay = React.forwardRef(
         sellerAddress: apiSettings?.sellerAddress || "123 E-com St, Digital City",
         gstNumber: apiSettings?.gstNumber || "123456789",
         panNumber: apiSettings?.panNumber || "LBCPS9976F",
+        logoUrl: apiSettings?.logoUrl || "",
         signatureUrl: apiSettings?.signatureUrl || "",
         fssai: apiSettings?.fssai || "N/A"
     };
@@ -228,6 +229,9 @@ export const InvoiceDisplay = React.forwardRef(
         <div className="tax">
           <div className="tax-header">
             <div className="tax-header-item">
+              {settings.logoUrl && (
+                  <img src={settings.logoUrl} alt="Store Logo" style={{ height: "40px", marginBottom: "5px", objectFit: "contain", maxWidth: "120px" }} />
+              )}
               <h2 style={{ fontSize: "12px", margin: "0 0 3px 0" }}>Tax Invoice</h2>
             </div>
             <div className="tax-header-item">

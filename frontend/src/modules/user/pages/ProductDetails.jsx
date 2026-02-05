@@ -87,6 +87,38 @@ const ProductDetails = () => {
 
     // Translation Hooks
     const translatedName = useGoogleTranslation(product?.name);
+    // Static Text Translations
+    const homeText = useGoogleTranslation('Home');
+    const addToCartText = useGoogleTranslation('Add to Cart');
+    const outOfStockText = useGoogleTranslation('Out of Stock');
+    const buyNowText = useGoogleTranslation('Buy Now');
+    const checkText = useGoogleTranslation('Check');
+    const freeText = useGoogleTranslation('Free');
+    const deliverByText = useGoogleTranslation('Delivery by');
+    const specialPriceText = useGoogleTranslation('Special Price');
+    const availableOffersText = useGoogleTranslation('Available offers');
+    const deliveryText = useGoogleTranslation('Delivery');
+    const specificationsText = useGoogleTranslation('Specifications');
+    const productDescriptionText = useGoogleTranslation('Product Description');
+    const ratingsAndReviewsText = useGoogleTranslation('Ratings and reviews');
+    const rateThisProductText = useGoogleTranslation('Rate this product');
+    const ratingsText = useGoogleTranslation('Ratings');
+    const reviewsText = useGoogleTranslation('Reviews');
+    const offText = useGoogleTranslation('off');
+    const notDeliverableText = useGoogleTranslation('Not deliverable in your area');
+    const codNotAvailableText = useGoogleTranslation('COD Not Available');
+    const cashOnDeliveryText = useGoogleTranslation('Cash on Delivery');
+    const onlinePaymentOnlyText = useGoogleTranslation('Online payment only');
+    const payAtDoorstepText = useGoogleTranslation('Pay at doorstep');
+    const daysReturnText = useGoogleTranslation('-Day Return');
+    const easyReturnsText = useGoogleTranslation('Easy returns');
+    const warrantyDetailsText = useGoogleTranslation('Warranty details');
+    const currentlyNotAvailableText = useGoogleTranslation('Currently not available at this location');
+    const noReviewsText = useGoogleTranslation('No reviews yet. Be the first to review!');
+    const shareExperienceText = useGoogleTranslation('Share your experience...');
+    const highlightsText = useGoogleTranslation('Highlights');
+    const viewAllReviewsText = useGoogleTranslation('View All Reviews');
+
     // Note: Complex descriptions might need more granular translation, 
     // but for now we'll translate the main name which is key.
 
@@ -374,7 +406,7 @@ const ProductDetails = () => {
             <div className="hidden md:block max-w-[1600px] mx-auto p-6 animate-in fade-in duration-500">
                 {/* Breadcrumbs */}
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
-                    <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate('/')}>Home</span>
+                    <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate('/')}>{homeText}</span>
                     <span className="material-icons text-[12px] text-gray-400">chevron_right</span>
                     <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate(`/search?category=${product.category}`)}>{product.category}</span>
                     {product.subCategories && product.subCategories.length > 0 && (
@@ -433,7 +465,7 @@ const ProductDetails = () => {
                                 <div className="flex-1 bg-red-50 border border-red-100 p-4 rounded-sm text-center">
                                     <p className="text-red-600 font-bold uppercase tracking-tight text-sm flex items-center justify-center gap-2">
                                         <span className="material-icons text-red-500 text-[18px]">location_off</span>
-                                        Not deliverable in your area
+                                        {notDeliverableText}
                                     </p>
                                 </div>
                             ) : (
@@ -448,7 +480,7 @@ const ProductDetails = () => {
                                         }`}
                                     >
                                         <span className="material-icons text-[20px]">{currentStock > 0 ? 'shopping_cart' : 'info'}</span>
-                                        {currentStock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                                        {currentStock > 0 ? addToCartText : outOfStockText}
                                     </button>
                                     <button 
                                         onClick={handleBuyNow} 
@@ -460,7 +492,7 @@ const ProductDetails = () => {
                                         }`}
                                     >
                                         <span className="material-icons text-[20px]">{currentStock > 0 ? 'flash_on' : 'remove_shopping_cart'}</span>
-                                        {currentStock > 0 ? 'Buy Now' : 'Out of Stock'}
+                                        {currentStock > 0 ? buyNowText : outOfStockText}
                                     </button>
                                 </>
                             )}
@@ -485,14 +517,14 @@ const ProductDetails = () => {
                             <span className="bg-[#388e3c] text-white text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer">
                                 {averageRating} <span className="material-icons text-[10px]">star</span>
                             </span>
-                            <span className="text-gray-500 text-sm font-medium">{totalRatings.toLocaleString()} Ratings & {totalRatings.toLocaleString()} Reviews</span>
+                            <span className="text-gray-500 text-sm font-medium">{totalRatings.toLocaleString()} {ratingsText} & {totalRatings.toLocaleString()} {reviewsText}</span>
                         </div>
 
-                        <p className="text-green-600 text-sm font-bold mb-1">Special Price</p>
+                        <p className="text-green-600 text-sm font-bold mb-1">{specialPriceText}</p>
                         <div className="flex items-baseline gap-3 mb-4">
                             <span className="text-3xl font-medium text-gray-900">₹{product.price.toLocaleString()}</span>
                             <span className="text-gray-500 line-through text-base">₹{product.originalPrice.toLocaleString()}</span>
-                            <span className="text-green-600 font-bold text-base">{discountPercentage}% off</span>
+                            <span className="text-green-600 font-bold text-base">{discountPercentage}% {offText}</span>
                         </div>
 
                         {/* Dynamic Variants Desktop */}
@@ -532,7 +564,7 @@ const ProductDetails = () => {
 
                         {/* Offers - Desktop */}
                         <div className="mb-6 space-y-2">
-                            <p className="text-sm font-bold text-gray-900 mb-2">Available offers</p>
+                            <p className="text-sm font-bold text-gray-900 mb-2">{availableOffersText}</p>
                             {offers.map((offer, idx) => (
                                 <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
                                     <span className="material-icons text-[#388e3c] text-[16px] mt-0.5">local_offer</span>
@@ -549,7 +581,7 @@ const ProductDetails = () => {
                         <div className="flex gap-16 mb-6">
                             {/* Delivery */}
                             <div className="flex gap-4">
-                                <span className="text-gray-500 font-medium text-sm w-12 pt-1">Delivery</span>
+                                <span className="text-gray-500 font-medium text-sm w-12 pt-1">{deliveryText}</span>
                                 <div className="flex flex-col gap-2">
                                     <div className="flex items-center gap-2 border-b-2 border-blue-600 pb-0.5 max-w-[200px]">
                                         <span className="material-icons text-[18px] text-gray-400">location_on</span>
@@ -566,7 +598,7 @@ const ProductDetails = () => {
                                             disabled={checkingPincode}
                                             className="text-blue-600 text-[11px] font-bold uppercase whitespace-nowrap hover:text-blue-700 disabled:opacity-50"
                                         >
-                                            {checkingPincode ? '...' : 'Check'}
+                                            {checkingPincode ? '...' : checkText}
                                         </button>
                                     </div>
                                     <div className="text-sm">
@@ -576,14 +608,14 @@ const ProductDetails = () => {
                                         {pincodeStatus?.isServiceable && (
                                             <>
                                                 <span className="text-gray-400 mx-1">|</span>
-                                                <span className="text-green-600 font-bold">Free</span>
+                                                <span className="text-green-600 font-bold">{freeText}</span>
                                                 <span className="text-gray-400 line-through text-xs ml-1">₹40</span>
                                             </>
                                         )}
                                     </div>
                                     {!pincodeStatus?.isServiceable && pincodeStatus && (
                                          <p className="text-xs text-red-500 font-medium">
-                                            Currently not available at this location
+                                            {currentlyNotAvailableText}
                                          </p>
                                     )}
                                 </div>
@@ -600,8 +632,8 @@ const ProductDetails = () => {
                                         <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">autorenew</span>
                                     </div>
                                     <div className="text-gray-800">
-                                        <span className="text-[14px] font-bold leading-tight block">{product.returnPolicy.days}-Day Return</span>
-                                        <span className="text-xs text-gray-500">Easy returns</span>
+                                        <span className="text-[14px] font-bold leading-tight block">{product.returnPolicy.days}{daysReturnText}</span>
+                                        <span className="text-xs text-gray-500">{easyReturnsText}</span>
                                     </div>
     
                                 </div>
@@ -617,10 +649,10 @@ const ProductDetails = () => {
                                 </div>
                                 <div className="text-gray-800">
                                     <span className={`text-[14px] font-bold leading-tight block ${pincodeStatus?.isCOD === false ? 'text-red-600' : ''}`}>
-                                        {pincodeStatus?.isCOD === false ? 'COD Not Available' : 'Cash on Delivery'}
+                                        {pincodeStatus?.isCOD === false ? codNotAvailableText : cashOnDeliveryText}
                                     </span>
                                     <span className="text-xs text-gray-500 px-0.5">
-                                        {pincodeStatus?.isCOD === false ? 'Online payment only' : 'Pay at doorstep'}
+                                        {pincodeStatus?.isCOD === false ? onlinePaymentOnlyText : payAtDoorstepText}
                                     </span>
                                 </div>
                             </div>
@@ -631,7 +663,7 @@ const ProductDetails = () => {
                                 </div>
                                 <div className="text-gray-800">
                                     <span className="text-[14px] font-bold leading-tight block">{product.warranty?.summary || 'Brand Warranty'}</span>
-                                    <span className="text-xs text-gray-500">Warranty details</span>
+                                    <span className="text-xs text-gray-500">{warrantyDetailsText}</span>
                                 </div>
                             </div>
                         </div>
@@ -662,7 +694,7 @@ const ProductDetails = () => {
                         {/* Product Description Section - Rich Zig-Zag Layout */}
                         {product.description && product.description.length > 0 && (
                             <div className="space-y-12 mt-12 mb-12">
-                                <h3 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4">Product Description</h3>
+                                <h3 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4">{productDescriptionText}</h3>
                                 
                                 {product.description.map((section, idx) => {
                                     const isEven = idx % 2 === 0;
@@ -720,7 +752,7 @@ const ProductDetails = () => {
                         {/* Specifications Section */}
                         {product.specifications && product.specifications.length > 0 && product.specifications[0].groupName && (
                             <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mt-6">
-                                <h3 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4 mb-6">Specifications</h3>
+                                <h3 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4 mb-6">{specificationsText}</h3>
                                 <div className="space-y-6">
                                     {product.specifications.map((group, idx) => (
                                         group.groupName && (
@@ -745,7 +777,7 @@ const ProductDetails = () => {
 
                         {/* Ratings and Reviews Section - Desktop Right Column */}
                         <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm mt-6">
-                            <h3 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-3">Ratings and reviews</h3>
+                            <h3 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-3">{ratingsAndReviewsText}</h3>
                             
                             {/* Reviews List */}
                             <div className="space-y-4 mb-6">
@@ -765,13 +797,13 @@ const ProductDetails = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-sm text-gray-500 italic pb-2">No reviews yet. Be the first to review!</p>
+                                    <p className="text-sm text-gray-500 italic pb-2">{noReviewsText}</p>
                                 )}
                             </div>
 
                             {/* Post Review Form - Compact */}
                             <div className="p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
-                                <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider mb-3">Rate this product</h4>
+                                <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider mb-3">{rateThisProductText}</h4>
                                 <div className="flex gap-1.5 mb-4">
                                     {[1, 2, 3, 4, 5].map(star => (
                                         <button
@@ -787,7 +819,7 @@ const ProductDetails = () => {
                                     ))}
                                 </div>
                                 <textarea
-                                    placeholder="Share your experience..."
+                                    placeholder={shareExperienceText}
                                     value={newReview.comment}
                                     onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
                                     className="w-full bg-white border border-gray-100 rounded-xl p-3 text-xs focus:ring-2 focus:ring-green-100 outline-none resize-none min-h-[70px] mb-3 shadow-inner"
@@ -907,7 +939,7 @@ const ProductDetails = () => {
                             <span className="material-icons text-[10px]">star</span>
                         </div>
                         <span className="text-gray-500 text-xs">
-                            {totalRatings.toLocaleString()} Ratings & {totalRatings.toLocaleString()} Reviews
+                            {totalRatings.toLocaleString()} {ratingsText} & {totalRatings.toLocaleString()} {reviewsText}
                         </span>
                     </div>
 
@@ -918,7 +950,7 @@ const ProductDetails = () => {
                             <>
                                 <span className="text-sm text-gray-400 line-through">₹{product.originalPrice.toLocaleString()}</span>
                                 <span className="text-sm text-green-600 font-semibold">
-                                    {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% off
+                                    {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% {offText}
                                 </span>
                             </>
                         )}
@@ -969,7 +1001,7 @@ const ProductDetails = () => {
 
                 {/* Offers Section */}
                 <div className="bg-white border-t-8 border-gray-100 px-4 py-4">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Available offers</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">{availableOffersText}</h3>
                     <div className="space-y-2">
                         {offers.slice(0, 4).map((offer, idx) => (
                             <div key={idx} className="flex gap-2 items-start text-xs text-gray-700">
@@ -985,7 +1017,7 @@ const ProductDetails = () => {
 
                 {/* Delivery Details Section */}
                 <div className="bg-white border-t-8 border-gray-100 px-4 py-4">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Delivery</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">{deliveryText}</h3>
 
                     <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                         {/* Location Bar */}
@@ -1005,7 +1037,7 @@ const ProductDetails = () => {
                                     disabled={checkingPincode}
                                     className="text-xs font-bold text-blue-600 whitespace-nowrap disabled:opacity-50"
                                 >
-                                    {checkingPincode ? '...' : 'Check'}
+                                    {checkingPincode ? '...' : checkText}
                                 </button>
                             </div>
                         </div>
@@ -1020,7 +1052,7 @@ const ProductDetails = () => {
                         
                         {pincodeStatus?.isServiceable && (
                             <div className="mt-2 text-xs text-green-600 font-medium">
-                                Free Delivery
+                                {freeText}
                             </div>
                         )}
                     </div>
@@ -1035,7 +1067,7 @@ const ProductDetails = () => {
                                     <span className="material-icons-outlined text-[24px]">autorenew</span>
                                 </div>
                                 <div className="flex items-center text-gray-800">
-                                    <span className="text-[11px] font-bold text-center leading-tight">{product.returnPolicy.days}-Day<br />Return</span>
+                                    <span className="text-[11px] font-bold text-center leading-tight">{product.returnPolicy.days}{daysReturnText}</span>
                                     <span className="material-icons text-[14px] text-gray-400 ml-0.5">chevron_right</span>
                                 </div>
                             </div>
@@ -1046,7 +1078,7 @@ const ProductDetails = () => {
                                 <span className="material-icons-outlined text-[24px]">payments</span>
                             </div>
                             <div className="flex items-center text-gray-800">
-                                <span className="text-[11px] font-bold text-center leading-tight">Cash on<br />Delivery</span>
+                                <span className="text-[11px] font-bold text-center leading-tight">{cashOnDeliveryText}</span>
                                 <span className="material-icons text-[14px] text-gray-400 ml-0.5">chevron_right</span>
                             </div>
                         </div>
@@ -1060,10 +1092,10 @@ const ProductDetails = () => {
                                     {product.warranty?.summary ? (
                                         <>
                                             {product.warranty.summary.split(' ').slice(0, 2).join(' ')}<br />
-                                            {product.warranty.summary.split(' ').slice(2).join(' ') || 'Warranty'}
+                                            {product.warranty.summary.split(' ').slice(2).join(' ') || warrantyDetailsText}
                                         </>
                                     ) : (
-                                        <>Brand<br />Warranty</>
+                                        <>{warrantyDetailsText}</>
                                     )}
                                 </span>
                                 <span className="material-icons text-[14px] text-gray-400 ml-0.5">chevron_right</span>
@@ -1077,7 +1109,7 @@ const ProductDetails = () => {
                     {/* Highlights Section */}
                     {product.highlights && product.highlights.length > 0 && (
                         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-                            <h3 className="text-[16px] font-bold text-gray-900 mb-4">Highlights</h3>
+                            <h3 className="text-[16px] font-bold text-gray-900 mb-4">{highlightsText}</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                 {Array.isArray(product.highlights) ? (
                                     product.highlights.map((section, idx) => {
@@ -1111,7 +1143,7 @@ const ProductDetails = () => {
                     {/* Description Section */}
                     {product.description && product.description.length > 0 && (
                         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-                            <h3 className="text-[16px] font-bold text-gray-900 mb-4">Product Description</h3>
+                            <h3 className="text-[16px] font-bold text-gray-900 mb-4">{productDescriptionText}</h3>
                             <div className="space-y-4">
                                 {product.description.map((section, idx) => (
                                     <div key={idx} className="space-y-3">
@@ -1143,9 +1175,9 @@ const ProductDetails = () => {
                             onClick={() => toggleSection('reviews')}
                         >
                             <div>
-                                <h3 className="text-[16px] font-bold text-gray-900">Ratings & Reviews</h3>
+                                <h3 className="text-[16px] font-bold text-gray-900">{ratingsAndReviewsText}</h3>
                                 <p className="text-[12px] text-gray-500 mt-0.5">
-                                    {reviews.length > 0 ? `${reviews.length} total reviews` : 'Be the first to review'}
+                                    {reviews.length > 0 ? `${reviews.length} ${reviewsText}` : noReviewsText}
                                 </p>
                             </div>
                             <span className={`material-icons transition-transform ${expandedSections.reviews ? 'rotate-180' : ''}`}>expand_more</span>
@@ -1170,7 +1202,7 @@ const ProductDetails = () => {
                                     onClick={() => navigate(`/reviews/${id}`)}
                                     className="w-full py-2.5 text-blue-600 text-xs font-bold border border-blue-50 bg-blue-50/30 rounded-xl"
                                 >
-                                    View All Reviews
+                                    {viewAllReviewsText}
                                 </button>
                             </div>
                         )}
@@ -1301,7 +1333,7 @@ const ProductDetails = () => {
                     <div className="flex-1 bg-red-50 p-3 rounded-xl text-center">
                         <p className="text-red-600 font-bold uppercase tracking-tight text-xs flex items-center justify-center gap-2">
                             <span className="material-icons text-red-500 text-[16px]">location_off</span>
-                            Not deliverable in your area
+                            {notDeliverableText}
                         </p>
                     </div>
                 ) : (
@@ -1315,7 +1347,7 @@ const ProductDetails = () => {
                                 : 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
                             }`}
                         >
-                            {currentStock > 0 ? 'Add to cart' : 'OUT OF STOCK'}
+                            {currentStock > 0 ? addToCartText : outOfStockText}
                         </button>
                         <button
                             onClick={handleBuyNow}
@@ -1326,7 +1358,7 @@ const ProductDetails = () => {
                                 : 'bg-gray-100 text-gray-300 shadow-none cursor-not-allowed'
                             }`}
                         >
-                            {currentStock > 0 ? 'Buy now' : 'OUT OF STOCK'}
+                            {currentStock > 0 ? buyNowText : outOfStockText}
                         </button>
                     </>
                 )}
