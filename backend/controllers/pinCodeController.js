@@ -4,7 +4,7 @@ import PinCode from '../models/PinCode.js';
 // @route   POST /api/pincodes
 // @access  Private/Admin
 const addPinCode = async (req, res) => {
-    const { code, deliveryTime, unit } = req.body;
+    const { code, deliveryTime, unit, isCOD } = req.body;
 
     // Validate inputs
     if (!code || !deliveryTime || !unit) {
@@ -20,7 +20,8 @@ const addPinCode = async (req, res) => {
     const pinCode = await PinCode.create({
         code,
         deliveryTime,
-        unit
+        unit,
+        isCOD: isCOD !== undefined ? isCOD : true
     });
 
     if (pinCode) {
@@ -65,6 +66,7 @@ const checkPinCode = async (req, res) => {
                 isServiceable: true,
                 deliveryTime: pinCode.deliveryTime,
                 unit: pinCode.unit,
+                isCOD: pinCode.isCOD,
                 message: `Delivered in ${pinCode.deliveryTime} ${pinCode.unit}`
             });
         } else {
@@ -76,6 +78,26 @@ const checkPinCode = async (req, res) => {
     } catch (error) {
         console.error(`Error checking pincode:`, error);
         res.status(500).json({ message: 'Error checking pincode' });
+    }
+};
+
+// @desc    Update a PIN code
+// @route   PUT /api/pincodes/:id
+// @access  Private/Admin
+const updatePinCode = async (req, res) => {
+    const { code, deliveryTime, unit, isCOD } = req.body;
+    const pinCode = await PinCode.findById(req.params.id);
+
+    if (pinCode) {
+        pinCode.code = code || pinCode.code;
+        pinCode.deliveryTime = deliveryTime || pinCode.deliveryTime;
+        pinCode.unit = unit || pinCode.unit;
+        if (isCOD !== undefined) pinCode.isCOD = isCOD;
+
+        const updatedPinCode = await pinCode.save();
+        res.json(updatedPinCode);
+    } else {
+        res.status(404).json({ message: 'PIN Code not found' });
     }
 };
 
@@ -173,6 +195,8 @@ const bulkImportPinCodes = async (req, res) => {
             const pincode = getValueFromRow(row, ['Pincode', 'pincode', 'code', 'Code', 'PIN', 'pin']);
             const deliveryTime = getValueFromRow(row, ['DeliveryTime', 'deliveryTime', 'Delivery Time', 'DeliveryTim', 'DeliveryTin', 'delivery_time', 'Time']);
             const unit = getValueFromRow(row, ['Unit', 'unit', 'Units']) || 'days';
+            const isCODVal = getValueFromRow(row, ['isCOD', 'COD', 'cod', 'CashOnDelivery']);
+            const isCOD = isCODVal === 'false' || isCODVal === false || isCODVal === 'No' || isCODVal === 'no' ? false : true;
 
             // Validate row data
             if (!pincode || !deliveryTime) {
@@ -191,7 +215,8 @@ const bulkImportPinCodes = async (req, res) => {
                 await PinCode.create({
                     code: String(pincode).trim(),
                     deliveryTime: Number(deliveryTime),
-                    unit: String(unit).toLowerCase()
+                    unit: String(unit).toLowerCase(),
+                    isCOD: isCOD
                 });
                 results.successful++;
             } catch (error) {
@@ -214,5 +239,6 @@ export {
     getPinCodes,
     deletePinCode,
     checkPinCode,
-    bulkImportPinCodes
+    bulkImportPinCodes,
+    updatePinCode
 };

@@ -32,6 +32,7 @@ const Checkout = () => {
     const [isAddingAddress, setIsAddingAddress] = useState(false);
 
     const [isPincodeServiceable, setIsPincodeServiceable] = useState(true);
+    const [isCODServiceable, setIsCODServiceable] = useState(true);
     const [isPincodeChecking, setIsPincodeChecking] = useState(false);
 
     useEffect(() => {
@@ -42,9 +43,11 @@ const Checkout = () => {
                 try {
                     const { data } = await API.get(`/pincodes/check/${selectedAddrObj.pincode}`);
                     setIsPincodeServiceable(data.isServiceable);
+                    setIsCODServiceable(data.isCOD !== false); // Default to true if undefined, but API sends it now
                 } catch (error) {
                     console.error('Error checking serviceability:', error);
                     setIsPincodeServiceable(false);
+                    setIsCODServiceable(false);
                 } finally {
                     setIsPincodeChecking(false);
                 }
@@ -511,12 +514,20 @@ const Checkout = () => {
                                             </p>
                                         </div>
                                     )}
+                                    {isPincodeServiceable && !isCODServiceable && !isPincodeChecking && (
+                                        <div className="bg-orange-50 p-2 rounded-lg border border-orange-100 mb-2">
+                                            <p className="text-orange-600 font-bold text-xs flex items-center gap-2 justify-center">
+                                                <span className="material-icons text-orange-500 text-[18px]">money_off</span>
+                                                Cash on Delivery is not available for this location.
+                                            </p>
+                                        </div>
+                                    )}
                                     <div className="flex justify-end gap-3">
                                         <button
                                             onClick={() => handlePlaceOrder('COD')}
-                                            disabled={!isPincodeServiceable || isPincodeChecking}
+                                            disabled={!isPincodeServiceable || isPincodeChecking || !isCODServiceable}
                                             className={`px-8 py-3.5 rounded-xl font-black text-sm shadow-lg hover:shadow-xl transition-all uppercase tracking-wide flex items-center gap-2 ${
-                                                isPincodeServiceable && !isPincodeChecking
+                                                isPincodeServiceable && !isPincodeChecking && isCODServiceable
                                                 ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
                                                 : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed shadow-none'
                                             }`}
@@ -649,17 +660,17 @@ const Checkout = () => {
                                     <button className="text-[10px] text-blue-600 font-black uppercase tracking-tighter text-left w-fit">View Details</button>
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    {!isPincodeServiceable && !isPincodeChecking ? (
-                                        <span className="text-red-500 font-black text-[10px] uppercase text-right leading-tight mb-1">
-                                            Not deliverable here
+                                    {( (!isPincodeServiceable && !isPincodeChecking) || (!isCODServiceable && !isPincodeChecking) ) && (
+                                        <span className={`${!isPincodeServiceable ? 'text-red-500' : 'text-orange-500'} font-black text-[10px] uppercase text-right leading-tight mb-1`}>
+                                            {!isPincodeServiceable ? 'Not deliverable here' : 'COD Not Available'}
                                         </span>
-                                    ) : null}
+                                    )}
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handlePlaceOrder('COD')}
-                                            disabled={!isPincodeServiceable || isPincodeChecking}
+                                            disabled={!isPincodeServiceable || isPincodeChecking || !isCODServiceable}
                                             className={`px-6 py-3 rounded-xl font-black uppercase text-[11px] shadow-lg active:scale-[0.98] transition-all flex items-center gap-2 ${
-                                                isPincodeServiceable && !isPincodeChecking
+                                                isPincodeServiceable && !isPincodeChecking && isCODServiceable
                                                 ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-green-600/20'
                                                 : 'bg-gray-100 text-gray-300 shadow-none cursor-not-allowed'
                                             }`}
@@ -718,9 +729,12 @@ const Checkout = () => {
                                             </div>
                                         </label>
 
-                                        <label className={`flex items-center gap-4 p-4 rounded-lg border transition-all cursor-pointer ${paymentMethod === 'COD' ? 'border-blue-500 bg-blue-50/20' : 'border-gray-50 hover:bg-gray-50'}`}>
-                                            <input type="radio" checked={paymentMethod === 'COD'} onChange={() => setPaymentMethod('COD')} className="accent-blue-600" />
-                                            <span className="text-sm font-bold text-gray-800">Cash on Delivery</span>
+                                        <label className={`flex items-center gap-4 p-4 rounded-lg border transition-all cursor-pointer ${paymentMethod === 'COD' ? 'border-blue-500 bg-blue-50/20' : (!isCODServiceable ? 'bg-gray-50 opacity-50 cursor-not-allowed' : 'border-gray-50 hover:bg-gray-50')}`}>
+                                            <input type="radio" checked={paymentMethod === 'COD'} onChange={() => isCODServiceable && setPaymentMethod('COD')} disabled={!isCODServiceable} className="accent-blue-600" />
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-gray-800">Cash on Delivery</span>
+                                                {!isCODServiceable && <span className="text-[10px] text-red-500 font-bold">Not available due to high returns/risk</span>}
+                                            </div>
                                         </label>
                                     </div>
 

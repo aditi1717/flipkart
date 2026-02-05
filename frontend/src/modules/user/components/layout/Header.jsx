@@ -4,6 +4,7 @@ import { useCartStore } from '../../store/cartStore';
 import { useCategories } from '../../../../hooks/useData';
 import API from '../../../../services/api';
 import { IoSearch } from 'react-icons/io5';
+import { useTranslation } from 'react-i18next';
 import {
     MdLocationPin,
     MdStars,
@@ -141,6 +142,13 @@ const Header = () => {
     const isCategory = location.pathname.includes('/category/');
     const isSpecialPage = isPDP || isCategory;
 
+    // Translation Hook
+    const { t, i18n } = useTranslation();
+
+    const changeLanguage = (lng) => {
+        i18n.changeLanguage(lng);
+    };
+
     return (
         <header className={`bg-white/95 backdrop-blur-md px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border-b border-blue-50/50 md:border-gray-100 transition-all duration-300 ${isSpecialPage ? 'py-2' : 'py-0.5 md:py-0'}`}>
             <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center md:gap-8">
@@ -164,6 +172,22 @@ const Header = () => {
                     >
                         <img src={logo} alt="IndianKart" className="h-[65px] lg:h-[100px] object-contain" />
                     </div>
+                    
+                    {/* Language Switcher (Mobile) */}
+                     <div className="md:hidden flex items-center gap-2">
+                            <button 
+                                onClick={() => changeLanguage('en')} 
+                                className={`text-[10px] font-bold px-2 py-1 rounded ${i18n.language === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                            >
+                                EN
+                            </button>
+                            <button 
+                                onClick={() => changeLanguage('hi')} 
+                                className={`text-[10px] font-bold px-2 py-1 rounded ${i18n.language === 'hi' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                            >
+                                HI
+                            </button>
+                     </div>
                 </div>
 
                 {/* Mobile Address - Moved Above Search */}
@@ -184,7 +208,7 @@ const Header = () => {
                         <IoSearch className={`text-gray-400 md:text-gray-500 text-[18px] md:text-[20px] mr-2 md:mr-3 ${isSearching ? 'animate-pulse' : ''}`} />
                         <input
                             className="bg-transparent border-none focus:ring-0 text-[14px] md:text-[15px] w-full p-0 outline-none placeholder-gray-400 md:placeholder-gray-500 text-black md:text-gray-800 h-full flex items-center font-normal"
-                            placeholder="Search for Products, Brands and More"
+                            placeholder={t('search_placeholder')}
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -312,10 +336,26 @@ const Header = () => {
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center gap-6 ml-auto">
+                    {/* Language Switcher (Desktop) */}
+                    <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg">
+                            <button 
+                                onClick={() => changeLanguage('en')} 
+                                className={`text-[10px] font-bold px-2 py-1 rounded transition-colors ${i18n.language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <span className="font-sans">EN</span>
+                            </button>
+                            <button 
+                                onClick={() => changeLanguage('hi')} 
+                                className={`text-[10px] font-bold px-2 py-1 rounded transition-colors ${i18n.language === 'hi' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <span className="font-serif">HI</span>
+                            </button>
+                    </div>
+
                     {/* Account */}
                     <div className="flex items-center gap-2 cursor-pointer hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors group" onClick={() => navigate('/account')}>
                         <MdPersonOutline className="text-[24px] text-gray-700" />
-                        <span className="text-gray-800 font-medium text-[15px]">Account</span>
+                        <span className="text-gray-800 font-medium text-[15px]">{t('my_account')}</span>
                         <MdExpandMore className="text-gray-700 transition-transform group-hover:rotate-180" />
                     </div>
 
@@ -325,7 +365,7 @@ const Header = () => {
                             <MdShoppingCart className="text-[24px] text-gray-700" />
                             {totalItems > 0 && <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">{totalItems}</div>}
                         </div>
-                        <span className="text-gray-800 font-medium text-[15px]">Cart</span>
+                        <span className="text-gray-800 font-medium text-[15px]">{t('cart')}</span>
                     </div>
 
                     {/* More */}

@@ -14,7 +14,7 @@ const usePinCodeStore = create((set, get) => ({
         } catch (error) {
             set({ isLoading: false });
             console.error(error);
-            // toast.error('Failed to load PIN codes');
+            toast.error('Failed to load PIN codes');
         }
     },
 
@@ -47,6 +47,21 @@ const usePinCodeStore = create((set, get) => ({
             toast.success('PIN Code deleted');
         } catch (error) {
             toast.error('Failed to delete PIN Code');
+        }
+    },
+
+    updatePinCode: async (id, updateData) => {
+        try {
+            const { data } = await API.put(`/pincodes/${id}`, updateData);
+            set(state => ({
+                pinCodes: state.pinCodes.map(p => p._id === id ? data : p)
+            }));
+            toast.success('PIN Code updated');
+            return true;
+        } catch (error) {
+            toast.error('Failed to update PIN Code');
+            console.error(error);
+            return false;
         }
     },
 

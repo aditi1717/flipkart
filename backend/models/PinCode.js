@@ -20,6 +20,10 @@ const pinCodeSchema = mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    isCOD: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true

@@ -3,14 +3,20 @@ import { MdLocationOn, MdDelete, MdAdd, MdTimer, MdUpload, MdDownload } from 're
 import usePinCodeStore from '../../store/pinCodeStore';
 
 const PinCodeManager = () => {
-    const { pinCodes, fetchPinCodes, addPinCode, deletePinCode, bulkImportPinCodes, isLoading } = usePinCodeStore();
+    const { pinCodes, fetchPinCodes, addPinCode, deletePinCode, bulkImportPinCodes, updatePinCode, isLoading } = usePinCodeStore();
     const [formData, setFormData] = useState({
         code: '',
         deliveryTime: '',
-        unit: 'days'
+        unit: 'days',
+        isCOD: false
     });
     const [importResults, setImportResults] = useState(null);
     const [isImporting, setIsImporting] = useState(false);
+
+    // Toggle COD status for a pincode
+    const toggleCOD = async (id, currentStatus) => {
+        await updatePinCode(id, { isCOD: !currentStatus });
+    };
 
     useEffect(() => {
         fetchPinCodes();
@@ -25,7 +31,7 @@ const PinCodeManager = () => {
         e.preventDefault();
         const success = await addPinCode(formData);
         if (success) {
-            setFormData({ code: '', deliveryTime: '', unit: 'days' });
+            setFormData({ code: '', deliveryTime: '', unit: 'days', isCOD: false });
         }
     };
 
@@ -111,7 +117,20 @@ const PinCodeManager = () => {
                             <option value="minutes">Minutes</option>
                         </select>
                     </div>
-                    <div className="md:col-span-1">
+                    <div className="space-y-1.5 md:col-span-1">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">COD Available</label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                name="isCOD"
+                                checked={formData.isCOD}
+                                onChange={(e) => setFormData(prev => ({ ...prev, isCOD: e.target.checked }))}
+                                className="w-5 h-5 accent-blue-600 rounded"
+                            />
+                            <span className="text-sm font-bold text-gray-700">{formData.isCOD ? 'Yes' : 'No'}</span>
+                        </label>
+                    </div>
+                    <div className="md:col-span-4 mt-2">
                         <button
                             type="submit"
                             disabled={isLoading}
@@ -196,6 +215,14 @@ const PinCodeManager = () => {
                                         <MdTimer className="text-green-500" />
                                         {pin.deliveryTime} {pin.unit}
                                     </div>
+                                    <button 
+                                        onClick={() => toggleCOD(pin._id, pin.isCOD !== false)}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all border shadow-sm active:scale-95 ${pin.isCOD !== false ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' : 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200'}`}
+                                        title="Click to Toggle COD"
+                                    >
+                                        <span className="material-icons text-[14px]">{pin.isCOD !== false ? 'payments' : 'money_off'}</span>
+                                        <span className="text-xs font-bold">{pin.isCOD !== false ? 'COD ON' : 'COD OFF'}</span>
+                                    </button>
                                 </div>
                                 <button
                                     onClick={() => deletePinCode(pin._id)}

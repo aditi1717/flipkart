@@ -5,7 +5,8 @@ import {
     getPinCodes,
     deletePinCode,
     checkPinCode,
-    bulkImportPinCodes
+    bulkImportPinCodes,
+    updatePinCode
 } from '../controllers/pinCodeController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 import multer from 'multer';
@@ -33,6 +34,6 @@ const upload = multer({
 router.route('/').post(protect, admin, addPinCode).get(protect, admin, getPinCodes);
 router.route('/bulk-import').post(protect, admin, upload.single('file'), bulkImportPinCodes);
 router.route('/check/:code').get(checkPinCode);
-router.route('/:id').delete(protect, admin, deletePinCode);
+router.route('/:id').delete(protect, admin, deletePinCode).put(protect, admin, updatePinCode);
 
 export default router;

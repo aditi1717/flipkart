@@ -110,7 +110,9 @@ const ProductDetails = () => {
                 setPincodeStatus({
                     isServiceable: true,
                     message: data.message || `Delivered in ${data.deliveryTime} ${data.unit}`,
-                    deliveryDate: data.deliveryTime + ' ' + data.unit
+                    message: data.message || `Delivered in ${data.deliveryTime} ${data.unit}`,
+                    deliveryDate: data.deliveryTime + ' ' + data.unit,
+                    isCOD: data.isCOD
                 });
             } else {
                 setPincodeStatus({
@@ -595,16 +597,25 @@ const ProductDetails = () => {
                                         <span className="text-[14px] font-bold leading-tight block">{product.returnPolicy.days}-Day Return</span>
                                         <span className="text-xs text-gray-500">Easy returns</span>
                                     </div>
+    
                                 </div>
                             )}
 
+
+
                             <div className="flex items-center gap-4 group cursor-pointer">
-                                <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800 transition-colors group-hover:bg-blue-50">
-                                    <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">payments</span>
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${pincodeStatus?.isCOD === false ? 'bg-red-50 text-red-500' : 'bg-[#f5f5f5] text-gray-800 group-hover:bg-blue-50'}`}>
+                                    <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">
+                                        {pincodeStatus?.isCOD === false ? 'money_off' : 'payments'}
+                                    </span>
                                 </div>
                                 <div className="text-gray-800">
-                                    <span className="text-[14px] font-bold leading-tight block">Cash on Delivery</span>
-                                    <span className="text-xs text-gray-500">Pay at doorstep</span>
+                                    <span className={`text-[14px] font-bold leading-tight block ${pincodeStatus?.isCOD === false ? 'text-red-600' : ''}`}>
+                                        {pincodeStatus?.isCOD === false ? 'COD Not Available' : 'Cash on Delivery'}
+                                    </span>
+                                    <span className="text-xs text-gray-500 px-0.5">
+                                        {pincodeStatus?.isCOD === false ? 'Online payment only' : 'Pay at doorstep'}
+                                    </span>
                                 </div>
                             </div>
 

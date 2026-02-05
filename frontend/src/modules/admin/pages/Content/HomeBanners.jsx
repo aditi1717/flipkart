@@ -164,6 +164,9 @@ const SortableSlide = ({ slide, index, onRemove, onUpdate, offers, onProductPick
     );
 };
 
+
+
+
 // Live Preview Carousel Component
 const LivePreview = ({ slides }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -326,7 +329,7 @@ const HomeBanners = () => {
             brand: '', brandTag: '', title: '', subtitle: '', description: '',
             imageUrl: '', badgeText: '', offerText: '', offerBank: '', backgroundColor: '',
             buttonText: '',
-            useCustomPosition: false,
+            useCustomPosition: true,
             textPosition: { x: 10, y: 50 },
             imagePosition: { x: 70, y: 50 },
             featuredProducts: []
@@ -343,6 +346,8 @@ const HomeBanners = () => {
     const fileInputRef = useRef(null);
     const heroFileInputRef = useRef(null);
     const bgFileInputRef = useRef(null);
+    
+    const [resetKey, setResetKey] = useState(0);
     
     // Refs for Draggable components (React 18 compatibility)
     const textDragRef = useRef(null);
@@ -793,71 +798,13 @@ const HomeBanners = () => {
                                 </div>
                             </div>
 
-                            {/* Alignment & Style */}
+                            {/* Style & Colors - PRESET ALIGMNENT REMOVED */}
                             <div className="space-y-4">
                                 <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
                                     <span className="w-6 h-6 bg-purple-100 text-purple-600 rounded flex items-center justify-center text-xs font-black">2</span>
-                                    Layout & Style
+                                    Style & Colors
                                 </h3>
                                 
-                                {/* Horizontal Alignment */}
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Text Position (Horizontal)</label>
-                                    <div className="grid grid-cols-3 gap-1">
-                                        {['left', 'center', 'right'].map(align => (
-                                            <button
-                                                key={align}
-                                                onClick={() => setFormData({...formData, content: {...formData.content, textAlign: align}})}
-                                                className={`py-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 ${(formData.content.textAlign || 'left') === align ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
-                                            >
-                                                {align === 'left' && '◀'}
-                                                {align === 'center' && '●'}
-                                                {align === 'right' && '▶'}
-                                                {align.charAt(0).toUpperCase() + align.slice(1)}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Vertical Alignment */}
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Text Position (Vertical)</label>
-                                    <div className="grid grid-cols-3 gap-1">
-                                        {['top', 'center', 'bottom'].map(align => (
-                                            <button
-                                                key={align}
-                                                onClick={() => setFormData({...formData, content: {...formData.content, verticalAlign: align}})}
-                                                className={`py-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 ${(formData.content.verticalAlign || 'center') === align ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
-                                            >
-                                                {align === 'top' && '▲'}
-                                                {align === 'center' && '●'}
-                                                {align === 'bottom' && '▼'}
-                                                {align.charAt(0).toUpperCase() + align.slice(1)}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                
-                                {/* Image Position */}
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Product Image Position</label>
-                                    <div className="grid grid-cols-2 gap-1">
-                                        {['left', 'right', 'center', 'none'].map(align => (
-                                            <button
-                                                key={align}
-                                                onClick={() => setFormData({...formData, content: {...formData.content, imageAlign: align}})}
-                                                className={`py-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1 ${(formData.content.imageAlign || 'right') === align ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
-                                            >
-                                                {align === 'left' && '◀ '}
-                                                {align === 'right' && ' ▶'}
-                                                {align === 'center' && '●'}
-                                                {align === 'none' && '✕'}
-                                                {align.charAt(0).toUpperCase() + align.slice(1)}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
                                 {/* Background Color */}
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold text-gray-400 uppercase">Background Color</label>
@@ -959,67 +906,6 @@ const HomeBanners = () => {
                         </div>
                     </div>
 
-                    {/* Featured Products (Shop the Look) */}
-                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                        <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2 mb-4">
-                            <span className="w-6 h-6 bg-purple-100 text-purple-600 rounded flex items-center justify-center text-xs font-black">4</span>
-                            Featured Products (Shop the Look)
-                        </h3>
-                        
-                        {/* Add Product Button */}
-                        <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setSearchTerm('');
-                                setShowProductPicker('featured');
-                            }}
-                            className="w-full py-3 rounded-xl border-2 border-dashed border-purple-300 hover:border-purple-500 hover:bg-purple-50 transition text-purple-600 font-bold text-sm flex items-center justify-center gap-2"
-                        >
-                            <MdAdd size={20} />
-                            Add Product to Banner
-                        </button>
-
-                        {/* Selected Products List */}
-                        {formData.content.featuredProducts && formData.content.featuredProducts.length > 0 && (
-                            <div className="space-y-2 mt-4">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase">
-                                    {formData.content.featuredProducts.length} Product(s) Added
-                                </p>
-                                {formData.content.featuredProducts.map((fp, index) => {
-                                    const product = products.find(p => (p._id || p.id) === fp.productId);
-                                    return product ? (
-                                        <div key={index} className="flex items-center gap-3 p-2 bg-purple-50 rounded-lg border border-purple-200">
-                                            <img 
-                                                src={product.images?.[0]} 
-                                                alt={product.name}
-                                                className="w-12 h-12 object-cover rounded"
-                                            />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-bold text-gray-800 truncate">{product.name}</p>
-                                                <p className="text-[10px] text-gray-500">₹{product.price}</p>
-                                            </div>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setFormData({
-                                                        ...formData,
-                                                        content: {
-                                                            ...formData.content,
-                                                            featuredProducts: formData.content.featuredProducts.filter((_, i) => i !== index)
-                                                        }
-                                                    });
-                                                }}
-                                                className="p-1.5 text-red-500 hover:bg-red-100 rounded transition"
-                                            >
-                                                <MdDelete size={16} />
-                                            </button>
-                                        </div>
-                                    ) : null;
-                                })}
-                            </div>
-                        )}
-                    </div>
-
                     {/* Live Preview */}
                     <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                         <div className="flex items-center gap-2 mb-4">
@@ -1027,31 +913,20 @@ const HomeBanners = () => {
                             <h3 className="text-sm font-bold text-gray-700">Live Preview</h3>
                             <span className="text-[10px] text-gray-400 ml-auto">Drag elements to position</span>
                             
-                            {/* Custom Position Toggle */}
-                            <button
-                                onClick={() => setFormData({...formData, content: {...formData.content, useCustomPosition: !formData.content.useCustomPosition}})}
-                                className={`ml-2 px-3 py-1 rounded-lg text-[10px] font-bold transition ${
-                                    formData.content.useCustomPosition 
-                                        ? 'bg-green-100 text-green-700 border border-green-200' 
-                                        : 'bg-gray-100 text-gray-500 border border-gray-200'
-                                }`}
-                            >
-                                {formData.content.useCustomPosition ? 'CUSTOM' : 'PRESET'}
-                            </button>
-                            
                             {/* Reset Position Button */}
-                            {formData.content.useCustomPosition && (
-                                <button
-                                    onClick={() => setFormData({...formData, content: {
+                            <button
+                                onClick={() => {
+                                    setResetKey(prev => prev + 1);
+                                    setFormData({...formData, content: {
                                         ...formData.content,
                                         textPosition: { x: 10, y: 50 },
                                         imagePosition: { x: 70, y: 50 }
                                     }})}
-                                    className="px-2 py-1 rounded-lg text-[10px] font-bold text-orange-600 hover:bg-orange-50 transition"
-                                >
-                                    RESET
-                                </button>
-                            )}
+                                }
+                                className="px-2 py-1 rounded-lg text-[10px] font-bold text-orange-600 hover:bg-orange-50 transition"
+                            >
+                                RESET
+                            </button>
                         </div>
                         
                         {/* Hero Preview */}
@@ -1075,106 +950,60 @@ const HomeBanners = () => {
                                 </div>
                             )}
 
-                            {/* Text Block - Draggable or Aligned */}
-                            {formData.content.useCustomPosition ? (
-                                <Draggable
-                                    key={`text-${formData.content.textPosition.x}-${formData.content.textPosition.y}`}
-                                    nodeRef={textDragRef}
-                                    defaultPosition={{
-                                        x: (formData.content.textPosition.x / 100) * 600,
-                                        y: (formData.content.textPosition.y / 100) * 400
-                                    }}
-                                    onStop={(e, data) => {
-                                        const x = Math.max(0, Math.min(100, (data.x / 600) * 100));
-                                        const y = Math.max(0, Math.min(100, (data.y / 400) * 100));
-                                        setFormData({
-                                            ...formData,
-                                            content: {
-                                                ...formData.content,
-                                                textPosition: { x: Math.round(x), y: Math.round(y) }
-                                            }
-                                        });
-                                    }}
-                                    bounds="parent"
-                                >
-                                    <div 
-                                        ref={textDragRef}
-                                        className="absolute cursor-move z-20 group/text"
-                                        style={{ transform: 'translate(-50%, -50%)' }}
-                                    >
-                                        <div className="max-w-md p-6 bg-black/10 backdrop-blur-sm rounded-lg border-2 border-dashed border-white/40 group-hover/text:border-white/80 transition">
-                                            <div className="absolute -top-3 -left-3 bg-green-500 text-white px-2 py-0.5 rounded text-[9px] font-bold">
-                                                <MdDragIndicator className="inline mr-1" />
-                                                TEXT ({formData.content.textPosition.x}%, {formData.content.textPosition.y}%)
-                                            </div>
-                                            {formData.content.brand && (
-                                                <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-80" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                                    {formData.content.brand}
-                                                </p>
-                                            )}
-                                            {formData.content.title && (
-                                                <h2 className="text-2xl md:text-4xl font-black mb-2 leading-tight" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                                    {formData.content.title}
-                                                </h2>
-                                            )}
-                                            {formData.content.subtitle && (
-                                                <p className="text-lg font-bold mb-3" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                                    {formData.content.subtitle}
-                                                </p>
-                                            )}
-                                            {formData.content.description && (
-                                                <p className="text-sm opacity-80 mb-4 max-w-sm" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                                    {formData.content.description}
-                                                </p>
-                                            )}
-                                            {formData.content.buttonText && (
-                                                <button 
-                                                    className="px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl"
-                                                    style={{ 
-                                                        backgroundColor: formData.content.textColor || '#ffffff',
-                                                        color: formData.content.backgroundColor || '#1e3a5f'
-                                                    }}
-                                                >
-                                                    {formData.content.buttonText}
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </Draggable>
-                            ) : (
+                            {/* Text Block - Always Draggable (Custom Mode Forced) */}
+                            <Draggable
+                                key={`text-drag-${resetKey}`}
+                                nodeRef={textDragRef}
+                                defaultPosition={{
+                                    x: (formData.content.textPosition?.x / 100) * 600 || 60,
+                                    y: (formData.content.textPosition?.y / 100) * 400 || 200
+                                }}
+                                onStop={(e, data) => {
+                                    const x = Math.max(0, Math.min(100, (data.x / 600) * 100));
+                                    const y = Math.max(0, Math.min(100, (data.y / 400) * 100));
+                                    setFormData({
+                                        ...formData,
+                                        content: {
+                                            ...formData.content,
+                                            textPosition: { x: Math.round(x), y: Math.round(y) }
+                                        }
+                                    });
+                                }}
+                                bounds="parent"
+                            >
                                 <div 
-                                    className={`absolute inset-0 flex pointer-events-none ${
-                                        formData.content.verticalAlign === 'top' ? 'items-start pt-8' : 
-                                        formData.content.verticalAlign === 'bottom' ? 'items-end pb-8' : 'items-center'
-                                    } ${
-                                        formData.content.textAlign === 'center' ? 'justify-center text-center' : 
-                                        formData.content.textAlign === 'right' ? 'justify-end text-right pr-8' : 'justify-start text-left pl-8'
-                                    }`}
+                                    ref={textDragRef}
+                                    className="absolute cursor-move z-20 group/text"
+                                    style={{ transform: 'translate(-50%, -50%)' }}
                                 >
-                                    <div className="max-w-md p-6 z-10">
+                                    <div className="max-w-md p-6 bg-black/10 backdrop-blur-sm rounded-lg border-2 border-dashed border-white/40 group-hover/text:border-white/80 transition">
+                                        <div className="absolute -top-3 -left-3 bg-green-500 text-white px-2 py-0.5 rounded text-[9px] font-bold">
+                                            <MdDragIndicator className="inline mr-1" />
+                                            TEXT ({formData.content.textPosition?.x}%, {formData.content.textPosition?.y}%)
+                                        </div>
                                         {formData.content.brand && (
                                             <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-80" style={{ color: formData.content.textColor || '#ffffff' }}>
                                                 {formData.content.brand}
                                             </p>
                                         )}
                                         {formData.content.title && (
-                                            <h2 className="text-2xl md:text-5xl font-black mb-2 leading-tight" style={{ color: formData.content.textColor || '#ffffff' }}>
+                                            <h2 className="text-2xl md:text-4xl font-black mb-2 leading-tight" style={{ color: formData.content.textColor || '#ffffff' }}>
                                                 {formData.content.title}
                                             </h2>
                                         )}
                                         {formData.content.subtitle && (
-                                            <p className="text-xl font-bold mb-3" style={{ color: formData.content.textColor || '#ffffff' }}>
+                                            <p className="text-lg font-bold mb-3" style={{ color: formData.content.textColor || '#ffffff' }}>
                                                 {formData.content.subtitle}
                                             </p>
                                         )}
                                         {formData.content.description && (
-                                            <p className="text-sm opacity-80 mb-6 max-w-sm" style={{ color: formData.content.textColor || '#ffffff' }}>
+                                            <p className="text-sm opacity-80 mb-4 max-w-sm" style={{ color: formData.content.textColor || '#ffffff' }}>
                                                 {formData.content.description}
                                             </p>
                                         )}
                                         {formData.content.buttonText && (
                                             <button 
-                                                className="px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl"
+                                                className="px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl"
                                                 style={{ 
                                                     backgroundColor: formData.content.textColor || '#ffffff',
                                                     color: formData.content.backgroundColor || '#1e3a5f'
@@ -1185,135 +1014,48 @@ const HomeBanners = () => {
                                         )}
                                     </div>
                                 </div>
-                            )}
+                            </Draggable>
                             
-                            {/* Product Image - Draggable or Aligned */}
-                            {heroImagePreview && formData.content.imageAlign !== 'none' && (
-                                formData.content.useCustomPosition ? (
-                                    <Draggable
-                                        key={`image-${formData.content.imagePosition.x}-${formData.content.imagePosition.y}`}
-                                        nodeRef={imageDragRef}
-                                        defaultPosition={{
-                                            x: (formData.content.imagePosition.x / 100) * 600,
-                                            y: (formData.content.imagePosition.y / 100) * 400
-                                        }}
-                                        onStop={(e, data) => {
-                                            const x = Math.max(0, Math.min(100, (data.x / 600) * 100));
-                                            const y = Math.max(0, Math.min(100, (data.y / 400) * 100));
-                                            setFormData({
-                                                ...formData,
-                                                content: {
-                                                    ...formData.content,
-                                                    imagePosition: { x: Math.round(x), y: Math.round(y) }
-                                                }
-                                            });
-                                        }}
-                                        bounds="parent"
-                                    >
-                                        <div 
-                                            ref={imageDragRef}
-                                            className="absolute cursor-move z-20 group/img"
-                                            style={{ transform: 'translate(-50%, -50%)' }}
-                                        >
-                                            <div className="relative">
-                                                <div className="absolute -top-3 -right-3 bg-blue-500 text-white px-2 py-0.5 rounded text-[9px] font-bold">
-                                                    <MdDragIndicator className="inline mr-1" />
-                                                    IMG ({formData.content.imagePosition.x}%, {formData.content.imagePosition.y}%)
-                                                </div>
-                                                <img 
-                                                    src={heroImagePreview} 
-                                                    className="max-h-[200px] max-w-[200px] object-contain filter drop-shadow-2xl border-2 border-dashed border-white/40 group-hover/img:border-white/80 rounded-lg transition" 
-                                                    alt="hero" 
-                                                />
-                                            </div>
-                                        </div>
-                                    </Draggable>
-                                ) : (
+                            {/* Product Image - Always Draggable (Custom Mode Forced) */}
+                            {heroImagePreview && (
+                                <Draggable
+                                    key={`image-drag-${resetKey}`}
+                                    nodeRef={imageDragRef}
+                                    defaultPosition={{
+                                        x: (formData.content.imagePosition?.x / 100) * 600 || 420,
+                                        y: (formData.content.imagePosition?.y / 100) * 400 || 200
+                                    }}
+                                    onStop={(e, data) => {
+                                        const x = Math.max(0, Math.min(100, (data.x / 600) * 100));
+                                        const y = Math.max(0, Math.min(100, (data.y / 400) * 100));
+                                        setFormData({
+                                            ...formData,
+                                            content: {
+                                                ...formData.content,
+                                                imagePosition: { x: Math.round(x), y: Math.round(y) }
+                                            }
+                                        });
+                                    }}
+                                    bounds="parent"
+                                >
                                     <div 
-                                        className={`absolute pointer-events-none ${
-                                            formData.content.imageAlign === 'left' ? 'left-8' : 
-                                            formData.content.imageAlign === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-8'
-                                        } top-0 bottom-0 ${
-                                            formData.content.imageAlign === 'center' ? 'w-1/3' : 'w-1/2'
-                                        } flex items-center justify-center z-10`}
+                                        ref={imageDragRef}
+                                        className="absolute cursor-move z-20 group/img"
+                                        style={{ transform: 'translate(-50%, -50%)' }}
                                     >
-                                        <img 
-                                            src={heroImagePreview} 
-                                            className="max-h-[80%] max-w-full object-contain filter drop-shadow-2xl" 
-                                            alt="hero" 
-                                        />
-                                    </div>
-                                )
-                            )}
-
-
-                            {/* Featured Product Cards - Only in CUSTOM mode */}
-                            {formData.content.useCustomPosition && formData.content.featuredProducts && formData.content.featuredProducts.length > 0 && (
-                                formData.content.featuredProducts.map((fp, fpIndex) => {
-                                    const product = products.find(p => (p._id || p.id) === fp.productId);
-                                    if (!product) return null;
-                                    
-                                    return (
-                                        <Draggable
-                                            key={`fp-${fpIndex}-${fp.position.x}-${fp.position.y}`}
-                                            nodeRef={(el) => {
-                                                // Create dynamic refs for each product card
-                                                if (!featuredProductRefs.current[fpIndex]) {
-                                                    featuredProductRefs.current[fpIndex] = { current: el };
-                                                } else {
-                                                    featuredProductRefs.current[fpIndex].current = el;
-                                                }
-                                            }}
-                                            defaultPosition={{
-                                                x: (fp.position.x / 100) * 600,
-                                                y: (fp.position.y / 100) * 400
-                                            }}
-                                            onStop={(e, data) => {
-                                                const x = Math.max(0, Math.min(100, (data.x / 600) * 100));
-                                                const y = Math.max(0, Math.min(100, (data.y / 400) * 100));
-                                                const updated = [...formData.content.featuredProducts];
-                                                updated[fpIndex] = {
-                                                    ...updated[fpIndex],
-                                                    position: { x: Math.round(x), y: Math.round(y) }
-                                                };
-                                                setFormData({
-                                                    ...formData,
-                                                    content: {
-                                                        ...formData.content,
-                                                        featuredProducts: updated
-                                                    }
-                                                });
-                                            }}
-                                            bounds="parent"
-                                        >
-                                            <div 
-                                                ref={(el) => {
-                                                    if (!featuredProductRefs.current[fpIndex]) {
-                                                        featuredProductRefs.current[fpIndex] = { current: el };
-                                                    } else {
-                                                        featuredProductRefs.current[fpIndex].current = el;
-                                                    }
-                                                }}
-                                                className="absolute cursor-move z-30 group/product"
-                                                style={{ transform: 'translate(-50%, -50%)' }}
-                                            >
-                                                <div className="relative bg-white rounded-lg shadow-lg border-2 border-dashed border-purple-300 group-hover/product:border-purple-500 p-2 transition w-32">
-                                                    <div className="absolute -top-2 -right-2 bg-purple-500 text-white px-1.5 py-0.5 rounded text-[8px] font-bold">
-                                                        <MdDragIndicator className="inline mr-0.5" />
-                                                        PRODUCT
-                                                    </div>
-                                                    <img 
-                                                        src={product.images?.[0]} 
-                                                        alt={product.name}
-                                                        className="w-full h-20 object-cover rounded mb-1"
-                                                    />
-                                                    <p className="text-[9px] font-bold text-gray-800 truncate">{product.name}</p>
-                                                    <p className="text-[8px] text-purple-600 font-bold">₹{product.price}</p>
-                                                </div>
+                                        <div className="relative">
+                                            <div className="absolute -top-3 -right-3 bg-blue-500 text-white px-2 py-0.5 rounded text-[9px] font-bold">
+                                                <MdDragIndicator className="inline mr-1" />
+                                                IMG ({formData.content.imagePosition?.x}%, {formData.content.imagePosition?.y}%)
                                             </div>
-                                        </Draggable>
-                                    );
-                                })
+                                            <img 
+                                                src={heroImagePreview} 
+                                                className="max-h-[200px] max-w-[200px] object-contain filter drop-shadow-2xl border-2 border-dashed border-white/40 group-hover/img:border-white/80 rounded-lg transition" 
+                                                alt="hero" 
+                                            />
+                                        </div>
+                                    </div>
+                                </Draggable>
                             )}
 
                             {/* Empty state */}
