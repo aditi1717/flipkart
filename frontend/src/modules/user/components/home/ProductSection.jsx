@@ -35,20 +35,20 @@ const ProductSection = ({
             <div className="flex items-center justify-between mb-4">
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900">{translatedTitle}</h3>
+                        <h3 className="text-[15px] md:text-2xl font-bold text-gray-900">{translatedTitle}</h3>
                         {titleBadge && (
-                            <span className="bg-gray-100 text-gray-500 text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                            <span className="bg-gray-100 text-gray-500 text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
                                 {titleBadge}
                             </span>
                         )}
                     </div>
-                    {subtitle && <p className="text-[10px] md:text-sm text-gray-500 font-medium -mt-0.5">{translatedSubtitle}</p>}
+                    {subtitle && <p className="text-[9px] md:text-sm text-gray-500 font-medium -mt-0.5">{translatedSubtitle}</p>}
                 </div>
                 <button
                     onClick={onViewAll}
-                    className="bg-blue-600 text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center hover:bg-blue-700 transition-colors"
+                    className="bg-blue-600 text-white rounded-full w-7 h-7 md:w-10 md:h-10 flex items-center justify-center hover:bg-blue-700 transition-colors"
                 >
-                    <span className="material-icons text-white text-lg">arrow_forward</span>
+                    <span className="material-icons text-white text-base md:text-lg">arrow_forward</span>
                 </button>
             </div>
 
@@ -57,15 +57,15 @@ const ProductSection = ({
                     {/* Left Scroll Button */}
                     <button
                         onClick={() => scroll('left')}
-                        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg items-center justify-center border border-gray-100 opacity-0 group-hover/section:opacity-100 transition-opacity disabled:opacity-0 -ml-5"
+                        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg items-center justify-center border border-gray-100 opacity-0 group/section:opacity-100 transition-opacity disabled:opacity-0 -ml-5"
                     >
                         <span className="material-icons text-gray-700">chevron_left</span>
                     </button>
 
-                    <div ref={scrollRef} className="flex overflow-x-auto gap-3 md:gap-6 no-scrollbar pb-2 -mx-1 px-1 scroll-smooth">
+                    <div ref={scrollRef} className="flex overflow-x-auto gap-2 md:gap-6 no-scrollbar pb-2 -mx-1 px-1 scroll-smooth">
                         {loading ? (
                             skeletonItems.map((i) => (
-                                <div key={i} className="min-w-[140px] w-[140px] md:min-w-[240px] md:w-[240px] flex-shrink-0 animate-pulse">
+                                <div key={i} className="min-w-[130px] w-[130px] md:min-w-[240px] md:w-[240px] flex-shrink-0 animate-pulse">
                                     <div className="aspect-square bg-gray-100 rounded-2xl mb-3"></div>
                                     <div className="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
                                     <div className="h-4 bg-gray-50 rounded w-1/2"></div>
@@ -73,7 +73,7 @@ const ProductSection = ({
                             ))
                         ) : (
                             products.map((product) => (
-                                <div key={product.id} className="min-w-[140px] w-[140px] md:min-w-[240px] md:w-[240px] flex-shrink-0">
+                                <div key={product.id} className="min-w-[130px] w-[130px] md:min-w-[240px] md:w-[240px] flex-shrink-0">
                                     <ProductCard product={product} />
                                 </div>
                             ))

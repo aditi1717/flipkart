@@ -4,12 +4,15 @@ import { MdAdd, MdSearch, MdEdit, MdDelete, MdFilterList, MdImage, MdVisibility,
 import useProductStore from '../../store/productStore';
 import Pagination from '../../../../components/Pagination';
 import API from '../../../../services/api'; import toast from 'react-hot-toast';
+import useCategoryStore from '../../store/categoryStore';
 
 const ProductManager = () => {
     const navigate = useNavigate();
     const { products, deleteProduct, fetchProducts } = useProductStore();
+    const { categories, fetchCategories } = useCategoryStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('All');
+    const [selectedProduct, setSelectedProduct] = useState(null);
     
     // Server-side Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -112,6 +115,10 @@ const ProductManager = () => {
         }
     }, [currentPage, filterCategory, searchTerm]);
 
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
     // Update handleDelete to refresh list
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
@@ -137,7 +144,7 @@ const ProductManager = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Product Management</h1>
-                    <p className="text-gray-500 text-sm">Manage inventory, prices, and product details ({filteredProducts.length} total)</p>
+                    <p className="text-gray-500 text-sm">Manage inventory, prices, and product details ({totalProducts} total)</p>
                 </div>
                 <button
                     onClick={() => navigate('/admin/products/new')}
@@ -173,14 +180,14 @@ const ProductManager = () => {
                         }}
                     >
                         {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
+                            <option key={cat.id || cat._id || cat} value={cat.name || cat}>{cat.name || cat}</option>
                         ))}
                     </select>
                 </div>
             </div>
 
             {/* Product Table */}
-            {filteredProducts.length === 0 ? (
+            {localProducts.length === 0 ? (
                 <div className="bg-white p-12 text-center rounded-xl border border-dashed border-gray-300">
                     <p className="text-gray-500">No products found matching your criteria.</p>
                 </div>

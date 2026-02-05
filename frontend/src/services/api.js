@@ -16,10 +16,12 @@ API.interceptors.request.use((config) => {
         }
         
         // Check for User Token (Fallback for cookie issues)
+        // Check for User Token (Fallback for cookie issues)
         const userStorageData = localStorage.getItem('user-auth-storage');
         if (userStorageData) {
             const parsed = JSON.parse(userStorageData);
-            const token = parsed?.state?.token; // Store will save it as 'token'
+            // Check for token in 'user' object (as partialized in authStore) or root 'token' (fallback)
+            const token = parsed?.state?.user?.token || parsed?.state?.token;
             if (token && !config.headers.Authorization) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
