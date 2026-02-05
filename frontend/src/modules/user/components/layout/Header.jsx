@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
+import { useLanguageStore } from '../../../../store/languageStore';
 import { useCategories } from '../../../../hooks/useData';
 import API from '../../../../services/api';
 import { IoSearch } from 'react-icons/io5';
-import { useTranslation } from 'react-i18next';
+import TranslatedText from '../common/TranslatedText';
+import { useGoogleTranslation } from '../../../../hooks/useGoogleTranslation';
 import {
     MdLocationPin,
     MdStars,
@@ -142,12 +144,12 @@ const Header = () => {
     const isCategory = location.pathname.includes('/category/');
     const isSpecialPage = isPDP || isCategory;
 
-    // Translation Hook
-    const { t, i18n } = useTranslation();
-
-    const changeLanguage = (lng) => {
-        i18n.changeLanguage(lng);
-    };
+    // Translation State
+    const { language, setLanguage } = useLanguageStore();
+    const searchPlaceholder = useGoogleTranslation('Search for products, brands and more');
+    const myAccountText = useGoogleTranslation('My Account');
+    const cartText = useGoogleTranslation('Cart');
+    const categoriesText = useGoogleTranslation('Categories');
 
     return (
         <header className={`bg-white/95 backdrop-blur-md px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border-b border-blue-50/50 md:border-gray-100 transition-all duration-300 ${isSpecialPage ? 'py-2' : 'py-0.5 md:py-0'}`}>
@@ -176,14 +178,14 @@ const Header = () => {
                     {/* Language Switcher (Mobile) */}
                      <div className="md:hidden flex items-center gap-2">
                             <button 
-                                onClick={() => changeLanguage('en')} 
-                                className={`text-[10px] font-bold px-2 py-1 rounded ${i18n.language === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                                onClick={() => setLanguage('en')} 
+                                className={`text-[10px] font-bold px-2 py-1 rounded ${language === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
                             >
                                 EN
                             </button>
                             <button 
-                                onClick={() => changeLanguage('hi')} 
-                                className={`text-[10px] font-bold px-2 py-1 rounded ${i18n.language === 'hi' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                                onClick={() => setLanguage('hi')} 
+                                className={`text-[10px] font-bold px-2 py-1 rounded ${language === 'hi' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
                             >
                                 HI
                             </button>
@@ -208,7 +210,7 @@ const Header = () => {
                         <IoSearch className={`text-gray-400 md:text-gray-500 text-[18px] md:text-[20px] mr-2 md:mr-3 ${isSearching ? 'animate-pulse' : ''}`} />
                         <input
                             className="bg-transparent border-none focus:ring-0 text-[14px] md:text-[15px] w-full p-0 outline-none placeholder-gray-400 md:placeholder-gray-500 text-black md:text-gray-800 h-full flex items-center font-normal"
-                            placeholder={t('search_placeholder')}
+                            placeholder={searchPlaceholder}
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -339,14 +341,14 @@ const Header = () => {
                     {/* Language Switcher (Desktop) */}
                     <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg">
                             <button 
-                                onClick={() => changeLanguage('en')} 
-                                className={`text-[10px] font-bold px-2 py-1 rounded transition-colors ${i18n.language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => { console.log('Clicked EN'); setLanguage('en'); }} 
+                                className={`text-[10px] font-bold px-2 py-1 rounded transition-colors ${language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                                 <span className="font-sans">EN</span>
                             </button>
                             <button 
-                                onClick={() => changeLanguage('hi')} 
-                                className={`text-[10px] font-bold px-2 py-1 rounded transition-colors ${i18n.language === 'hi' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => { console.log('Clicked HI'); setLanguage('hi'); }} 
+                                className={`text-[10px] font-bold px-2 py-1 rounded transition-colors ${language === 'hi' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                                 <span className="font-serif">HI</span>
                             </button>
@@ -355,7 +357,7 @@ const Header = () => {
                     {/* Account */}
                     <div className="flex items-center gap-2 cursor-pointer hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors group" onClick={() => navigate('/account')}>
                         <MdPersonOutline className="text-[24px] text-gray-700" />
-                        <span className="text-gray-800 font-medium text-[15px]">{t('my_account')}</span>
+                        <span className="text-gray-800 font-medium text-[15px]">{myAccountText}</span>
                         <MdExpandMore className="text-gray-700 transition-transform group-hover:rotate-180" />
                     </div>
 
@@ -365,7 +367,7 @@ const Header = () => {
                             <MdShoppingCart className="text-[24px] text-gray-700" />
                             {totalItems > 0 && <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">{totalItems}</div>}
                         </div>
-                        <span className="text-gray-800 font-medium text-[15px]">{t('cart')}</span>
+                        <span className="text-gray-800 font-medium text-[15px]">{cartText}</span>
                     </div>
 
                     {/* More */}
@@ -416,7 +418,7 @@ const Header = () => {
                                         <IconComponent className="text-[20px] md:text-2xl" />
                                     </div>
                                     <span className={`text-[10px] md:text-sm font-bold transition-colors ${active ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
-                                        {cat.name}
+                                        <TranslatedText text={cat.name} />
                                     </span>
 
                                     {/* Mega Menu - Positioned under specific item */}
@@ -429,9 +431,9 @@ const Header = () => {
                                                 {/* Subcategories Column */}
                                                 <div className="w-64 py-2 border-r border-gray-100 bg-gray-50/30">
                                                     <h3 className="px-4 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 mb-1">
-                                                        Categories
-                                                    </h3>
-                                                    {(cat.children || cat.subCategories).map((sub) => (
+                                                {categoriesText}
+                                            </h3>
+                                            {(cat.children || cat.subCategories).map((sub) => (
                                                         <div 
                                                             key={sub.id || sub._id}
                                                             onClick={(e) => {
@@ -445,7 +447,7 @@ const Header = () => {
                                                                     : 'text-gray-700 hover:bg-gray-50'
                                                             }`}
                                                         >
-                                                            <span>{sub.name}</span>
+                                                            <span><TranslatedText text={sub.name} /></span>
                                                             <MdKeyboardArrowRight className={`text-lg transition-transform ${hoveredSubcategory === sub.name ? 'translate-x-1' : ''}`} />
                                                         </div>
                                                     ))}
@@ -457,7 +459,7 @@ const Header = () => {
                                                         <div className="flex items-center gap-2">
                                                             <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
                                                             <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">
-                                                                {hoveredSubcategory || cat.name}
+                                                                <TranslatedText text={hoveredSubcategory || cat.name} />
                                                             </h3>
                                                         </div>
                                                         <button

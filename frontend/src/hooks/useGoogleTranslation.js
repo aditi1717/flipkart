@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { translateText } from '../services/translationService';
+import { useLanguageStore } from '../store/languageStore';
 
 /**
  * Custom hook to translate text asynchronously using Google API.
@@ -8,23 +8,24 @@ import { translateText } from '../services/translationService';
  * @returns {string} - The translated text (or original while loading/error)
  */
 export const useGoogleTranslation = (text) => {
-    const { i18n } = useTranslation();
+    const { language } = useLanguageStore();
     const [translatedText, setTranslatedText] = useState(text);
     // eslint-disable-next-line no-unused-vars
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        // console.log('Hook Language changed:', language, 'Text:', text);
         let isMounted = true;
 
         const fetchTranslation = async () => {
-            if (!text || i18n.language === 'en') {
+            if (!text || language === 'en') {
                 setTranslatedText(text);
                 return;
             }
 
             setIsLoading(true);
             try {
-                const result = await translateText(text, i18n.language);
+                const result = await translateText(text, language);
                 if (isMounted) {
                     setTranslatedText(result);
                 }
@@ -41,7 +42,7 @@ export const useGoogleTranslation = (text) => {
         return () => {
             isMounted = false;
         };
-    }, [text, i18n.language]);
+    }, [text, language]);
 
     return translatedText;
 };

@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
 import API from '../../../services/api';
-import { useTranslation } from 'react-i18next';
+import TranslatedText from '../components/common/TranslatedText';
+import { useGoogleTranslation } from '../../../hooks/useGoogleTranslation';
 
 import toast from 'react-hot-toast';
 
 const Addresses = () => {
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const { addresses, addAddress, updateAddress, removeAddress } = useCartStore();
@@ -27,6 +27,28 @@ const Addresses = () => {
         state: '',
         type: 'Home'
     };
+
+
+    // Static text translations for complex usage (if any) or attributes
+    const addressesText = useGoogleTranslation('Addresses');
+    const manageAddressesText = useGoogleTranslation('Manage Addresses');
+    const addNewAddressText = useGoogleTranslation('Add New Address');
+    const editAddressText = useGoogleTranslation('Edit Address');
+    const useCurrentLocationText = useGoogleTranslation('Use Current Location');
+    
+    // Form Labels
+    const fullNameText = useGoogleTranslation('Full Name');
+    const phoneNumberText = useGoogleTranslation('Phone Number');
+    const pincodeText = useGoogleTranslation('Pincode');
+    const addressAreaText = useGoogleTranslation('Address (Area and Street)');
+    const cityText = useGoogleTranslation('City/District/Town');
+    const stateText = useGoogleTranslation('State');
+    const addressTypeText = useGoogleTranslation('Address Type');
+    const homeTypeText = useGoogleTranslation('Home (All day delivery)');
+    const workTypeText = useGoogleTranslation('Work (Delivery between 10 AM - 5 PM)');
+    const cancelText = useGoogleTranslation('Cancel');
+    const updateAddressText = useGoogleTranslation('Update Address');
+    const saveAddressText = useGoogleTranslation('Save Address');
 
     const [newAddr, setNewAddr] = useState(initialAddr);
 
@@ -100,7 +122,7 @@ const Addresses = () => {
             {/* Mobile Header - Hidden on Desktop */}
             <div className="bg-white px-4 py-4 flex items-center gap-4 border-b md:hidden">
                 <button onClick={() => navigate(-1)} className="material-icons text-gray-700">arrow_back</button>
-                <h1 className="text-lg font-bold text-gray-800">{t('addresses')}</h1>
+                <h1 className="text-lg font-bold text-gray-800">{addressesText}</h1>
             </div>
 
             {/* Desktop Container */}
@@ -110,11 +132,11 @@ const Addresses = () => {
                 <div className="hidden md:block w-[280px] shrink-0 space-y-4">
                     {/* Breadcrumbs */}
                     <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                        <span onClick={() => navigate('/')} className="cursor-pointer hover:text-blue-600">{t('home')}</span>
+                        <span onClick={() => navigate('/')} className="cursor-pointer hover:text-blue-600"><TranslatedText text="Home" /></span>
                         <span className="material-icons text-[10px]">chevron_right</span>
-                        <span onClick={() => navigate('/account')} className="cursor-pointer hover:text-blue-600">{t('my_account')}</span>
+                        <span onClick={() => navigate('/account')} className="cursor-pointer hover:text-blue-600"><TranslatedText text="My Account" /></span>
                         <span className="material-icons text-[10px]">chevron_right</span>
-                        <span className="text-gray-800 font-bold">{t('addresses')}</span>
+                        <span className="text-gray-800 font-bold">{addressesText}</span>
                     </div>
 
                     <div className="bg-white p-4 shadow-sm rounded-sm">
@@ -123,7 +145,7 @@ const Addresses = () => {
                                 <span className="material-icons text-gray-600">person</span>
                             </div>
                             <div>
-                                <p className="text-[10px] text-gray-500">{t('hello')},</p>
+                                <p className="text-[10px] text-gray-500"><TranslatedText text="Hello" />,</p>
                                 <p className="text-sm font-bold text-gray-800">{user?.name || 'User'}</p>
                             </div>
                         </div>
@@ -133,7 +155,7 @@ const Addresses = () => {
                 {/* Main Content Area */}
                 <div className="md:flex-1 space-y-4">
 
-                    <h1 className="hidden md:block text-lg font-bold text-gray-800 mb-4">{t('manage_addresses')}</h1>
+                    <h1 className="hidden md:block text-lg font-bold text-gray-800 mb-4">{manageAddressesText}</h1>
 
                     <div className="p-2 space-y-2 md:p-0">
                         {/* Add New Address Button */}
@@ -147,7 +169,7 @@ const Addresses = () => {
                                 className="w-full bg-white p-4 flex items-center gap-3 text-blue-600 font-bold text-sm shadow-sm active:bg-gray-50 transition-colors md:rounded-sm md:border md:border-gray-200 md:hover:bg-blue-50"
                             >
                                 <span className="material-icons text-lg">add</span>
-                                {t('add_new_address').toUpperCase()}
+                                {addNewAddressText.toUpperCase()}
                             </button>
                         )}
 
@@ -156,7 +178,7 @@ const Addresses = () => {
                             <div className="bg-white p-4 shadow-sm animate-in slide-in-from-top duration-300 md:rounded-sm md:border md:border-gray-200">
                                 <div className="flex items-center justify-between mb-4 border-b pb-3">
                                     <h2 className="text-blue-600 font-bold uppercase text-[12px] tracking-wider">
-                                        {editingId ? t('edit_address') : t('add_new_address')}
+                                        {editingId ? editAddressText : addNewAddressText}
                                     </h2>
                                     <button onClick={() => { setIsAdding(false); setEditingId(null); }} className="text-gray-400 hover:text-red-500">
                                         <span className="material-icons">close</span>
@@ -258,7 +280,7 @@ const Addresses = () => {
                                             ) : (
                                                 <>
                                                     <span className="material-icons text-sm">my_location</span>
-                                                    {t('use_current_location')}
+                                                    {useCurrentLocationText}
                                                 </>
                                             )}
                                         </button>
@@ -266,7 +288,7 @@ const Addresses = () => {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="col-span-2 md:col-span-1 space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{t('full_name')}</label>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{fullNameText}</label>
                                             <input 
                                                 required 
                                                 type="text" 
@@ -276,43 +298,43 @@ const Addresses = () => {
                                             />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{t('phone_number')}</label>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{phoneNumberText}</label>
                                             <input required type="tel" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.mobile} onChange={e => setNewAddr({ ...newAddr, mobile: e.target.value })} />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{t('pincode')}</label>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{pincodeText}</label>
                                             <input required type="number" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.pincode} onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })} />
                                         </div>
                                         <div className="col-span-2 space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{t('address_area')}</label>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{addressAreaText}</label>
                                             <textarea required rows="3" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.address} onChange={e => setNewAddr({ ...newAddr, address: e.target.value })} />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{t('city')}</label>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{cityText}</label>
                                             <input required type="text" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.city} onChange={e => setNewAddr({ ...newAddr, city: e.target.value })} />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{t('state')}</label>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase">{stateText}</label>
                                             <input required type="text" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.state} onChange={e => setNewAddr({ ...newAddr, state: e.target.value })} />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase">{t('address_type')}</label>
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase">{addressTypeText}</label>
                                         <div className="flex gap-6">
                                             {['Home', 'Work'].map(type => (
                                                 <label key={type} className="flex items-center gap-2 cursor-pointer group">
                                                     <input type="radio" checked={newAddr.type === type} onChange={() => setNewAddr({ ...newAddr, type })} className="accent-blue-600 w-4 h-4 cursor-pointer" />
-                                                    <span className="text-sm text-gray-700">{type === 'Home' ? t('home_type') : t('work_type')}</span>
+                                                    <span className="text-sm text-gray-700">{type === 'Home' ? homeTypeText : workTypeText}</span>
                                                 </label>
                                             ))}
                                         </div>
                                     </div>
 
                                     <div className="flex gap-3 pt-4">
-                                        <button type="button" onClick={() => { setIsAdding(false); setEditingId(null); }} className="flex-1 py-4 text-gray-500 font-bold uppercase text-[12px] hover:text-gray-700">{t('cancel')}</button>
+                                        <button type="button" onClick={() => { setIsAdding(false); setEditingId(null); }} className="flex-1 py-4 text-gray-500 font-bold uppercase text-[12px] hover:text-gray-700">{cancelText}</button>
                                         <button type="submit" className="flex-1 bg-blue-600 text-white py-4 rounded-sm font-bold uppercase text-[12px] shadow-lg active:scale-95 transition-all hover:bg-blue-700">
-                                            {editingId ? t('update_address') : t('save_address')}
+                                            {editingId ? updateAddressText : saveAddressText}
                                         </button>
                                     </div>
                                 </form>

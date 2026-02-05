@@ -1,17 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+
 import { useGoogleTranslation } from '../../../../hooks/useGoogleTranslation';
 
 const ProductCard = ({ product, footerText }) => {
     const navigate = useNavigate();
-    const { t, i18n } = useTranslation();
     
     // Translated Values
     const productName = useGoogleTranslation(product.name);
     // Brand names should usually not be translated
     const productBrand = product.brand || product.name.split(' ')[0];
     const translatedFooter = useGoogleTranslation(footerText);
+    const offText = useGoogleTranslation('OFF');
+    const adText = useGoogleTranslation('AD');
+    const withBankOfferText = useGoogleTranslation('with Bank offer');
 
     const [isNavigating, setIsNavigating] = React.useState(false);
 
@@ -25,10 +27,10 @@ const ProductCard = ({ product, footerText }) => {
     };
 
     // Calculate dynamic discount if not provided
-    const discountPercent = product.discount || (product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) + `% ${t('off')}` : null);
+    const discountPercent = product.discount || (product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) + `% ${offText}` : null);
 
     // Default footer text if none provided
-    const displayFooterText = footerText ? translatedFooter : `₹${Math.round(product.price * 0.95).toLocaleString()} ${t('with_bank_offer')}`;
+    const displayFooterText = footerText ? translatedFooter : `₹${Math.round(product.price * 0.95).toLocaleString()} ${withBankOfferText}`;
 
 
     return (
@@ -62,7 +64,7 @@ const ProductCard = ({ product, footerText }) => {
                 {/* AD Badge - Top Right (Conditional or dynamic based on ID) */}
                 {(product.id % 4 === 0) && (
                     <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-sm text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded">
-                        {t('ad')}
+                        {adText}
                     </div>
                 )}
             </div>

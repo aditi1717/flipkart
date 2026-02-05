@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../store/cartStore';
 import ProductSection from '../components/home/ProductSection';
 import { useProduct, useProducts } from '../../../hooks/useData';
@@ -82,7 +81,6 @@ const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart, wishlist, toggleWishlist, addresses } = useCartStore();
-    const { t } = useTranslation();
     
     // Fetch individual product
     const { product, loading } = useProduct(id);
