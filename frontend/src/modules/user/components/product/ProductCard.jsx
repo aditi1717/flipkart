@@ -1,8 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useGoogleTranslation } from '../../../../hooks/useGoogleTranslation';
 
 const ProductCard = ({ product, footerText }) => {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
+    
+    // Translated Values
+    const productName = useGoogleTranslation(product.name);
+    // Brand names should usually not be translated
+    const productBrand = product.brand || product.name.split(' ')[0];
+    const translatedFooter = useGoogleTranslation(footerText);
+
     const [isNavigating, setIsNavigating] = React.useState(false);
 
     const handleNavigate = () => {
@@ -15,10 +25,11 @@ const ProductCard = ({ product, footerText }) => {
     };
 
     // Calculate dynamic discount if not provided
-    const discountPercent = product.discount || (product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) + '% OFF' : null);
+    const discountPercent = product.discount || (product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) + `% ${t('off')}` : null);
 
     // Default footer text if none provided
-    const displayFooterText = footerText || `₹${Math.round(product.price * 0.95).toLocaleString()} with Bank offer`;
+    const displayFooterText = footerText ? translatedFooter : `₹${Math.round(product.price * 0.95).toLocaleString()} ${t('with_bank_offer')}`;
+
 
     return (
         <div
@@ -51,7 +62,7 @@ const ProductCard = ({ product, footerText }) => {
                 {/* AD Badge - Top Right (Conditional or dynamic based on ID) */}
                 {(product.id % 4 === 0) && (
                     <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-sm text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 rounded">
-                        AD
+                        {t('ad')}
                     </div>
                 )}
             </div>
@@ -59,7 +70,7 @@ const ProductCard = ({ product, footerText }) => {
             <div className="px-1 flex flex-col flex-1">
                 {/* Brand / Title */}
                 <h4 className="text-[12px] md:text-sm font-bold text-gray-900 line-clamp-1 mb-0.5">
-                    {product.brand || product.name.split(' ')[0]} {product.name}
+                    {productBrand} {productName}
                 </h4>
 
                 {/* Discount Percentage */}

@@ -22,5 +22,9 @@
   "work_type": "कार्यालय",
   "use_current_location": "वर्तमान स्थान का उपयोग करें",
   "manage_addresses": "पते प्रबंधित करें",
-  "hello": "नमस्ते"
+  "hello": "नमस्ते",
+  "off": "की छूट",
+  "ad": "विज्ञापन",
+  "with_bank_offer": "बैंक ऑफर के साथ",
+  "view_all": "सभी देखें"
 }

@@ -5,11 +5,19 @@ import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
+import { useGoogleTranslation } from '../../../../hooks/useGoogleTranslation';
 
 const HomeBanner = ({ banner }) => {
     const navigate = useNavigate();
     
     if (!banner || !banner.active) return null;
+
+    // Translation Hook for Content
+    const translatedTitle = useGoogleTranslation(banner.content?.title);
+    const translatedSubtitle = useGoogleTranslation(banner.content?.subtitle);
+    const translatedDescription = useGoogleTranslation(banner.content?.description);
+    const translatedOfferText = useGoogleTranslation(banner.content?.offerText);
+    const translatedButtonText = useGoogleTranslation(banner.content?.buttonText);
 
     const handleSlideClick = (slide) => {
         const offerId = slide.linkedOffer?._id || slide.linkedOffer;
@@ -96,17 +104,17 @@ const HomeBanner = ({ banner }) => {
                                         className="text-2xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight uppercase transition-all line-clamp-2"
                                         style={{ color: textColor }}
                                     >
-                                        {content.title}
+                                        {translatedTitle}
                                     </h2>
                                 )}
                                 {content.subtitle && (
                                     <p className="text-lg md:text-2xl font-bold mt-2 line-clamp-1" style={{ color: textColor }}>
-                                        {content.subtitle}
+                                        {translatedSubtitle}
                                     </p>
                                 )}
                                 {content.description && (
                                     <p className="text-xs md:text-sm opacity-90 mt-3 line-clamp-2 max-w-lg" style={{ color: textColor }}>
-                                        {content.description}
+                                        {translatedDescription}
                                     </p>
                                 )}
                                 {content.buttonText && (
@@ -117,7 +125,7 @@ const HomeBanner = ({ banner }) => {
                                             color: bgColor
                                         }}
                                     >
-                                        {content.buttonText}
+                                        {translatedButtonText}
                                     </button>
                                 )}
                             </div>
@@ -149,14 +157,14 @@ const HomeBanner = ({ banner }) => {
                                     className="text-2xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight uppercase transition-all line-clamp-2"
                                     style={{ color: textColor }}
                                 >
-                                    {content.title}
+                                    {translatedTitle}
                                 </h2>
                                 {content.subtitle && (
                                     <p 
                                         className="text-lg md:text-3xl font-bold mt-1 md:mt-2 line-clamp-1 opacity-90"
                                         style={{ color: textColor }}
                                     >
-                                        {content.subtitle}
+                                        {translatedSubtitle}
                                     </p>
                                 )}
                                 {content.description && (
@@ -164,7 +172,7 @@ const HomeBanner = ({ banner }) => {
                                         className="text-[10px] md:text-lg mt-2 leading-relaxed line-clamp-2 opacity-70 font-medium"
                                         style={{ color: textColor }}
                                     >
-                                        {content.description}
+                                        {translatedDescription}
                                     </p>
                                 )}
 
@@ -174,7 +182,7 @@ const HomeBanner = ({ banner }) => {
                                             className="px-6 md:px-10 py-2 md:py-3 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-lg transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
                                             style={{ backgroundColor: textColor, color: bgColor }}
                                         >
-                                            {content.buttonText}
+                                            {translatedButtonText}
                                         </button>
                                     </div>
                                 )}
@@ -281,10 +289,10 @@ const HomeBanner = ({ banner }) => {
                     <div className="absolute inset-0 bg-black/20 flex items-center p-6 bg-gradient-to-r from-black/50 to-transparent">
                         <div className="max-w-[70%]">
                             <h2 className="text-xl md:text-3xl font-black text-white uppercase tracking-tighter leading-none mb-1 group-hover:translate-x-2 transition-transform drop-shadow-md">
-                                {banner.content.title}
+                                {translatedTitle}
                             </h2>
                             <p className="text-sm md:text-xl font-bold text-yellow-400 italic tracking-wide group-hover:translate-x-2 transition-transform delay-75 drop-shadow-md">
-                                {banner.content.subtitle || banner.content.offerText}
+                                {translatedSubtitle || translatedOfferText}
                             </p>
                         </div>
                     </div>
@@ -310,10 +318,10 @@ const HomeBanner = ({ banner }) => {
                                 <h4 className="text-[#e67e22] text-xs md:text-sm font-black tracking-widest uppercase mb-1">{banner.content.brand}</h4>
                             )}
                             <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-gray-900 leading-tight mb-2 line-clamp-2">
-                                {banner.content.title}
+                                {translatedTitle}
                             </h2>
                             <p className="text-xs md:text-lg font-bold text-gray-600 line-clamp-2">
-                                {banner.content.description}
+                                {translatedDescription}
                             </p>
                             <button className="hidden md:block mt-6 bg-gray-900 text-white px-6 py-2 rounded-full font-bold hover:bg-black transition-colors">
                                 Shop Now
@@ -331,7 +339,7 @@ const HomeBanner = ({ banner }) => {
                     </div>
                     {banner.content.offerText && (
                         <div className="absolute bottom-0 left-0 right-0 py-2.5 px-6 md:px-12 bg-[#ff6b35] flex items-center justify-between z-20">
-                            <span className="text-white text-sm md:text-xl font-black">{banner.content.offerText}</span>
+                            <span className="text-white text-sm md:text-xl font-black">{translatedOfferText}</span>
                             <div className="flex gap-1">
                                 {[1, 2, 3, 4, 5, 6].map(i => (
                                     <div key={i} className={`h-1.5 md:h-2 rounded-full ${i === 4 ? 'w-6 md:w-8 bg-white' : 'w-1.5 md:w-2 bg-white/40'}`} />

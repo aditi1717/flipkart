@@ -42,8 +42,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// react-draggable for custom positioning
-import Draggable from 'react-draggable';
+// react-draggable removed
 
 // Sortable Slide Item Component
 const SortableSlide = ({ slide, index, onRemove, onUpdate, offers, onProductPick }) => {
@@ -347,11 +346,7 @@ const HomeBanners = () => {
     const heroFileInputRef = useRef(null);
     const bgFileInputRef = useRef(null);
     
-    const [resetKey, setResetKey] = useState(0);
-    
-    // Refs for Draggable components (React 18 compatibility)
-    const textDragRef = useRef(null);
-    const imageDragRef = useRef(null);
+    // Refs for Draggable components
     const featuredProductRefs = useRef([]);
 
     // DnD Kit sensors
@@ -911,22 +906,7 @@ const HomeBanners = () => {
                         <div className="flex items-center gap-2 mb-4">
                             <MdVisibility className="text-green-500" />
                             <h3 className="text-sm font-bold text-gray-700">Live Preview</h3>
-                            <span className="text-[10px] text-gray-400 ml-auto">Drag elements to position</span>
-                            
-                            {/* Reset Position Button */}
-                            <button
-                                onClick={() => {
-                                    setResetKey(prev => prev + 1);
-                                    setFormData({...formData, content: {
-                                        ...formData.content,
-                                        textPosition: { x: 10, y: 50 },
-                                        imagePosition: { x: 70, y: 50 }
-                                    }})}
-                                }
-                                className="px-2 py-1 rounded-lg text-[10px] font-bold text-orange-600 hover:bg-orange-50 transition"
-                            >
-                                RESET
-                            </button>
+                            <h3 className="text-sm font-bold text-gray-700">Live Preview</h3>
                         </div>
                         
                         {/* Hero Preview */}
@@ -950,112 +930,68 @@ const HomeBanners = () => {
                                 </div>
                             )}
 
-                            {/* Text Block - Always Draggable (Custom Mode Forced) */}
-                            <Draggable
-                                key={`text-drag-${resetKey}`}
-                                nodeRef={textDragRef}
-                                defaultPosition={{
-                                    x: (formData.content.textPosition?.x / 100) * 600 || 60,
-                                    y: (formData.content.textPosition?.y / 100) * 400 || 200
+                            {/* Text Block - Static Position */}
+                            <div 
+                                className="absolute z-20"
+                                style={{ 
+                                    left: `${formData.content.textPosition?.x || 10}%`,
+                                    top: `${formData.content.textPosition?.y || 50}%`,
+                                    transform: 'translate(-50%, -50%)' 
                                 }}
-                                onStop={(e, data) => {
-                                    const x = Math.max(0, Math.min(100, (data.x / 600) * 100));
-                                    const y = Math.max(0, Math.min(100, (data.y / 400) * 100));
-                                    setFormData({
-                                        ...formData,
-                                        content: {
-                                            ...formData.content,
-                                            textPosition: { x: Math.round(x), y: Math.round(y) }
-                                        }
-                                    });
-                                }}
-                                bounds="parent"
                             >
+                                <div className="max-w-md p-6">
+                                    {formData.content.brand && (
+                                        <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-80" style={{ color: formData.content.textColor || '#ffffff' }}>
+                                            {formData.content.brand}
+                                        </p>
+                                    )}
+                                    {formData.content.title && (
+                                        <h2 className="text-2xl md:text-4xl font-black mb-2 leading-tight" style={{ color: formData.content.textColor || '#ffffff' }}>
+                                            {formData.content.title}
+                                        </h2>
+                                    )}
+                                    {formData.content.subtitle && (
+                                        <p className="text-lg font-bold mb-3" style={{ color: formData.content.textColor || '#ffffff' }}>
+                                            {formData.content.subtitle}
+                                        </p>
+                                    )}
+                                    {formData.content.description && (
+                                        <p className="text-sm opacity-80 mb-4 max-w-sm" style={{ color: formData.content.textColor || '#ffffff' }}>
+                                            {formData.content.description}
+                                        </p>
+                                    )}
+                                    {formData.content.buttonText && (
+                                        <button 
+                                            className="px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl"
+                                            style={{ 
+                                                backgroundColor: formData.content.textColor || '#ffffff',
+                                                color: formData.content.backgroundColor || '#1e3a5f'
+                                            }}
+                                        >
+                                            {formData.content.buttonText}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* Product Image - Static Position */}
+                            {heroImagePreview && (
                                 <div 
-                                    ref={textDragRef}
-                                    className="absolute cursor-move z-20 group/text"
-                                    style={{ transform: 'translate(-50%, -50%)' }}
+                                    className="absolute z-20"
+                                    style={{ 
+                                        left: `${formData.content.imagePosition?.x || 70}%`,
+                                        top: `${formData.content.imagePosition?.y || 50}%`,
+                                        transform: 'translate(-50%, -50%)' 
+                                    }}
                                 >
-                                    <div className="max-w-md p-6 bg-black/10 backdrop-blur-sm rounded-lg border-2 border-dashed border-white/40 group-hover/text:border-white/80 transition">
-                                        <div className="absolute -top-3 -left-3 bg-green-500 text-white px-2 py-0.5 rounded text-[9px] font-bold">
-                                            <MdDragIndicator className="inline mr-1" />
-                                            TEXT ({formData.content.textPosition?.x}%, {formData.content.textPosition?.y}%)
-                                        </div>
-                                        {formData.content.brand && (
-                                            <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-80" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                                {formData.content.brand}
-                                            </p>
-                                        )}
-                                        {formData.content.title && (
-                                            <h2 className="text-2xl md:text-4xl font-black mb-2 leading-tight" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                                {formData.content.title}
-                                            </h2>
-                                        )}
-                                        {formData.content.subtitle && (
-                                            <p className="text-lg font-bold mb-3" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                                {formData.content.subtitle}
-                                            </p>
-                                        )}
-                                        {formData.content.description && (
-                                            <p className="text-sm opacity-80 mb-4 max-w-sm" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                                {formData.content.description}
-                                            </p>
-                                        )}
-                                        {formData.content.buttonText && (
-                                            <button 
-                                                className="px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl"
-                                                style={{ 
-                                                    backgroundColor: formData.content.textColor || '#ffffff',
-                                                    color: formData.content.backgroundColor || '#1e3a5f'
-                                                }}
-                                            >
-                                                {formData.content.buttonText}
-                                            </button>
-                                        )}
+                                    <div className="relative">
+                                        <img 
+                                            src={heroImagePreview} 
+                                            className="max-h-[300px] max-w-[300px] object-contain filter drop-shadow-2xl" 
+                                            alt="hero" 
+                                        />
                                     </div>
                                 </div>
-                            </Draggable>
-                            
-                            {/* Product Image - Always Draggable (Custom Mode Forced) */}
-                            {heroImagePreview && (
-                                <Draggable
-                                    key={`image-drag-${resetKey}`}
-                                    nodeRef={imageDragRef}
-                                    defaultPosition={{
-                                        x: (formData.content.imagePosition?.x / 100) * 600 || 420,
-                                        y: (formData.content.imagePosition?.y / 100) * 400 || 200
-                                    }}
-                                    onStop={(e, data) => {
-                                        const x = Math.max(0, Math.min(100, (data.x / 600) * 100));
-                                        const y = Math.max(0, Math.min(100, (data.y / 400) * 100));
-                                        setFormData({
-                                            ...formData,
-                                            content: {
-                                                ...formData.content,
-                                                imagePosition: { x: Math.round(x), y: Math.round(y) }
-                                            }
-                                        });
-                                    }}
-                                    bounds="parent"
-                                >
-                                    <div 
-                                        ref={imageDragRef}
-                                        className="absolute cursor-move z-20 group/img"
-                                        style={{ transform: 'translate(-50%, -50%)' }}
-                                    >
-                                        <div className="relative">
-                                            <div className="absolute -top-3 -right-3 bg-blue-500 text-white px-2 py-0.5 rounded text-[9px] font-bold">
-                                                <MdDragIndicator className="inline mr-1" />
-                                                IMG ({formData.content.imagePosition?.x}%, {formData.content.imagePosition?.y}%)
-                                            </div>
-                                            <img 
-                                                src={heroImagePreview} 
-                                                className="max-h-[200px] max-w-[200px] object-contain filter drop-shadow-2xl border-2 border-dashed border-white/40 group-hover/img:border-white/80 rounded-lg transition" 
-                                                alt="hero" 
-                                            />
-                                        </div>
-                                    </div>
-                                </Draggable>
                             )}
 
                             {/* Empty state */}

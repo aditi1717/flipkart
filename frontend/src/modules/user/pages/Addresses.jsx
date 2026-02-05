@@ -5,6 +5,8 @@ import { useAuthStore } from '../store/authStore';
 import API from '../../../services/api';
 import { useTranslation } from 'react-i18next';
 
+import toast from 'react-hot-toast';
+
 const Addresses = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -14,6 +16,7 @@ const Addresses = () => {
     const [editingId, setEditingId] = useState(null);
     const [showMenu, setShowMenu] = useState(null);
     const [pincodeStatus, setPincodeStatus] = useState({}); // { addressId: { isServiceable, message, deliveryTime, unit } }
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
     const initialAddr = {
         name: '',
@@ -165,17 +168,21 @@ const Addresses = () => {
                                     {!editingId && (
                                         <button
                                             type="button"
+                                            disabled={isLoadingLocation}
                                             onClick={async () => {
                                                 if (!navigator.geolocation) {
-                                                    alert('Geolocation is not supported by your browser.');
+                                                    toast.error('Geolocation is not supported by your browser.');
                                                     return;
                                                 }
 
                                                 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
                                                 if (!apiKey) {
-                                                    alert('Google Maps API Key is missing. Please contact support.');
+                                                    toast.error('Google Maps API Key is missing. Please contact support.');
                                                     return;
                                                 }
+
+                                                setIsLoadingLocation(true);
+                                                const loadingToast = toast.loading('Fetching your location...');
 
                                                 try {
                                                     const position = await new Promise((resolve, reject) => {
@@ -224,23 +231,36 @@ const Addresses = () => {
                                                             pincode,
                                                             address: fullAddress
                                                         }));
+                                                        toast.success('Address fetched successfully!', { id: loadingToast });
                                                     } else {
-                                                        alert('Could not fetch address details. Please fill manually.');
+                                                        console.error('Google Maps Error:', data);
+                                                        toast.error(`Google Maps Error: ${data.status} - ${data.error_message || 'Unknown error'}`, { id: loadingToast });
                                                     }
 
                                                 } catch (error) {
                                                     console.error('Location Error:', error);
                                                     if (error.code === 1) {
-                                                        alert('Location permission denied. Please allow location access to use this feature.');
+                                                        toast.error('Location permission denied. Please allow location access.', { id: loadingToast });
                                                     } else {
-                                                        alert('Failed to detect location. Please try again or fill manually.');
+                                                        toast.error('Failed to detect location. Please try again or fill manually.', { id: loadingToast });
                                                     }
+                                                } finally {
+                                                    setIsLoadingLocation(false);
                                                 }
                                             }}
-                                            className="w-full bg-blue-50 text-blue-600 py-3 rounded-sm font-bold text-xs uppercase flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors mb-4 border border-blue-100"
+                                            className={`w-full bg-blue-50 text-blue-600 py-3 rounded-sm font-bold text-xs uppercase flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors mb-4 border border-blue-100 ${isLoadingLocation ? 'opacity-70 cursor-wait' : ''}`}
                                         >
-                                            <span className="material-icons text-sm">my_location</span>
-                                            {t('use_current_location')}
+                                            {isLoadingLocation ? (
+                                                <>
+                                                    <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
+                                                    DETECTING...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="material-icons text-sm">my_location</span>
+                                                    {t('use_current_location')}
+                                                </>
+                                            )}
                                         </button>
                                     )}
 

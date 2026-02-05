@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../store/cartStore';
 import ProductSection from '../components/home/ProductSection';
 import { useProduct, useProducts } from '../../../hooks/useData';
+import { useGoogleTranslation } from '../../../hooks/useGoogleTranslation';
 import API from '../../../services/api';
 import toast from 'react-hot-toast';
 import './ProductDetails.css';
@@ -80,10 +82,16 @@ const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart, wishlist, toggleWishlist, addresses } = useCartStore();
+    const { t } = useTranslation();
     
     // Fetch individual product
     const { product, loading } = useProduct(id);
-    
+
+    // Translation Hooks
+    const translatedName = useGoogleTranslation(product?.name);
+    // Note: Complex descriptions might need more granular translation, 
+    // but for now we'll translate the main name which is key.
+
     // Fetch all products for "Similar" and "High Rated" logic (could be optimized on backend)
     const { products, loading: productsLoading } = useProducts();
     
@@ -110,7 +118,7 @@ const ProductDetails = () => {
                 setPincodeStatus({
                     isServiceable: true,
                     message: data.message || `Delivered in ${data.deliveryTime} ${data.unit}`,
-                    message: data.message || `Delivered in ${data.deliveryTime} ${data.unit}`,
+
                     deliveryDate: data.deliveryTime + ' ' + data.unit,
                     isCOD: data.isCOD
                 });
@@ -466,7 +474,7 @@ const ProductDetails = () => {
                         <div className="mb-2">
                             <p className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-1 hover:text-blue-600 cursor-pointer w-fit">{product.brand || "Brand Name"}</p>
                             <h1 className="text-2xl font-medium text-gray-900 leading-snug hover:text-blue-600 cursor-pointer transition-colors inline-block">
-                                {product.name}
+                                {translatedName}
                                 {displayVariantHeadings.length > 0 && (
                                     <span className="text-gray-500 ml-1">
                                         ({displayVariantHeadings.map(vh => selectedVariants[vh.name]).filter(Boolean).join(', ')})

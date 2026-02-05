@@ -1,5 +1,6 @@
 import React from 'react';
 import ProductCard from '../product/ProductCard';
+import { useGoogleTranslation } from '../../../../hooks/useGoogleTranslation';
 
 const ProductSection = ({
     title,
@@ -13,6 +14,10 @@ const ProductSection = ({
 }) => {
     const scrollRef = React.useRef(null);
     const skeletonItems = [1, 2, 3, 4, 5, 6];
+    
+    // Translate Title and Subtitle
+    const translatedTitle = useGoogleTranslation(title);
+    const translatedSubtitle = useGoogleTranslation(subtitle);
 
     const scroll = (direction) => {
         if (scrollRef.current) {
@@ -30,14 +35,14 @@ const ProductSection = ({
             <div className="flex items-center justify-between mb-4">
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900">{title}</h3>
+                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900">{translatedTitle}</h3>
                         {titleBadge && (
                             <span className="bg-gray-100 text-gray-500 text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
                                 {titleBadge}
                             </span>
                         )}
                     </div>
-                    {subtitle && <p className="text-[10px] md:text-sm text-gray-500 font-medium -mt-0.5">{subtitle}</p>}
+                    {subtitle && <p className="text-[10px] md:text-sm text-gray-500 font-medium -mt-0.5">{translatedSubtitle}</p>}
                 </div>
                 <button
                     onClick={onViewAll}

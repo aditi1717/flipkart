@@ -22,5 +22,9 @@
   "work_type": "Work",
   "use_current_location": "Use Current Location",
   "manage_addresses": "Manage Addresses",
-  "hello": "Hello"
+  "hello": "Hello",
+  "off": "OFF",
+  "ad": "AD",
+  "with_bank_offer": "with Bank offer",
+  "view_all": "View All"
 }
