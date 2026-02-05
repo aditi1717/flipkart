@@ -61,14 +61,8 @@ const InfoPage = () => {
     return (
         <div className="bg-white min-h-screen text-gray-900">
             {/* Header */}
-            <div className="bg-white sticky top-0 z-10 border-b border-gray-100 px-4 py-4 flex items-center gap-4">
-                <button 
-                    onClick={() => navigate(-1)} 
-                    className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition-colors"
-                >
-                    <MdArrowBack size={24} className="text-gray-900" />
-                </button>
-                <h1 className="text-xl font-black text-gray-900 tracking-tight">
+            <div className="bg-white sticky top-0 z-10 border-b border-gray-100 px-8 py-6 flex items-center justify-center">
+                <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase">
                     {title}
                 </h1>
             </div>
