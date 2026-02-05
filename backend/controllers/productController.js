@@ -5,7 +5,7 @@ import Product from '../models/Product.js';
 // @access  Public
 export const getProducts = async (req, res) => {
     try {
-        const { category, subcategory, all } = req.query;
+        const { category, subcategory, all, pageNumber, limit } = req.query;
         let filter = {};
 
         if (all !== 'true') {
@@ -41,6 +41,27 @@ export const getProducts = async (req, res) => {
             filter.category = category;
         }
 
+        // Pagination Logic
+        if (pageNumber || limit) {
+            const pageSize = Number(limit) || 12;
+            const page = Number(pageNumber) || 1;
+
+            const count = await Product.countDocuments(filter);
+            const products = await Product.find(filter)
+                .populate('subCategories', 'name isActive')
+                .sort({ createdAt: -1 })
+                .limit(pageSize)
+                .skip(pageSize * (page - 1));
+
+            return res.json({ 
+                products, 
+                page, 
+                pages: Math.ceil(count / pageSize), 
+                total: count 
+            });
+        } 
+
+        // Default behavior (No pagination) - Backward Compatibility
         const products = await Product.find(filter)
             .populate('subCategories', 'name isActive')
             .sort({ createdAt: -1 });

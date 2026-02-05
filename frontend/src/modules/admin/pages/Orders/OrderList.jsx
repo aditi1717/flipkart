@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MdSearch, MdFilterList, MdVisibility, MdChevronLeft, MdChevronRight, MdLocalShipping, MdCheckCircle, MdPendingActions, MdCancel } from 'react-icons/md';
 import useOrderStore from '../../store/orderStore';
-import Pagination from '../../components/common/Pagination';
+import Pagination from '../../../../components/Pagination';
+import API from '../../../../services/api';
 
 const OrderList = () => {
     const navigate = useNavigate();
@@ -12,30 +13,53 @@ const OrderList = () => {
     const { orders, fetchOrders } = useOrderStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
+    
+    // Server-side Pagination State
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalOrders, setTotalOrders] = useState(0);
+    const itemsPerPage = 12;
+    
+    const [localOrders, setLocalOrders] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        fetchOrders();
-    }, [fetchOrders]);
+        const fetchPaginatedOrders = async () => {
+            setLoading(true);
+            try {
+                const params = {
+                    pageNumber: currentPage,
+                    limit: itemsPerPage
+                };
+                
+                if (searchTerm) params.search = searchTerm;
+                if (statusFilter !== 'All') params.status = statusFilter;
+                if (userEmailFilter) params.user = userEmailFilter;
+                
+                const { data } = await API.get('/orders', { params });
+                
+                if (data.orders) {
+                    setLocalOrders(data.orders);
+                    setTotalPages(data.pages);
+                    setTotalOrders(data.total);
+                } else {
+                    setLocalOrders(data);
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const filteredOrders = orders.filter(order => {
-        const matchesSearch = 
-            (order.id?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.user?.name?.toLowerCase() || order.shippingAddress?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.user?.email?.toLowerCase() || order.shippingAddress?.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-            (order.items || []).some(item => (item.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()));
+        const timer = setTimeout(() => {
+            fetchPaginatedOrders();
+        }, 300); // Debounce search
 
-        const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
+        return () => clearTimeout(timer);
+    }, [currentPage, searchTerm, statusFilter, userEmailFilter]);
 
-        const matchesUserFilter = !userEmailFilter || (order.user?.email?.toLowerCase() || '') === userEmailFilter.toLowerCase();
-
-        return matchesSearch && matchesStatus && matchesUserFilter;
-    });
-
-    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedOrders = filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+    const filteredOrders = localOrders; // Now directly from server
 
     const getStatusStyle = (status) => {
         switch (status) {
@@ -58,7 +82,7 @@ const OrderList = () => {
             default: return null;
         }
     };
-
+    
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
             setCurrentPage(newPage);
@@ -134,7 +158,7 @@ const OrderList = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
-                                    {paginatedOrders.map((order, index) => (
+                                    {filteredOrders.map((order, index) => (
                                         <tr key={order.id || `order-${index}`} className="hover:bg-blue-50/10 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
@@ -218,9 +242,9 @@ const OrderList = () => {
                     {/* Pagination */}
                     {totalPages >= 1 && (
                         <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={handlePageChange}
+                            page={currentPage}
+                            pages={totalPages}
+                            changePage={handlePageChange}
                         />
                     )}
                 </div>

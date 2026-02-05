@@ -10,6 +10,16 @@ import { useGoogleTranslation } from '../../../../hooks/useGoogleTranslation';
 const HomeBanner = ({ banner }) => {
     const navigate = useNavigate();
     
+    // Debugging Banner Data
+    if (banner?.active && banner?.type === 'hero') {
+        console.log('Banner Debug:', {
+            id: banner._id,
+            useCustomPosition: banner.content?.useCustomPosition,
+            textPosition: banner.content?.textPosition,
+            imagePosition: banner.content?.imagePosition
+        });
+    }
+    
     if (!banner || !banner.active) return null;
 
     // Translation Hook for Content
@@ -63,10 +73,10 @@ const HomeBanner = ({ banner }) => {
                     style={{ backgroundColor: bgColor }}
                 >
                     {/* Background Image Layer */}
-                    {content.backgroundImageUrl && (
+                    {(content.backgroundImageUrl || content.imageUrl) && (
                         <div className="absolute inset-0">
                             <img 
-                                src={content.backgroundImageUrl} 
+                                src={content.backgroundImageUrl || content.imageUrl} 
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
                                 alt="" 
                             />
@@ -74,196 +84,12 @@ const HomeBanner = ({ banner }) => {
                         </div>
                     )}
 
-                    {/* Text Layer - Custom Position or Aligned */}
-                    {useCustomPos ? (
-                        <div 
-                            className="absolute z-10"
-                            style={{
-                                left: `${content.textPosition?.x || 10}%`,
-                                top: `${content.textPosition?.y || 50}%`,
-                                transform: 'translate(-50%, -50%)'
-                            }}
-                        >
-                            <div className="max-w-[90%] md:max-w-[400px] p-4">
-                                {(content.brand || content.brandTag) && (
-                                    <div className="flex items-center gap-2 mb-2">
-                                        {content.brand && (
-                                            <p className="text-[10px] md:text-xs font-black uppercase tracking-widest" style={{ color: textColor }}>
-                                                {content.brand}
-                                            </p>
-                                        )}
-                                        {content.brandTag && (
-                                            <span className="bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-full text-[8px] md:text-[10px] font-bold" style={{ color: textColor }}>
-                                                {content.brandTag}
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
-                                {content.title && (
-                                    <h2 
-                                        className="text-2xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight uppercase transition-all line-clamp-2"
-                                        style={{ color: textColor }}
-                                    >
-                                        {translatedTitle}
-                                    </h2>
-                                )}
-                                {content.subtitle && (
-                                    <p className="text-lg md:text-2xl font-bold mt-2 line-clamp-1" style={{ color: textColor }}>
-                                        {translatedSubtitle}
-                                    </p>
-                                )}
-                                {content.description && (
-                                    <p className="text-xs md:text-sm opacity-90 mt-3 line-clamp-2 max-w-lg" style={{ color: textColor }}>
-                                        {translatedDescription}
-                                    </p>
-                                )}
-                                {content.buttonText && (
-                                    <button 
-                                        className="mt-4 px-6 py-2 md:px-8 md:py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl transition-all hover:scale-105"
-                                        style={{ 
-                                            backgroundColor: textColor,
-                                            color: bgColor
-                                        }}
-                                    >
-                                        {translatedButtonText}
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    ) : (
-                        <div 
-                            className={`absolute inset-0 flex p-6 md:px-16 z-10 ${
-                                content.verticalAlign === 'top' ? 'items-start pt-8 md:pt-12' : 
-                                content.verticalAlign === 'bottom' ? 'items-end pb-8 md:pb-12' : 'items-center'
-                            } ${
-                                content.textAlign === 'center' ? 'justify-center text-center' : 
-                                content.textAlign === 'right' ? 'justify-end text-right' : 'justify-start text-left'
-                            }`}
-                        >
-                            <div className={`max-w-[100%] md:max-w-[50%] ${content.textAlign === 'center' ? 'mx-auto' : ''}`}>
-                                {(content.brand || content.brandTag) && (
-                                    <div className={`flex items-center gap-2 mb-2 ${content.textAlign === 'center' ? 'justify-center' : content.textAlign === 'right' ? 'justify-end' : ''}`}>
-                                        {content.brand && (
-                                            <span 
-                                                className="text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded uppercase tracking-widest border"
-                                                style={{ color: textColor, borderColor: `${textColor}44` }}
-                                            >
-                                                {content.brand}
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
-                                <h2 
-                                    className="text-2xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight uppercase transition-all line-clamp-2"
-                                    style={{ color: textColor }}
-                                >
-                                    {translatedTitle}
-                                </h2>
-                                {content.subtitle && (
-                                    <p 
-                                        className="text-lg md:text-3xl font-bold mt-1 md:mt-2 line-clamp-1 opacity-90"
-                                        style={{ color: textColor }}
-                                    >
-                                        {translatedSubtitle}
-                                    </p>
-                                )}
-                                {content.description && (
-                                    <p 
-                                        className="text-[10px] md:text-lg mt-2 leading-relaxed line-clamp-2 opacity-70 font-medium"
-                                        style={{ color: textColor }}
-                                    >
-                                        {translatedDescription}
-                                    </p>
-                                )}
+                    {/* Text Layer - REMOVED (Image Only Mode) */}
 
-                                {content.buttonText && (
-                                    <div className={`mt-6 ${content.textAlign === 'center' ? 'flex justify-center' : content.textAlign === 'right' ? 'flex justify-end' : 'flex justify-start'}`}>
-                                        <button 
-                                            className="px-6 md:px-10 py-2 md:py-3 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-lg transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
-                                            style={{ backgroundColor: textColor, color: bgColor }}
-                                        >
-                                            {translatedButtonText}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Main Product Image positioning - Custom or Aligned */}
-                    {content.imageUrl && content.imageAlign !== 'none' && (
-                        useCustomPos ? (
-                            <div 
-                                className="absolute z-10 pointer-events-none transition-transform duration-700 group-hover:scale-105"
-                                style={{
-                                    left: `${content.imagePosition?.x || 70}%`,
-                                    top: `${content.imagePosition?.y || 50}%`,
-                                    transform: 'translate(-50%, -50%)'
-                                }}
-                            >
-                                <img 
-                                    src={content.imageUrl} 
-                                    className="max-h-[150px] md:max-h-[280px] max-w-[200px] md:max-w-[350px] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]" 
-                                    alt="" 
-                                />
-                            </div>
-                        ) : (
-                            <div 
-                                className={`absolute ${
-                                    content.imageAlign === 'left' ? 'left-4 md:left-16' : 
-                                    content.imageAlign === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-4 md:right-16'
-                                } top-0 bottom-0 ${
-                                    content.imageAlign === 'center' ? 'w-1/3 md:w-1/4' : 'w-1/2'
-                                } flex items-center justify-center pointer-events-none z-10 transition-transform duration-700 group-hover:scale-105`}
-                            >
-                                <img 
-                                    src={content.imageUrl} 
-                                    className="max-h-[80%] md:max-h-[85%] max-w-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]" 
-                                    alt="" 
-                                />
-                            </div>
-                        )
-                    )}
+                                    {/* Main Product Image positioning - REMOVED */}
 
 
-                    {/* Shop the Look - Featured Products */}
-                    {useCustomPos && content.featuredProducts && content.featuredProducts.length > 0 && content.featuredProducts.map((fp, index) => {
-                        const product = fp.productId;
-                        // Ensure product is fully populated object
-                        if (!product || typeof product !== 'object') return null;
-
-                        return (
-                            <div 
-                                key={index}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/product/${product._id}`);
-                                }}
-                                className="absolute z-20 cursor-pointer group/product animate-in fade-in zoom-in duration-500"
-                                style={{
-                                    left: `${fp.position.x}%`, 
-                                    top: `${fp.position.y}%`,
-                                    transform: 'translate(-50%, -50%)',
-                                    animationDelay: `${index * 100 + 300}ms`
-                                }}
-                            >
-                                <div className="relative bg-white/90 backdrop-blur-sm rounded-lg shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 p-1.5 md:p-2 transition-all duration-300 hover:scale-110 hover:bg-white hover:shadow-xl w-24 md:w-32">
-                                    <div className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 bg-purple-600 text-white w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center shadow-sm z-10 transition-transform group-hover/product:scale-110">
-                                        <span className="text-[10px] md:text-xs font-bold">+</span>
-                                    </div>
-                                    <img 
-                                        src={product.images?.[0]} 
-                                        alt={product.name}
-                                        className="w-full h-16 md:h-20 object-cover rounded mb-1.5 bg-gray-50"
-                                    />
-                                    <div className="space-y-0.5">
-                                        <p className="text-[8px] md:text-[10px] font-bold text-gray-800 truncate leading-tight">{product.name}</p>
-                                        <p className="text-[8px] md:text-[9px] text-purple-700 font-black">₹{product.price}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                    {/* Shop the Look - REMOVED (Image Only Mode) */}
                 </div>
             </section>
         );

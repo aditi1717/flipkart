@@ -21,6 +21,8 @@ const HomeLayoutEditor = () => {
     
     const { banners, fetchBanners } = useBannerStore();
 
+    console.log('HomeLayoutEditor State:', { bannersCount: banners.length, layoutCount: homeLayout.length });
+
     useEffect(() => {
         fetchHomeSections();
         fetchBanners();
@@ -65,7 +67,11 @@ const HomeLayoutEditor = () => {
                                 <div key={banner.id || banner._id} className="flex items-center justify-between p-3 bg-gray-50 hover:bg-white border border-transparent hover:border-purple-200 hover:shadow-sm rounded-xl group transition-all">
                                     <div className="flex items-center gap-3 overflow-hidden">
                                         <div className="w-8 h-8 rounded-lg bg-gray-200 overflow-hidden shrink-0">
-                                            <img src={(banner.type === 'hero' ? banner.content?.imageUrl : banner.slides[0]?.imageUrl) || ''} className="w-full h-full object-cover" />
+                                            <img 
+                                                src={(banner.type === 'hero' ? (banner.content?.backgroundImageUrl || banner.content?.imageUrl) : banner.slides?.[0]?.imageUrl) || ''} 
+                                                className="w-full h-full object-cover" 
+                                                onError={(e) => console.error('Layout List Thumb Error:', banner.type, banner._id, e.target.src)}
+                                            />
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-xs font-bold text-gray-700 truncate">{banner.type === 'hero' ? banner.content?.title : 'Slideshow'}</p>
@@ -154,7 +160,11 @@ const HomeLayoutEditor = () => {
                                         <div className="flex-1 flex items-center gap-4 bg-gray-50 p-2 rounded-lg border border-gray-100">
                                             <div className="w-12 h-12 rounded-lg bg-white overflow-hidden shrink-0 border border-gray-100 relative">
                                                 {item.type === 'banner' ? (
-                                                    <img src={(details.type === 'hero' ? details.content?.imageUrl : details.slides?.[0]?.imageUrl) || ''} className="w-full h-full object-cover" />
+                                                    <img 
+                                                        src={(details.type === 'hero' ? (details.content?.backgroundImageUrl || details.content?.imageUrl) : details.slides?.[0]?.imageUrl) || ''} 
+                                                        className="w-full h-full object-cover" 
+                                                        onError={(e) => console.error('Layout Stream Thumb Error:', details.type, details._id, e.target.src)}
+                                                    />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-blue-500 bg-blue-50 font-black text-xs">
                                                         {details.products?.length}

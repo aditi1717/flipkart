@@ -321,7 +321,7 @@ const ProductDetails = () => {
     const totalRatings = reviews.length;
     const averageRating = totalRatings > 0 
         ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / totalRatings).toFixed(1)
-        : (product?.rating || 4.2);
+        : (product?.rating || 0);
 
     const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
     const [submittingReview, setSubmittingReview] = useState(false);

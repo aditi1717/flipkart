@@ -2,34 +2,60 @@ import React, { useState, useEffect } from 'react';
 import { MdSearch, MdFilterList, MdVisibility, MdBlock, MdCheckCircle, MdMoreVert, MdChevronLeft, MdChevronRight, MdMail, MdPhone, MdShoppingBag } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from '../../store/userStore';
-import Pagination from '../../components/common/Pagination';
+import Pagination from '../../../../components/Pagination';
+import API from '../../../../services/api';
 
 const UserList = () => {
     const navigate = useNavigate();
-    const { users, toggleUserStatus, fetchUsers } = useUserStore();
+    const { users, toggleUserStatus } = useUserStore();
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('All');
+    
+    // Server-side Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalUsers, setTotalUsers] = useState(0);
+    const itemsPerPage = 12;
+
+    const [localUsers, setLocalUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        fetchUsers();
-    }, [fetchUsers]);
-    const [statusFilter, setStatusFilter] = useState('All');
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+        const fetchPaginatedUsers = async () => {
+             setLoading(true);
+             try {
+                 const params = {
+                     pageNumber: currentPage,
+                     limit: itemsPerPage
+                 };
+                 if (searchTerm) params.search = searchTerm;
+                 if (statusFilter !== 'All') params.status = statusFilter;
 
-    const filteredUsers = users.filter(user => {
-        const matchesSearch =
-            user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (user.phone || '').includes(searchTerm);
+                 const { data } = await API.get('/auth/users', { params });
+                 
+                 if (data.users) {
+                     setLocalUsers(data.users);
+                     setTotalPages(data.pages);
+                     setTotalUsers(data.total);
+                 } else {
+                     setLocalUsers(data);
+                     setTotalPages(1);
+                 }
+             } catch (error) {
+                 console.error(error);
+             } finally {
+                 setLoading(false);
+             }
+        };
 
-        const matchesStatus = statusFilter === 'All' || user.status === statusFilter.toLowerCase();
+        const timer = setTimeout(() => {
+            fetchPaginatedUsers();
+        }, 300);
 
-        return matchesSearch && matchesStatus;
-    });
+        return () => clearTimeout(timer);
+    }, [currentPage, searchTerm, statusFilter]);
 
-    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedUsers = localUsers;
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -180,9 +206,9 @@ const UserList = () => {
             {/* Pagination */}
             {totalPages > 1 && (
                 <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
+                    page={currentPage}
+                    pages={totalPages}
+                    changePage={handlePageChange}
                 />
             )}
         </div>

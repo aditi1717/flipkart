@@ -167,7 +167,57 @@ export const getOrderById = async (req, res) => {
 // @access  Private/Admin
 export const getOrders = async (req, res) => {
     try {
-        const orders = await Order.find({})
+        const { pageNumber, limit, search, status, user } = req.query;
+        let filter = {};
+        
+        // Search Implementation
+        if (search) {
+             const searchRegex = { $regex: search, $options: 'i' };
+             filter.$or = [
+                 { 'user.name': searchRegex },
+                 { '_id': search },
+                 { 'shippingAddress.name': searchRegex },
+                 { 'shippingAddress.email': searchRegex }
+             ];
+             // Note: Searching nested user fields in a referenced document (populate) isn't directly possible in a simple find query 
+             // without aggregation or looking up user IDs first. 
+             // However, redundancy in Order model (shippingAddress) helps. 
+             // For strict user name search, we might need a separate lookup if not stored in Order.
+        }
+
+        if (status && status !== 'All') {
+            filter.status = status;
+        }
+        
+        // Filter by User Email (exact match)
+        if (user) {
+            // This assumes we can filter by user email directly or need to look up user first
+            // Since User is referenced, we need the User ID. 
+            // If the query passes an email, we might need to find the user first.
+            // Or rely on shippingAddress.email
+             filter['shippingAddress.email'] = user; 
+        }
+
+        if (pageNumber || limit) {
+             const pageSize = Number(limit) || 12;
+             const page = Number(pageNumber) || 1;
+             
+             const count = await Order.countDocuments(filter);
+             const orders = await Order.find(filter)
+                 .populate('user', 'name email phone')
+                 .sort({ createdAt: -1 })
+                 .limit(pageSize)
+                 .skip(pageSize * (page - 1));
+                 
+             return res.json({ 
+                 orders, 
+                 page, 
+                 pages: Math.ceil(count / pageSize), 
+                 total: count 
+             });
+        }
+
+        const orders = await Order.find(filter) // Apply filter even without pagination
             .populate('user', 'name email phone')
             .sort({ createdAt: -1 });
         res.json(orders);

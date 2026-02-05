@@ -154,7 +154,57 @@ export const updateUserProfile = async (req, res) => {
 // @access  Private/Admin
 export const getUsers = async (req, res) => {
     try {
-        const users = await User.find({}).select('-password');
+        const { pageNumber, limit, search, status } = req.query;
+        let filter = {};
+
+        // Search Implementation
+        if (search) {
+            const searchRegex = { $regex: search, $options: 'i' };
+            filter.$or = [
+                { name: searchRegex },
+                { email: searchRegex },
+                { phone: searchRegex }
+            ];
+        }
+
+        if (status && status !== 'All') {
+            const statusValue = status.toLowerCase(); // frontend likely sends 'Active'/'Disabled'
+            filter.status = statusValue === 'active' ? { $in: ['active', undefined] } : statusValue;
+        }
+
+        // --- Pagination Logic ---
+        if (pageNumber || limit) {
+             const pageSize = Number(limit) || 12;
+             const page = Number(pageNumber) || 1;
+             
+             const count = await User.countDocuments(filter);
+             const users = await User.find(filter)
+                 .select('-password')
+                 .sort({ createdAt: -1 })
+                 .limit(pageSize)
+                 .skip(pageSize * (page - 1));
+
+             // Fetch stats for paginated users
+             const usersWithStats = await Promise.all(users.map(async (user) => {
+                 const orderCount = await Order.countDocuments({ user: user._id });
+                 return {
+                     ...user._doc,
+                     joinedDate: user.createdAt,
+                     status: user.status || 'active',
+                     orderStats: { total: orderCount }
+                 };
+             }));
+                 
+             return res.json({ 
+                 users: usersWithStats, 
+                 page, 
+                 pages: Math.ceil(count / pageSize), 
+                 total: count 
+             });
+        }
+        
+        // --- Fallback for non-paginated requests ---
+        const users = await User.find(filter).select('-password').sort({ createdAt: -1 });
         
         // Fetch order counts for each user
         const usersWithStats = await Promise.all(users.map(async (user) => {

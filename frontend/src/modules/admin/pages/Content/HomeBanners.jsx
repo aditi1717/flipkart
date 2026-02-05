@@ -241,6 +241,9 @@ const LivePreview = ({ slides }) => {
     );
 };
 
+
+
+
 const HomeBanners = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -249,6 +252,8 @@ const HomeBanners = () => {
     const { products, fetchProducts } = useProductStore();
     const { homeSections, fetchHomeSections } = useContentStore();
     const [offers, setOffers] = useState([]);
+
+    console.log('HomeBanners State:', { bannersCount: banners.length, view: searchParams.get('view'), bannerId: searchParams.get('id') });
 
     useEffect(() => {
         fetchBanners();
@@ -264,6 +269,7 @@ const HomeBanners = () => {
         if (view === 'edit' && bannerId && banners.length > 0) {
             const banner = banners.find(b => (b.id || b._id) === bannerId);
             if (banner) {
+                console.log('Editing Banner:', banner); // DEBUG LOG
                 setFormData({
                     ...banner,
                     slides: (banner.slides || []).map((s, i) => ({ ...s, id: s.id || `slide-${i}-${Date.now()}` })),
@@ -275,7 +281,7 @@ const HomeBanners = () => {
                         subtitle: banner.content?.subtitle || '',
                         description: banner.content?.description || '',
                         imageUrl: banner.content?.imageUrl || '',
-                        backgroundImageUrl: banner.content?.backgroundImageUrl || '',
+                        backgroundImageUrl: banner.content?.backgroundImageUrl || banner.content?.imageUrl || '',
                         badgeText: banner.content?.badgeText || '',
                         offerText: banner.content?.offerText || '',
                         offerBank: banner.content?.offerBank || '',
@@ -297,7 +303,7 @@ const HomeBanners = () => {
                     }
                 });
                 setHeroImagePreview(banner.content?.imageUrl || '');
-                setBackgroundImagePreview(banner.content?.backgroundImageUrl || '');
+                setBackgroundImagePreview(banner.content?.backgroundImageUrl || banner.content?.imageUrl || '');
             }
         } else if (view === 'new') {
             setFormData({ 
@@ -345,6 +351,7 @@ const HomeBanners = () => {
     const fileInputRef = useRef(null);
     const heroFileInputRef = useRef(null);
     const bgFileInputRef = useRef(null);
+    const previewContainerRef = useRef(null);
     
     // Refs for Draggable components
     const featuredProductRefs = useRef([]);
@@ -497,7 +504,7 @@ const HomeBanners = () => {
             }
         });
         setHeroImagePreview(banner.content?.imageUrl || '');
-        setBackgroundImagePreview(banner.content?.backgroundImageUrl || '');
+        setBackgroundImagePreview(banner.content?.backgroundImageUrl || banner.content?.imageUrl || '');
         setSearchParams({ view: 'edit', id: banner.id || banner._id });
     };
 
@@ -548,12 +555,26 @@ const HomeBanners = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {banners.map((banner) => (
-                        <div key={banner.id || banner._id} className="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition">
+                        <div 
+                            key={banner.id || banner._id} 
+                            onClick={() => console.log('Banner List Item Click:', banner)}
+                            className="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition cursor-pointer"
+                        >
                             <div className="h-32 bg-gray-50 border-b border-gray-50 relative overflow-hidden">
                                 {banner.type === 'hero' ? (
-                                    <img src={banner.content?.imageUrl} className="w-full h-full object-cover" alt="" />
+                                    <img 
+                                        src={banner.content?.backgroundImageUrl || banner.content?.imageUrl} 
+                                        className="w-full h-full object-cover" 
+                                        alt="" 
+                                        onError={(e) => console.error('Banner List Thumb Error (Hero):', banner._id, e.target.src)}
+                                    />
                                 ) : (
-                                    <img src={banner.slides[0]?.imageUrl} className="w-full h-full object-cover opacity-80" alt="" />
+                                    <img 
+                                        src={banner.slides?.[0]?.imageUrl} 
+                                        className="w-full h-full object-cover opacity-80" 
+                                        alt="" 
+                                        onError={(e) => console.error('Banner List Thumb Error (Slides):', banner._id, e.target.src)}
+                                    />
                                 )}
                                 <div className="absolute top-2 right-2 flex gap-1">
                                      <span className="bg-black/60 text-[8px] font-bold text-white px-2 py-0.5 rounded-full uppercase">{banner.type}</span>
@@ -723,166 +744,19 @@ const HomeBanners = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Text Content */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                    <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded flex items-center justify-center text-xs font-black">1</span>
-                                    Content
-                                </h3>
-                                <input type="text" placeholder="Brand Name" value={formData.content.brand || ''} onChange={(e) => setFormData({...formData, content: {...formData.content, brand: e.target.value}})} className="w-full px-3 py-2 bg-gray-50 rounded-lg outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 text-sm text-gray-800 placeholder-gray-400" />
-                                <input type="text" placeholder="Title" value={formData.content.title || ''} onChange={(e) => setFormData({...formData, content: {...formData.content, title: e.target.value}})} className="w-full px-3 py-2 bg-gray-50 rounded-lg outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 text-sm font-bold text-gray-800 placeholder-gray-400" />
-                                <input type="text" placeholder="Subtitle / Price" value={formData.content.subtitle || ''} onChange={(e) => setFormData({...formData, content: {...formData.content, subtitle: e.target.value}})} className="w-full px-3 py-2 bg-gray-50 rounded-lg outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 text-sm text-gray-800 placeholder-gray-400" />
-                                <textarea placeholder="Description" value={formData.content.description || ''} onChange={(e) => setFormData({...formData, content: {...formData.content, description: e.target.value}})} className="w-full px-3 py-2 bg-gray-50 rounded-lg outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 text-sm h-20 resize-none text-gray-800 placeholder-gray-400" />
-                                <input type="text" placeholder="Button Text (e.g. Shop Now)" value={formData.content.buttonText || ''} onChange={(e) => setFormData({...formData, content: {...formData.content, buttonText: e.target.value}})} className="w-full px-3 py-2 bg-gray-50 rounded-lg outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 text-sm text-gray-800 placeholder-gray-400" />
-                                
-                                <div className="pt-2 space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Click Action (Entire Banner)</label>
-                                    <div className="flex gap-1">
-                                        {['product', 'offer', 'url'].map(type => (
-                                            <button
-                                                key={type}
-                                                type="button"
-                                                onClick={() => setFormData({...formData, content: {...formData.content, targetType: type}})}
-                                                className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold transition ${
-                                                    (formData.content.targetType || 'product') === type
-                                                        ? type === 'product' ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                                                            : type === 'offer' ? 'bg-green-100 text-green-700 border border-green-200'
-                                                                : 'bg-purple-100 text-purple-700 border border-purple-200'
-                                                        : 'bg-gray-50 text-gray-400 border border-transparent'
-                                                }`}
-                                            >
-                                                {type.charAt(0).toUpperCase() + type.slice(1)}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {/* Conditional Action Inputs */}
-                                    {formData.content.targetType === 'offer' && (
-                                        <select
-                                            value={formData.content.linkedOffer || ''}
-                                            onChange={(e) => setFormData({...formData, content: {...formData.content, linkedOffer: e.target.value}})}
-                                            className="w-full p-2 text-xs border border-gray-200 rounded-lg bg-white text-gray-800"
-                                        >
-                                            <option value="">Select Offer...</option>
-                                            {offers.map(offer => (
-                                                <option key={offer._id} value={offer._id}>
-                                                    {offer.title}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    )}
-                                    {formData.content.targetType === 'product' && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowProductPicker('hero')}
-                                            className="w-full p-2 text-xs bg-gray-50 border border-gray-200 rounded-lg text-left hover:bg-gray-100 truncate text-gray-800"
-                                        >
-                                            {formData.content.linkedProduct ? formData.content.linkedProduct.name : 'Select Product...'}
-                                        </button>
-                                    )}
-                                    {formData.content.targetType === 'url' && (
-                                        <input
-                                            type="text"
-                                            placeholder="https://..."
-                                            value={formData.content.link || ''}
-                                            onChange={(e) => setFormData({...formData, content: {...formData.content, link: e.target.value}})}
-                                            className="w-full p-2 text-xs border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400"
-                                        />
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Style & Colors - PRESET ALIGMNENT REMOVED */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                    <span className="w-6 h-6 bg-purple-100 text-purple-600 rounded flex items-center justify-center text-xs font-black">2</span>
-                                    Style & Colors
-                                </h3>
-                                
-                                {/* Background Color */}
+                        {/* Image Upload & Click Action */}
+                        <div className="space-y-4">
+                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Left Column: Image Upload */}
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Background Color</label>
-                                    <div className="flex gap-2">
-                                        <input 
-                                            type="color" 
-                                            value={formData.content.backgroundColor || '#1e3a5f'} 
-                                            onChange={(e) => setFormData({...formData, content: {...formData.content, backgroundColor: e.target.value}})}
-                                            className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-200"
-                                        />
-                                        <input 
-                                            type="text" 
-                                            placeholder="#1e3a5f" 
-                                            value={formData.content.backgroundColor || ''} 
-                                            onChange={(e) => setFormData({...formData, content: {...formData.content, backgroundColor: e.target.value}})}
-                                            className="flex-1 px-3 py-2 bg-gray-50 rounded-lg outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 text-sm font-mono text-gray-800 placeholder-gray-400"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Text Color */}
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Text Color</label>
-                                    <div className="flex gap-2">
-                                        <input 
-                                            type="color" 
-                                            value={formData.content.textColor || '#ffffff'} 
-                                            onChange={(e) => setFormData({...formData, content: {...formData.content, textColor: e.target.value}})}
-                                            className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-200"
-                                        />
-                                        <input 
-                                            type="text" 
-                                            placeholder="#ffffff" 
-                                            value={formData.content.textColor || ''} 
-                                            onChange={(e) => setFormData({...formData, content: {...formData.content, textColor: e.target.value}})}
-                                            className="flex-1 px-3 py-2 bg-gray-50 rounded-lg outline-none focus:bg-white focus:ring-2 focus:ring-blue-200 text-sm font-mono text-gray-800 placeholder-gray-400"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Images */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                    <span className="w-6 h-6 bg-green-100 text-green-600 rounded flex items-center justify-center text-xs font-black">3</span>
-                                    Images
-                                </h3>
-                                
-                                {/* Main Product Image */}
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Product Image (Optional)</label>
-                                    <label className="block w-full aspect-video rounded-xl border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 transition cursor-pointer relative overflow-hidden group">
-                                        {heroImagePreview ? (
-                                            <img src={heroImagePreview} className="w-full h-full object-contain p-2" alt="" />
-                                        ) : (
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-300">
-                                                <MdImage size={32} />
-                                                <span className="text-[10px] font-bold mt-1">Product Image</span>
-                                            </div>
-                                        )}
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-bold text-xs transition">Change</div>
-                                        <input type="file" ref={heroFileInputRef} hidden onChange={handleHeroImageUpload} accept="image/*" />
-                                    </label>
-                                    {heroImagePreview && (
-                                        <button 
-                                            onClick={(e) => { e.preventDefault(); setHeroImageFile(null); setHeroImagePreview(''); setFormData({...formData, content: {...formData.content, imageUrl: ''}})}}
-                                            className="w-full py-1 text-[10px] text-red-500 font-bold hover:bg-red-50 rounded transition"
-                                        >
-                                            REMOVE PRODUCT IMAGE
-                                        </button>
-                                    )}
-                                </div>
-
-                                {/* Background Image */}
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Background Image (Full Cover)</label>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Banner Image</label>
                                     <label className="block w-full aspect-video rounded-xl border-2 border-dashed border-gray-200 hover:border-purple-400 hover:bg-purple-50/50 transition cursor-pointer relative overflow-hidden group">
                                         {backgroundImagePreview ? (
                                             <img src={backgroundImagePreview} className="w-full h-full object-cover" alt="" />
                                         ) : (
                                             <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-300">
                                                 <MdCloudUpload size={32} />
-                                                <span className="text-[10px] font-bold mt-1">Background Image</span>
+                                                <span className="text-[10px] font-bold mt-1">Upload Image</span>
                                             </div>
                                         )}
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-bold text-xs transition">Change</div>
@@ -893,117 +767,111 @@ const HomeBanners = () => {
                                             onClick={(e) => { e.preventDefault(); setBackgroundImageFile(null); setBackgroundImagePreview(''); setFormData({...formData, content: {...formData.content, backgroundImageUrl: ''}})}}
                                             className="w-full py-1 text-[10px] text-red-500 font-bold hover:bg-red-50 rounded transition"
                                         >
-                                            REMOVE BACKGROUND
+                                            REMOVE IMAGE
                                         </button>
                                     )}
                                 </div>
-                            </div>
+
+                                {/* Right Column: Click Action */}
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase">Click Action</label>
+                                        <div className="flex gap-1">
+                                            {['product', 'offer', 'url'].map(type => (
+                                                <button
+                                                    key={type}
+                                                    type="button"
+                                                    onClick={() => setFormData({...formData, content: {...formData.content, targetType: type}})}
+                                                    className={`flex-1 py-2 px-2 rounded-lg text-[10px] font-bold transition ${
+                                                        (formData.content.targetType || 'product') === type
+                                                            ? type === 'product' ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                                                : type === 'offer' ? 'bg-green-100 text-green-700 border border-green-200'
+                                                                    : 'bg-purple-100 text-purple-700 border border-purple-200'
+                                                            : 'bg-gray-50 text-gray-400 border border-transparent'
+                                                    }`}
+                                                >
+                                                    {type.toUpperCase()}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Action Details Input */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase">
+                                            {formData.content.targetType === 'product' ? 'Select Product' : 
+                                             formData.content.targetType === 'offer' ? 'Select Offer' : 'External URL'}
+                                        </label>
+                                        
+                                        {formData.content.targetType === 'offer' && (
+                                            <select
+                                                value={formData.content.linkedOffer || ''}
+                                                onChange={(e) => setFormData({...formData, content: {...formData.content, linkedOffer: e.target.value}})}
+                                                className="w-full p-2.5 text-xs border border-gray-200 rounded-lg bg-white text-gray-800 outline-none focus:ring-2 focus:ring-blue-100"
+                                            >
+                                                <option value="">Select an Offer...</option>
+                                                {offers.map(offer => (
+                                                    <option key={offer._id} value={offer._id}>
+                                                        {offer.title}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        )}
+                                        {formData.content.targetType === 'product' && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowProductPicker('hero')}
+                                                className="w-full p-2.5 text-xs bg-white border border-gray-200 rounded-lg text-left hover:bg-gray-50 truncate text-gray-800 flex justify-between items-center"
+                                            >
+                                                <span>{formData.content.linkedProduct ? formData.content.linkedProduct.name : 'Select a Product...'}</span>
+                                                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">BROWSE</span>
+                                            </button>
+                                        )}
+                                        {formData.content.targetType === 'url' && (
+                                            <input
+                                                type="text"
+                                                placeholder="https://example.com/promo"
+                                                value={formData.content.link || ''}
+                                                onChange={(e) => setFormData({...formData, content: {...formData.content, link: e.target.value}})}
+                                                className="w-full p-2.5 text-xs border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-100"
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                             </div>
                         </div>
                     </div>
 
                     {/* Live Preview */}
-                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm sticky top-24">
                         <div className="flex items-center gap-2 mb-4">
                             <MdVisibility className="text-green-500" />
                             <h3 className="text-sm font-bold text-gray-700">Live Preview</h3>
-                            <h3 className="text-sm font-bold text-gray-700">Live Preview</h3>
                         </div>
                         
-                        {/* Hero Preview */}
                         <div 
-                            className="rounded-xl overflow-hidden relative select-none"
-                            style={{ 
-                                backgroundColor: formData.content.backgroundColor || '#1e3a5f',
-                                minHeight: '400px',
-                                height: '400px'
-                            }}
+                            ref={previewContainerRef}
+                            className="relative w-full aspect-[21/9] md:aspect-[3/1] bg-gray-100 rounded-xl overflow-hidden shadow-sm border border-gray-200 group"
                         >
-                            {/* Background Image Layer */}
-                            {backgroundImagePreview && (
-                                <div className="absolute inset-0 pointer-events-none">
-                                    <img 
-                                        src={backgroundImagePreview} 
-                                        className="w-full h-full object-cover" 
-                                        alt="background" 
-                                    />
-                                    <div className="absolute inset-0 bg-black/20" />
-                                </div>
-                            )}
-
-                            {/* Text Block - Static Position */}
-                            <div 
-                                className="absolute z-20"
-                                style={{ 
-                                    left: `${formData.content.textPosition?.x || 10}%`,
-                                    top: `${formData.content.textPosition?.y || 50}%`,
-                                    transform: 'translate(-50%, -50%)' 
-                                }}
-                            >
-                                <div className="max-w-md p-6">
-                                    {formData.content.brand && (
-                                        <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-80" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                            {formData.content.brand}
-                                        </p>
-                                    )}
-                                    {formData.content.title && (
-                                        <h2 className="text-2xl md:text-4xl font-black mb-2 leading-tight" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                            {formData.content.title}
-                                        </h2>
-                                    )}
-                                    {formData.content.subtitle && (
-                                        <p className="text-lg font-bold mb-3" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                            {formData.content.subtitle}
-                                        </p>
-                                    )}
-                                    {formData.content.description && (
-                                        <p className="text-sm opacity-80 mb-4 max-w-sm" style={{ color: formData.content.textColor || '#ffffff' }}>
-                                            {formData.content.description}
-                                        </p>
-                                    )}
-                                    {formData.content.buttonText && (
-                                        <button 
-                                            className="px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl"
-                                            style={{ 
-                                                backgroundColor: formData.content.textColor || '#ffffff',
-                                                color: formData.content.backgroundColor || '#1e3a5f'
-                                            }}
-                                        >
-                                            {formData.content.buttonText}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                            
-                            {/* Product Image - Static Position */}
-                            {heroImagePreview && (
-                                <div 
-                                    className="absolute z-20"
-                                    style={{ 
-                                        left: `${formData.content.imagePosition?.x || 70}%`,
-                                        top: `${formData.content.imagePosition?.y || 50}%`,
-                                        transform: 'translate(-50%, -50%)' 
-                                    }}
-                                >
-                                    <div className="relative">
-                                        <img 
-                                            src={heroImagePreview} 
-                                            className="max-h-[300px] max-w-[300px] object-contain filter drop-shadow-2xl" 
-                                            alt="hero" 
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Empty state */}
-                            {!formData.content.title && !formData.content.brand && !heroImagePreview && !backgroundImagePreview && (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <p className="text-white/50 text-sm">Fill in content or upload images to see preview</p>
+                            {backgroundImagePreview ? (
+                                <img 
+                                    src={backgroundImagePreview} 
+                                    className="w-full h-full object-cover" 
+                                    alt="Banner Preview" 
+                                    onError={(e) => console.error('Image Load Error:', backgroundImagePreview)}
+                                />
+                            ) : (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 font-bold uppercase tracking-widest text-[8px] p-4 text-center">
+                                    <span>No Image Selected</span>
+                                    {formData.content?.backgroundImageUrl && <span>BG: {formData.content.backgroundImageUrl.substring(0, 30)}...</span>}
+                                    {formData.content?.imageUrl && <span>IMG: {formData.content.imageUrl.substring(0, 30)}...</span>}
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
             )}
+
 
             {/* Product Picker Modal */}
             {showProductPicker !== null && (
@@ -1041,7 +909,6 @@ const HomeBanners = () => {
             )}
         </div>
     );
-}
-
+};
 
 export default HomeBanners;
