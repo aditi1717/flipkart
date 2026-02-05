@@ -200,7 +200,7 @@ const OfferForm = () => {
                             name="title"
                             value={formData.title}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 caret-black"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 caret-black placeholder:text-gray-500"
                             placeholder="e.g., Summer Sale 2024"
                             required
                         />
@@ -213,7 +213,7 @@ const OfferForm = () => {
                             value={formData.description}
                             onChange={handleChange}
                             rows="3"
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 caret-black resize-none"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 caret-black resize-none placeholder:text-gray-500"
                             placeholder="Brief description of the offer..."
                         />
                     </div>
@@ -252,7 +252,7 @@ const OfferForm = () => {
                                 min="0"
                                 step={formData.discountType === 'percentage' ? '1' : '0.01'}
                                 max={formData.discountType === 'percentage' ? '100' : undefined}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 caret-black"
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 caret-black placeholder:text-gray-500"
                                 placeholder={formData.discountType === 'percentage' ? 'e.g., 20' : 'e.g., 500'}
                                 required
                             />
@@ -409,7 +409,7 @@ const OfferForm = () => {
                                 value={formData.priority}
                                 onChange={handleChange}
                                 min="0"
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 caret-black"
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 caret-black placeholder:text-gray-500"
                                 placeholder="0"
                             />
                             <p className="text-xs text-gray-500 mt-1">Higher priority offers display first</p>
@@ -423,7 +423,7 @@ const OfferForm = () => {
                             value={formData.termsAndConditions}
                             onChange={handleChange}
                             rows="4"
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 caret-black resize-none"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 caret-black resize-none placeholder:text-gray-500"
                             placeholder="Enter offer terms and conditions..."
                         />
                     </div>

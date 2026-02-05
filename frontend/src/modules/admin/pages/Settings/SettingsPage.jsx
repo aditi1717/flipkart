@@ -130,7 +130,7 @@ const SettingsPage = () => {
                                 name="sellerName"
                                 value={settings.sellerName}
                                 onChange={handleChange}
-                                className="w-full border border-gray-200 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none placeholder:text-gray-400 caret-black font-medium text-gray-900 bg-gray-50/50 transition-all"
+                                className="w-full border border-gray-200 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none placeholder:text-gray-500 caret-black font-medium text-gray-900 bg-gray-50/50 transition-all"
                                 placeholder="Enter store name"
                             />
                         </div>
@@ -142,7 +142,7 @@ const SettingsPage = () => {
                                 name="gstNumber"
                                 value={settings.gstNumber}
                                 onChange={handleChange}
-                                className="w-full border border-gray-200 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none placeholder:text-gray-400 caret-black font-medium text-gray-900 bg-gray-50/50 transition-all"
+                                className="w-full border border-gray-200 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none placeholder:text-gray-500 caret-black font-medium text-gray-900 bg-gray-50/50 transition-all"
                                 placeholder="GSTIN"
                             />
                         </div>
@@ -154,7 +154,7 @@ const SettingsPage = () => {
                                 name="panNumber"
                                 value={settings.panNumber}
                                 onChange={handleChange}
-                                className="w-full border border-gray-200 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none placeholder:text-gray-400 caret-black font-medium text-gray-900 bg-gray-50/50 transition-all"
+                                className="w-full border border-gray-200 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none placeholder:text-gray-500 caret-black font-medium text-gray-900 bg-gray-50/50 transition-all"
                                 placeholder="PAN"
                             />
                         </div>
@@ -166,7 +166,7 @@ const SettingsPage = () => {
                                 value={settings.sellerAddress}
                                 onChange={handleChange}
                                 rows="4"
-                                className="w-full border border-gray-200 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none placeholder:text-gray-400 caret-black font-medium text-gray-900 bg-gray-50/50 transition-all resize-none"
+                                className="w-full border border-gray-200 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none placeholder:text-gray-500 caret-black font-medium text-gray-900 bg-gray-50/50 transition-all resize-none"
                                 placeholder="Full registered address"
                             ></textarea>
                         </div>
@@ -183,7 +183,7 @@ const SettingsPage = () => {
                                 name="contactEmail"
                                 value={settings.contactEmail}
                                 onChange={handleChange}
-                                className="w-full border border-gray-200 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none placeholder:text-gray-400 caret-black font-medium text-gray-900 bg-gray-50/50 transition-all"
+                                className="w-full border border-gray-200 rounded-xl p-3.5 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none placeholder:text-gray-500 caret-black font-medium text-gray-900 bg-gray-50/50 transition-all"
                                 placeholder="support@yourstore.com"
                             />
                         </div>

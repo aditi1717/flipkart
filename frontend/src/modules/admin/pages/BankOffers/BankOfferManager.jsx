@@ -106,16 +106,16 @@ const BankOfferManager = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-400 uppercase">Offer Name</label>
-                                <input type="text" name="offerName" value={formData.offerName} onChange={handleChange} required placeholder="e.g. 10% Off on HDFC" className="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:border-purple-500 outline-none text-gray-900 caret-black placeholder:text-gray-400" />
+                                <input type="text" name="offerName" value={formData.offerName} onChange={handleChange} required placeholder="e.g. 10% Off on HDFC" className="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:border-purple-500 outline-none text-gray-900 caret-black placeholder:text-gray-500" />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-400 uppercase">Bank Name</label>
-                                <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} required placeholder="e.g. HDFC Bank" className="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:border-purple-500 outline-none text-gray-900 caret-black placeholder:text-gray-400" />
+                                <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} required placeholder="e.g. HDFC Bank" className="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:border-purple-500 outline-none text-gray-900 caret-black placeholder:text-gray-500" />
                             </div>
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold text-gray-400 uppercase">Description</label>
-                            <input type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Brief details about the offer" className="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:border-purple-500 outline-none text-gray-900 caret-black placeholder:text-gray-400" />
+                            <input type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Brief details about the offer" className="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:border-purple-500 outline-none text-gray-900 caret-black placeholder:text-gray-500" />
                         </div>
                     </div>
 
@@ -131,7 +131,7 @@ const BankOfferManager = () => {
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-400 uppercase">Value</label>
-                                <input type="number" name="discountValue" value={formData.discountValue} onChange={handleChange} required placeholder="e.g. 10" className="w-full px-4 py-2 bg-gray-50 border rounded-lg outline-none text-gray-900 caret-black" />
+                                <input type="number" name="discountValue" value={formData.discountValue} onChange={handleChange} required placeholder="e.g. 10" className="w-full px-4 py-2 bg-gray-50 border rounded-lg outline-none text-gray-900 caret-black placeholder:text-gray-500" />
                             </div>
                         </div>
                     </div>

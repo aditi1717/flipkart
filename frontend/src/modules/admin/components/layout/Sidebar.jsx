@@ -23,7 +23,9 @@ import {
     MdViewCarousel,
     MdRateReview,
     MdLocationOn,
-    MdLayers
+    MdLayers,
+    MdHelpCenter,
+    MdViewCompact
 } from 'react-icons/md';
 
 import logo from '../../../../assets/indiankart-logo.png';
@@ -40,6 +42,7 @@ const Sidebar = () => {
         { name: 'Categories', icon: MdCategory, path: '/admin/categories' },
         { name: 'Subcategories', icon: MdCategory, path: '/admin/subcategories' },
         { name: 'Users', icon: MdPeople, path: '/admin/users' },
+        { name: 'Seller Requests', icon: MdStorefront, path: '/admin/seller-requests' },
         { name: 'Delivery Slip', icon: MdLocalShipping, path: '/admin/delivery-slip' },
         { name: 'Reviews', icon: MdRateReview, path: '/admin/reviews' },
         { name: 'Returns', icon: MdAssignmentReturn, path: '/admin/returns' },
@@ -51,7 +54,9 @@ const Sidebar = () => {
         { name: 'Home Sections', icon: MdViewAgenda, path: '/admin/content/sections' },
         { name: 'Home Banners', icon: MdViewCarousel, path: '/admin/content/banners' },
         { name: 'Content Pages', icon: MdDescription, path: '/admin/pages' },
-        { name: 'Support Requests', icon: MdSupportAgent, path: '/admin/support' },
+        { name: 'Support', icon: MdHelpCenter, path: '/admin/support' },
+        { name: 'Footer Settings', icon: MdViewCompact, path: '/admin/footer-settings' },
+        { name: 'Header Settings', icon: MdViewCompact, path: '/admin/header-settings' },
         { name: 'Settings', icon: MdSettings, path: '/admin/settings' },
     ];
 

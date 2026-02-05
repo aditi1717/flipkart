@@ -4,6 +4,7 @@ import API from '../../../services/api';
 export const useContentStore = create((set, get) => ({
     homeSections: [],
     homeLayout: [], // { type: 'section' | 'banner', referenceId: string }
+    pages: [], // Array of { pageKey, content, createdAt, ... }
     privacyPolicy: '',
     aboutUs: '',
     seoContent: '',
@@ -136,21 +137,58 @@ export const useContentStore = create((set, get) => ({
 
     // --- Content Pages ---
     fetchPages: async () => {
-        // Fetch specific pages or all
+        set({ isLoading: true });
         try {
             const { data } = await API.get('/pages');
+            set({ pages: data, isLoading: false });
+            
+            // Keep backward compatibility for now
             const pp = data.find(p => p.pageKey === 'privacyPolicy')?.content || '';
             const au = data.find(p => p.pageKey === 'aboutUs')?.content || '';
             const seo = data.find(p => p.pageKey === 'seoContent')?.content || '';
             set({ privacyPolicy: pp, aboutUs: au, seoContent: seo });
-        } catch (error) { console.error(error); }
+        } catch (error) { 
+            console.error(error); 
+            set({ isLoading: false });
+        }
     },
 
     updateContent: async (key, content) => {
-        // Update specific store key locally for UI feel then API
-        set(state => ({ [key]: content }));
+        // Optimistic update
+        set(state => {
+           const newPages = state.pages.map(p => p.pageKey === key ? { ...p, content } : p);
+           // If it doesn't exist, we might be creating it via this specific call (legacy), so add it
+           if (!newPages.find(p => p.pageKey === key)) {
+               newPages.push({ pageKey: key, content });
+           }
+           return { 
+               pages: newPages,
+               // Update legacy keys too
+               [key]: content 
+           };
+        });
+
         try {
-            await API.post('/pages', { pageKey: key, content });
+            const { data } = await API.post('/pages', { pageKey: key, content });
+            // Update with real data from server
+             set(state => ({
+                pages: state.pages.map(p => p.pageKey === key ? data : p)
+            }));
+        } catch (error) { console.error(error); }
+    },
+
+    deletePage: async (key) => {
+        try {
+            // Check if backend supports delete, if not we might just clear content
+            // Assuming we added DELETE endpoint or reuse generalized logic
+            // For now, let's assume we just remove it from list if backend had DELETE /api/pages/:key
+            // But we don't have that yet, so let's stick to just updateContent(key, null)?
+            // Actually, let's add delete support to backend later if needed. 
+            // For now, we will just filter it out locally to simulate
+             set(state => ({
+                pages: state.pages.filter(p => p.pageKey !== key)
+            }));
+            // TODO: Implement backend delete
         } catch (error) { console.error(error); }
     }
 }));

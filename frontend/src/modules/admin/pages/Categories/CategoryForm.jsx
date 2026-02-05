@@ -112,7 +112,7 @@ const CategoryForm = ({ category, onClose }) => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 placeholder:text-gray-500"
                             placeholder="Enter category name"
                             required
                         />

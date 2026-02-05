@@ -17,6 +17,7 @@ import ProductManager from '../pages/Products/ProductManager';
 import ProductForm from '../pages/Products/ProductForm';
 import UserList from '../pages/Users/UserList';
 import UserDetail from '../pages/Users/UserDetail';
+import SellerRequests from '../pages/Users/SellerRequests';
 import PageManager from '../pages/PageManager';
 import SupportRequests from '../pages/Support/SupportRequests';
 import HomeContentManager from '../pages/Content/HomeContentManager'; // Can be removed later if unused
@@ -30,6 +31,8 @@ import SettingsPage from '../pages/Settings/SettingsPage';
 import OfferList from '../pages/Offers/OfferList';
 import OfferForm from '../pages/Offers/OfferForm';
 import StockManagement from '../pages/StockManagement/StockManagement';
+import FooterManager from '../pages/Settings/FooterManager';
+import HeaderManager from '../pages/Settings/HeaderManager';
 
 const AdminRoutes = () => {
     return (
@@ -67,6 +70,7 @@ const AdminRoutes = () => {
                 <Route path="homepage" element={<BannerManager />} />
                 <Route path="users" element={<UserList />} />
                 <Route path="users/:id" element={<UserDetail />} />
+                <Route path="seller-requests" element={<SellerRequests />} />
                 <Route path="pages" element={<PageManager />} />
                 <Route path="content/layout" element={<HomeLayoutEditor />} />
                 <Route path="content/sections" element={<HomeSections />} />
@@ -77,6 +81,8 @@ const AdminRoutes = () => {
                 <Route path="bank-offers" element={<BankOfferManager />} />
                 <Route path="support" element={<SupportRequests />} />
                 <Route path="settings" element={<SettingsPage />} />
+                <Route path="footer-settings" element={<FooterManager />} />
+                <Route path="header-settings" element={<HeaderManager />} />
             </Route>
         </Routes>
     );

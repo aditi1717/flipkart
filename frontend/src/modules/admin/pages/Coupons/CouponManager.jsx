@@ -274,7 +274,7 @@ const CouponManager = () => {
                                             type="text"
                                             value={couponData.code}
                                             onChange={(e) => setCouponData({ ...couponData, code: e.target.value.toUpperCase() })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none font-mono text-base text-gray-800 uppercase placeholder-gray-300"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none font-mono text-base text-gray-800 uppercase placeholder:text-gray-500"
                                             placeholder="e.g. SAVE20"
                                             required
                                         />
@@ -285,7 +285,7 @@ const CouponManager = () => {
                                             type="text"
                                             value={couponData.title}
                                             onChange={(e) => setCouponData({ ...couponData, title: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800 placeholder:text-gray-500"
                                             placeholder="e.g. Summer Sale"
                                             required
                                         />
@@ -297,7 +297,7 @@ const CouponManager = () => {
                                     <textarea
                                         value={couponData.description}
                                         onChange={(e) => setCouponData({ ...couponData, description: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800 placeholder:text-gray-500"
                                         placeholder="Brief terms or benefits..."
                                         required
                                     />
@@ -341,7 +341,7 @@ const CouponManager = () => {
                                                 type="number"
                                                 value={couponData.minPurchase}
                                                 onChange={(e) => setCouponData({ ...couponData, minPurchase: e.target.value })}
-                                                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-sm font-normal text-gray-800"
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-sm font-normal text-gray-800 placeholder:text-gray-500"
                                                 placeholder="₹"
                                                 required
                                             />
@@ -377,7 +377,7 @@ const CouponManager = () => {
                                             type="number"
                                             value={couponData.value}
                                             onChange={(e) => setCouponData({ ...couponData, value: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800 placeholder:text-gray-500"
                                             placeholder={couponData.type === 'percentage' ? "e.g. 20" : "e.g. 200"}
                                             required
                                         />
@@ -391,7 +391,7 @@ const CouponManager = () => {
                                             type="number"
                                             value={couponData.maxDiscount}
                                             onChange={(e) => setCouponData({ ...couponData, maxDiscount: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800 placeholder:text-gray-500"
                                             placeholder="e.g. 100"
                                         />
                                     </div>
@@ -427,7 +427,7 @@ const CouponManager = () => {
                                         type="text"
                                         value={offerData.title}
                                         onChange={(e) => setOfferData({ ...offerData, title: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800 placeholder:text-gray-500"
                                         placeholder="e.g. 10% off on HDFC Cards"
                                         required
                                     />
@@ -438,7 +438,7 @@ const CouponManager = () => {
                                     <textarea
                                         value={offerData.description}
                                         onChange={(e) => setOfferData({ ...offerData, description: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800 placeholder:text-gray-500"
                                         placeholder="Details shown on product page..."
                                         required
                                     />
@@ -449,7 +449,7 @@ const CouponManager = () => {
                                     <textarea
                                         value={offerData.terms}
                                         onChange={(e) => setOfferData({ ...offerData, terms: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800 placeholder:text-gray-500"
                                         placeholder="Minimum purchase limits etc..."
                                     />
                                 </div>

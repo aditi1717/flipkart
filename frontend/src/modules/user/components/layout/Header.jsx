@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
 import { useLanguageStore } from '../../../../store/languageStore';
 import { useCategories } from '../../../../hooks/useData';
+import { useHeaderStore } from '../../../admin/store/headerStore';
 import API from '../../../../services/api';
 import { IoSearch } from 'react-icons/io5';
 import TranslatedText from '../common/TranslatedText';
@@ -41,6 +42,17 @@ const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { categories, loading: categoriesLoading } = useCategories();
+    const { headerCategories, fetchHeaderConfig, isLoading: headerLoading } = useHeaderStore();
+    
+    useEffect(() => {
+        fetchHeaderConfig();
+    }, []);
+
+    // Use configured header categories if available, otherwise fallback to first 8 active categories
+    const displayCategories = headerCategories?.length > 0 
+        ? headerCategories 
+        : categories.filter(c => c.active).slice(0, 8);
+
     
     // Mega menu state
     const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -354,6 +366,15 @@ const Header = () => {
                             </button>
                     </div>
 
+                    {/* Become a Seller */}
+                    <div 
+                        onClick={() => navigate('/become-seller')}
+                        className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors border border-gray-100 shadow-sm bg-white group ring-1 ring-black/5 hover:ring-blue-100"
+                    >
+                        <MdStore className="text-[24px] text-gray-700 group-hover:text-blue-600 transition-colors" />
+                        <span className="text-gray-800 font-bold text-[15px] whitespace-nowrap">Become a Seller</span>
+                    </div>
+
                     {/* Account */}
                     <div className="flex items-center gap-2 cursor-pointer hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors group" onClick={() => navigate('/account')}>
                         <MdPersonOutline className="text-[24px] text-gray-700" />
@@ -381,11 +402,11 @@ const Header = () => {
             {!isSpecialPage && !categoriesLoading && (
                 <div className="max-w-[1200px] mx-auto relative px-2">
                     <div className="flex overflow-x-auto md:overflow-visible no-scrollbar gap-4 py-2 md:py-1 md:justify-between mt-0 md:-mt-2 border-t border-gray-100 pb-2 md:pb-1">
-                        {categories.map((cat, index) => {
+                        {displayCategories.map((cat, index) => {
                             const active = isActiveCategory(cat.name);
                             const IconComponent = iconMap[cat.icon] || MdGridView;
                             const isHovered = hoveredCategory === cat.name;
-                            const isRightSide = index > categories.length / 2;
+                            const isRightSide = index > displayCategories.length / 2;
                             
                             return (
                                 <div
