@@ -1,13 +1,27 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
+import API from '../../../services/api';
 
 const OrderSuccess = () => {
     const navigate = useNavigate();
     const orders = useCartStore(state => state.orders);
     const latestOrder = orders[0];
+    const [settings, setSettings] = React.useState(null);
 
     const startSimulation = useCartStore(state => state.startSimulation);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const { data } = await API.get('/settings');
+                setSettings(data);
+            } catch (err) {
+                console.error('Fetch settings error:', err);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -71,7 +85,7 @@ const OrderSuccess = () => {
                         <button
                             onClick={() => {
                                 import('../../../utils/invoiceGenerator').then(({ generateInvoice }) => {
-                                    generateInvoice(latestOrder);
+                                    generateInvoice(latestOrder, settings);
                                 });
                             }}
                             className="w-full bg-purple-600 text-white py-3.5 rounded-lg font-bold shadow-lg hover:bg-purple-700 transition flex items-center justify-center gap-2"

@@ -96,7 +96,7 @@ const TrackOrder = () => {
                 </button>
                 <div className="flex flex-col">
                     <h1 className="text-sm font-bold uppercase tracking-tight">Tracking {productId ? (currentStatus?.includes('RETURN') ? 'Return' : 'Replacement') : 'Order'}</h1>
-                    <span className="text-[10px] text-white/80 uppercase">#{order.id}</span>
+                    <span className="text-[10px] text-white/80 uppercase">#{order.displayId || order.id}</span>
                 </div>
             </div>
 
@@ -124,7 +124,7 @@ const TrackOrder = () => {
                             <div className="flex-1">
                                 <h2 className="text-sm font-bold text-gray-800 line-clamp-1 md:text-base">{targetItem?.name}</h2>
                                 <p className="text-xs text-gray-500 mt-1 md:text-sm">Status: <span className="text-blue-600 font-bold uppercase tracking-tighter">{currentStatus?.replace(/_/g, ' ')}</span></p>
-                                <p className="text-[10px] text-gray-400 mt-1 hidden md:block">Order ID: {order.id}</p>
+                                <p className="text-[10px] text-gray-400 mt-1 hidden md:block">Order ID: {order.displayId || order.id}</p>
                             </div>
                         </div>
                     </div>

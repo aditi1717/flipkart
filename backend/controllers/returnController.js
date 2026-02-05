@@ -123,8 +123,23 @@ export const createReturnRequest = async (req, res) => {
 // @access  Private/Admin
 export const getReturns = async (req, res) => {
     try {
-        const returns = await Return.find({}).sort({ date: -1 });
-        res.json(returns);
+        const returns = await Return.find({}).sort({ date: -1 }).lean();
+        
+        // Populate displayId manually since orderId is String
+        const orderIds = returns.map(r => r.orderId);
+        const orders = await Order.find({ _id: { $in: orderIds } }).select('_id displayId');
+        
+        const orderMap = orders.reduce((acc, order) => {
+            acc[order._id.toString()] = order.displayId;
+            return acc;
+        }, {});
+
+        const returnsWithDisplayId = returns.map(ret => ({
+            ...ret,
+            orderDisplayId: orderMap[ret.orderId] || ret.orderId
+        }));
+
+        res.json(returnsWithDisplayId);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -135,11 +150,22 @@ export const getReturns = async (req, res) => {
 // @access  Private
 export const getUserReturnRequests = async (req, res) => {
     try {
-        const userOrders = await Order.find({ user: req.user._id }).select('_id');
+        const userOrders = await Order.find({ user: req.user._id }).select('_id displayId');
         const orderIds = userOrders.map(order => order._id.toString());
         
-        const returns = await Return.find({ orderId: { $in: orderIds } }).sort({ date: -1 });
-        res.json(returns);
+        const orderMap = userOrders.reduce((acc, order) => {
+            acc[order._id.toString()] = order.displayId;
+            return acc;
+        }, {});
+
+        const returns = await Return.find({ orderId: { $in: orderIds } }).sort({ date: -1 }).lean();
+
+        const returnsWithDisplayId = returns.map(ret => ({
+            ...ret,
+            orderDisplayId: orderMap[ret.orderId] || ret.orderId
+        }));
+
+        res.json(returnsWithDisplayId);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

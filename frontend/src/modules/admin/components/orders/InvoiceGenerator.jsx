@@ -157,7 +157,7 @@ export const InvoiceDisplay = React.forwardRef(
                 <th style={{ width: "40px", textAlign: "center", fontSize: "14px" }}>STD</th>
                 <th>
                   <div style={{ fontSize: "8px" }}>E-Kart Logistics</div>
-                  <div style={{ fontSize: "10px", fontWeight: "bold" }}>{order.id || order._id}</div>
+                  <div style={{ fontSize: "10px", fontWeight: "bold" }}>{order.displayId || order.id || order._id}</div>
                 </th>
                 <th style={{ width: "100px" }}>
                   <div style={{ fontSize: "8px" }}>↑FRAGILE</div>
@@ -211,7 +211,7 @@ export const InvoiceDisplay = React.forwardRef(
               ))}
               <tr>
                 <td colSpan="3" style={{ padding: "6px" }}>
-                  <div style={{ fontSize: "10px", fontWeight: "bold" }}>FMPP{String(order.id || order._id).slice(0, 8).toUpperCase()}</div>
+                  <div style={{ fontSize: "10px", fontWeight: "bold" }}>FMPP{String(order.displayId || order.id || order._id).slice(0, 8).toUpperCase()}</div>
                 </td>
                 <td className="b2">B2</td>
               </tr>
@@ -235,11 +235,11 @@ export const InvoiceDisplay = React.forwardRef(
               <h2 style={{ fontSize: "12px", margin: "0 0 3px 0" }}>Tax Invoice</h2>
             </div>
             <div className="tax-header-item">
-              Order Id: <b>{order.id || order._id}</b><br />
+              Order Id: <b>{order.displayId || order.id || order._id}</b><br />
               <span style={{ fontSize: "7px" }}>{new Date(order.date || order.createdAt).toLocaleString()}</span>
             </div>
             <div className="tax-header-item">
-              Invoice: <b>INV-{String(order.id || order._id).slice(-8).toUpperCase()}</b><br />
+              Invoice: <b>INV-{String(order.displayId || order.id || order._id).toUpperCase()}</b><br />
               <span style={{ fontSize: "7px" }}>{new Date().toLocaleString()}</span>
             </div>
             <div className="tax-header-item text-right">

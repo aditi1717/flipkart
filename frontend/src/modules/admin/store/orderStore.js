@@ -14,6 +14,8 @@ const useOrderStore = create((set) => ({
             const transformedOrders = data.map(order => ({
                 ...order,
                 id: order._id,
+                displayId: order.displayId,
+                transactionId: order.transactionId,
                 date: order.createdAt,
                 items: order.orderItems?.map(item => ({
                     id: item.product,
@@ -29,7 +31,7 @@ const useOrderStore = create((set) => ({
                 payment: {
                     method: order.paymentMethod === 'COD' ? 'COD' : order.paymentMethod,
                     status: order.isPaid ? 'Paid' : 'Pending',
-                    transactionId: order.paymentResult?.razorpay_order_id || order.paymentResult?.id,
+                    transactionId: order.transactionId || order.paymentResult?.razorpay_order_id || order.paymentResult?.id,
                     cardType: order.paymentResult?.card_type,
                     cardNetwork: order.paymentResult?.card_network,
                     cardLast4: order.paymentResult?.card_last4
@@ -67,6 +69,8 @@ const useOrderStore = create((set) => ({
             const transformedOrder = {
                 ...data,
                 id: data._id,
+                displayId: data.displayId,
+                transactionId: data.transactionId,
                 date: data.createdAt,
                 items: data.orderItems?.map(item => ({
                     id: item.product,
@@ -82,7 +86,7 @@ const useOrderStore = create((set) => ({
                 payment: {
                     method: data.paymentMethod === 'COD' ? 'COD' : data.paymentMethod,
                     status: data.isPaid ? 'Paid' : 'Pending',
-                    transactionId: data.paymentResult?.razorpay_order_id || data.paymentResult?.id,
+                    transactionId: data.transactionId || data.paymentResult?.razorpay_order_id || data.paymentResult?.id,
                     cardType: data.paymentResult?.card_type,
                     cardNetwork: data.paymentResult?.card_network,
                     cardLast4: data.paymentResult?.card_last4
@@ -122,6 +126,8 @@ const useOrderStore = create((set) => ({
             const transformedOrder = {
                 ...data,
                 id: data._id,
+                displayId: data.displayId,
+                transactionId: data.transactionId,
                 date: data.createdAt,
                 items: data.orderItems?.map(item => ({
                     id: item.product,
@@ -135,7 +141,7 @@ const useOrderStore = create((set) => ({
                 payment: {
                     method: data.paymentMethod === 'COD' ? 'COD' : data.paymentMethod,
                     status: data.isPaid ? 'Paid' : 'Pending',
-                    transactionId: data.paymentResult?.razorpay_order_id || data.paymentResult?.id,
+                    transactionId: data.transactionId || data.paymentResult?.razorpay_order_id || data.paymentResult?.id,
                     cardType: data.paymentResult?.card_type,
                     cardNetwork: data.paymentResult?.card_network,
                     cardLast4: data.paymentResult?.card_last4
@@ -175,6 +181,8 @@ const useOrderStore = create((set) => ({
             const transformedOrder = {
                 ...data,
                 id: data._id,
+                displayId: data.displayId,
+                transactionId: data.transactionId,
                 date: data.createdAt,
                 items: data.orderItems?.map(item => ({
                     id: item.product,
@@ -190,7 +198,7 @@ const useOrderStore = create((set) => ({
                 payment: {
                     method: data.paymentMethod === 'COD' ? 'COD' : data.paymentMethod,
                     status: data.isPaid ? 'Paid' : 'Pending',
-                    transactionId: data.paymentResult?.razorpay_order_id || data.paymentResult?.id,
+                    transactionId: data.transactionId || data.paymentResult?.razorpay_order_id || data.paymentResult?.id,
                     cardType: data.paymentResult?.card_type,
                     cardNetwork: data.paymentResult?.card_network,
                     cardLast4: data.paymentResult?.card_last4

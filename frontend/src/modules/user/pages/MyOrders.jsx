@@ -151,7 +151,7 @@ const MyOrders = () => {
                                             <span className="material-icons text-blue-600 text-2xl">receipt_long</span>
                                             <div>
                                                 <p className="text-xs text-gray-500 font-medium">Order ID</p>
-                                                <p className="font-bold text-gray-800 text-sm">#{order._id.slice(-8).toUpperCase()}</p>
+                                                <p className="font-bold text-gray-800 text-sm">#{order.displayId || order._id.slice(-8).toUpperCase()}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">

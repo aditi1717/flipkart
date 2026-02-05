@@ -1,21 +1,25 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import API from '../../../services/api';
 
-export const useAuthStore = create((set, get) => ({
-    user: null,
-    isAuthenticated: false,
-    loading: true,
-    error: null,
+export const useAuthStore = create(
+    persist(
+        (set, get) => ({
+            user: null,
+            isAuthenticated: false,
+            loading: true,
+            error: null,
 
-    // Check if user is logged in (on app mount)
-    checkAuth: async () => {
-        try {
-            const { data } = await API.get('/auth/profile');
-            set({ user: data, isAuthenticated: true, loading: false });
-        } catch (error) {
-            set({ user: null, isAuthenticated: false, loading: false });
-        }
-    },
+            // Check if user is logged in (on app mount)
+            checkAuth: async () => {
+                try {
+                    const { data } = await API.get('/auth/profile');
+                    // Ensure token is preserved if it exists in data or state
+                    set({ user: data, isAuthenticated: true, loading: false });
+                } catch (error) {
+                    set({ user: null, isAuthenticated: false, loading: false });
+                }
+            },
 
     // Send OTP
     sendOtp: async (mobile, userType = 'Customer') => {
@@ -111,5 +115,10 @@ export const useAuthStore = create((set, get) => ({
             });
             throw error;
         }
+        }
+    }), {
+        name: 'user-auth-storage',
+        getStorage: () => localStorage,
+        partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }), // Token is inside user object
     }
-}));
+));

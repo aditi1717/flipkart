@@ -14,6 +14,16 @@ API.interceptors.request.use((config) => {
                 config.headers.Authorization = `Bearer ${token}`;
             }
         }
+        
+        // Check for User Token (Fallback for cookie issues)
+        const userStorageData = localStorage.getItem('user-auth-storage');
+        if (userStorageData) {
+            const parsed = JSON.parse(userStorageData);
+            const token = parsed?.state?.token; // Store will save it as 'token'
+            if (token && !config.headers.Authorization) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        }
     } catch (error) {
         console.error('Error retrieving auth token:', error);
     }

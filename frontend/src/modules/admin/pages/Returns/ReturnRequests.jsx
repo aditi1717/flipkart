@@ -141,7 +141,7 @@ const ReturnRequests = () => {
                                                     {ret.type}
                                                 </span>
                                             </div>
-                                            <span className="text-[10px] font-bold text-blue-600 mt-1 uppercase tracking-tighter">Order: {ret.orderId}</span>
+                                            <span className="text-[10px] font-bold text-blue-600 mt-1 uppercase tracking-tighter">Order: {ret.orderDisplayId || ret.orderId}</span>
                                             <span className="text-[9px] text-gray-400 font-medium mt-0.5">{ret.customer}</span>
                                         </div>
                                     </td>
@@ -264,7 +264,7 @@ const ReturnRequests = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-blue-50/50 p-4 rounded-2xl">
                                         <p className="text-[9px] font-black text-blue-400 uppercase mb-1">Order Ref</p>
-                                        <p className="text-xs font-black text-blue-700">#{selectedReturn.orderId}</p>
+                                        <p className="text-xs font-black text-blue-700">#{selectedReturn.orderDisplayId || selectedReturn.orderId}</p>
                                     </div>
                                     <div className="bg-gray-50 p-4 rounded-2xl">
                                         <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Customer</p>

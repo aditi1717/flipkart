@@ -166,7 +166,7 @@ const OrderDetail = () => {
                     </button>
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{order.id}</h1>
+                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{order.displayId || order.id}</h1>
                             <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${order.status === 'Delivered' ? 'bg-green-100 text-green-600' :
                                     order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
                                         'bg-blue-100 text-blue-600 animate-pulse'

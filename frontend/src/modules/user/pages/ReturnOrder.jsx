@@ -142,7 +142,7 @@ const ReturnOrder = () => {
                 <span className="material-icons text-[10px]">chevron_right</span>
                 <span onClick={() => navigate('/my-orders')} className="cursor-pointer hover:text-blue-600">My Orders</span>
                 <span className="material-icons text-[10px]">chevron_right</span>
-                <span onClick={() => navigate(`/my-orders/${orderId}`)} className="cursor-pointer hover:text-blue-600">Order Details</span>
+                <span onClick={() => navigate(`/my-orders/${orderId}`)} className="cursor-pointer hover:text-blue-600">Order #{order?.displayId || orderId.slice(-8).toUpperCase()}</span>
                 <span className="material-icons text-[10px]">chevron_right</span>
                 <span className="text-gray-800 font-bold">Return</span>
             </div>

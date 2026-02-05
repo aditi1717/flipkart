@@ -62,6 +62,10 @@ const orderSchema = mongoose.Schema({
     deliveryOtpVerified: { type: Boolean, default: false },
     invoiceEnabled: { type: Boolean, default: false },
     
+    // Order IDs
+    displayId: { type: String, unique: true },
+    transactionId: { type: String },
+
     // Order Status
     status: { 
         type: String, 

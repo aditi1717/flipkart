@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import PinCode from '../models/PinCode.js';
@@ -33,7 +34,33 @@ export const addOrderItems = async (req, res) => {
             return res.status(400).json({ message: 'Shipping pincode is required' });
         }
 
+        // Generate Unique Human-Readable Order ID
+        const generateDisplayId = () => {
+            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude ambiguous 0, O, 1, I
+            let result = 'ORD-';
+            for (let i = 0; i < 6; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        };
+
+        let displayId = generateDisplayId();
+        let isUnique = false;
+        let attempts = 0;
+        
+        while (!isUnique && attempts < 10) {
+            const existing = await Order.findOne({ displayId });
+            if (!existing) {
+                isUnique = true;
+            } else {
+                displayId = generateDisplayId();
+                attempts++;
+            }
+        }
+
         const order = new Order({
+            displayId,
+            transactionId: req.body.paymentResult?.razorpay_payment_id || req.body.paymentResult?.id || null,
             orderItems: orderItems.map(item => ({
                 ...item,
                 product: item.product || item._id
@@ -173,12 +200,19 @@ export const getOrders = async (req, res) => {
         // Search Implementation
         if (search) {
              const searchRegex = { $regex: search, $options: 'i' };
-             filter.$or = [
+             
+             let searchConditions = [
                  { 'user.name': searchRegex },
-                 { '_id': search },
+                 { 'displayId': searchRegex },
                  { 'shippingAddress.name': searchRegex },
                  { 'shippingAddress.email': searchRegex }
              ];
+
+             if (mongoose.Types.ObjectId.isValid(search)) {
+                searchConditions.push({ '_id': search });
+             }
+
+             filter.$or = searchConditions;
              // Note: Searching nested user fields in a referenced document (populate) isn't directly possible in a simple find query 
              // without aggregation or looking up user IDs first. 
              // However, redundancy in Order model (shippingAddress) helps. 

@@ -10,10 +10,21 @@ const OrderDetails = () => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [settings, setSettings] = useState(null);
 
     useEffect(() => {
         fetchOrderDetails();
+        fetchSettings();
     }, [orderId]);
+
+    const fetchSettings = async () => {
+        try {
+            const { data } = await API.get('/settings');
+            setSettings(data);
+        } catch (err) {
+            console.error('Fetch settings error:', err);
+        }
+    };
 
     const fetchOrderDetails = async () => {
         try {
@@ -147,7 +158,7 @@ const OrderDetails = () => {
                     </button>
                     <div className="flex-1">
                         <h1 className="text-lg font-bold">Order Details</h1>
-                        <p className="text-xs text-white/80">#{order._id.slice(-8).toUpperCase()}</p>
+                        <p className="text-xs text-white/80">#{order.displayId || order._id.slice(-8).toUpperCase()}</p>
                     </div>
                     <span className={`px-3 py-1.5 rounded-full text-xs font-bold border flex items-center gap-1 ${getStatusColor(order.status)}`}>
                         <span className="material-icons text-sm">{getStatusIcon(order.status)}</span>
@@ -499,7 +510,7 @@ const OrderDetails = () => {
                         <button
                             onClick={() => {
                                 import('../../../utils/invoiceGenerator').then(({ generateInvoice }) => {
-                                    generateInvoice(order);
+                                    generateInvoice(order, settings);
                                 });
                             }}
                             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl font-bold hover:shadow-lg transition-all flex items-center justify-center gap-2"

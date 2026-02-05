@@ -38,12 +38,30 @@ const OrderList = () => {
                 
                 const { data } = await API.get('/orders', { params });
                 
+                const transformOrder = (order) => ({
+                    ...order,
+                    id: order._id,
+                    date: order.createdAt,
+                    items: order.orderItems?.map(item => ({
+                        id: item.product,
+                        name: item.name,
+                        image: item.image,
+                        price: item.price,
+                        quantity: item.qty
+                    })) || [],
+                    total: order.totalPrice,
+                    payment: {
+                        method: order.paymentMethod,
+                        status: order.isPaid ? 'Paid' : 'Pending'
+                    }
+                });
+
                 if (data.orders) {
-                    setLocalOrders(data.orders);
+                    setLocalOrders(data.orders.map(transformOrder));
                     setTotalPages(data.pages);
                     setTotalOrders(data.total);
                 } else {
-                    setLocalOrders(data);
+                    setLocalOrders(Array.isArray(data) ? data.map(transformOrder) : []);
                 }
             } catch (error) {
                 console.error(error);
@@ -162,7 +180,7 @@ const OrderList = () => {
                                         <tr key={order.id || `order-${index}`} className="hover:bg-blue-50/10 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
-                                                    <span className="text-xs font-black text-gray-900 group-hover:text-blue-600 transition-colors">{order.id}</span>
+                                                    <span className="text-xs font-black text-gray-900 group-hover:text-blue-600 transition-colors">{order.displayId || order.id}</span>
                                                     <span className="text-[10px] font-bold text-gray-400 uppercase mt-1">
                                                         {new Date(order.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                     </span>
