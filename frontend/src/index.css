@@ -103,11 +103,34 @@
 
   .home-banner-swiper .swiper-button-next,
   .home-banner-swiper .swiper-button-prev {
-    width: 36px !important;
-    height: 36px !important;
-    right: 10px !important;
-    left: 10px !important;
-    opacity: 0.8;
+    width: 32px !important;
+    height: 32px !important;
+    background-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    display: flex !important;
+    top: 50% !important;
+    margin-top: 0 !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .home-banner-swiper .swiper-button-next::after,
+  .home-banner-swiper .swiper-button-prev::after {
+    font-size: 24px !important;
+    color: #fff !important;
+    font-weight: 900 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .home-banner-swiper .swiper-button-next {
+    right: 8px !important;
+    left: auto !important;
+  }
+
+  .home-banner-swiper .swiper-button-prev {
+    left: 8px !important;
+    right: auto !important;
   }
 }
 
