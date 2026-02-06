@@ -94,10 +94,14 @@ import toast from 'react-hot-toast';
                 galleryImages: initGallery,
                 price: product.price || '',
                 originalPrice: product.originalPrice || '',
-                variantHeadings: product.variantHeadings || (product.colors?.length || product.sizes?.length ? [
-                    ...(product.colors?.length ? [{ name: 'Color', hasImage: true, options: product.colors }] : []),
-                    ...(product.sizes?.length ? [{ name: product.variantLabel || 'Size', hasImage: false, options: product.sizes.map(s => typeof s === 'string' ? { name: s } : s) }] : [])
-                ] : []),
+                variantHeadings: (product.variantHeadings || []).map(vh => ({
+                    ...vh,
+                    options: (vh.options || []).map(opt => ({
+                        ...opt,
+                        image: opt.image ? (typeof opt.image === 'string' ? { type: 'url', content: opt.image, preview: opt.image } : opt.image) : null,
+                        images: (opt.images || []).map(img => typeof img === 'string' ? { type: 'url', content: img, preview: img } : img)
+                    }))
+                })),
                 categoryPath: product.categoryPath || (
                     product.categoryId 
                         ? (product.subCategory ? [product.categoryId, (product.subCategory._id || product.subCategory)] : [product.categoryId]) 
@@ -168,6 +172,19 @@ import toast from 'react-hot-toast';
         if (!file) return;
         const previewUrl = URL.createObjectURL(file);
         callback({ type: 'file', content: file, preview: previewUrl });
+    };
+
+    const handleVariantMultiFileUpload = (e, currentImages, callback) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const newImages = files.map(file => ({
+            type: 'file',
+            content: file,
+            preview: URL.createObjectURL(file)
+        }));
+
+        callback([...(currentImages || []), ...newImages]);
     };
 
     const updateArrayItem = (field, index, value) => {
@@ -317,7 +334,7 @@ import toast from 'react-hot-toast';
         setFormData(prev => ({
             ...prev,
             variantHeadings: prev.variantHeadings.map(vh =>
-                vh.id === headingId ? { ...vh, options: [...vh.options, { name: '', image: '' }] } : vh
+                vh.id === headingId ? { ...vh, options: [...vh.options, { name: '', image: null, images: [] }] } : vh
             )
         }));
     };
@@ -510,15 +527,30 @@ import toast from 'react-hot-toast';
         const processedHeadings = formData.variantHeadings.map(vh => ({
             ...vh,
             options: vh.options.map(opt => {
+                const newOpt = { ...opt };
+                
+                // Handle single primary image
                 if (opt.image && opt.image.type === 'file') {
                     variantImages.push(opt.image.content);
-                    return { ...opt, image: `VARIANT_INDEX::${variantImages.length - 1}` };
+                    newOpt.image = `VARIANT_INDEX::${variantImages.length - 1}`;
                 } else if (opt.image && opt.image.type === 'url') {
-                    return { ...opt, image: opt.image.content };
+                    newOpt.image = opt.image.content;
+                } else if (!opt.image) {
+                    newOpt.image = '';
                 }
-                 // Handle case where it might be raw string (shouldn't happen with new state, but safety)
-                if (typeof opt.image === 'string') return opt;
-                return { ...opt, image: '' };
+
+                // Handle multiple images array
+                newOpt.images = (opt.images || []).map(img => {
+                    if (img && img.type === 'file') {
+                        variantImages.push(img.content);
+                        return `VARIANT_INDEX::${variantImages.length - 1}`;
+                    } else if (img && img.type === 'url') {
+                        return img.content;
+                    }
+                    return img;
+                });
+
+                return newOpt;
             })
         }));
         data.append('variantHeadings', JSON.stringify(processedHeadings));
@@ -1199,30 +1231,40 @@ import toast from 'react-hot-toast';
                                                             className="text-xs font-bold border-b border-gray-200 outline-none p-1 focus:border-blue-500 text-gray-900 caret-black placeholder:text-gray-500"
                                                         />
                                                         {vh.hasImage && (
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-100 relative group/file">
-                                                                    {opt.image ? (
-                                                                        <img src={opt.image.preview || opt.image} className="w-full h-full object-cover" />
-                                                                    ) : (
-                                                                        <MdImage className="w-full h-full p-2 text-gray-300" />
-                                                                    )}
-                                                                    <label className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-file/hover:opacity-100 cursor-pointer transition-opacity">
-                                                                        <MdAdd size={14} />
+                                                            <div className="space-y-2">
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {/* Existing Variant Images */}
+                                                                    {(opt.images || []).map((img, imgIdx) => (
+                                                                        <div key={imgIdx} className="relative group/vimg w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
+                                                                            <img src={img.preview} alt="" className="w-full h-full object-cover" />
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    const newImages = opt.images.filter((_, i) => i !== imgIdx);
+                                                                                    updateVariantOption(vh.id, optIdx, 'images', newImages);
+                                                                                }}
+                                                                                className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-vimg/hover:opacity-100 transition-opacity"
+                                                                            >
+                                                                                <MdClose size={12} />
+                                                                            </button>
+                                                                        </div>
+                                                                    ))}
+                                                                    
+                                                                    {/* Add More Images Button */}
+                                                                    <label className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-200 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
+                                                                        <MdAdd className="text-gray-400" size={16} />
                                                                         <input
                                                                             type="file"
+                                                                            multiple
                                                                             className="hidden"
                                                                             accept="image/*"
-                                                                            onChange={(e) => handleVariantFileUpload(e, (data) => updateVariantOption(vh.id, optIdx, 'image', data))}
+                                                                            onChange={(e) => handleVariantMultiFileUpload(e, opt.images, (data) => updateVariantOption(vh.id, optIdx, 'images', data))}
                                                                         />
                                                                     </label>
                                                                 </div>
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Or URL..."
-                                                                    value={opt.image?.content || (typeof opt.image === 'string' ? opt.image : '')}
-                                                                    onChange={(e) => updateVariantOption(vh.id, optIdx, 'image', e.target.value)}
-                                                                    className="flex-1 text-[10px] bg-gray-50 px-2 py-1 rounded outline-none border border-gray-200 focus:border-blue-500 font-bold text-gray-900 caret-black placeholder:text-gray-500"
-                                                                />
+                                                                <div className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">
+                                                                    {(opt.images || []).length} images added
+                                                                </div>
                                                             </div>
                                                         )}
                                                     </div>

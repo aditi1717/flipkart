@@ -147,18 +147,30 @@ export const createProduct = async (req, res) => {
         if (req.files && req.files.variant_images) {
              const variantFiles = req.files.variant_images;
              if (Array.isArray(variantHeadings)) {
-                 variantHeadings = variantHeadings.map(vh => ({
-                     ...vh,
-                     options: vh.options.map(opt => {
-                         if (opt.image && typeof opt.image === 'string' && opt.image.startsWith('VARIANT_INDEX::')) {
-                             const idx = parseInt(opt.image.split('::')[1]);
-                             if (variantFiles[idx]) {
-                                 return { ...opt, image: variantFiles[idx].path };
-                             }
-                         }
-                         return opt;
-                     })
-                 }));
+                variantHeadings = variantHeadings.map(vh => ({
+                    ...vh,
+                    options: vh.options.map(opt => {
+                        const newOpt = { ...opt };
+                        // Handle single primary background image
+                        if (opt.image && typeof opt.image === 'string' && opt.image.startsWith('VARIANT_INDEX::')) {
+                            const idx = parseInt(opt.image.split('::')[1]);
+                            if (variantFiles[idx]) {
+                                newOpt.image = variantFiles[idx].path;
+                            }
+                        }
+                        // Handle multiple images array
+                        if (Array.isArray(opt.images)) {
+                            newOpt.images = opt.images.map(img => {
+                                if (typeof img === 'string' && img.startsWith('VARIANT_INDEX::')) {
+                                    const idx = parseInt(img.split('::')[1]);
+                                    return variantFiles[idx] ? variantFiles[idx].path : img;
+                                }
+                                return img;
+                            });
+                        }
+                        return newOpt;
+                    })
+                }));
              }
         }
 
@@ -278,13 +290,25 @@ export const updateProduct = async (req, res) => {
                          variantHeadings = variantHeadings.map(vh => ({
                              ...vh,
                              options: vh.options.map(opt => {
+                                 const newOpt = { ...opt };
+                                 // Handle single primary background image
                                  if (opt.image && typeof opt.image === 'string' && opt.image.startsWith('VARIANT_INDEX::')) {
                                      const idx = parseInt(opt.image.split('::')[1]);
                                      if (variantFiles[idx]) {
-                                         return { ...opt, image: variantFiles[idx].path };
+                                         newOpt.image = variantFiles[idx].path;
                                      }
                                  }
-                                 return opt;
+                                 // Handle multiple images array
+                                 if (Array.isArray(opt.images)) {
+                                     newOpt.images = opt.images.map(img => {
+                                         if (typeof img === 'string' && img.startsWith('VARIANT_INDEX::')) {
+                                             const idx = parseInt(img.split('::')[1]);
+                                             return variantFiles[idx] ? variantFiles[idx].path : img;
+                                         }
+                                         return img;
+                                     });
+                                 }
+                                 return newOpt;
                              })
                          }));
                      }

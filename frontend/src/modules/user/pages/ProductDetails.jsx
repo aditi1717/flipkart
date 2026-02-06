@@ -251,31 +251,39 @@ const ProductDetails = () => {
     const productImages = React.useMemo(() => {
         if (!product) return [];
         
-        const images = [
+        const baseImages = [
             product.image,
             ...(Array.isArray(product.images) ? product.images : [])
         ];
 
-        // Add images from variant headings
+        // Add ONLY the images of currently selected variants
+        const variantImages = [];
         displayVariantHeadings.forEach(vh => {
             if (vh.hasImage && vh.options) {
-                vh.options.forEach(opt => {
-                    if (opt.image) images.push(opt.image);
-                });
+                // Find the image for the currently selected option in this category
+                const selectedOpt = vh.options.find(opt => opt.name === selectedVariants[vh.name]);
+                if (selectedOpt) {
+                    if (selectedOpt.image) variantImages.push(selectedOpt.image);
+                    if (Array.isArray(selectedOpt.images)) {
+                        variantImages.push(...selectedOpt.images);
+                    }
+                }
             }
         });
 
-        return Array.from(new Set(images)).filter(Boolean);
-    }, [product, displayVariantHeadings]);
+        // Combine base images and selected variant images, unique and filtered
+        return Array.from(new Set([...baseImages, ...variantImages])).filter(Boolean);
+    }, [product, displayVariantHeadings, selectedVariants]);
 
-    const handleVariantSelect = (vhName, optName, optImage) => {
+    const handleVariantSelect = (vhName, optName, optImage, optImages) => {
         setSelectedVariants(prev => ({ ...prev, [vhName]: optName }));
         
-        if (optImage) {
-            const imgIndex = productImages.indexOf(optImage);
-            if (imgIndex !== -1) {
-                setCurrentImageIndex(imgIndex);
-            }
+        // When a variant with images is selected, we want to jump to the first one.
+        if (optImage || (Array.isArray(optImages) && optImages.length > 0)) {
+            // Find where these images start in the recomputed productImages list.
+            // They always appear after baseImages.
+            const baseImagesCount = [product.image, ...(Array.isArray(product.images) ? product.images : [])].filter(Boolean).length;
+            setCurrentImageIndex(baseImagesCount); 
         }
     };
 
@@ -594,10 +602,14 @@ const ProductDetails = () => {
                                                 vh.hasImage ? (
                                                     <div
                                                         key={idx}
-                                                        onClick={() => handleVariantSelect(vh.name, opt.name, opt.image)}
+                                                        onClick={() => handleVariantSelect(vh.name, opt.name, opt.image, opt.images)}
                                                         className={`w-14 h-16 rounded border-2 p-0.5 cursor-pointer transition-all hover:scale-105 ${selectedVariants[vh.name] === opt.name ? 'border-blue-600' : 'border-transparent'}`}
                                                     >
-                                                        <img src={opt.image} alt={opt.name} className="w-full h-full object-cover rounded-[2px]" />
+                                                        <img 
+                                                            src={opt.image || (opt.images && opt.images[0])} 
+                                                            alt={opt.name} 
+                                                            className="w-full h-full object-cover rounded-[2px]" 
+                                                        />
                                                     </div>
                                                 ) : (
                                                     <button

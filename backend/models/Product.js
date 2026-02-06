@@ -60,7 +60,8 @@ const productSchema = mongoose.Schema({
         hasImage: { type: Boolean, default: false },
         options: [{
             name: { type: String },
-            image: { type: String }
+            image: { type: String },
+            images: [{ type: String }]
         }]
     }],
     skus: [{
