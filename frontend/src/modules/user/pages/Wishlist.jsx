@@ -7,7 +7,7 @@ const Wishlist = () => {
     const { wishlist, toggleWishlist, moveToCart } = useCartStore();
 
     return (
-        <div className="bg-white min-h-screen pb-20 md:bg-[#f1f3f6] md:pb-10">
+        <div className="bg-white min-h-screen md:bg-[#f1f3f6]">
 
             {/* Mobile Header - Hidden on Desktop */}
             <div className="bg-white sticky top-0 z-10 px-4 py-4 flex items-center gap-4 border-b md:hidden">

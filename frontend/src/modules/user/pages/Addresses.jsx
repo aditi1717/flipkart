@@ -8,6 +8,7 @@ import { useGoogleTranslation } from '../../../hooks/useGoogleTranslation';
 
 import toast from 'react-hot-toast';
 import { confirmToast } from '../../../utils/toastUtils.jsx';
+import { useAddressAutocomplete } from '../../../hooks/useAddressAutocomplete';
 
 const Addresses = () => {
     const navigate = useNavigate();
@@ -18,10 +19,18 @@ const Addresses = () => {
     const [showMenu, setShowMenu] = useState(null);
     const [pincodeStatus, setPincodeStatus] = useState({}); // { addressId: { isServiceable, message, deliveryTime, unit } }
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+    
+    const { 
+        suggestions, 
+        loading: autocompleteLoading, 
+        fetchSuggestions, 
+        fetchPlaceDetails,
+        setSuggestions 
+    } = useAddressAutocomplete();
 
     const initialAddr = {
-        name: '',
-        mobile: '',
+        name: user?.name || '',
+        mobile: user?.phone || user?.mobile || '',
         pincode: '',
         address: '',
         city: '',
@@ -56,13 +65,13 @@ const Addresses = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editingId) {
-            updateAddress(editingId, { ...newAddr, name: user?.name || newAddr.name });
+            updateAddress(editingId, newAddr);
             setEditingId(null);
         } else {
-            addAddress({ ...newAddr, name: user?.name || newAddr.name, id: Date.now() });
+            addAddress({ ...newAddr, id: Date.now() });
         }
         setIsAdding(false);
-        setNewAddr(initialAddr);
+        setNewAddr({ ...initialAddr, name: user?.name || '', mobile: user?.phone || user?.mobile || '' });
     };
 
     const handleEdit = (addr) => {
@@ -297,9 +306,9 @@ const Addresses = () => {
                                             <input 
                                                 required 
                                                 type="text" 
-                                                disabled
-                                                className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none bg-gray-50 text-gray-500 cursor-not-allowed font-medium" 
-                                                value={user?.name || newAddr.name} 
+                                                className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" 
+                                                value={newAddr.name} 
+                                                onChange={e => setNewAddr({ ...newAddr, name: e.target.value })}
                                             />
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
@@ -310,9 +319,48 @@ const Addresses = () => {
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">{pincodeText}</label>
                                             <input required type="number" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.pincode} onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })} />
                                         </div>
-                                        <div className="col-span-2 space-y-1">
+                                        <div className="col-span-2 space-y-1 relative">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">{addressAreaText}</label>
-                                            <textarea required rows="3" className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" value={newAddr.address} onChange={e => setNewAddr({ ...newAddr, address: e.target.value })} />
+                                            <textarea 
+                                                required 
+                                                rows="3" 
+                                                className="w-full border border-gray-200 p-3 rounded-sm text-sm outline-none focus:border-blue-500 text-gray-900" 
+                                                value={newAddr.address} 
+                                                onChange={e => {
+                                                    const val = e.target.value;
+                                                    setNewAddr({ ...newAddr, address: val });
+                                                    fetchSuggestions(val);
+                                                }} 
+                                            />
+                                            {suggestions.length > 0 && (
+                                                <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-gray-200 shadow-xl rounded-sm max-h-60 overflow-y-auto">
+                                                    {suggestions.map((suggestion) => (
+                                                        <button
+                                                            key={suggestion.place_id}
+                                                            type="button"
+                                                            onClick={async () => {
+                                                                const details = await fetchPlaceDetails(suggestion.place_id);
+                                                                if (details) {
+                                                                    setNewAddr(prev => ({
+                                                                        ...prev,
+                                                                        address: details.address,
+                                                                        city: details.city || prev.city,
+                                                                        state: details.state || prev.state,
+                                                                        pincode: details.pincode || prev.pincode
+                                                                    }));
+                                                                    setSuggestions([]);
+                                                                }
+                                                            }}
+                                                            className="w-full text-left p-3 hover:bg-gray-50 border-b last:border-0 border-gray-100 transition-colors flex items-start gap-2"
+                                                        >
+                                                            <span className="material-icons text-gray-400 text-sm mt-0.5">location_on</span>
+                                                            <div className="flex-1">
+                                                                <p className="text-sm text-gray-800 font-medium">{suggestion.description}</p>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="col-span-2 md:col-span-1 space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">{cityText}</label>

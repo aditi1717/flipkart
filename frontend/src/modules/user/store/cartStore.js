@@ -282,7 +282,17 @@ export const useCartStore = create()(
                 const original = cart.reduce((total, item) => total + (item.originalPrice || item.price) * item.quantity, 0);
                 const current = cart.reduce((total, item) => total + item.price * item.quantity, 0);
                 return original - current;
-            }
+            },
+
+            clearStore: () => set({
+                cart: [],
+                wishlist: [],
+                savedForLater: [],
+                orders: [],
+                addresses: [],
+                appliedCoupon: null,
+                userProfile: null
+            })
         }),
         {
             name: 'cart-storage',

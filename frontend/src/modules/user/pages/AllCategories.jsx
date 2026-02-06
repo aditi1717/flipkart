@@ -75,9 +75,9 @@ const AllCategories = () => {
                 </div>
             </div>
 
-            <div className="flex flex-1 overflow-hidden h-[calc(100vh-120px)]">
+            <div className="flex flex-1">
                 {/* Left Sidebar - Categories List */}
-                <div className="w-1/4 max-w-[100px] bg-gray-50 h-full overflow-y-auto border-r border-gray-200 no-scrollbar pb-20">
+                <div className="w-1/4 max-w-[100px] bg-gray-50 border-r border-gray-200 no-scrollbar">
                     {displayCategories.map((cat) => {
                         const IconComponent = iconMap[cat.icon] || MdGridView;
                         return (
@@ -103,7 +103,7 @@ const AllCategories = () => {
                 </div>
 
                 {/* Right Content Area - Subcategories ONLY */}
-                <div className="flex-1 h-full overflow-y-auto bg-white p-4 pb-20">
+                <div className="flex-1 bg-white p-4">
                     <div className="animate-in slide-in-from-bottom-2 duration-300">
                         {/* Subcategories Grid */}
                         <h3 className="font-bold text-gray-800 mb-3 text-sm">Shop by Category</h3>

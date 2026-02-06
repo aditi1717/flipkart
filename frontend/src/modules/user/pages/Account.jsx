@@ -74,7 +74,7 @@ const Account = () => {
     ];
 
     return (
-        <div className="bg-[#f1f3f6] min-h-screen pb-24 md:pb-10">
+        <div className="bg-[#f1f3f6] min-h-screen">
             <div className="max-w-3xl mx-auto md:pt-6 md:px-4">
                 
                 {/* Profile Card */}

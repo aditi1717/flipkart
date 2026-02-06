@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore';
 import useCouponStore from '../../admin/store/couponStore';
 import API from '../../../services/api';
 import { toast } from 'react-hot-toast';
+import { useAddressAutocomplete } from '../../../hooks/useAddressAutocomplete';
 import Loader from '../../../components/common/Loader';
 
 const Checkout = () => {
@@ -30,6 +31,13 @@ const Checkout = () => {
     const [isOrderSuccess, setIsOrderSuccess] = useState(false);
     const [isChangingAddress, setIsChangingAddress] = useState(false);
     const [isAddingAddress, setIsAddingAddress] = useState(false);
+    const { 
+        suggestions, 
+        loading: autocompleteLoading, 
+        fetchSuggestions, 
+        fetchPlaceDetails,
+        setSuggestions 
+    } = useAddressAutocomplete();
 
     const [isPincodeServiceable, setIsPincodeServiceable] = useState(true);
     const [isCODServiceable, setIsCODServiceable] = useState(true);
@@ -141,14 +149,25 @@ const Checkout = () => {
 
     // New Address Form State
     const [newAddr, setNewAddr] = useState({
-        name: '',
-        mobile: '',
+        name: user?.name || '',
+        mobile: user?.phone || user?.mobile || '',
         pincode: '',
         address: '',
         city: '',
         state: '',
         type: 'Home'
     });
+
+    // Update newAddr if user changes
+    useEffect(() => {
+        if (user) {
+            setNewAddr(prev => ({
+                ...prev,
+                name: prev.name || user.name || '',
+                mobile: prev.mobile || user.phone || user.mobile || ''
+            }));
+        }
+    }, [user]);
 
     const handleAddAddress = (e) => {
         e.preventDefault();
@@ -444,8 +463,8 @@ const Checkout = () => {
                                             <form onSubmit={handleAddAddress} className="border border-blue-200 p-4 rounded-lg bg-blue-50/10 space-y-4 animate-in slide-in-from-top-4 duration-300">
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div className="space-y-2 col-span-2">
-                                                        <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">👤 Full Name (Linked to Account)</label>
-                                                        <input required type="text" disabled placeholder="Linked to Account" className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm outline-none bg-blue-50/50 text-gray-500 font-bold cursor-not-allowed shadow-sm" value={user?.name || newAddr.name} />
+                                                        <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">👤 Full Name</label>
+                                                        <input required type="text" placeholder="Enter your full name" className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-gray-900 font-semibold placeholder-blue-300 bg-white shadow-sm" value={newAddr.name} onChange={e => setNewAddr({ ...newAddr, name: e.target.value })} />
                                                     </div>
                                                     <div className="space-y-2">
                                                         <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">📱 Mobile</label>
@@ -455,9 +474,49 @@ const Checkout = () => {
                                                         <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">📮 Pincode</label>
                                                         <input required type="number" placeholder="6-digit PIN" className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-gray-900 font-semibold placeholder-blue-300 bg-white shadow-sm" value={newAddr.pincode} onChange={e => setNewAddr({ ...newAddr, pincode: e.target.value })} />
                                                     </div>
-                                                    <div className="space-y-2 col-span-2">
-                                                        <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">🏠 Address</label>
-                                                        <textarea required rows="3" placeholder="House No, Building, Street, Area" className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-gray-900 font-semibold placeholder-blue-300 bg-white shadow-sm" value={newAddr.address} onChange={e => setNewAddr({ ...newAddr, address: e.target.value })} />
+                                                    <div className="space-y-2 col-span-2 relative">
+                                                        <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">🏠 Address (Area and Street)</label>
+                                                        <textarea 
+                                                            required 
+                                                            rows="2" 
+                                                            placeholder="Enter flat, house no., building, company, apartment, area, street" 
+                                                            className="w-full border-2 border-blue-200 p-3 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none text-gray-900 font-semibold placeholder-blue-300 bg-white shadow-sm" 
+                                                            value={newAddr.address} 
+                                                            onChange={e => {
+                                                                const val = e.target.value;
+                                                                setNewAddr({ ...newAddr, address: val });
+                                                                fetchSuggestions(val);
+                                                            }} 
+                                                        />
+                                                        {suggestions.length > 0 && (
+                                                            <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-blue-200 shadow-xl rounded-xl max-h-48 overflow-y-auto">
+                                                                {suggestions.map((suggestion) => (
+                                                                    <button
+                                                                        key={suggestion.place_id}
+                                                                        type="button"
+                                                                        onClick={async () => {
+                                                                            const details = await fetchPlaceDetails(suggestion.place_id);
+                                                                            if (details) {
+                                                                                setNewAddr(prev => ({
+                                                                                    ...prev,
+                                                                                    address: details.address,
+                                                                                    city: details.city || prev.city,
+                                                                                    state: details.state || prev.state,
+                                                                                    pincode: details.pincode || prev.pincode
+                                                                                }));
+                                                                                setSuggestions([]);
+                                                                            }
+                                                                        }}
+                                                                        className="w-full text-left p-3 hover:bg-blue-50 border-b last:border-0 border-blue-50 transition-colors flex items-start gap-2"
+                                                                    >
+                                                                        <span className="material-icons text-blue-400 text-sm mt-0.5">location_on</span>
+                                                                        <div className="flex-1">
+                                                                            <p className="text-sm text-gray-800 font-medium">{suggestion.description}</p>
+                                                                        </div>
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="space-y-2">
                                                         <label className="text-xs font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent uppercase tracking-wide pl-1">🏙️ City</label>

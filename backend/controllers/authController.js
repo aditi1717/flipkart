@@ -24,7 +24,7 @@ export const sendLoginOtp = async (req, res) => {
 };
 
 export const verifyLoginOtp = async (req, res) => {
-    const { mobile, otp, userType, name } = req.body;
+    const { mobile, otp, userType, name, email } = req.body;
     if (!mobile || !otp) return res.status(400).json({ message: 'Mobile and OTP are required' });
     try {
         const isValid = await verifyOTP(mobile, otp, userType || 'Customer');
@@ -33,10 +33,15 @@ export const verifyLoginOtp = async (req, res) => {
         if (!user) {
             user = await User.create({
                 name: name || 'New User',
-                email: mobile,
+                email: email || mobile,
                 phone: mobile,
                 password: await bcrypt.hash(Math.random().toString(36), 10),
             });
+        } else {
+            // Update name and email if provided (handles case where user had only mobile/first name before)
+            if (name) user.name = name;
+            if (email) user.email = email;
+            await user.save();
         }
         const token = generateToken(res, user._id);
         res.json({ 

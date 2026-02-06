@@ -440,8 +440,8 @@ const Header = () => {
                 </div>
             </div>
 
-            {/* Category Navigation - Hidden on PDP/List */}
-            {!isSpecialPage && !categoriesLoading && (
+            {/* Category Navigation - Only on Homepage */}
+            {location.pathname === '/' && !categoriesLoading && (
                 <div className="max-w-[1200px] mx-auto relative px-2">
                     <div className="flex overflow-x-auto md:overflow-visible no-scrollbar gap-4 py-2 md:py-1 md:justify-between mt-0 md:-mt-2 border-t border-gray-100 pb-2 md:pb-1">
                         {displayCategories.map((cat, index) => {

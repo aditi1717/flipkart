@@ -182,7 +182,7 @@ const Footer = () => {
                 </div>
 
                 {/* ================= MOBILE VIEW ================= */}
-                <div className="md:hidden bg-[#212121] py-8 px-4 border-t border-gray-700">
+                <div className="md:hidden bg-[#212121] pt-8 pb-24 px-4 border-t border-gray-700">
                     <div className="flex flex-col gap-6 text-xs text-gray-300">
                         <div className="grid grid-cols-2 gap-y-4 gap-x-8">
                             {footerConfig.sections.map((section, sIdx) => (

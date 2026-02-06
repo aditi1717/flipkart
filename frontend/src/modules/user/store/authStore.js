@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import API from '../../../services/api';
+import { useCartStore } from './cartStore';
 
 export const useAuthStore = create(
     persist(
@@ -38,10 +39,10 @@ export const useAuthStore = create(
     },
 
     // Verify OTP & Login
-    verifyOtp: async (mobile, otp, userType = 'Customer', name = '') => {
+    verifyOtp: async (mobile, otp, userType = 'Customer', name = '', email = '') => {
         set({ loading: true, error: null });
         try {
-            const { data } = await API.post('/auth/verify-otp', { mobile, otp, userType, name });
+            const { data } = await API.post('/auth/verify-otp', { mobile, otp, userType, name, email });
             set({ user: data, isAuthenticated: true, loading: false });
             return data;
         } catch (error) {
@@ -88,6 +89,7 @@ export const useAuthStore = create(
         try {
             await API.post('/auth/logout');
             set({ user: null, isAuthenticated: false });
+            useCartStore.getState().clearStore();
         } catch (error) {
             console.error('Logout failed', error);
             // Force client-side logout anyway

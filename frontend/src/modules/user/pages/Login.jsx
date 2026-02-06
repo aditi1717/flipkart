@@ -10,8 +10,10 @@ const Login = () => {
     const location = useLocation();
     const { sendOtp, verifyOtp, loading, error } = useAuthStore();
     const [mobile, setMobile] = useState(location.state?.mobile || '');
+    const [name, setName] = useState(location.state?.name || '');
+    const [email, setEmail] = useState(location.state?.email || '');
     const [otp, setOtp] = useState(''); // State for OTP
-    const [step, setStep] = useState(1); // 1: Mobile, 2: OTP
+    const [step, setStep] = useState(location.state?.mobile ? 2 : 1); // 1: Mobile, 2: OTP
     const from = location.state?.from?.pathname || '/';
 
     const handleSendOtp = async () => {
@@ -32,7 +34,7 @@ const Login = () => {
     const handleVerifyOtp = async () => {
         if (otp.length === 4) {
             try {
-                await verifyOtp(mobile, otp);
+                await verifyOtp(mobile, otp, 'Customer', name, email);
                 toast.success('Login successful!');
                 navigate(from, { replace: true });
             } catch (err) {

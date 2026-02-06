@@ -52,7 +52,7 @@ const Cart = () => {
     const delivery = price > 500 ? 0 : 40;
 
     return (
-        <div className="bg-gradient-to-b from-blue-50 via-white to-gray-50 min-h-screen pb-24">
+        <div className="bg-gradient-to-b from-blue-50 via-white to-gray-50 min-h-screen">
             {/* Header */}
             <div className="bg-white sticky top-0 z-50 shadow-md md:shadow-sm md:static md:bg-transparent md:mb-4 border-b border-blue-100">
                 <div className="px-4 py-4 flex items-center gap-3 md:max-w-[1248px] md:mx-auto md:px-0">

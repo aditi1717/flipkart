@@ -26,10 +26,12 @@ const Layout = () => {
         '/login',
         '/signup',
         '/play',
-        '/categories'
+        '/categories',
+        '/wishlist'
     ].some(path => location.pathname.includes(path));
 
     const isAccountPage = location.pathname === '/account';
+    const isHome = location.pathname === '/';
 
     return (
         <div className="w-full min-h-screen flex flex-col relative bg-background-light overflow-x-hidden">
@@ -38,8 +40,11 @@ const Layout = () => {
                     <Header />
                 </div>
             )}
-            <main className={`flex-1 flex flex-col ${!isPDP && 'pb-20'} md:pb-0 w-full transition-all duration-300 min-h-[60vh] bg-white
-                ${isStandalonePage ? 'pt-0' : isPDP ? 'pt-[64px] md:pt-[110px]' : isCategory ? 'pt-[106px] md:pt-[110px]' : 'pt-[260px] md:pt-[200px]'}`}>
+            <main className={`flex flex-col md:pb-0 w-full transition-all duration-300 bg-white
+                ${isStandalonePage ? 'pt-0' : 
+                  isPDP ? 'pt-[64px] md:pt-[110px]' : 
+                  isHome ? 'pt-[260px] md:pt-[200px]' : 
+                  'pt-[110px] md:pt-[110px]'}`}>
                 <AnimatePresence mode="popLayout">
                     <motion.div
                         key={location.pathname}
