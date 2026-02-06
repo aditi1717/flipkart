@@ -46,6 +46,7 @@ const ProductCard = ({ product, footerText }) => {
                 )}
                 <img
                     alt={product.name}
+                    loading="lazy"
                     className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500"
                     src={product.image}
                     onError={(e) => {
