@@ -3,7 +3,8 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { MdLocalShipping, MdSearch, MdFilterList, MdDownload, MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
 import useOrderStore from '../../store/orderStore';
-import { generateDeliverySlip, generateBulkDeliverySlips } from '../../../../utils/deliverySlipGenerator';
+import InvoiceGenerator, { BulkInvoiceGenerator } from '../../components/orders/InvoiceGenerator';
+import API from '../../../../services/api';
 
 const DeliverySlip = () => {
     const navigate = useNavigate();
@@ -12,9 +13,11 @@ const DeliverySlip = () => {
     const [statusFilter, setStatusFilter] = useState('All');
     const [selectedOrders, setSelectedOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [settings, setSettings] = useState(null);
 
     useEffect(() => {
         loadOrders();
+        fetchSettings();
     }, []);
 
     const loadOrders = async () => {
@@ -23,16 +26,19 @@ const DeliverySlip = () => {
         setLoading(false);
     };
 
-    // Filter orders eligible for delivery slips (not Pending or Cancelled)
-    const eligibleStatuses = ['Confirmed', 'Packed', 'Dispatched', 'Out for Delivery'];
-    const eligibleOrders = orders.filter(order =>
-        eligibleStatuses.includes(order.status)
-    );
+    const fetchSettings = async () => {
+        try {
+            const { data } = await API.get('/settings');
+            setSettings(data);
+        } catch (error) {
+            console.error('Error fetching settings for invoice:', error);
+        }
+    };
 
     // Apply search and filter
-    const filteredOrders = eligibleOrders.filter(order => {
+    const filteredOrders = orders.filter(order => {
         const matchesSearch =
-            order.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (order.displayId || order.id)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.user?.phone?.includes(searchTerm);
 
@@ -57,18 +63,6 @@ const DeliverySlip = () => {
         }
     };
 
-    const handleGenerateSingle = (order) => {
-        generateDeliverySlip(order);
-    };
-
-    const handleGenerateBulk = () => {
-        const ordersToGenerate = orders.filter(order => selectedOrders.includes(order.id));
-        if (ordersToGenerate.length === 0) {
-            toast.error('Please select at least one order');
-            return;
-        }
-        generateBulkDeliverySlips(ordersToGenerate);
-    };
 
     if (loading) {
         return (
@@ -91,18 +85,23 @@ const DeliverySlip = () => {
                             <MdLocalShipping className="text-blue-600" size={28} />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black text-gray-900">Delivery Slips</h1>
-                            <p className="text-sm text-gray-500 mt-1">Generate delivery slips for confirmed orders</p>
+                            <h1 className="text-2xl font-black text-gray-900">Delivery & Invoices</h1>
+                            <p className="text-sm text-gray-500 mt-1">Generate delivery slips and invoices for all orders</p>
                         </div>
                     </div>
                     {selectedOrders.length > 0 && (
-                        <button
-                            onClick={handleGenerateBulk}
-                            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-sm rounded-2xl hover:shadow-lg transition-all uppercase tracking-wider"
-                        >
-                            <MdDownload size={20} />
-                            Generate {selectedOrders.length} Slip{selectedOrders.length > 1 ? 's' : ''}
-                        </button>
+                        <BulkInvoiceGenerator 
+                            orders={orders.filter(order => selectedOrders.includes(order.id))}
+                            settings={settings}
+                            customTrigger={
+                                <button
+                                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-sm rounded-2xl hover:shadow-lg transition-all uppercase tracking-wider"
+                                >
+                                    <MdDownload size={20} />
+                                    Generate {selectedOrders.length} Invoice{selectedOrders.length > 1 ? 's' : ''}
+                                </button>
+                            }
+                        />
                     )}
                 </div>
             </div>
@@ -118,7 +117,7 @@ const DeliverySlip = () => {
                             placeholder="Search by Order ID, Customer Name, or Phone..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none transition-all text-sm font-medium"
+                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none transition-all text-sm text-gray-900 placeholder:text-gray-900 font-bold"
                         />
                     </div>
 
@@ -128,13 +127,16 @@ const DeliverySlip = () => {
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none transition-all text-sm font-bold appearance-none cursor-pointer"
+                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none transition-all text-sm font-black text-gray-900 appearance-none cursor-pointer"
                         >
                             <option value="All">All Statuses</option>
+                            <option value="Pending">Pending</option>
                             <option value="Confirmed">Confirmed</option>
                             <option value="Packed">Packed</option>
                             <option value="Dispatched">Dispatched</option>
                             <option value="Out for Delivery">Out for Delivery</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
                         </select>
                     </div>
                 </div>
@@ -142,7 +144,7 @@ const DeliverySlip = () => {
                 {/* Summary Stats */}
                 <div className="mt-4 flex items-center justify-between text-sm">
                     <p className="text-gray-500">
-                        Showing <span className="font-bold text-gray-900">{filteredOrders.length}</span> of <span className="font-bold text-gray-900">{eligibleOrders.length}</span> eligible orders
+                        Showing <span className="font-bold text-gray-900">{filteredOrders.length}</span> of <span className="font-bold text-gray-900">{orders.length}</span> total orders
                     </p>
                     {filteredOrders.length > 0 && (
                         <button
@@ -173,7 +175,7 @@ const DeliverySlip = () => {
                     <p className="text-gray-500">
                         {searchTerm || statusFilter !== 'All'
                             ? 'Try adjusting your search or filter criteria'
-                            : 'No orders are ready for delivery slips yet'
+                            : 'No orders found in the system'
                         }
                     </p>
                 </div>
@@ -216,7 +218,7 @@ const DeliverySlip = () => {
                                                 onClick={() => navigate(`/admin/orders/${order.id}`)}
                                                 className="text-sm font-black text-blue-600 hover:underline"
                                             >
-                                                {order.id}
+                                                {order.displayId || order.id}
                                             </button>
                                         </td>
                                         <td className="px-6 py-4">
@@ -226,10 +228,14 @@ const DeliverySlip = () => {
                                             <p className="text-sm text-gray-600">{order.user?.phone || 'N/A'}</p>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-tight ${order.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' :
+                                            <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-tight ${
+                                                    order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
+                                                    order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
+                                                    order.status === 'Pending' ? 'bg-gray-100 text-gray-700' :
+                                                    order.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' :
                                                     order.status === 'Packed' ? 'bg-indigo-100 text-indigo-700' :
-                                                        order.status === 'Dispatched' ? 'bg-purple-100 text-purple-700' :
-                                                            'bg-orange-100 text-orange-700'
+                                                    order.status === 'Dispatched' ? 'bg-purple-100 text-purple-700' :
+                                                    'bg-orange-100 text-orange-700'
                                                 }`}>
                                                 {order.status}
                                             </span>
@@ -245,13 +251,17 @@ const DeliverySlip = () => {
                                             )}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <button
-                                                onClick={() => handleGenerateSingle(order)}
-                                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-all mx-auto"
-                                            >
-                                                <MdDownload size={16} />
-                                                Generate
-                                            </button>
+                                            <InvoiceGenerator 
+                                                order={order} 
+                                                items={order.items} 
+                                                settings={settings}
+                                                customTrigger={
+                                                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-all mx-auto shadow-sm">
+                                                        <MdDownload size={16} />
+                                                        Invoice
+                                                    </button>
+                                                }
+                                            />
                                         </td>
                                     </tr>
                                 ))}
@@ -268,10 +278,10 @@ const DeliverySlip = () => {
                     <div>
                         <h3 className="text-sm font-black text-blue-900 uppercase tracking-wider mb-2">Quick Tips</h3>
                         <ul className="text-sm text-blue-800 space-y-1">
-                            <li>• Delivery slips are available for <strong>Confirmed, Packed, Dispatched,</strong> and <strong>Out for Delivery</strong> orders</li>
-                            <li>• Select multiple orders to generate a bulk PDF with all delivery slips</li>
-                            <li>• Each delivery slip includes customer details, items, and COD amount if applicable</li>
-                            <li>• Click on an Order ID to view full order details</li>
+                            <li>• View and manage <strong>All Orders</strong> irrespective of their current status</li>
+                            <li>• Select multiple orders to generate a bulk PDF with all invoices/slips</li>
+                            <li>• Each document includes customer details, items, and payment info</li>
+                            <li>• Use the search bar for quick access by ID, Name or Phone</li>
                         </ul>
                     </div>
                 </div>

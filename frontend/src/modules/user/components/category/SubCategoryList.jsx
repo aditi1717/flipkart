@@ -8,15 +8,15 @@ const SubCategoryList = ({ subCategories }) => {
     return (
         <>
             {/* MOBILE VIEW: Identical to original 2-row grid */}
-            <div className="lg:hidden bg-white dark:bg-gray-900 py-4 mb-2">
-                <div className="grid grid-rows-2 grid-flow-col auto-cols-min gap-x-4 gap-y-3 overflow-x-auto px-4 no-scrollbar">
+            <div className="lg:hidden bg-white py-4 mb-2">
+                <div className="flex overflow-x-auto gap-x-6 gap-y-4 px-4 no-scrollbar pb-2 min-h-max">
                     {subCategories.map((sub, index) => {
                         const currentPath = location.pathname.endsWith('/') ? location.pathname.slice(0, -1) : location.pathname;
                         const targetPath = `${currentPath}/${encodeURIComponent(sub.name)}`;
 
                         return (
-                            <Link key={index} to={targetPath} className="flex flex-col items-center cursor-pointer hover:opacity-80 w-[60px]">
-                                <div className="w-[60px] h-[60px] bg-[#ffede2] rounded-[18px] border-b-[3px] border-orange-200 flex items-center justify-center overflow-hidden mb-1">
+                            <Link key={index} to={targetPath} className="flex flex-col items-center cursor-pointer hover:opacity-80 shrink-0 w-[85px]">
+                                <div className="w-[70px] h-[70px] bg-blue-50/50 rounded-2xl border border-blue-100/50 flex items-center justify-center overflow-hidden mb-2 transition-transform active:scale-95 shadow-sm">
                                     <img
                                         src={sub.image}
                                         alt={sub.name}
@@ -27,7 +27,7 @@ const SubCategoryList = ({ subCategories }) => {
                                         }}
                                     />
                                 </div>
-                                <span className="text-[10px] font-semibold text-center text-black dark:text-gray-300 leading-tight w-[64px] line-clamp-2 tracking-tight">
+                                <span className="text-[11px] font-black text-center text-gray-900 leading-tight w-full line-clamp-2 tracking-tight px-1">
                                     {sub.name}
                                 </span>
                             </Link>

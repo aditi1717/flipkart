@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { MdAdd, MdClose, MdLocalOffer, MdDelete, MdToggleOn, MdToggleOff, MdContentCopy } from 'react-icons/md';
 import useCouponStore from '../../store/couponStore';
+import { confirmToast } from '../../../../utils/toastUtils.jsx';
 
 const CouponManager = () => {
     const {
@@ -53,11 +54,20 @@ const CouponManager = () => {
     };
 
     const handleDelete = (id) => {
-        if (activeTab === 'coupons') {
-            if (window.confirm('Delete this coupon?')) deleteCoupon(id);
-        } else {
-            if (window.confirm('Delete this offer?')) deleteOffer(id);
-        }
+        const typeStr = activeTab === 'coupons' ? 'coupon' : 'offer';
+        confirmToast({
+            message: `Are you sure you want to delete this ${typeStr}?`,
+            type: 'danger',
+            icon: 'delete_forever',
+            confirmText: 'Delete',
+            onConfirm: () => {
+                if (activeTab === 'coupons') {
+                    deleteCoupon(id);
+                } else {
+                    deleteOffer(id);
+                }
+            }
+        });
     };
 
     const copyCode = (code) => {

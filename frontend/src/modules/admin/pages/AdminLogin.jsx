@@ -8,8 +8,7 @@ const AdminLogin = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    // const [error, setError] = useState(''); // Removing local error state
-    const login = useAdminAuthStore((state) => state.login);
+    const { login, loading } = useAdminAuthStore();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -41,7 +40,10 @@ const AdminLogin = () => {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900"
+                            disabled={loading}
+                            className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900 ${
+                                loading ? 'bg-gray-50 cursor-not-allowed opacity-75' : 'bg-white'
+                            }`}
                             placeholder="admin@flipkart.com"
                             required
                         />
@@ -55,7 +57,10 @@ const AdminLogin = () => {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900"
+                            disabled={loading}
+                            className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900 ${
+                                loading ? 'bg-gray-50 cursor-not-allowed opacity-75' : 'bg-white'
+                            }`}
                             placeholder="••••••••"
                             required
                         />
@@ -65,9 +70,19 @@ const AdminLogin = () => {
 
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+                        disabled={loading}
+                        className={`w-full py-3 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${
+                            loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
                     >
-                        Sign In
+                        {loading ? (
+                            <>
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <span>Signing In...</span>
+                            </>
+                        ) : (
+                            'Sign In'
+                        )}
                     </button>
                 </form>
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import API from '../../../services/api';
 import { toast } from 'react-hot-toast';
+import { confirmToast } from '../../../utils/toastUtils.jsx';
 import Loader from '../../../components/common/Loader';
 
 const OrderDetails = () => {
@@ -41,21 +42,27 @@ const OrderDetails = () => {
     };
 
     const handleCancelOrder = async () => {
-        if (!window.confirm('Are you sure you want to cancel this order? It will be sent to the admin for approval.')) return;
-
-        try {
-            toast.loading('Requesting cancellation...', { id: 'cancel-order' });
-            await API.post(`/returns`, { 
-                orderId: order._id,
-                type: 'Cancellation',
-                reason: 'User requested cancellation'
-            });
-            toast.success('Cancellation request sent!', { id: 'cancel-order' });
-            fetchOrderDetails(); // Refresh details
-        } catch (err) {
-            console.error('Cancel order error:', err);
-            toast.error(err.response?.data?.message || 'Failed to request cancellation', { id: 'cancel-order' });
-        }
+        confirmToast({
+            message: 'Are you sure you want to cancel this order?\nIt will be sent to the admin for approval.',
+            type: 'warning',
+            icon: 'report_problem',
+            confirmText: 'Cancel Order',
+            onConfirm: async () => {
+                try {
+                    toast.loading('Requesting cancellation...', { id: 'cancel-order' });
+                    await API.post(`/returns`, { 
+                        orderId: order._id,
+                        type: 'Cancellation',
+                        reason: 'User requested cancellation'
+                    });
+                    toast.success('Cancellation request sent!', { id: 'cancel-order' });
+                    fetchOrderDetails(); // Refresh details
+                } catch (err) {
+                    console.error('Cancel order error:', err);
+                    toast.error(err.response?.data?.message || 'Failed to request cancellation', { id: 'cancel-order' });
+                }
+            }
+        });
     };
 
     const getStatusColor = (status) => {
@@ -67,6 +74,7 @@ const OrderDetails = () => {
             'Out for Delivery': 'bg-orange-100 text-orange-800 border-orange-200',
             'Delivered': 'bg-green-100 text-green-800 border-green-200',
             'Cancelled': 'bg-red-100 text-red-800 border-red-200',
+            'Cancellation Requested': 'bg-orange-100 text-orange-800 border-orange-200',
             'Return Requested': 'bg-orange-100 text-orange-800 border-orange-200',
             'Replacement Requested': 'bg-blue-100 text-blue-800 border-blue-200',
             'Approved': 'bg-teal-100 text-teal-800 border-teal-200',
@@ -90,6 +98,7 @@ const OrderDetails = () => {
             'Out for Delivery': 'delivery_dining',
             'Delivered': 'done_all',
             'Cancelled': 'cancel',
+            'Cancellation Requested': 'hourglass_empty',
             'Return Requested': 'assignment_return',
             'Replacement Requested': 'sync',
             'Approved': 'thumb_up',
@@ -173,7 +182,7 @@ const OrderDetails = () => {
                     {/* Left Column */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Order Status Timeline */}
-                        {order.status !== 'Cancelled' && (
+                        {order.status !== 'Cancelled' && order.status !== 'Cancellation Requested' && (
                             <div className="bg-white p-6 rounded-xl shadow-md border-2 border-blue-100">
                                 <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
                                     <span className="material-icons text-blue-600">local_shipping</span>
@@ -301,6 +310,19 @@ const OrderDetails = () => {
                                         </div>
                                     );
                                 })()}
+                            </div>
+                        )}
+
+                        {/* Cancellation Requested status */}
+                        {order.status === 'Cancellation Requested' && (
+                            <div className="bg-orange-50 border-2 border-orange-200 p-6 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                    <span className="material-icons text-orange-600 text-4xl animate-pulse">hourglass_empty</span>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-orange-800">Cancellation Requested</h3>
+                                        <p className="text-sm text-orange-600 mt-1">Your request is being reviewed by our team. You'll be notified once it's approved.</p>
+                                    </div>
+                                </div>
                             </div>
                         )}
 

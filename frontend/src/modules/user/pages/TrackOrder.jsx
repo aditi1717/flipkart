@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
+import { confirmToast } from '../../../utils/toastUtils.jsx';
 
 const TrackOrder = () => {
     const { orderId, productId } = useParams();
@@ -70,9 +71,13 @@ const TrackOrder = () => {
     // Auto-cancellation for testing purposes
     const updateStatus = useCartStore(state => state.updateOrderStatus);
     const handleCancel = () => {
-        if (window.confirm('Are you sure you want to cancel this order?')) {
-            updateStatus(order.id, 'CANCELLED');
-        }
+        confirmToast({
+            message: 'Are you sure you want to cancel this order?',
+            type: 'danger',
+            icon: 'cancel',
+            confirmText: 'Cancel Order',
+            onConfirm: () => updateStatus(order.id, 'CANCELLED')
+        });
     };
 
     return (

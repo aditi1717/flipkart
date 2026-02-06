@@ -8,26 +8,30 @@ const useAdminAuthStore = create(
             isAuthenticated: false,
             adminUser: null,
             error: null,
+            loading: false,
 
             // Real login
             login: async (email, password) => {
+                set({ loading: true, error: null });
                 try {
                     const { data } = await API.post('/admin/login', { email, password });
                     if (data.isAdmin || data.role === 'superadmin' || data.role === 'admin') {
                         set({
                             isAuthenticated: true,
                             adminUser: data,
-                            error: null
+                            error: null,
+                            loading: false
                         });
                         return true;
                     } else {
-                        set({ error: 'Not authorized as admin' });
+                        set({ error: 'Not authorized as admin', loading: false });
                         return false;
                     }
                 } catch (error) {
                     set({
                         error: error.response?.data?.message || 'Login failed',
-                        isAuthenticated: false
+                        isAuthenticated: false,
+                        loading: false
                     });
                      return false;
                 }

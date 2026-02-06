@@ -12,6 +12,7 @@ import {
 } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import useOfferStore from '../../store/offerStore';
+import { confirmToast } from '../../../../utils/toastUtils.jsx';
 
 const OfferList = () => {
     const navigate = useNavigate();
@@ -36,13 +37,19 @@ const OfferList = () => {
     });
 
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this offer?')) {
-            try {
-                await deleteOffer(id);
-            } catch (error) {
-                toast.error('Failed to delete offer');
+        confirmToast({
+            message: 'Are you sure you want to delete this offer?',
+            type: 'danger',
+            icon: 'delete_forever',
+            confirmText: 'Delete Offer',
+            onConfirm: async () => {
+                try {
+                    await deleteOffer(id);
+                } catch (error) {
+                    toast.error('Failed to delete offer');
+                }
             }
-        }
+        });
     };
 
     const handleToggleStatus = async (id) => {

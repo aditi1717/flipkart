@@ -76,6 +76,12 @@ export const createReturnRequest = async (req, res) => {
             return res.status(201).json(createdReturn);
         } else {
             // CANCELLATION Flow
+            // Safety Check: Only Pending or Confirmed orders can be cancelled
+            const eligibleForCancellation = ['Pending', 'Confirmed'].includes(order.status);
+            if (!eligibleForCancellation) {
+                return res.status(400).json({ message: `Order cannot be cancelled in its current status: ${order.status}` });
+            }
+
             const newReturn = new Return({
                 id: `CAN-${Date.now()}`,
                 orderId: order._id,

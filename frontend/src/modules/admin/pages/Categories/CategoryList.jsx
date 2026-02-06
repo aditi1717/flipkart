@@ -3,6 +3,7 @@ import { MdAdd, MdEdit, MdDelete, MdExpandMore, MdChevronRight, MdCheckCircle, M
 import useCategoryStore from '../../store/categoryStore';
 import CategoryForm from './CategoryForm';
 import Pagination from '../../components/common/Pagination';
+import { confirmToast } from '../../../../utils/toastUtils.jsx';
 
 const CategoryList = () => {
     const { categories, deleteCategory, toggleCategoryStatus, fetchCategories } = useCategoryStore();
@@ -36,9 +37,13 @@ const CategoryList = () => {
     };
 
     const handleDelete = (id, name) => {
-        if (window.confirm(`Are you sure you want to delete "${name}"? All subcategories will also be deleted.`)) {
-            deleteCategory(id);
-        }
+        confirmToast({
+            message: `Are you sure you want to delete "${name}"?\nAll subcategories will also be deleted.`,
+            type: 'danger',
+            icon: 'delete_sweep',
+            confirmText: 'Delete Category',
+            onConfirm: () => deleteCategory(id)
+        });
     };
 
     const handleCloseForm = () => {

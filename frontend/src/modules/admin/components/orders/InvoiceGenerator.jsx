@@ -406,4 +406,53 @@ const InvoiceGenerator = ({ order, item, items, settings, customTrigger }) => {
   );
 };
 
+/* ============================================
+   BULK INVOICE GENERATOR
+============================================ */
+
+export const BulkInvoiceGenerator = ({ orders, settings, customTrigger }) => {
+  const componentRef = useRef(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: componentRef,
+  });
+
+  if (!orders || orders.length === 0) return null;
+
+  const trigger = customTrigger ? (
+    React.cloneElement(customTrigger, { 
+      onClick: (e) => {
+        e.preventDefault();
+        handlePrint();
+      }
+    })
+  ) : (
+    <button
+      onClick={handlePrint}
+      className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+    >
+      Print {orders.length} Invoices
+    </button>
+  );
+
+  return (
+    <>
+      <div style={{ display: "none" }}>
+        <div ref={componentRef}>
+          {orders.map((order, index) => (
+            <div key={order.id || order._id} style={{ pageBreakAfter: "always" }}>
+              <InvoiceDisplay
+                order={order}
+                items={order.items || order.orderItems}
+                settings={settings || {}}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      {trigger}
+    </>
+  );
+};
+
 export default InvoiceGenerator;

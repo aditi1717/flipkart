@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
+import { useAuthStore } from '../store/authStore';
+import { confirmToast } from '../../../utils/toastUtils.jsx';
 import ProductSection from '../components/home/ProductSection';
 import { products } from '../data/mockData';
 import toast from 'react-hot-toast';
@@ -20,19 +22,25 @@ const Cart = () => {
         getTotalSavings,
         addresses
     } = useCartStore();
+    const { isAuthenticated } = useAuthStore();
 
     const handleCheckout = () => {
+        if (!isAuthenticated) {
+            toast.error('Please login first to proceed to checkout');
+            navigate('/login', { state: { from: '/cart' } });
+            return;
+        }
         if (cart.length === 0) {
             toast.error('🛒 Your cart is empty!');
             return;
         }
         if (addresses.length === 0) {
-            const shouldRedirect = window.confirm(
-                '📍 Please add a delivery address before checkout.\n\nWould you like to add one now?'
-            );
-            if (shouldRedirect) {
-                navigate('/addresses');
-            }
+            confirmToast({
+                message: '📍 Please add a delivery address before checkout.\n\nWould you like to add one now?',
+                confirmText: 'Add Address',
+                icon: 'add_location_alt',
+                onConfirm: () => navigate('/addresses')
+            });
             return;
         }
         navigate('/checkout');

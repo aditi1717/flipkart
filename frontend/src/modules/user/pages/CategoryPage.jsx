@@ -155,7 +155,7 @@ const CategoryPage = () => {
     return (
         <div className="bg-[#f1f3f6] min-h-screen pb-20 md:pb-10">
             {/* Header / Breadcrumbs Section */}
-            <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 md:relative z-40">
+            <div className="bg-white shadow-sm border-b border-gray-200 sticky top-[106px] md:relative z-40">
                 <div className="max-w-[1440px] mx-auto px-4 py-2.5 md:py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3 md:gap-6">
                         <button
@@ -360,7 +360,7 @@ const CategoryPage = () => {
                     <main className="flex-1 min-w-0">
                         {/* Highlights / Subcategories */}
                         {categoryData.subCategories?.length > 0 && (
-                            <div className="bg-white md:rounded-lg md:shadow-sm border border-gray-100 overflow-hidden mb-4">
+                            <div className="bg-white md:rounded-lg md:shadow-sm border border-gray-100 mb-4">
                                 <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                                     <h2 className="text-[13px] font-black text-gray-900 uppercase tracking-[2px]">Shop by Department</h2>
                                     <span className="material-icons text-gray-300">chevron_right</span>

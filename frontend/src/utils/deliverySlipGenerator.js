@@ -42,7 +42,7 @@ export const generateDeliverySlip = (order) => {
     doc.text('Delivery Slip No:', 15, yPos);
     doc.setFont(undefined, 'normal');
     doc.setFontSize(10);
-    doc.text(`DS-${order._id?.slice(-8).toUpperCase() || order.id || 'N/A'}`, 60, yPos);
+    doc.text(`DS-${(order.displayId || order._id?.slice(-8) || order.id || 'N/A').toUpperCase()}`, 60, yPos);
 
     doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
@@ -57,7 +57,7 @@ export const generateDeliverySlip = (order) => {
     doc.text('Order ID:', 15, yPos);
     doc.setFont(undefined, 'normal');
     doc.setFontSize(10);
-    doc.text(`#${order._id?.slice(-8).toUpperCase() || order.id || 'N/A'}`, 60, yPos);
+    doc.text(`#${order.displayId || order._id?.slice(-8).toUpperCase() || order.id || 'N/A'}`, 60, yPos);
 
     doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
@@ -230,7 +230,7 @@ export const generateDeliverySlip = (order) => {
     doc.text('IndianKart - Delivering Happiness | Support: +91 1800-123-4567', pageWidth / 2, yPos, { align: 'center' });
 
     // Save the PDF
-    const fileName = `DeliverySlip_${order._id?.slice(-8).toUpperCase() || order.id || 'Order'}.pdf`;
+    const fileName = `DeliverySlip_${order.displayId || order._id?.slice(-8).toUpperCase() || order.id || 'Order'}.pdf`;
     doc.save(fileName);
 };
 

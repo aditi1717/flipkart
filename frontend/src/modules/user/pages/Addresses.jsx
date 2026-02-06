@@ -7,6 +7,7 @@ import TranslatedText from '../components/common/TranslatedText';
 import { useGoogleTranslation } from '../../../hooks/useGoogleTranslation';
 
 import toast from 'react-hot-toast';
+import { confirmToast } from '../../../utils/toastUtils.jsx';
 
 const Addresses = () => {
     const navigate = useNavigate();
@@ -72,9 +73,13 @@ const Addresses = () => {
     };
 
     const handleDelete = (id) => {
-        if (window.confirm('Are you sure you want to delete this address?')) {
-            removeAddress(id);
-        }
+        confirmToast({
+            message: 'Are you sure you want to delete this address?',
+            onConfirm: () => removeAddress(id),
+            type: 'danger',
+            icon: 'delete_forever',
+            confirmText: 'Delete'
+        });
         setShowMenu(null);
     };
 

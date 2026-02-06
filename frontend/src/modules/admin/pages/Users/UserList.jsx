@@ -86,7 +86,7 @@ const UserList = () => {
                     <input
                         type="text"
                         placeholder="Search by name, email or phone..."
-                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all text-sm font-medium"
+                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all text-sm text-gray-900 placeholder:text-gray-900 font-bold"
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
@@ -96,7 +96,7 @@ const UserList = () => {
                 </div>
                 <div className="flex items-center gap-3 w-full lg:w-auto">
                     <select
-                        className="flex-1 lg:flex-none px-6 py-3 bg-gray-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-500 text-sm font-bold min-w-[150px]"
+                        className="flex-1 lg:flex-none px-6 py-3 bg-gray-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-500 text-sm font-black text-gray-900 min-w-[150px]"
                         value={statusFilter}
                         onChange={(e) => {
                             setStatusFilter(e.target.value);

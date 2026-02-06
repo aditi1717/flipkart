@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import ProductSection from '../components/home/ProductSection';
+import { useAuthStore } from '../store/authStore';
 import { useProduct, useProducts } from '../../../hooks/useData';
 import { useGoogleTranslation } from '../../../hooks/useGoogleTranslation';
 import API from '../../../services/api';
 import toast from 'react-hot-toast';
+import { confirmToast } from '../../../utils/toastUtils.jsx';
 import './ProductDetails.css';
 
 const ProductSkeleton = () => {
@@ -80,6 +82,7 @@ const ProductSkeleton = () => {
 const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user, isAuthenticated } = useAuthStore();
     const { addToCart, wishlist, toggleWishlist, addresses } = useCartStore();
     
     // Fetch individual product
@@ -272,19 +275,29 @@ const ProductDetails = () => {
     };
 
     const handleAddToCart = () => {
+        if (!isAuthenticated) {
+            toast.error('Please login first to add items to cart');
+            navigate('/login', { state: { from: window.location.pathname } });
+            return;
+        }
         addToCart(product, selectedVariants);
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
     };
 
     const handleBuyNow = () => {
+        if (!isAuthenticated) {
+            toast.error('Please login first to buy items');
+            navigate('/login', { state: { from: window.location.pathname } });
+            return;
+        }
         if (addresses.length === 0) {
-            const shouldRedirect = window.confirm(
-                '📍 Please add a delivery address before checkout.\n\nWould you like to add one now?'
-            );
-            if (shouldRedirect) {
-                navigate('/addresses');
-            }
+            confirmToast({
+                message: '📍 Please add a delivery address before purchase.\n\nWould you like to add one now?',
+                confirmText: 'Add Address',
+                icon: 'add_location_alt',
+                onConfirm: () => navigate('/addresses')
+            });
             return;
         }
         // Instead of adding to cart, pass item directly to checkout via state
@@ -655,17 +668,17 @@ const ProductDetails = () => {
 
 
                             <div className="flex items-center gap-4 group cursor-pointer">
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${pincodeStatus?.isCOD === false ? 'bg-red-50 text-red-500' : 'bg-[#f5f5f5] text-gray-800 group-hover:bg-blue-50'}`}>
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${pincodeStatus ? (pincodeStatus?.isCOD ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500') : 'bg-[#f5f5f5] text-gray-800 group-hover:bg-blue-50'}`}>
                                     <span className="material-icons-outlined text-[24px] group-hover:text-blue-600">
-                                        {pincodeStatus?.isCOD === false ? 'money_off' : 'payments'}
+                                        {pincodeStatus ? (pincodeStatus.isCOD ? 'payments' : 'money_off') : 'payments'}
                                     </span>
                                 </div>
                                 <div className="text-gray-800">
-                                    <span className={`text-[14px] font-bold leading-tight block ${pincodeStatus?.isCOD === false ? 'text-red-600' : ''}`}>
-                                        {pincodeStatus?.isCOD === false ? codNotAvailableText : cashOnDeliveryText}
+                                    <span className={`text-[14px] font-bold leading-tight block ${pincodeStatus ? (pincodeStatus.isCOD ? 'text-green-700' : 'text-red-600') : ''}`}>
+                                        {pincodeStatus ? (pincodeStatus.isCOD ? cashOnDeliveryText : codNotAvailableText) : cashOnDeliveryText}
                                     </span>
                                     <span className="text-xs text-gray-500 px-0.5">
-                                        {pincodeStatus?.isCOD === false ? onlinePaymentOnlyText : payAtDoorstepText}
+                                        {pincodeStatus ? (pincodeStatus.isCOD ? payAtDoorstepText : onlinePaymentOnlyText) : payAtDoorstepText}
                                     </span>
                                 </div>
                             </div>
@@ -1074,12 +1087,18 @@ const ProductDetails = () => {
                         )}
 
                         <div className="flex flex-col items-center gap-2.5 w-1/3">
-                            <div className="w-12 h-12 rounded-xl bg-[#f5f5f5] flex items-center justify-center text-gray-800">
-                                <span className="material-icons-outlined text-[24px]">payments</span>
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${pincodeStatus ? (pincodeStatus.isCOD ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500') : 'bg-[#f5f5f5] text-gray-800'}`}>
+                                <span className="material-icons-outlined text-[24px]">
+                                    {pincodeStatus ? (pincodeStatus.isCOD ? 'payments' : 'money_off') : 'payments'}
+                                </span>
                             </div>
-                            <div className="flex items-center text-gray-800">
-                                <span className="text-[11px] font-bold text-center leading-tight">{cashOnDeliveryText}</span>
-                                <span className="material-icons text-[14px] text-gray-400 ml-0.5">chevron_right</span>
+                            <div className="flex flex-col items-center text-gray-800">
+                                <span className={`text-[11px] font-bold text-center leading-tight ${pincodeStatus ? (pincodeStatus.isCOD ? 'text-green-700' : 'text-red-600') : ''}`}>
+                                    {pincodeStatus ? (pincodeStatus.isCOD ? cashOnDeliveryText : codNotAvailableText) : cashOnDeliveryText}
+                                </span>
+                                <span className="text-[9px] text-gray-500 mt-0.5 uppercase tracking-tighter">
+                                    {pincodeStatus ? (pincodeStatus.isCOD ? payAtDoorstepText : onlinePaymentOnlyText) : payAtDoorstepText}
+                                </span>
                             </div>
                         </div>
 

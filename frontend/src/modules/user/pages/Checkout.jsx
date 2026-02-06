@@ -58,15 +58,18 @@ const Checkout = () => {
         }
     }, [selectedAddress, addresses]);
 
-    // Redirect if cart is empty or no addresses exist
+    // Redirect if not logged in, cart is empty or no addresses exist
     useEffect(() => {
-        if (checkoutItems.length === 0) {
+        if (!user) {
+            toast.error('Please login first to access checkout');
+            navigate('/login', { state: { from: '/checkout' }, replace: true });
+        } else if (checkoutItems.length === 0) {
             navigate('/cart', { replace: true });
         } else if (addresses.length === 0) {
             toast.error('📍 Please add a delivery address before placing an order.');
             navigate('/addresses', { replace: true });
         }
-    }, [cart, addresses, navigate]);
+    }, [user, cart, addresses, navigate]);
 
     const [couponInput, setCouponInput] = useState('');
     const [couponError, setCouponError] = useState('');
@@ -183,6 +186,12 @@ const Checkout = () => {
         // Validate address object exists and has required fields
         if (!selectedAddrObj || !selectedAddrObj.address || !selectedAddrObj.city || !selectedAddrObj.pincode) {
             toast.error('Please add a complete delivery address with all required fields');
+            return;
+        }
+
+        // Validate mobile number
+        if (!selectedAddrObj.mobile) {
+            toast.error('Please ensure a mobile number is added to your delivery address');
             return;
         }
 
