@@ -213,26 +213,28 @@ export const updateReturnStatus = async (req, res) => {
                         if (order.status !== 'Cancelled') {
                             order.status = 'Cancelled';
                             
-                            // Restore Stock Logic (Reused from previous orderController attempt)
-                            const ProductModel = mongoose.model('Product');
                             for (const item of order.orderItems) {
                                 const product = await ProductModel.findOne({ id: item.product });
                                 if (product) {
-                                    // 1. Restore Variant Stock
+                                    const update = { $inc: { stock: item.qty } };
+                                    
                                     if (item.variant && Object.keys(item.variant).length > 0) {
-                                        const sku = product.skus.find(s => {
+                                        const skuIndex = product.skus.findIndex(s => {
                                             const comb = s.combination instanceof Map ? Object.fromEntries(s.combination) : s.combination;
                                             const itemKeys = Object.keys(item.variant);
                                             const combKeys = Object.keys(comb);
                                             if (itemKeys.length !== combKeys.length) return false;
                                             return itemKeys.every(key => String(item.variant[key]) === String(comb[key]));
                                         });
-                                        if (sku) sku.stock += item.qty;
+                                        if (skuIndex !== -1) {
+                                            update.$inc[`skus.${skuIndex}.stock`] = item.qty;
+                                        }
                                     }
-                                    // 2. Restore Overall Stock
-                                    product.stock += item.qty;
-                                    product.markModified('skus');
-                                    await product.save();
+
+                                    await ProductModel.findOneAndUpdate(
+                                        { _id: product._id },
+                                        update
+                                    );
                                 }
                             }
                             await order.save();

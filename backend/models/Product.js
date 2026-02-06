@@ -52,7 +52,7 @@ const productSchema = mongoose.Schema({
     },
 
     // Inventory & Variants
-    stock: { type: Number, default: 0 },
+    stock: { type: Number, default: 0, min: 0 },
     variantLabel: { type: String }, // 'Size', 'Color' etc.
     variantHeadings: [{
         id: { type: Number },
@@ -65,7 +65,7 @@ const productSchema = mongoose.Schema({
     }],
     skus: [{
         combination: { type: Map, of: String }, // e.g. { Color: "Red", Size: "M" }
-        stock: { type: Number, default: 0 }
+        stock: { type: Number, default: 0, min: 0 }
     }],
     
     // Legacy fields if needed

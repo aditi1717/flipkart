@@ -11,17 +11,25 @@ const StockManagement = () => {
     const [expandedProduct, setExpandedProduct] = useState(null);
     const [editingStock, setEditingStock] = useState({}); // { productId: value, "productId-skuIndex": value }
 
-    const fetchProducts = async () => {
+    const fetchProducts = async (showToast = false) => {
         try {
             setLoading(true);
             const { data } = await API.get('/products?all=true');
             setProducts(data);
+            if (showToast) toast.success('Inventory synced successfully');
         } catch (error) {
             console.error('Fetch products error:', error);
             toast.error('Failed to fetch products');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleRefresh = () => {
+        setSearchTerm('');
+        setEditingStock({});
+        setExpandedProduct(null);
+        fetchProducts(true);
     };
 
     useEffect(() => {
@@ -91,10 +99,10 @@ const StockManagement = () => {
                     <p className="text-sm text-gray-500 font-medium">Update inventory levels for products and variants</p>
                 </div>
                 <button 
-                    onClick={fetchProducts}
+                    onClick={handleRefresh}
                     className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all font-bold text-sm shadow-sm"
                 >
-                    <MdRefresh size={20} /> Refresh
+                    <MdRefresh size={20} className={loading ? 'animate-spin' : ''} /> Refresh
                 </button>
             </div>
 
@@ -165,10 +173,15 @@ const StockManagement = () => {
                                                     disabled={product.skus && product.skus.length > 0}
                                                     className={`w-20 px-3 py-2 text-center rounded-xl border-2 font-black text-sm transition-all outline-none ${
                                                         product.skus && product.skus.length > 0 
-                                                        ? 'bg-gray-100 border-transparent text-gray-400' 
+                                                        ? 'bg-gray-100 border-transparent text-gray-400 cursor-not-allowed' 
                                                         : 'bg-white border-blue-50 focus:border-blue-500 text-gray-900 group-hover:shadow-lg'
                                                     }`}
-                                                    value={editingStock[product.id] ?? product.stock}
+                                                    value={
+                                                        editingStock[product.id] ?? 
+                                                        (product.skus && product.skus.length > 0 
+                                                            ? product.skus.reduce((acc, s) => acc + (Number(s.stock) || 0), 0)
+                                                            : product.stock)
+                                                    }
                                                     onChange={(e) => handleStockChange(product.id, e.target.value)}
                                                 />
                                                 {product.stock <= 5 && !product.skus?.length && (

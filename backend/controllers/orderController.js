@@ -58,6 +58,38 @@ export const addOrderItems = async (req, res) => {
             }
         }
 
+        // 1. Initial Stock Validation (Pre-creation)
+        for (const item of orderItems) {
+            const product = await Product.findOne({ id: item.product || item._id });
+            if (!product) {
+                return res.status(404).json({ message: `Product not found: ${item.name}` });
+            }
+
+            // Check Variant Stock if applicable
+            if (item.variant && Object.keys(item.variant).length > 0) {
+                const sku = product.skus.find(s => {
+                    const comb = s.combination instanceof Map ? Object.fromEntries(s.combination) : s.combination;
+                    const itemKeys = Object.keys(item.variant);
+                    const combKeys = Object.keys(comb);
+                    if (itemKeys.length !== combKeys.length) return false;
+                    return itemKeys.every(key => String(item.variant[key]) === String(comb[key]));
+                });
+                
+                if (!sku || sku.stock < item.qty) {
+                    return res.status(400).json({ 
+                        message: `Insufficient stock for ${item.name} (${Object.values(item.variant).join(', ')})`,
+                        available: sku ? sku.stock : 0
+                    });
+                }
+            } else if (product.stock < item.qty) {
+                // Check Overall Stock
+                return res.status(400).json({ 
+                    message: `Insufficient stock for ${item.name}`,
+                    available: product.stock
+                });
+            }
+        }
+
         const order = new Order({
             displayId,
             transactionId: req.body.paymentResult?.razorpay_payment_id || req.body.paymentResult?.id || null,
@@ -79,13 +111,15 @@ export const addOrderItems = async (req, res) => {
 
         const createdOrder = await order.save();
 
-        // Reduce Stock for each item
+        // 2. Reduce Stock (Post-creation)
         for (const item of createdOrder.orderItems) {
             const product = await Product.findOne({ id: item.product });
             if (product) {
-                // 1. Reduce Variant (SKU) Stock if variant exists
+                const update = { $inc: { stock: -item.qty } };
+                
+                // If variant exists, find its index for atomic array update
                 if (item.variant && Object.keys(item.variant).length > 0) {
-                    const sku = product.skus.find(s => {
+                    const skuIndex = product.skus.findIndex(s => {
                         const comb = s.combination instanceof Map ? Object.fromEntries(s.combination) : s.combination;
                         const itemKeys = Object.keys(item.variant);
                         const combKeys = Object.keys(comb);
@@ -93,33 +127,46 @@ export const addOrderItems = async (req, res) => {
                         return itemKeys.every(key => String(item.variant[key]) === String(comb[key]));
                     });
                     
-                    if (sku) {
-                        sku.stock -= item.qty;
-                        if (sku.stock <= 5) {
-                             await Notification.create({
+                    if (skuIndex !== -1) {
+                        update.$inc[`skus.${skuIndex}.stock`] = -item.qty;
+                    }
+                }
+
+                // Atomic update to avoid VersionError
+                const updatedProduct = await Product.findOneAndUpdate(
+                    { _id: product._id },
+                    update,
+                    { new: true }
+                );
+
+                if (updatedProduct) {
+                    // Overall Low Stock Alert
+                    if (updatedProduct.stock <= 5) {
+                        await Notification.create({
+                            type: 'stock',
+                            title: 'Low Stock Alert',
+                            message: `Product "${updatedProduct.name}" is running low on stock (${updatedProduct.stock} remaining).`,
+                            relatedId: updatedProduct._id
+                        });
+                    }
+
+                    // Variant Low Stock Alert (Check updated SKU stock)
+                    if (item.variant && Object.keys(item.variant).length > 0) {
+                         const updatedSku = updatedProduct.skus.find(s => {
+                            const comb = s.combination instanceof Map ? Object.fromEntries(s.combination) : s.combination;
+                            const itemKeys = Object.keys(item.variant);
+                            return itemKeys.every(key => String(item.variant[key]) === String(comb[key]));
+                        });
+                        if (updatedSku && updatedSku.stock <= 5) {
+                            await Notification.create({
                                 type: 'stock',
                                 title: 'Low Stock Alert (Variant)',
-                                message: `Product "${product.name}" variant has low stock (${sku.stock} remaining).`,
-                                relatedId: product._id
+                                message: `Product "${updatedProduct.name}" variant has low stock (${updatedSku.stock} remaining).`,
+                                relatedId: updatedProduct._id
                             });
                         }
                     }
                 }
-
-                // 2. Reduce Overall Product Stock
-                product.stock -= item.qty;
-                if (product.stock <= 5) {
-                    await Notification.create({
-                        type: 'stock',
-                        title: 'Low Stock Alert',
-                        message: `Product "${product.name}" is running low on stock (${product.stock} remaining).`,
-                        relatedId: product._id
-                    });
-                }
-                
-                // Use markModified if using Map for combination to ensure Mongoose saves nested changes
-                product.markModified('skus');
-                await product.save();
             }
         }
 
