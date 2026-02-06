@@ -18,12 +18,12 @@ export const authAdmin = async (req, res) => {
     }
 
     if (adminQuery && (await adminQuery.matchPassword(password))) {
-        const token = generateToken(res, admin._id);
+        const token = generateToken(res, adminQuery._id);
         res.json({
-            _id: admin._id,
-            name: admin.name,
-            email: admin.email,
-            role: admin.role,
+            _id: adminQuery._id,
+            name: adminQuery.name,
+            email: adminQuery.email,
+            role: adminQuery.role,
             isAdmin: true,
             token
         });

@@ -39,6 +39,8 @@ import logo from '../../../../assets/indiankart-logo.png';
 
 const Header = () => {
     const totalItems = useCartStore((state) => state.getTotalItems());
+    const addresses = useCartStore((state) => state.addresses);
+    const primaryAddress = addresses && addresses.length > 0 ? addresses[0] : null;
     const navigate = useNavigate();
     const location = useLocation();
     const { categories, loading: categoriesLoading } = useCategories();
@@ -164,15 +166,15 @@ const Header = () => {
     const categoriesText = useGoogleTranslation('Categories');
 
     return (
-        <header className={`bg-white/95 backdrop-blur-md px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border-b border-blue-50/50 md:border-gray-100 transition-all duration-300 ${isSpecialPage ? 'py-2' : 'py-0.5 md:py-0'}`}>
-            <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center md:gap-8">
+        <header className={`${isPDP ? 'bg-[#D4EDFF]' : 'bg-white/95 backdrop-blur-md'} px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border-b transition-all duration-300 ${isPDP ? 'md:border-gray-100 py-1.5' : isCategory ? 'py-2 border-blue-50/50 md:border-gray-100' : 'py-0.5 md:py-0 border-blue-50/50 md:border-gray-100'}`}>
+            <div className={`max-w-[1440px] mx-auto flex ${isPDP ? 'flex-row items-center gap-2' : 'flex-col'} md:flex-row md:items-center md:gap-8`}>
 
-                {/* Mobile Top Row: Logo (Left) + Seller Button (Right) */}
-                <div className="flex items-center justify-between mb-0 md:mb-0 w-full md:w-auto">
-                    {/* Mobile Logo */}
-                    {!isSpecialPage && (
+                {/* Mobile Top Row: Logo (Left) + Seller Button (Right) - Hidden on mobile PDP to match single row design */}
+                <div className={`${isPDP ? 'hidden md:flex' : 'flex'} items-center justify-between mb-0 md:mb-0 w-full md:w-auto`}>
+                    {/* Mobile Logo - Only on Homepage */}
+                    {location.pathname === '/' && (
                         <div
-                            className="flex items-center md:hidden -my-4 cursor-pointer"
+                            className="flex items-center md:hidden -my-4 cursor-pointer shrink-0"
                             onClick={() => navigate('/')}
                         >
                             <img src={logo} alt="IndianKart" className="h-24 object-contain" />
@@ -187,38 +189,78 @@ const Header = () => {
                         <img src={logo} alt="IndianKart" className="h-[65px] lg:h-[100px] object-contain" />
                     </div>
                     
-                    {/* Language Switcher (Mobile) */}
-                     <div className="md:hidden flex items-center gap-2">
-                            <button 
-                                onClick={() => setLanguage('en')} 
-                                className={`text-[10px] font-bold px-2 py-1 rounded ${language === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
-                            >
-                                EN
-                            </button>
-                            <button 
-                                onClick={() => setLanguage('hi')} 
-                                className={`text-[10px] font-bold px-2 py-1 rounded ${language === 'hi' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
-                            >
-                                HI
-                            </button>
-                     </div>
+                    {/* Mobile Header Actions (Seller + Language) */}
+                    <div className="md:hidden flex items-center gap-2">
+                            {/* Become a Seller Button (Mobile) - Only on Homepage */}
+                            {location.pathname === '/' && (
+                                <div 
+                                    onClick={() => navigate('/become-seller')}
+                                    className="flex items-center gap-1.5 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100 shadow-sm active:scale-95 transition-all"
+                                >
+                                    <MdStore className="text-blue-600" size={16} />
+                                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Become a Seller</span>
+                                </div>
+                            )}
+
+                            {/* Language Switcher (Mobile) */}
+                            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-100">
+                                    <button 
+                                        onClick={() => setLanguage('en')} 
+                                        className={`text-[9px] font-black px-2 py-1 rounded transition-all ${language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
+                                    >
+                                        EN
+                                    </button>
+                                    <button 
+                                        onClick={() => setLanguage('hi')} 
+                                        className={`text-[9px] font-black px-2 py-1 rounded transition-all ${language === 'hi' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
+                                    >
+                                        HI
+                                    </button>
+                            </div>
+                    </div>
                 </div>
 
                 {/* Mobile Address - Moved Above Search */}
                 {!isSpecialPage && (
-                    <div className="flex md:hidden w-full mb-2 items-center gap-1 bg-blue-50/50 p-1.5 rounded-lg border border-blue-100">
+                    <div 
+                        onClick={() => navigate('/addresses')}
+                        className="flex md:hidden w-full mb-2 items-center gap-1 bg-blue-50/50 p-1.5 rounded-lg border border-blue-100 cursor-pointer active:bg-blue-100 transition-colors"
+                    >
                         <MdLocationPin className="text-sm text-blue-600 shrink-0" />
                         <div className="flex items-center gap-1 min-w-0 flex-1">
-                            <span className="text-gray-900 text-xs font-bold whitespace-nowrap">Delivering to 452001</span>
-                            <span className="text-gray-500 text-[10px] font-medium truncate">- Update location</span>
+                            <span className="text-gray-900 text-xs font-bold whitespace-nowrap">
+                                {primaryAddress ? `Delivering to ${primaryAddress.pincode}` : 'Select Location'}
+                            </span>
+                            <span className="text-gray-500 text-[10px] font-medium truncate">
+                                {primaryAddress ? `- ${primaryAddress.city}` : '- Update location'}
+                            </span>
                         </div>
                         <MdKeyboardArrowRight className="text-sm text-gray-400 shrink-0" />
                     </div>
                 )}
 
                 {/* Search Bar Row */}
-                <div className="flex items-center gap-3 flex-1 mt-0 md:mt-0 relative search-container">
-                    <div className="flex-1 bg-white rounded-lg flex items-center px-3 md:px-4 shadow-sm md:shadow-none overflow-hidden h-10 md:h-11 border border-gray-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-100 transition-all">
+                <div className="flex items-center gap-2 flex-1 mt-0 md:gap-3 md:mt-0 relative search-container">
+                    {/* Mobile Back Button (Only on PDP) */}
+                    {isPDP && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                console.log('Mobile back button triggered');
+                                if (window.history.length > 1) {
+                                    navigate(-1);
+                                } else {
+                                    navigate('/');
+                                }
+                            }}
+                            className="md:hidden flex items-center justify-center p-2 -ml-2 text-gray-700 active:scale-90 transition-all flex-shrink-0 z-[100] cursor-pointer"
+                        >
+                            <MdArrowBack size={26} />
+                        </button>
+                    )}
+
+                    <div className={`flex-1 bg-white rounded-lg flex items-center px-3 md:px-4 shadow-sm md:shadow-none overflow-hidden h-10 md:h-11 border transition-all ${isPDP ? 'border-blue-400 md:border-gray-200' : 'border-gray-200'} focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-100`}>
                         <IoSearch className={`text-gray-400 md:text-gray-500 text-[18px] md:text-[20px] mr-2 md:mr-3 ${isSearching ? 'animate-pulse' : ''}`} />
                         <input
                             className="bg-transparent border-none focus:ring-0 text-[14px] md:text-[15px] w-full p-0 outline-none placeholder-gray-400 md:placeholder-gray-500 text-black md:text-gray-800 h-full flex items-center font-normal"

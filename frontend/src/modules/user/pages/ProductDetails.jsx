@@ -401,6 +401,19 @@ const ProductDetails = () => {
     return (
         <div className="bg-white min-h-screen pb-24 font-sans text-gray-900">
             {/* ============================================================== */}
+            {/* COMMON BACK NAVIGATION - "Below" the header                   */}
+            {/* ============================================================== */}
+            <div className="hidden md:flex bg-white px-4 md:px-6 py-2.5 items-center gap-2 border-b border-gray-50 max-w-[1600px] mx-auto w-full">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="w-9 h-9 flex items-center justify-center bg-gray-50 rounded-full text-gray-800 hover:bg-gray-100 active:scale-90 transition-all shadow-sm"
+                >
+                    <span className="material-icons text-[22px]">arrow_back</span>
+                </button>
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Back to results</span>
+            </div>
+
+            {/* ============================================================== */}
             {/* DESKTOP VIEW (Visible only on md+)                           */}
             {/* ============================================================== */}
             <div className="hidden md:block max-w-[1600px] mx-auto p-6 animate-in fade-in duration-500">
@@ -855,20 +868,7 @@ const ProductDetails = () => {
                 </div>
             </div>
 
-            {/* ============================================================== */}
-            {/* MOBILE VIEW (Wrapped to hide on md+)                           */}
-            {/* ============================================================== */}
             <div className="md:hidden">
-                {/* Floating Back Button - Transparent and Sticky */}
-                <div className="sticky top-4 z-[100] h-0 overflow-visible pointer-events-none px-4">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="pointer-events-auto w-10 h-10 flex items-center justify-center text-gray-800 active:scale-95 transition-transform"
-                        style={{ textShadow: '0 0 10px rgba(255,255,255,0.8)' }}
-                    >
-                        <span className="material-icons text-[28px]">arrow_back</span>
-                    </button>
-                </div>
 
                 {/* Product Image Section - Single Image with Thumbnail Gallery */}
                 <div className="bg-white">
@@ -919,73 +919,73 @@ const ProductDetails = () => {
                 </div>
 
                 {/* Product Info - Redesigned */}
-                <div className="bg-white border-t-8 border-gray-100 px-4 py-4">
+                <div className="bg-white px-5 py-4">
                     {/* Brand */}
-                    <div className="mb-1">
-                        <span className="text-gray-500 text-xs font-medium uppercase tracking-wide">
+                    <div className="mb-2">
+                        <span className="text-blue-600 text-[10px] font-black uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">
                             {product.brand || 'Brand'}
                         </span>
                     </div>
 
                     {/* Product Name */}
-                    <h1 className="text-gray-900 text-base font-medium leading-snug mb-2">
+                    <h1 className="text-gray-900 text-lg font-bold leading-snug mb-3">
                         {product.name}
                     </h1>
 
                     {/* Rating */}
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="flex items-center gap-1 bg-green-600 text-white text-xs font-semibold px-2 py-0.5 rounded">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="flex items-center gap-1 bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded shadow-sm">
                             {averageRating}
                             <span className="material-icons text-[10px]">star</span>
                         </div>
-                        <span className="text-gray-500 text-xs">
+                        <span className="text-gray-400 text-xs font-medium">
                             {totalRatings.toLocaleString()} {ratingsText} & {totalRatings.toLocaleString()} {reviewsText}
                         </span>
                     </div>
 
                     {/* Price */}
-                    <div className="flex items-baseline gap-2 mb-4">
-                        <span className="text-2xl font-medium text-gray-900">₹{product.price.toLocaleString()}</span>
+                    <div className="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                        <span className="text-3xl font-black text-gray-900">₹{product.price.toLocaleString()}</span>
                         {product.originalPrice > product.price && (
-                            <>
-                                <span className="text-sm text-gray-400 line-through">₹{product.originalPrice.toLocaleString()}</span>
-                                <span className="text-sm text-green-600 font-semibold">
+                            <div className="flex flex-col">
+                                <span className="text-xs text-gray-400 line-through">₹{product.originalPrice.toLocaleString()}</span>
+                                <span className="text-xs text-green-600 font-black">
                                     {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% {offText}
                                 </span>
-                            </>
+                            </div>
                         )}
                     </div>
 
                     {/* Dynamic Variants Mobile */}
                     {displayVariantHeadings.length > 0 && (
-                        <div className="space-y-4 pb-2">
+                        <div className="space-y-6 pb-2">
                             {displayVariantHeadings.map((vh) => (
                                 <div key={vh.id}>
-                                    <p className="text-xs font-semibold text-gray-900 mb-2 uppercase tracking-wide">
-                                        {vh.name}: <span className="font-normal text-gray-600 normal-case">{selectedVariants[vh.name]}</span>
+                                    <p className="text-[11px] font-black text-gray-400 mb-3 uppercase tracking-widest">
+                                        Select {vh.name}: <span className="text-gray-900 normal-case ml-1">{selectedVariants[vh.name]}</span>
                                     </p>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex flex-wrap gap-2.5">
                                         {vh.options?.map((opt, idx) => (
                                             vh.hasImage ? (
                                                 <button
                                                     key={idx}
                                                     onClick={() => handleVariantSelect(vh.name, opt.name, opt.image)}
-                                                    className={`w-12 h-14 rounded border-2 p-0.5 transition-all ${
+                                                    className={`w-14 h-16 rounded-xl border-2 p-0.5 transition-all shadow-sm ${
                                                         selectedVariants[vh.name] === opt.name 
-                                                            ? 'border-blue-600' 
-                                                            : 'border-gray-200'
+                                                            ? 'border-blue-600 bg-blue-50/50 scale-105 shadow-md' 
+                                                            : 'border-gray-100 bg-white hover:border-gray-200'
                                                     }`}
                                                 >
-                                                    <img src={opt.image} alt={opt.name} className="w-full h-full object-cover rounded-sm" />
+                                                    <img src={opt.image} alt={opt.name} className="w-full h-full object-cover rounded-lg" />
                                                 </button>
                                             ) : (
                                                 <button
                                                     key={idx}
                                                     onClick={() => handleVariantSelect(vh.name, opt.name)}
-                                                    className={`h-9 px-3 rounded border-2 font-medium text-xs transition-all ${
+                                                    className={`h-11 px-5 rounded-xl border-2 font-bold text-xs transition-all shadow-sm ${
                                                         selectedVariants[vh.name] === opt.name
-                                                            ? 'border-blue-600 text-blue-600 bg-blue-50'
-                                                            : 'border-gray-200 text-gray-700'
+                                                            ? 'border-blue-600 text-blue-600 bg-blue-50/50 scale-105 shadow-md'
+                                                            : 'border-gray-100 bg-gray-50 text-gray-700 hover:border-gray-200'
                                                     }`}
                                                 >
                                                     {opt.name}
@@ -1260,48 +1260,7 @@ const ProductDetails = () => {
 
 
 
-                {/* Questions and Answers Section - Input Only */}
-                <div className="border-t border-gray-100 pb-2">
-                    {/* Desktop Header */}
-                    <div className="hidden md:block px-4 md:px-0 py-4">
-                        <h3 className="text-[17px] md:text-2xl font-bold text-gray-900 leading-tight">Questions and Answers</h3>
-                    </div>
-                    {/* Mobile Header */}
-                    <div
-                        className="px-4 py-5 flex items-center justify-between cursor-pointer md:hidden"
-                        onClick={() => toggleSection('questions')}
-                    >
-                        <h3 className="text-[17px] font-bold text-gray-900 leading-tight">Questions and Answers</h3>
-                        <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center transition-transform duration-300 ${expandedSections.questions ? 'rotate-180' : ''}`}>
-                            <span className="material-icons text-gray-600 text-[20px]">expand_more</span>
-                        </div>
-                    </div>
 
-                    <div className={`px-4 md:px-0 pb-6 animate-in fade-in slide-in-from-top-2 duration-300 ${expandedSections.questions ? '' : 'hidden'} md:block`}>
-                        <div className="bg-blue-50/40 rounded-3xl p-5 border border-blue-50 shadow-sm">
-                            <h4 className="text-[15px] font-bold text-blue-900 mb-4">Post a question</h4>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Is it waterproof?"
-                                    value={newQuestion}
-                                    onChange={(e) => setNewQuestion(e.target.value)}
-                                    className="flex-1 bg-white border border-blue-100 rounded-2xl px-5 py-3.5 text-sm outline-none focus:ring-2 focus:ring-blue-200 shadow-inner"
-                                />
-                                <button
-                                    onClick={() => {
-                                        if (!newQuestion) return;
-                                        setNewQuestion('');
-                                    }}
-                                    className="bg-[#1084ea] text-white w-12 h-12 rounded-2xl flex items-center justify-center active:scale-95 transition-all shadow-lg"
-                                >
-                                    <span className="material-icons text-[24px]">send</span>
-                                </button>
-                            </div>
-                            <p className="text-[12px] text-blue-600 mt-3 font-medium">Get answer from experts and other customers.</p>
-                        </div>
-                    </div>
-                </div>
 
                 {/* Recently Viewed Section */}
                 <div className="border-t border-gray-100 mt-2">

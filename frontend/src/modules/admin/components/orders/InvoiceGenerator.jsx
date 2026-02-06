@@ -329,14 +329,23 @@ export const InvoiceDisplay = React.forwardRef(
 
           <div style={{ marginTop: "25px", display: "flex", justifyBetween: "space-between", alignItems: "flex-end" }}>
             <div style={{ fontSize: "8px", lineHeight: "1.5", color: "#444" }}>
+              <div style={{ marginBottom: "10px" }}>
+                <b>Declaration</b><br />
+                The goods sold are intended for end user consumption and not for resale.
+              </div>
               <b>Seller Registered Address:</b><br />
               {settings.sellerName}, {settings.sellerAddress}<br />
               FSSAI: {settings.fssai || 'N/A'}
             </div>
-            <div className="text-center" style={{ marginLeft: "auto", minWidth: "120px" }}>
-              {settings.signatureUrl && <img src={settings.signatureUrl} alt="Signature" style={{ height: "35px", marginBottom: "3px" }} />}
-              <div style={{ fontWeight: "bold", fontSize: "9px" }}>{settings.sellerName}</div>
-              <div style={{ borderTop: "1px solid black", paddingTop: "3px", fontSize: "8px", marginTop: "2px" }}>
+            <div className="text-center" style={{ marginLeft: "auto", minWidth: "150px" }}>
+              {settings.signatureUrl && (
+                <img 
+                  src={settings.signatureUrl} 
+                  alt="Signature" 
+                  style={{ height: "60px", width: "auto", margin: "0 auto 5px auto", display: "block", objectFit: "contain" }} 
+                />
+              )}
+              <div style={{ borderTop: "1px solid black", paddingTop: "5px", fontSize: "9px", fontWeight: "bold", marginTop: "5px" }}>
                 Authorized Signature
               </div>
             </div>

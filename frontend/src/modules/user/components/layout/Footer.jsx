@@ -191,7 +191,7 @@ const Footer = () => {
                                     <ul className="space-y-1">
                                         {section.links.slice(0, 4).map((link, lIdx) => (
                                             <li key={lIdx}>
-                                                <button onClick={() => handleLinkClick(link)} className="text-white hover:text-blue-400">
+                                                <button onClick={() => handleLinkClick(link)} className="text-white hover:text-blue-400 text-left">
                                                     {link.label}
                                                 </button>
                                             </li>
@@ -199,6 +199,46 @@ const Footer = () => {
                                     </ul>
                                 </div>
                             ))}
+                        </div>
+
+                        {/* Special Links Grid for Mobile */}
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-8 pt-6 border-t border-gray-800">
+                            <div>
+                                <div 
+                                    onClick={() => navigate('/become-seller')}
+                                    className="flex items-center gap-2 cursor-pointer text-white"
+                                >
+                                    <FaStore className="text-yellow-500 text-sm" />
+                                    <span className="font-bold">Become a Seller</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div 
+                                    onClick={() => handleLinkClick({ pageKey: footerConfig.advertisePageKey || 'advertise' })}
+                                    className="flex items-center gap-2 cursor-pointer text-white"
+                                >
+                                    <FaBullhorn className="text-yellow-500 text-sm" />
+                                    <span className="font-bold">Advertise</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div 
+                                    onClick={() => handleLinkClick({ pageKey: footerConfig.giftCardsPageKey || 'gift-cards' })}
+                                    className="flex items-center gap-2 cursor-pointer text-white"
+                                >
+                                    <FaGift className="text-yellow-500 text-sm" />
+                                    <span className="font-bold">Gift Cards</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div 
+                                    onClick={() => handleLinkClick({ pageKey: footerConfig.helpCenterPageKey || 'help-center' })}
+                                    className="flex items-center gap-2 cursor-pointer text-white font-bold"
+                                >
+                                    <FaQuestionCircle className="text-yellow-500 text-sm" />
+                                    <span>Help Center</span>
+                                </div>
+                            </div>
                         </div>
                         
                         <div className="flex justify-center gap-6 py-4 border-y border-gray-800">
@@ -209,6 +249,22 @@ const Footer = () => {
                                     </a>
                                 )
                             ))}
+                        </div>
+
+                        {/* Mobile Address Section */}
+                        <div className="grid grid-cols-2 gap-8 px-2 py-2 text-[10px] leading-relaxed">
+                            <div className="flex flex-col">
+                                <h6 className="text-[#878787] uppercase mb-2 font-bold tracking-wider">Mail Us:</h6>
+                                <p className="whitespace-pre-line text-white/90">
+                                    {footerConfig.mailAddress}
+                                </p>
+                            </div>
+                            <div className="flex flex-col">
+                                <h6 className="text-[#878787] uppercase mb-2 font-bold tracking-wider">Office:</h6>
+                                <p className="whitespace-pre-line text-white/90">
+                                    {footerConfig.officeAddress}
+                                </p>
+                            </div>
                         </div>
 
                         {footerConfig.cinNumber && (
