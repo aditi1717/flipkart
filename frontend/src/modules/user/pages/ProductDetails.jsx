@@ -311,6 +311,31 @@ const ProductDetails = () => {
             } 
         });
     };
+
+    const handleShare = async () => {
+        const shareData = {
+            title: product?.name || 'Product Details',
+            text: `Check out this ${product?.name} on Indian Kart!`,
+            url: window.location.href,
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.error('Error sharing:', err);
+            }
+        } else {
+            // Fallback: Copy to clipboard
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                toast.success('Link copied to clipboard!');
+            } catch (err) {
+                console.error('Error copying to clipboard:', err);
+                toast.error('Failed to copy link');
+            }
+        }
+    };
     const [reviews, setReviews] = useState([]);
     const [questions, setQuestions] = useState([
         { id: 1, q: 'Is this skin friendly?', a: 'Yes, it is anti-allergic and safe for all skin types.', user: 'Sonal M.' }
@@ -479,8 +504,11 @@ const ProductDetails = () => {
                                         <span className="material-icons text-6xl">image_not_supported</span>
                                     </div>
                                 )}
-                                <button onClick={() => toggleWishlist(product)} className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full shadow-md border border-gray-100 flex items-center justify-center hover:scale-110 transition-transform text-gray-400 hover:text-red-500">
+                                <button onClick={() => toggleWishlist(product)} className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full shadow-md border border-gray-100 flex items-center justify-center hover:scale-110 transition-transform text-gray-400 hover:text-red-500 group/fav">
                                     <span className={`material-icons ${isInWishlist ? 'text-red-500' : ''}`}>favorite</span>
+                                </button>
+                                <button onClick={handleShare} className="absolute top-16 right-4 w-10 h-10 bg-white rounded-full shadow-md border border-gray-100 flex items-center justify-center hover:scale-110 transition-transform text-gray-400 hover:text-blue-500">
+                                    <span className="material-icons">share</span>
                                 </button>
                             </div>
                         </div>
@@ -903,7 +931,10 @@ const ProductDetails = () => {
                                     {isInWishlist ? 'favorite' : 'favorite_border'}
                                 </span>
                             </button>
-                            <button className="w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center border border-gray-100">
+                            <button 
+                                onClick={handleShare}
+                                className="w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center border border-gray-100"
+                            >
                                 <span className="material-icons-outlined text-gray-600 text-[20px]">share</span>
                             </button>
                         </div>

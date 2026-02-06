@@ -39,7 +39,7 @@ const Layout = () => {
                 </div>
             )}
             <main className={`flex-1 flex flex-col ${!isPDP && 'pb-20'} md:pb-0 w-full transition-all duration-300 min-h-[60vh] bg-white
-                ${isStandalonePage ? 'pt-0' : isPDP ? 'pt-[64px] md:pt-[110px]' : isCategory ? 'pt-[106px] md:pt-[110px]' : 'pt-[220px] md:pt-[180px]'}`}>
+                ${isStandalonePage ? 'pt-0' : isPDP ? 'pt-[64px] md:pt-[110px]' : isCategory ? 'pt-[106px] md:pt-[110px]' : 'pt-[260px] md:pt-[200px]'}`}>
                 <AnimatePresence mode="popLayout">
                     <motion.div
                         key={location.pathname}

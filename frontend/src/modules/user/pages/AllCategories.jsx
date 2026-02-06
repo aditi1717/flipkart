@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCategories } from '../../../hooks/useData';
+import { useHeaderStore } from '../../admin/store/headerStore';
 import { IoSearch } from 'react-icons/io5';
 import {
     MdGridView,
@@ -16,23 +17,40 @@ import {
 
 const AllCategories = () => {
     const navigate = useNavigate();
-    const { categories, loading } = useCategories();
+    const { categories, loading: categoriesLoading } = useCategories();
+    const { headerCategories, fetchHeaderConfig, isLoading: headerLoading } = useHeaderStore();
+
+    useEffect(() => {
+        fetchHeaderConfig();
+    }, []);
     
-    // Filter out "For You" category
-    const displayCategories = categories.filter(cat => cat.name !== "For You");
-    
-    // Use the first category ID as default if none selected or selected one not in current list
+    // Reorder categories to match header pinned items first
+    const displayCategories = useMemo(() => {
+        if (categoriesLoading) return [];
+        
+        // Filter out "For You" category and ensure they are active
+        const allActive = categories.filter(cat => cat.name !== "For You" && cat.active !== false);
+        const pinned = headerCategories.filter(cat => cat.name !== "For You" && cat.active !== false);
+        
+        const pinnedIds = new Set(pinned.map(cat => cat.id || cat._id));
+        const remaining = allActive.filter(cat => !pinnedIds.has(cat.id || cat._id));
+        
+        return [...pinned, ...remaining];
+    }, [categories, headerCategories, categoriesLoading]);
+
     const [selectedCategory, setSelectedCategory] = useState(null);
 
     // Update selected category when categories load
-    React.useEffect(() => {
-        if (categories.length > 0 && !selectedCategory) {
-            setSelectedCategory(displayCategories[0]?.id || categories[0].id || displayCategories[0]?._id);
+    useEffect(() => {
+        if (displayCategories.length > 0 && !selectedCategory) {
+            setSelectedCategory(displayCategories[0]?.id || displayCategories[0]?._id);
         }
-    }, [categories, selectedCategory, displayCategories]);
+    }, [displayCategories, selectedCategory]);
 
     // Filter categories to show content based on selection
-    const activeData = categories.find(cat => (cat.id || cat._id) === selectedCategory);
+    const activeData = useMemo(() => {
+        return categories.find(cat => (cat.id || cat._id) === selectedCategory);
+    }, [categories, selectedCategory]);
 
     const iconMap = {
         'grid_view': MdGridView,
@@ -44,7 +62,7 @@ const AllCategories = () => {
         'shopping_basket': MdShoppingBasket,
     };
 
-    if (loading) {
+    if (categoriesLoading) {
         return <div className="p-10 text-center">Loading categories...</div>;
     }
 
@@ -64,19 +82,19 @@ const AllCategories = () => {
                         const IconComponent = iconMap[cat.icon] || MdGridView;
                         return (
                             <div
-                                key={cat.id}
-                                onClick={() => setSelectedCategory(cat.id)}
-                                className={`flex flex-col items-center justify-center py-4 px-1 cursor-pointer relative ${selectedCategory === cat.id ? 'bg-white' : ''}`}
+                                key={cat.id || cat._id}
+                                onClick={() => setSelectedCategory(cat.id || cat._id)}
+                                className={`flex flex-col items-center justify-center py-4 px-1 cursor-pointer relative ${selectedCategory === (cat.id || cat._id) ? 'bg-white' : ''}`}
                             >
                                 {/* Active Indicator Strip */}
-                                {selectedCategory === cat.id && (
+                                {selectedCategory === (cat.id || cat._id) && (
                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-full"></div>
                                 )}
 
-                                <div className={`relative w-10 h-10 rounded-full flex items-center justify-center mb-1 ${selectedCategory === cat.id ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                                <div className={`relative w-10 h-10 rounded-full flex items-center justify-center mb-1 ${selectedCategory === (cat.id || cat._id) ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
                                     <IconComponent className="text-xl" />
                                 </div>
-                                <span className={`text-[10px] text-center font-medium leading-tight ${selectedCategory === cat.id ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>
+                                <span className={`text-[10px] text-center font-medium leading-tight ${selectedCategory === (cat.id || cat._id) ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>
                                     {cat.name}
                                 </span>
                             </div>
