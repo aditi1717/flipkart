@@ -44,12 +44,14 @@ const ProductSection = ({
                     </div>
                     {subtitle && <p className="text-[9px] md:text-sm text-gray-500 font-medium -mt-0.5">{translatedSubtitle}</p>}
                 </div>
-                <button
-                    onClick={onViewAll}
-                    className="bg-blue-600 text-white rounded-full w-7 h-7 md:w-10 md:h-10 flex items-center justify-center hover:bg-blue-700 transition-colors"
-                >
-                    <span className="material-icons text-white text-base md:text-lg">arrow_forward</span>
-                </button>
+                {onViewAll && (
+                    <button
+                        onClick={onViewAll}
+                        className="bg-blue-600 text-white rounded-full w-7 h-7 md:w-10 md:h-10 flex items-center justify-center hover:bg-blue-700 transition-colors"
+                    >
+                        <span className="material-icons text-white text-base md:text-lg">arrow_forward</span>
+                    </button>
+                )}
             </div>
 
             {isScrollable ? (

@@ -79,6 +79,11 @@ const ProductSkeleton = () => {
     );
 };
 
+const TranslatedText = ({ text }) => {
+    const translated = useGoogleTranslation(text);
+    return <>{translated}</>;
+};
+
 const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -445,19 +450,23 @@ const ProductDetails = () => {
             <div className="hidden md:block max-w-[1600px] mx-auto p-6 animate-in fade-in duration-500">
                 {/* Breadcrumbs */}
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-6 font-medium">
-                    <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate('/')}>{homeText}</span>
+                    <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate('/')}>
+                        <TranslatedText text={homeText} />
+                    </span>
                     <span className="material-icons text-[12px] text-gray-400">chevron_right</span>
-                    <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate(`/search?category=${product.category}`)}>{product.category}</span>
+                    <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate(`/search?category=${product.category}`)}>
+                        <TranslatedText text={product.category} />
+                    </span>
                     {product.subCategories && product.subCategories.length > 0 && (
                         <>
                             <span className="material-icons text-[12px] text-gray-400">chevron_right</span>
                             <span className="hover:text-blue-600 cursor-pointer transition-colors" onClick={() => navigate(`/search?subcategory=${product.subCategories[0].name}`)}>
-                                {product.subCategories[0].name}
+                                <TranslatedText text={product.subCategories[0].name} />
                             </span>
                         </>
                     )}
                     <span className="material-icons text-[12px] text-gray-400">chevron_right</span>
-                    <span className="text-gray-800 font-bold truncate max-w-[600px]">{product.name}</span>
+                    <span className="text-gray-800 font-bold truncate max-w-[600px]">{translatedName}</span>
                 </div>
 
                 <div className="flex gap-10 items-start">
@@ -549,7 +558,12 @@ const ProductDetails = () => {
                                 {translatedName}
                                 {displayVariantHeadings.length > 0 && (
                                     <span className="text-gray-500 ml-1">
-                                        ({displayVariantHeadings.map(vh => selectedVariants[vh.name]).filter(Boolean).join(', ')})
+                                        ({displayVariantHeadings.map((vh, i) => (
+                                            <React.Fragment key={vh.id}>
+                                                <TranslatedText text={selectedVariants[vh.name]} />
+                                                {i < displayVariantHeadings.length - 1 ? ', ' : ''}
+                                            </React.Fragment>
+                                        ))})
                                     </span>
                                 )}
                             </h1>
@@ -574,7 +588,7 @@ const ProductDetails = () => {
                             <div className="space-y-6 mb-8 mt-6">
                                 {displayVariantHeadings.map((vh) => (
                                     <div key={vh.id} className="flex gap-4">
-                                        <span className="text-gray-500 font-medium text-sm w-20 pt-1 uppercase tracking-wider text-[11px] font-bold">{vh.name}</span>
+                                        <span className="text-gray-500 font-medium text-sm w-20 pt-1 uppercase tracking-wider text-[11px] font-bold"><TranslatedText text={vh.name} /></span>
                                         <div className="flex flex-wrap gap-2 max-w-[500px]">
                                             {vh.options?.map((opt, idx) => (
                                                 vh.hasImage ? (
@@ -594,7 +608,7 @@ const ProductDetails = () => {
                                                             : 'border-gray-200 text-gray-900 hover:border-blue-400'
                                                             }`}
                                                     >
-                                                        {opt.name}
+                                                        <TranslatedText text={opt.name} />
                                                     </button>
                                                 )
                                             ))}
@@ -716,12 +730,12 @@ const ProductDetails = () => {
                             <div className="grid grid-cols-2 gap-12 mb-6 mt-6">
                                 {product.highlights.map((section, idx) => (
                                     <div key={idx}>
-                                        <h3 className="text-gray-500 font-medium text-sm mb-3">{section.heading}</h3>
+                                        <h3 className="text-gray-500 font-medium text-sm mb-3"><TranslatedText text={section.heading} /></h3>
                                         <ul className="space-y-2">
                                             {section.points.filter(p => p.trim()).map((point, pIdx) => (
                                                 <li key={pIdx} className="flex items-start gap-2 text-sm text-gray-700">
                                                     <span className="text-gray-400 mt-1.5 text-xs">●</span>
-                                                    <span className="flex-1">{point}</span>
+                                                    <span className="flex-1"><TranslatedText text={point} /></span>
                                                 </li>
                                             ))}
                                         </ul>
@@ -749,13 +763,13 @@ const ProductDetails = () => {
                                             <div className={`flex-1 space-y-4 ${hasImage ? '' : 'w-full'}`}>
                                                 {section.heading && (
                                                     <h4 className="text-2xl font-semibold text-gray-900 leading-tight">
-                                                        {section.heading}
+                                                        <TranslatedText text={section.heading} />
                                                     </h4>
                                                 )}
                                                 
                                                 {section.content && (
                                                     <p className="text-amber-800 text-sm leading-relaxed whitespace-pre-line">
-                                                        {section.content}
+                                                        <TranslatedText text={section.content} />
                                                     </p>
                                                 )}
 
@@ -765,7 +779,7 @@ const ProductDetails = () => {
                                                             point && (
                                                                 <li key={pIdx} className="flex items-start gap-3 text-sm text-gray-700">
                                                                     <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-2 flex-shrink-0"></span>
-                                                                    <span className="leading-relaxed">{point}</span>
+                                                                    <span className="leading-relaxed"><TranslatedText text={point} /></span>
                                                                 </li>
                                                             )
                                                         ))}
@@ -799,13 +813,13 @@ const ProductDetails = () => {
                                     {product.specifications.map((group, idx) => (
                                         group.groupName && (
                                             <div key={idx} className="border-b border-gray-100 pb-4 last:border-0">
-                                                <h4 className="text-lg font-semibold text-gray-900 mb-3">{group.groupName}</h4>
+                                                <h4 className="text-lg font-semibold text-gray-900 mb-3"><TranslatedText text={group.groupName} /></h4>
                                                 <div className="space-y-2">
                                                     {group.specs && group.specs.map((spec, specIdx) => (
                                                         spec.key && spec.value && (
                                                             <div key={specIdx} className="flex items-start gap-4">
-                                                                <span className="text-sm text-gray-500 min-w-[140px]">{spec.key}</span>
-                                                                <span className="text-sm text-gray-900 font-medium">{spec.value}</span>
+                                                                <span className="text-sm text-gray-500 min-w-[140px]"><TranslatedText text={spec.key} /></span>
+                                                                <span className="text-sm text-gray-900 font-medium"><TranslatedText text={spec.value} /></span>
                                                             </div>
                                                         )
                                                     ))}
@@ -961,7 +975,7 @@ const ProductDetails = () => {
 
                     {/* Product Name */}
                     <h1 className="text-gray-900 text-lg font-bold leading-snug mb-3">
-                        {product.name}
+                        {translatedName}
                     </h1>
 
                     {/* Rating */}
@@ -994,7 +1008,7 @@ const ProductDetails = () => {
                             {displayVariantHeadings.map((vh) => (
                                 <div key={vh.id}>
                                     <p className="text-[11px] font-black text-gray-400 mb-3 uppercase tracking-widest">
-                                        Select {vh.name}: <span className="text-gray-900 normal-case ml-1">{selectedVariants[vh.name]}</span>
+                                        Select <TranslatedText text={vh.name} />: <span className="text-gray-900 normal-case ml-1"><TranslatedText text={selectedVariants[vh.name]} /></span>
                                     </p>
                                     <div className="flex flex-wrap gap-2.5">
                                         {vh.options?.map((opt, idx) => (
@@ -1020,7 +1034,7 @@ const ProductDetails = () => {
                                                             : 'border-gray-100 bg-gray-50 text-gray-700 hover:border-gray-200'
                                                     }`}
                                                 >
-                                                    {opt.name}
+                                                    <TranslatedText text={opt.name} />
                                                 </button>
                                             )
                                         ))}
@@ -1156,11 +1170,11 @@ const ProductDetails = () => {
                                         
                                         return (
                                             <div key={idx}>
-                                                {section.heading && <h4 className="font-bold text-gray-800 text-sm mb-2">{section.heading}</h4>}
+                                                {section.heading && <h4 className="font-bold text-gray-800 text-sm mb-2"><TranslatedText text={section.heading} /></h4>}
                                                 {validPoints.length > 0 && (
                                                     <ul className="list-disc pl-4 space-y-1">
                                                         {validPoints.map((point, pIdx) => (
-                                                            <li key={pIdx} className="text-[13px] text-gray-700">{point}</li>
+                                                            <li key={pIdx} className="text-[13px] text-gray-700"><TranslatedText text={point} /></li>
                                                         ))}
                                                     </ul>
                                                 )}
@@ -1187,7 +1201,7 @@ const ProductDetails = () => {
                                     <div key={idx} className="space-y-3">
                                         {section.heading && (
                                             <h4 className="text-[13px] font-bold text-gray-900 uppercase tracking-wide border-b border-gray-50 pb-2">
-                                                {section.heading}
+                                                <TranslatedText text={section.heading} />
                                             </h4>
                                         )}
                                         <ul className="space-y-2">
@@ -1195,7 +1209,7 @@ const ProductDetails = () => {
                                                 point && (
                                                     <li key={pointIdx} className="flex items-start gap-2 text-[13px] text-gray-800">
                                                         <span className="text-blue-600 mt-1 flex-shrink-0 font-bold">•</span>
-                                                        <span className="leading-relaxed font-medium">{point}</span>
+                                                        <span className="leading-relaxed font-medium"><TranslatedText text={point} /></span>
                                                     </li>
                                                 )
                                             ))}
@@ -1262,7 +1276,6 @@ const ProductDetails = () => {
                         products={similarProducts}
                         loading={productsLoading}
                         containerClass="mt-4 pb-4 px-4 md:px-0"
-                        onViewAll={() => console.log('View all similar products')}
                     />
                 </div>
             )}
@@ -1278,7 +1291,6 @@ const ProductDetails = () => {
                             products={similarStyles}
                             loading={productsLoading}
                             containerClass="mt-2 pb-4 px-4 md:px-0"
-                            onViewAll={() => console.log('View all similar styles')}
                         />
                     </div>
                 )}
@@ -1291,7 +1303,6 @@ const ProductDetails = () => {
                             products={highRatedProducts}
                             loading={productsLoading}
                             containerClass="mt-2 pb-8 px-4 md:px-0"
-                            onViewAll={() => console.log('View all top rated')}
                         />
                     </div>
                 )}
@@ -1307,7 +1318,6 @@ const ProductDetails = () => {
                         products={products.slice(0, 6)}
                         loading={productsLoading}
                         containerClass="mt-2 pb-4 px-4 md:px-0"
-                        onViewAll={() => console.log('View all recently viewed')}
                     />
                 </div>
 
@@ -1319,7 +1329,6 @@ const ProductDetails = () => {
                         products={products.slice(6, 12)}
                         loading={productsLoading}
                         containerClass="mt-2 pb-4 px-4 md:px-0"
-                        onViewAll={() => console.log('View all recommendations')}
                     />
                 </div>
             </div>
