@@ -8,6 +8,7 @@ export const useContentStore = create((set, get) => ({
     privacyPolicy: '',
     aboutUs: '',
     seoContent: '',
+    copyright: '',
     isLoading: false,
 
     // --- Home Layout ---
@@ -146,7 +147,8 @@ export const useContentStore = create((set, get) => ({
             const pp = data.find(p => p.pageKey === 'privacyPolicy')?.content || '';
             const au = data.find(p => p.pageKey === 'aboutUs')?.content || '';
             const seo = data.find(p => p.pageKey === 'seoContent')?.content || '';
-            set({ privacyPolicy: pp, aboutUs: au, seoContent: seo });
+            const cr = data.find(p => p.pageKey === 'copyright')?.content || '';
+            set({ privacyPolicy: pp, aboutUs: au, seoContent: seo, copyright: cr });
         } catch (error) { 
             console.error(error); 
             set({ isLoading: false });

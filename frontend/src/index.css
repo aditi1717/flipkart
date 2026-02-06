@@ -126,3 +126,8 @@
 .home-banner-swiper .swiper-button-disabled {
   display: none !important;
 }
+
+.footer-copyright-html p {
+  margin: 0 !important;
+  display: inline;
+}

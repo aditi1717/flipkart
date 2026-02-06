@@ -48,7 +48,24 @@ const PageManager = () => {
             });
         });
 
-        const systemKeys = ['privacyPolicy', 'aboutUs', 'seoContent'];
+        // Add special bottom bar links
+        footerLinks.push({ 
+            pageKey: footerConfig.advertisePageKey || 'advertise', 
+            label: 'Advertise', 
+            section: 'Bottom Bar' 
+        });
+        footerLinks.push({ 
+            pageKey: footerConfig.giftCardsPageKey || 'gift-cards', 
+            label: 'Gift Cards', 
+            section: 'Bottom Bar' 
+        });
+        footerLinks.push({ 
+            pageKey: footerConfig.helpCenterPageKey || 'help-center', 
+            label: 'Help Center', 
+            section: 'Bottom Bar' 
+        });
+
+        const systemKeys = ['privacyPolicy', 'aboutUs', 'seoContent', 'copyright'];
         
         // 2. Map pages to footer links
         const mapped = footerLinks.map(link => {
@@ -99,6 +116,9 @@ const PageManager = () => {
                 setEditorContent(useContentStore.getState().aboutUs || '');
             } else if (selectedPageKey === 'seoContent') {
                 setEditorContent(useContentStore.getState().seoContent || '');
+            } else if (selectedPageKey === 'copyright') {
+                const copyrightFromStore = useContentStore.getState().pages.find(p => p.pageKey === 'copyright')?.content;
+                setEditorContent(copyrightFromStore || footerConfig?.copyrightText || '');
             }
         }
         setIsSaved(false);
@@ -129,6 +149,7 @@ const PageManager = () => {
         if (key === 'privacyPolicy') return 'Privacy Policy';
         if (key === 'aboutUs') return 'About Us';
         if (key === 'seoContent') return 'SEO Footer Text';
+        if (key === 'copyright') return 'Copyright Text';
         return key.replace(/-/g, ' ').replace(/(?:^|\s)\S/g, a => a.toUpperCase());
     }
 

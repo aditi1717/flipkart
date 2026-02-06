@@ -208,6 +208,15 @@ const FooterManager = () => {
                                 className="w-full bg-white border border-gray-100 rounded-3xl p-4 focus:ring-4 focus:ring-blue-100 outline-none font-medium text-gray-900 resize-none shadow-sm placeholder:text-gray-500"
                             />
                         </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CIN Number</label>
+                            <input 
+                                value={config.cinNumber || ''}
+                                onChange={(e) => handleConfigChange('cinNumber', e.target.value)}
+                                placeholder="Enter CIN number..."
+                                className="w-full bg-white border border-gray-100 rounded-2xl p-4 focus:ring-4 focus:ring-blue-100 outline-none font-black text-gray-900 shadow-sm placeholder:text-gray-500"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -223,6 +232,31 @@ const FooterManager = () => {
                                 onChange={(e) => handleConfigChange('copyrightText', e.target.value)}
                                 className="w-full bg-white border border-gray-100 rounded-2xl p-4 focus:ring-4 focus:ring-blue-100 outline-none font-black text-gray-900 shadow-sm"
                             />
+                        </div>
+
+                        <div className="space-y-4 pt-4 border-t">
+                            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Special Page Links</h3>
+                            <div className="grid grid-cols-1 gap-4">
+                                {[
+                                    { label: 'Advertise', field: 'advertisePageKey' },
+                                    { label: 'Gift Cards', field: 'giftCardsPageKey' },
+                                    { label: 'Help Center', field: 'helpCenterPageKey' }
+                                ].map(item => (
+                                    <div key={item.field} className="space-y-1">
+                                        <label className="text-[10px] font-bold text-gray-400 ml-1">{item.label} Page Mapping</label>
+                                        <select
+                                            value={config[item.field] || ''}
+                                            onChange={(e) => handleConfigChange(item.field, e.target.value)}
+                                            className="w-full bg-white border border-gray-100 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-100 outline-none text-gray-900 appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Select Page</option>
+                                            {useContentStore.getState().pages.map(p => (
+                                                <option key={p.pageKey} value={p.pageKey}>{p.pageKey}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         <div className="space-y-4 pt-4 border-t">

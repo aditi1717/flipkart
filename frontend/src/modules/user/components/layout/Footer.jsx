@@ -16,14 +16,15 @@ import { RiTwitterXFill } from 'react-icons/ri';
 
 const Footer = () => {
     const navigate = useNavigate();
-    const { seoContent } = useContentStore();
+    const { seoContent, copyright, fetchPages } = useContentStore();
     const { footerConfig, fetchFooterConfig } = useFooterStore();
 
     useEffect(() => {
         if (!footerConfig) {
             fetchFooterConfig();
         }
-    }, [footerConfig, fetchFooterConfig]);
+        fetchPages();
+    }, [footerConfig, fetchFooterConfig, fetchPages]);
 
     if (!footerConfig) return null;
 
@@ -95,7 +96,7 @@ const Footer = () => {
                                     <h6 className="text-[#878787] uppercase mb-3 font-medium">Social:</h6>
                                     <div className="flex gap-4">
                                         {socialIcons.map((social, idx) => (
-                                            social.url && (
+                                            social.url && social.url.trim() !== '' && (
                                                 <a 
                                                     key={idx} 
                                                     href={social.url} 
@@ -115,6 +116,12 @@ const Footer = () => {
                                 <p className="whitespace-pre-line text-white font-medium">
                                     {footerConfig.officeAddress}
                                 </p>
+                                {footerConfig.cinNumber && (
+                                    <div className="mt-4">
+                                        <h6 className="text-[#878787] uppercase mb-1 font-medium">CIN:</h6>
+                                        <p className="text-white font-medium uppercase">{footerConfig.cinNumber}</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -130,21 +137,37 @@ const Footer = () => {
                                     <FaStore className="text-yellow-500 text-sm group-hover:scale-110 transition-transform" />
                                     <span className="font-bold">Become a Seller</span>
                                 </div>
-                                <div className="flex items-center gap-2 cursor-pointer group text-white hover:text-yellow-400 transition-colors">
+                                <div 
+                                    onClick={() => handleLinkClick({ pageKey: footerConfig.advertisePageKey || 'advertise' })}
+                                    className="flex items-center gap-2 cursor-pointer group text-white hover:text-yellow-400 transition-colors"
+                                >
                                     <FaBullhorn className="text-yellow-500 text-sm group-hover:scale-110 transition-transform" />
                                     <span className="font-bold">Advertise</span>
                                 </div>
-                                <div className="flex items-center gap-2 cursor-pointer group text-white hover:text-yellow-400 transition-colors">
+                                <div 
+                                    onClick={() => handleLinkClick({ pageKey: footerConfig.giftCardsPageKey || 'gift-cards' })}
+                                    className="flex items-center gap-2 cursor-pointer group text-white hover:text-yellow-400 transition-colors"
+                                >
                                     <FaGift className="text-yellow-500 text-sm group-hover:scale-110 transition-transform" />
                                     <span className="font-bold">Gift Cards</span>
                                 </div>
-                                <div className="flex items-center gap-2 cursor-pointer group text-white hover:text-yellow-400 transition-colors font-bold">
+                                <div 
+                                    onClick={() => handleLinkClick({ pageKey: footerConfig.helpCenterPageKey || 'help-center' })}
+                                    className="flex items-center gap-2 cursor-pointer group text-white hover:text-yellow-400 transition-colors font-bold"
+                                >
                                     <FaQuestionCircle className="text-yellow-500 text-sm group-hover:scale-110 transition-transform" />
                                     <span>Help Center</span>
                                 </div>
-                                <span className="font-bold text-white leading-none">
-                                    {footerConfig.copyrightText}
-                                </span>
+                                {copyright ? (
+                                    <span 
+                                        className="font-bold text-white leading-none footer-copyright-html"
+                                        dangerouslySetInnerHTML={{ __html: copyright }}
+                                    />
+                                ) : (
+                                    <span className="font-bold text-white leading-none">
+                                        {footerConfig.copyrightText}
+                                    </span>
+                                )}
                             </div>
 
                             <div className="flex items-center gap-2">
@@ -180,7 +203,7 @@ const Footer = () => {
                         
                         <div className="flex justify-center gap-6 py-4 border-y border-gray-800">
                             {socialIcons.map((social, idx) => (
-                                social.url && (
+                                social.url && social.url.trim() !== '' && (
                                     <a key={idx} href={social.url} className="text-white">
                                         <social.icon size={20} />
                                     </a>
@@ -188,8 +211,21 @@ const Footer = () => {
                             ))}
                         </div>
 
+                        {footerConfig.cinNumber && (
+                            <div className="text-center px-4">
+                                <p className="text-[#878787] uppercase font-bold text-[10px] mb-1">CIN: {footerConfig.cinNumber}</p>
+                            </div>
+                        )}
+
                         <div className="text-center">
-                            <span className="block mb-4 font-bold text-white">{footerConfig.copyrightText}</span>
+                            {copyright ? (
+                                <div 
+                                    className="block mb-4 font-bold text-white footer-copyright-html"
+                                    dangerouslySetInnerHTML={{ __html: copyright }}
+                                />
+                            ) : (
+                                <span className="block mb-4 font-bold text-white">{footerConfig.copyrightText}</span>
+                            )}
                             <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/payment-method-c454fb.svg" alt="Payment Methods" className="h-4 mx-auto opacity-70" />
                         </div>
                     </div>

@@ -26,7 +26,7 @@ const Home = () => {
 
     return (
         <div className="bg-gradient-to-b from-white to-blue-100 pb-20 pt-1 flex-1 flex flex-col">
-            <div className="w-full space-y-12 md:space-y-16">
+            <div className="w-full space-y-4 md:space-y-6">
                 
                 {/* Dynamic Content Stream */}
                 {layout.map((item, index) => {
@@ -51,7 +51,7 @@ const Home = () => {
                         
                         if (isDeal && productCount <= 4) {
                              return (
-                             <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full">
+                             <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full px-4 md:px-0">
                                 <DealGrid
                                     title={section.title}
                                     items={section.products || []}
@@ -59,7 +59,7 @@ const Home = () => {
                                     darkBgColor=""
                                     titleKey="name"
                                     subtitleKey="price" // Or discount if available
-                                    containerClass="mt-4"
+                                    containerClass="mt-0"
                                     showArrow={true}
                                 />
                              </div>
@@ -67,12 +67,12 @@ const Home = () => {
                         }
 
                         return (
-                            <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full">
+                            <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full px-4 md:px-0">
                                 <ProductSection
                                     title={section.title}
                                     subtitle={section.subtitle}
                                     products={section.products}
-                                    containerClass="mt-4"
+                                    containerClass="mt-0"
                                     onViewAll={() => navigate(`/products?search=${section.title}`)}
                                 />
                             </div>

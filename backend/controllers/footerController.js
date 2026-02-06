@@ -34,7 +34,17 @@ export const getFooterConfig = async (req, res) => {
 // @access  Private/Admin
 export const updateFooterConfig = async (req, res) => {
     try {
-        const { sections, mailAddress, officeAddress, copyrightText, socialLinks } = req.body;
+        const { 
+            sections, 
+            mailAddress, 
+            officeAddress, 
+            cinNumber, 
+            copyrightText, 
+            socialLinks,
+            advertisePageKey,
+            giftCardsPageKey,
+            helpCenterPageKey
+        } = req.body;
 
         let config = await FooterConfig.findOne();
 
@@ -42,16 +52,24 @@ export const updateFooterConfig = async (req, res) => {
             config.sections = sections;
             config.mailAddress = mailAddress;
             config.officeAddress = officeAddress;
+            config.cinNumber = cinNumber;
             config.copyrightText = copyrightText;
             config.socialLinks = socialLinks;
+            config.advertisePageKey = advertisePageKey;
+            config.giftCardsPageKey = giftCardsPageKey;
+            config.helpCenterPageKey = helpCenterPageKey;
             await config.save();
         } else {
             config = await FooterConfig.create({
                 sections,
                 mailAddress,
                 officeAddress,
+                cinNumber,
                 copyrightText,
-                socialLinks
+                socialLinks,
+                advertisePageKey,
+                giftCardsPageKey,
+                helpCenterPageKey
             });
         }
 

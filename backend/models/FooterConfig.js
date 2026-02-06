@@ -24,6 +24,10 @@ const footerConfigSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    cinNumber: {
+        type: String,
+        default: ''
+    },
     copyrightText: {
         type: String,
         default: '© 2007-2024 YourStore.com'
@@ -33,7 +37,10 @@ const footerConfigSchema = new mongoose.Schema({
         twitter: String,
         youtube: String,
         instagram: String
-    }
+    },
+    advertisePageKey: String,
+    giftCardsPageKey: String,
+    helpCenterPageKey: String
 }, {
     timestamps: true
 });
