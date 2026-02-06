@@ -64,11 +64,19 @@ const Addresses = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        // Validate Indian mobile number
+        const mobileRegex = /^[6-9]\d{9}$/;
+        if (!mobileRegex.test(newAddr.mobile)) {
+            return toast.error('Please enter a valid 10-digit Indian mobile number (starting with 6-9)');
+        }
+
         if (editingId) {
             updateAddress(editingId, newAddr);
+            toast.success('Address updated!');
             setEditingId(null);
         } else {
             addAddress({ ...newAddr, id: Date.now() });
+            toast.success('Address added!');
         }
         setIsAdding(false);
         setNewAddr({ ...initialAddr, name: user?.name || '', mobile: user?.phone || user?.mobile || '' });

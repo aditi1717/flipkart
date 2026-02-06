@@ -17,7 +17,8 @@ const Signup = () => {
     const handleSignup = async () => {
         if (!name.trim()) return toast.error('Please enter your name');
         if (!email.trim() || !email.includes('@')) return toast.error('Please enter a valid email');
-        if (mobile.length === 10) {
+        const mobileRegex = /^[6-9]\d{9}$/;
+        if (mobileRegex.test(mobile)) {
             try {
                 await sendOtp(mobile);
                 toast.success(`OTP sent to ${mobile}`);
@@ -28,7 +29,7 @@ const Signup = () => {
                  toast.error(error || 'Failed to send OTP');
             }
         } else {
-            toast.error('Please enter a valid 10-digit mobile number');
+            toast.error('Please enter a valid 10-digit Indian mobile number (starting with 6-9)');
         }
     };
 

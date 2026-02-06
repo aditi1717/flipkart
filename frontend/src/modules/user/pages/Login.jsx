@@ -17,7 +17,8 @@ const Login = () => {
     const from = location.state?.from?.pathname || '/';
 
     const handleSendOtp = async () => {
-        if (mobile.length === 10) {
+        const mobileRegex = /^[6-9]\d{9}$/;
+        if (mobileRegex.test(mobile)) {
             try {
                 await sendOtp(mobile);
                 toast.success(`OTP sent to ${mobile}`);
@@ -27,7 +28,7 @@ const Login = () => {
                 toast.error(error || 'Failed to send OTP');
             }
         } else {
-            toast.error('Please enter a valid 10-digit mobile number');
+            toast.error('Please enter a valid 10-digit Indian mobile number (starting with 6-9)');
         }
     };
 

@@ -171,6 +171,12 @@ const Checkout = () => {
 
     const handleAddAddress = (e) => {
         e.preventDefault();
+        // Validate Indian mobile number
+        const mobileRegex = /^[6-9]\d{9}$/;
+        if (!mobileRegex.test(newAddr.mobile)) {
+            return toast.error('Please enter a valid 10-digit Indian mobile number (starting with 6-9)');
+        }
+
         const id = Date.now();
         addAddress({ ...newAddr, name: user?.name || newAddr.name, id });
         setSelectedAddress(id);
