@@ -438,18 +438,6 @@ const ProductDetails = () => {
 
     return (
         <div className="bg-white min-h-screen pb-24 font-sans text-gray-900">
-            {/* ============================================================== */}
-            {/* COMMON BACK NAVIGATION - "Below" the header                   */}
-            {/* ============================================================== */}
-            <div className="hidden md:flex bg-white px-4 md:px-6 py-2.5 items-center gap-2 border-b border-gray-50 max-w-[1600px] mx-auto w-full">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="w-9 h-9 flex items-center justify-center bg-gray-50 rounded-full text-gray-800 hover:bg-gray-100 active:scale-90 transition-all shadow-sm"
-                >
-                    <span className="material-icons text-[22px]">arrow_back</span>
-                </button>
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Back to results</span>
-            </div>
 
             {/* ============================================================== */}
             {/* DESKTOP VIEW (Visible only on md+)                           */}
@@ -469,7 +457,7 @@ const ProductDetails = () => {
                         </>
                     )}
                     <span className="material-icons text-[12px] text-gray-400">chevron_right</span>
-                    <span className="text-gray-800 font-bold truncate max-w-[300px]">{product.name}</span>
+                    <span className="text-gray-800 font-bold truncate max-w-[600px]">{product.name}</span>
                 </div>
 
                 <div className="flex gap-10 items-start">

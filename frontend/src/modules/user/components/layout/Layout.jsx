@@ -42,9 +42,9 @@ const Layout = () => {
             )}
             <main className={`flex flex-col md:pb-0 w-full transition-all duration-300 bg-white
                 ${isStandalonePage ? 'pt-0' : 
-                  isPDP ? 'pt-[64px] md:pt-[110px]' : 
-                  isHome ? 'pt-[260px] md:pt-[200px]' : 
-                  'pt-[110px] md:pt-[110px]'}`}>
+                   isPDP ? 'pt-[64px] md:pt-[130px]' : 
+                  isHome ? 'pt-[260px] md:pt-[240px]' : 
+                  'pt-[110px] md:pt-[160px]'}`}>
                 <AnimatePresence mode="popLayout">
                     <motion.div
                         key={location.pathname}

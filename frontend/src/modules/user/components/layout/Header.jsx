@@ -177,7 +177,7 @@ const Header = () => {
                             className="flex items-center md:hidden -my-4 cursor-pointer shrink-0"
                             onClick={() => navigate('/')}
                         >
-                            <img src={logo} alt="IndianKart" className="h-24 object-contain" />
+                            <img src="/indiankart-logo.png" alt="IndianKart" className="h-32 object-contain" />
                         </div>
                     )}
 
@@ -186,7 +186,7 @@ const Header = () => {
                         className="hidden md:flex flex-col cursor-pointer"
                         onClick={() => navigate('/')}
                     >
-                        <img src={logo} alt="IndianKart" className="h-[65px] lg:h-[100px] object-contain" />
+                        <img src="/indiankart-logo.png" alt="IndianKart" className="h-[80px] lg:h-[130px] object-contain" />
                     </div>
                     
                     {/* Mobile Header Actions (Seller + Language) */}

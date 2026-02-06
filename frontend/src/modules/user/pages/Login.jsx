@@ -54,7 +54,7 @@ const Login = () => {
 
             <div className="flex-1 flex flex-col pt-0">
                 <div className="mb-4 flex flex-col items-center">
-                    <div className="w-40 h-40 bg-white flex items-center justify-center mb-2">
+                    <div className="w-56 h-56 bg-white flex items-center justify-center mb-2">
                         <img src={logo} alt="logo" className="w-full h-full object-contain" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
