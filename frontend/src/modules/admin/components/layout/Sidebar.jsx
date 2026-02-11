@@ -18,7 +18,8 @@ import {
     MdSupportAgent,
     MdLabel,
     MdViewAgenda,
-    MdViewCarousel
+    MdViewCarousel,
+    MdLocalShipping
 } from 'react-icons/md';
 
 import logo from '../../../../assets/indiankart-logo.png';
