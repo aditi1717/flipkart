@@ -30,6 +30,7 @@ const Home = () => {
     const { sections, loading: sectionsLoading } = useHomeSections();
     const { banners, loading: bannersLoading } = useBanners();
     const { layout, loading: layoutLoading } = useHomeLayout();
+    const isHomeLoading = sectionsLoading || bannersLoading || layoutLoading;
 
     const isLayoutLoading = layoutLoading && layout.length === 0;
 
@@ -47,7 +48,7 @@ const Home = () => {
 
     return (
         <div className="bg-gradient-to-b from-white to-blue-100 pt-4 flex-1 flex flex-col">
-            <div className="w-full space-y-4 md:space-y-6">
+            <div className="w-full space-y-4 md:space-y-6 px-3 md:px-5 lg:px-6">
                 
                 {/* Dynamic Content Stream */}
                 {layout.map((item, index) => {
@@ -64,7 +65,7 @@ const Home = () => {
                         );
 
                         return (
-                            <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto px-4 md:px-0">
+                            <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full">
                                 {isFirstItem ? bannerComponent : (
                                     <LazySection placeholder={<BannerSkeleton />}>
                                         {bannerComponent}
@@ -107,7 +108,7 @@ const Home = () => {
                         );
 
                         return (
-                            <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full px-4 md:px-0">
+                            <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full">
                                 {isFirstItem ? sectionContent : (
                                     <LazySection placeholder={<SectionSkeleton />}>
                                         {sectionContent}
@@ -120,7 +121,7 @@ const Home = () => {
                     return null;
                 })}
 
-                {layout.length === 0 && !isLoading && (
+                {layout.length === 0 && !isHomeLoading && (
                     <div className="py-20 text-center text-gray-400">
                         <p>Welcome! Check back soon for amazing deals.</p>
                     </div>
