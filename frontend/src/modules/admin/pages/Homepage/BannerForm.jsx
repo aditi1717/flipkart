@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { MdClose, MdCloudUpload, MdAdd, MdDelete } from 'react-icons/md';
+import toast from 'react-hot-toast';
 import useBannerStore from '../../store/bannerStore';
+import API from '../../../../services/api';
 
 const BannerForm = ({ banner, onClose }) => {
     const { addBanner, updateBanner } = useBannerStore();
+    const [offers, setOffers] = useState([]);
 
     const [formData, setFormData] = useState({
         section: 'For You',
@@ -12,8 +15,32 @@ const BannerForm = ({ banner, onClose }) => {
     });
 
     useEffect(() => {
+        // Fetch offers
+        API.get('/offers').then(({ data }) => setOffers(data)).catch(console.error);
+        
         if (banner) {
-            setFormData(banner);
+            console.log('Loading banner for edit:', banner);
+            
+            // Ensure all slides have targetType for backward compatibility
+            const updatedBanner = {
+                ...banner,
+                slides: banner.slides.map((slide, idx) => {
+                    const inferredType = slide.linkedOffer ? 'offer' : 
+                                        (slide.targetValue || slide.linkedProduct) ? 'product' : 
+                                        slide.link ? 'url' : 'product';
+                    
+                    const result = {
+                        ...slide,
+                        targetType: slide.targetType || inferredType
+                    };
+                    
+                    console.log(`Slide ${idx}:`, { original: slide, updated: result });
+                    return result;
+                })
+            };
+            
+            console.log('Updated banner:', updatedBanner);
+            setFormData(updatedBanner);
         } else {
             // Start with one empty slide
             setFormData(prev => ({ ...prev, slides: [createEmptySlide()] }));
@@ -34,7 +61,7 @@ const BannerForm = ({ banner, onClose }) => {
         const validSlides = formData.slides.filter(s => s.imageUrl);
 
         if (validSlides.length === 0) {
-            alert('Please add at least one slide with an image.');
+            toast.error('Please add at least one slide with an image.');
             return;
         }
 
@@ -76,6 +103,17 @@ const BannerForm = ({ banner, onClose }) => {
     const updateSlide = (index, updates) => {
         const newSlides = [...formData.slides];
         newSlides[index] = { ...newSlides[index], ...updates };
+        
+        // If an offer is selected, auto-populate image from offer's bannerImage
+        if (updates.linkedOffer && offers.length > 0) {
+            const selectedOffer = offers.find(o => o._id === updates.linkedOffer);
+            if (selectedOffer && selectedOffer.bannerImage) {
+                newSlides[index].imageUrl = selectedOffer.bannerImage;
+                // Clear any file upload since we're using offer's image
+                delete newSlides[index].file;
+            }
+        }
+        
         setFormData(prev => ({ ...prev, slides: newSlides }));
     };
 
@@ -159,29 +197,43 @@ const BannerForm = ({ banner, onClose }) => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* Image Upload */}
                                     <div>
-                                        <div className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center relative bg-white overflow-hidden hover:border-blue-400 transition">
-                                            <input
-                                                type="file"
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                accept="image/*"
-                                                onChange={(e) => handleSlideImageChange(index, e)}
-                                            />
-                                            {slide.imageUrl ? (
-                                                <img src={slide.imageUrl} alt="Slide" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="text-center p-2">
-                                                    <MdCloudUpload size={24} className="mx-auto text-gray-400 mb-1" />
-                                                    <span className="text-xs text-gray-500">Upload Image</span>
+                                        {slide.linkedOffer && offers.find(o => o._id === slide.linkedOffer)?.bannerImage ? (
+                                            <>
+                                                <label className="text-xs font-semibold text-green-600 mb-1 block">
+                                                    Image from Offer
+                                                </label>
+                                                <div className="border-2 border-green-300 rounded-lg h-32 flex items-center justify-center relative bg-white overflow-hidden">
+                                                    <img src={slide.imageUrl} alt="Offer Banner" className="w-full h-full object-cover" />
                                                 </div>
-                                            )}
-                                        </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <label className="text-xs font-semibold text-gray-500 mb-1 block">Banner Image</label>
+                                                <div className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center relative bg-white overflow-hidden hover:border-blue-400 transition">
+                                                    <input
+                                                        type="file"
+                                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                        accept="image/*"
+                                                        onChange={(e) => handleSlideImageChange(index, e)}
+                                                    />
+                                                    {slide.imageUrl ? (
+                                                        <img src={slide.imageUrl} alt="Slide" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="text-center p-2">
+                                                            <MdCloudUpload size={24} className="mx-auto text-gray-400 mb-1" />
+                                                            <span className="text-xs text-gray-500">Upload Image</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
 
                                     {/* Link Properties */}
                                     <div className="space-y-3">
                                         <div>
                                             <label className="text-xs font-semibold text-gray-500 mb-1 block">Click Action</label>
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 flex-wrap">
                                                 <label className="flex items-center gap-1 cursor-pointer bg-white px-2 py-1 rounded border border-gray-200 text-xs">
                                                     <input
                                                         type="radio"
@@ -190,6 +242,15 @@ const BannerForm = ({ banner, onClose }) => {
                                                         className="text-blue-600"
                                                     />
                                                     Product
+                                                </label>
+                                                <label className="flex items-center gap-1 cursor-pointer bg-white px-2 py-1 rounded border border-gray-200 text-xs">
+                                                    <input
+                                                        type="radio"
+                                                        checked={slide.targetType === 'offer'}
+                                                        onChange={() => updateSlide(index, { targetType: 'offer' })}
+                                                        className="text-blue-600"
+                                                    />
+                                                    Offer
                                                 </label>
                                                 <label className="flex items-center gap-1 cursor-pointer bg-white px-2 py-1 rounded border border-gray-200 text-xs">
                                                     <input
@@ -212,6 +273,19 @@ const BannerForm = ({ banner, onClose }) => {
                                                 <option value="">Select Product...</option>
                                                 {productOptions.map(p => (
                                                     <option key={p.id} value={p.id}>{p.name}</option>
+                                                ))}
+                                            </select>
+                                        ) : slide.targetType === 'offer' ? (
+                                            <select
+                                                value={slide.linkedOffer || ''}
+                                                onChange={(e) => updateSlide(index, { linkedOffer: e.target.value })}
+                                                className="w-full p-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 bg-white"
+                                            >
+                                                <option value="">Select Offer...</option>
+                                                {offers.map(offer => (
+                                                    <option key={offer._id} value={offer._id}>
+                                                        {offer.title} ({offer.discountType === 'percentage' ? `${offer.discountValue}%` : `₹${offer.discountValue}`} OFF)
+                                                    </option>
                                                 ))}
                                             </select>
                                         ) : (

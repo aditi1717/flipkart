@@ -1,8 +1,28 @@
+import React, { lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DealGrid from '../components/home/DealGrid';
-import ProductSection from '../components/home/ProductSection';
-import HomeBanner from '../components/home/HomeBanner';
 import { useProducts, useHomeSections, useBanners, useHomeLayout } from '../../../hooks/useData';
+import LazySection from '../components/common/LazySection';
+
+// Lazy load components
+const DealGrid = lazy(() => import('../components/home/DealGrid'));
+const ProductSection = lazy(() => import('../components/home/ProductSection'));
+const HomeBanner = lazy(() => import('../components/home/HomeBanner'));
+
+// Skeletons
+const BannerSkeleton = () => (
+    <div className="w-full h-[200px] md:h-[400px] bg-gray-100 animate-pulse md:rounded-2xl mx-auto mb-6"></div>
+);
+
+const SectionSkeleton = () => (
+    <div className="w-full h-[300px] bg-white animate-pulse md:rounded-2xl mx-auto mb-6 p-4">
+        <div className="h-6 bg-gray-100 rounded w-1/4 mb-6"></div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => (
+                <div key={i} className="aspect-square bg-gray-50 rounded-xl"></div>
+            ))}
+        </div>
+    </div>
+);
 
 const Home = () => {
     const navigate = useNavigate();
@@ -11,68 +31,88 @@ const Home = () => {
     const { banners, loading: bannersLoading } = useBanners();
     const { layout, loading: layoutLoading } = useHomeLayout();
 
-    const isLoading = productsLoading || sectionsLoading || bannersLoading || layoutLoading;
+    const isLayoutLoading = layoutLoading && layout.length === 0;
 
-    if (isLoading) {
+    if (isLayoutLoading) {
         return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <div className="animate-pulse flex flex-col items-center">
-                    <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <p className="text-gray-500 font-bold">Loading your experience...</p>
+            <div className="min-h-screen bg-white">
+                <BannerSkeleton />
+                <div className="max-w-[1440px] mx-auto space-y-8 p-4">
+                    <SectionSkeleton />
+                    <SectionSkeleton />
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-gradient-to-b from-white to-blue-100 pb-20 pt-1 flex-1 flex flex-col">
-            <div className="w-full space-y-4 md:space-y-8">
+        <div className="bg-gradient-to-b from-white to-blue-100 pt-4 flex-1 flex flex-col">
+            <div className="w-full space-y-4 md:space-y-6">
                 
                 {/* Dynamic Content Stream */}
                 {layout.map((item, index) => {
+                    const isFirstItem = index === 0;
+
                     if (item.type === 'banner') {
-                        const banner = banners.find(b => String(b._id || b.id) === String(item.referenceId));
+                        const banner = banners.find(b => String(b._id) === String(item.referenceId) || String(b.id) === String(item.referenceId));
                         if (!banner) return null;
+                        
+                        const bannerComponent = (
+                            <Suspense fallback={<BannerSkeleton />}>
+                                <HomeBanner banner={banner} />
+                            </Suspense>
+                        );
+
                         return (
                             <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto px-4 md:px-0">
-                                <HomeBanner banner={banner} />
+                                {isFirstItem ? bannerComponent : (
+                                    <LazySection placeholder={<BannerSkeleton />}>
+                                        {bannerComponent}
+                                    </LazySection>
+                                )}
                             </div>
                         );
                     }
 
                     if (item.type === 'section') {
                         const section = sections.find(s => String(s.id) === String(item.referenceId));
-                        if (!section || !section.products || section.products.length === 0) return null;
+                        if (!section) return null;
 
-                        // Decide layout based on product count or defaults
-                        // Use DealGrid for specifically "Deal" types or small sets, otherwise ProductSection slider
                         const isDeal = section.title.toLowerCase().includes('deal') || section.title.toLowerCase().includes('find');
+                        const productCount = section.products?.length || 0;
                         
-                        if (isDeal && section.products.length <= 4) {
-                             return (
-                             <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full">
+                        const sectionContent = isDeal && productCount <= 4 ? (
+                            <Suspense fallback={<SectionSkeleton />}>
                                 <DealGrid
                                     title={section.title}
-                                    items={section.products}
+                                    items={section.products || []}
                                     bgColor="bg-white"
                                     darkBgColor=""
                                     titleKey="name"
-                                    subtitleKey="price" // Or discount if available
-                                    containerClass="mt-4"
+                                    subtitleKey="price"
+                                    containerClass="mt-0"
                                     showArrow={true}
                                 />
-                             </div>
-                             );
-                        }
-
-                        return (
-                            <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full">
+                            </Suspense>
+                        ) : (
+                            <Suspense fallback={<SectionSkeleton />}>
                                 <ProductSection
                                     title={section.title}
+                                    subtitle={section.subtitle}
                                     products={section.products}
-                                    containerClass="mt-4"
+                                    containerClass="mt-0"
                                     onViewAll={() => navigate(`/products?search=${section.title}`)}
                                 />
+                            </Suspense>
+                        );
+
+                        return (
+                            <div key={`${item.type}-${index}`} className="max-w-[1440px] mx-auto w-full px-4 md:px-0">
+                                {isFirstItem ? sectionContent : (
+                                    <LazySection placeholder={<SectionSkeleton />}>
+                                        {sectionContent}
+                                    </LazySection>
+                                )}
                             </div>
                         );
                     }

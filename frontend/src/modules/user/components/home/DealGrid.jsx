@@ -29,23 +29,23 @@ const DealGrid = ({
 
     return (
         <section className={`${containerClass}`}>
-            <div className={`${bgColor} md:rounded-2xl p-4 shadow-sm border-y md:border border-gray-100 relative overflow-hidden`}>
+            <div className={`${bgColor} md:rounded-2xl p-3 md:p-4 shadow-sm border-y md:border border-gray-100 relative overflow-hidden`}>
 
                 {/* Optional Stamp Decoration */}
                 {showStamp && (
                     <div className="absolute top-2 right-2 opacity-10 rotate-12 pointer-events-none select-none">
-                        <span className="text-[10px] md:text-sm font-black uppercase border-2 border-current px-2 py-0.5 leading-none whitespace-nowrap">
+                        <span className="text-[9px] md:text-sm font-black uppercase border-2 border-current px-2 py-0.5 leading-none whitespace-nowrap">
                             {stampText}
                         </span>
                     </div>
                 )}
 
                 {/* Header */}
-                <div className="flex items-center justify-between mb-4 px-1">
-                    <h3 className="text-base md:text-xl font-bold text-gray-900">{title}</h3>
+                <div className="flex items-center justify-between mb-2 md:mb-4 px-1">
+                    <h3 className="text-sm md:text-xl font-bold text-gray-900">{title}</h3>
                     {showArrow && (
-                        <button className="bg-black text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center hover:bg-gray-800 transition-colors z-10">
-                            <span className="material-icons text-white text-lg">arrow_forward</span>
+                        <button className="bg-black text-white rounded-full w-7 h-7 md:w-10 md:h-10 flex items-center justify-center hover:bg-gray-800 transition-colors z-10">
+                            <span className="material-icons text-white text-base md:text-lg">arrow_forward</span>
                         </button>
                     )}
                 </div>

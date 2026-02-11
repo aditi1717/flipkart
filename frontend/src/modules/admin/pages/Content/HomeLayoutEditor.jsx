@@ -3,13 +3,12 @@ import { useContentStore } from '../../store/contentStore';
 import useBannerStore from '../../store/bannerStore';
 import { 
     MdAdd, 
-    MdArrowUpward, 
-    MdArrowDownward, 
     MdDelete, 
-    MdViewCarousel, 
+    MdViewCarousel,
     MdViewAgenda, 
     MdDragIndicator 
 } from 'react-icons/md';
+import { Reorder } from 'framer-motion';
 
 const HomeLayoutEditor = () => {
     const { 
@@ -21,6 +20,8 @@ const HomeLayoutEditor = () => {
     } = useContentStore();
     
     const { banners, fetchBanners } = useBannerStore();
+
+    console.log('HomeLayoutEditor State:', { bannersCount: banners.length, layoutCount: homeLayout.length });
 
     useEffect(() => {
         fetchHomeSections();
@@ -36,11 +37,7 @@ const HomeLayoutEditor = () => {
         const newItem = {
             type,
             referenceId: id,
-            // unique key for list rendering if duplicates allowed? 
-            // MongoDB won't generate _id for subdocs in array content update unless schema strictly defined.
-            // But usually we just push the object.
-            // Ideally we need a unique instance ID for the FE key if we allow same banner multiple times. 
-            // For now using random string for key purposes only if needed, but here simple object is fine.
+            _id: `temp-${Date.now()}` // Temporary unique key for stable dragging before DB save
         };
         updateHomeLayout([...homeLayout, newItem]);
     };
@@ -51,16 +48,6 @@ const HomeLayoutEditor = () => {
         updateHomeLayout(newLayout);
     };
 
-    const handleMove = (index, direction) => {
-        if (direction === 'up' && index === 0) return;
-        if (direction === 'down' && index === homeLayout.length - 1) return;
-
-        const newLayout = [...homeLayout];
-        const item = newLayout[index];
-        newLayout.splice(index, 1);
-        newLayout.splice(direction === 'up' ? index - 1 : index + 1, 0, item);
-        updateHomeLayout(newLayout);
-    };
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
@@ -80,7 +67,11 @@ const HomeLayoutEditor = () => {
                                 <div key={banner.id || banner._id} className="flex items-center justify-between p-3 bg-gray-50 hover:bg-white border border-transparent hover:border-purple-200 hover:shadow-sm rounded-xl group transition-all">
                                     <div className="flex items-center gap-3 overflow-hidden">
                                         <div className="w-8 h-8 rounded-lg bg-gray-200 overflow-hidden shrink-0">
-                                            <img src={(banner.type === 'hero' ? banner.content?.imageUrl : banner.slides[0]?.imageUrl) || ''} className="w-full h-full object-cover" />
+                                            <img 
+                                                src={(banner.type === 'hero' ? (banner.content?.backgroundImageUrl || banner.content?.imageUrl) : banner.slides?.[0]?.imageUrl) || ''} 
+                                                className="w-full h-full object-cover" 
+                                                onError={(e) => console.error('Layout List Thumb Error:', banner.type, banner._id, e.target.src)}
+                                            />
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-xs font-bold text-gray-700 truncate">{banner.type === 'hero' ? banner.content?.title : 'Slideshow'}</p>
@@ -136,76 +127,78 @@ const HomeLayoutEditor = () => {
                     <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Homepage Layout Stream</h3>
                     <span className="text-[10px] font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded-lg">{homeLayout.length} Items</span>
                 </div>
-                <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-gray-50/30">
+                <div className="flex-1 overflow-y-auto p-6 bg-gray-50/30">
                     {homeLayout.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-50 space-y-4">
+                        <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-50 space-y-4 py-20">
                             <MdDragIndicator size={48} />
                             <p className="font-bold text-sm">Your homepage stream is empty</p>
                             <p className="text-xs text-center max-w-xs">Add banners and sections from the left panel to build your homepage.</p>
                         </div>
                     ) : (
-                        homeLayout.map((item, index) => {
-                            const details = item.type === 'banner' ? getBannerDetails(item.referenceId) : getSectionDetails(item.referenceId);
-                            if (!details) return null; // Skip invalid refs
+                        <Reorder.Group 
+                            axis="y" 
+                            values={homeLayout} 
+                            onReorder={updateHomeLayout}
+                            className="space-y-3"
+                        >
+                            {homeLayout.map((item, index) => {
+                                const details = item.type === 'banner' ? getBannerDetails(item.referenceId) : getSectionDetails(item.referenceId);
+                                if (!details) return null;
 
-                            return (
-                                <div key={index} className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-100 shadow-sm animate-in slide-in-from-bottom-2">
-                                    <div className="flex flex-col items-center gap-1 text-gray-300">
-                                        <button 
-                                            onClick={() => handleMove(index, 'up')} 
-                                            disabled={index === 0}
-                                            className="hover:text-blue-600 disabled:opacity-20"
-                                        >
-                                            <MdArrowUpward size={18} />
-                                        </button>
-                                        <span className="text-[9px] font-black">{index + 1}</span>
-                                        <button 
-                                            onClick={() => handleMove(index, 'down')}
-                                            disabled={index === homeLayout.length - 1}
-                                            className="hover:text-blue-600 disabled:opacity-20"
-                                        >
-                                            <MdArrowDownward size={18} />
-                                        </button>
-                                    </div>
-
-                                    {/* Preview Card */}
-                                    <div className="flex-1 flex items-center gap-4 bg-gray-50 p-2 rounded-lg border border-gray-100">
-                                        {/* Icon/Image */}
-                                        <div className="w-12 h-12 rounded-lg bg-white overflow-hidden shrink-0 border border-gray-100 relative">
-                                             {item.type === 'banner' ? (
-                                                <img src={(details.type === 'hero' ? details.content?.imageUrl : details.slides?.[0]?.imageUrl) || ''} className="w-full h-full object-cover" />
-                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-blue-500 bg-blue-50 font-black text-xs">
-                                                    {details.products?.length}
-                                                </div>
-                                             )}
-                                             <div className={`absolute bottom-0 left-0 right-0 h-1 ${item.type === 'banner' ? 'bg-purple-500' : 'bg-blue-500'}`} />
-                                        </div>
-
-                                        {/* Info */}
-                                        <div className="min-w-0">
-                                            <div className="flex items-center gap-2 mb-0.5">
-                                                <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded ${item.type === 'banner' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                                                    {item.type}
-                                                </span>
-                                                {item.type === 'banner' && <span className="text-[8px] font-bold text-gray-400 uppercase">{details.section}</span>}
-                                            </div>
-                                            <h4 className="text-sm font-bold text-gray-800 truncate">
-                                                {item.type === 'banner' ? (details.type === 'hero' ? details.content?.title : 'Slideshow Banner') : details.title}
-                                            </h4>
-                                        </div>
-                                    </div>
-
-                                    {/* Actions */}
-                                    <button 
-                                        onClick={() => handleRemoveFromLayout(index)}
-                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                                return (
+                                    <Reorder.Item 
+                                        key={item._id} 
+                                        value={item}
+                                        className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-100 shadow-sm cursor-grab active:cursor-grabbing hover:border-blue-200 transition-colors bg-white relative group"
                                     >
-                                        <MdDelete size={20} />
-                                    </button>
-                                </div>
-                            );
-                        })
+                                        <div className="flex flex-col items-center gap-1 text-gray-500 group-hover:text-blue-600 transition-colors bg-gray-100 p-1 rounded-lg">
+                                            <MdDragIndicator size={24} />
+                                            <span className="text-[9px] font-black">{index + 1}</span>
+                                        </div>
+
+                                        {/* Preview Card */}
+                                        <div className="flex-1 flex items-center gap-4 bg-gray-50 p-2 rounded-lg border border-gray-100">
+                                            <div className="w-12 h-12 rounded-lg bg-white overflow-hidden shrink-0 border border-gray-100 relative">
+                                                {item.type === 'banner' ? (
+                                                    <img 
+                                                        src={(details.type === 'hero' ? (details.content?.backgroundImageUrl || details.content?.imageUrl) : details.slides?.[0]?.imageUrl) || ''} 
+                                                        className="w-full h-full object-cover" 
+                                                        onError={(e) => console.error('Layout Stream Thumb Error:', details.type, details._id, e.target.src)}
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-blue-500 bg-blue-50 font-black text-xs">
+                                                        {details.products?.length}
+                                                    </div>
+                                                )}
+                                                <div className={`absolute bottom-0 left-0 right-0 h-1 ${item.type === 'banner' ? 'bg-purple-500' : 'bg-blue-500'}`} />
+                                            </div>
+
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2 mb-0.5">
+                                                    <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded ${item.type === 'banner' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                        {item.type}
+                                                    </span>
+                                                    {item.type === 'banner' && <span className="text-[8px] font-bold text-gray-400 uppercase">{details.section}</span>}
+                                                </div>
+                                                <h4 className="text-sm font-bold text-gray-800 truncate">
+                                                    {item.type === 'banner' ? (details.type === 'hero' ? details.content?.title : 'Slideshow Banner') : details.title}
+                                                </h4>
+                                            </div>
+                                        </div>
+
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent drag when clicking delete
+                                                handleRemoveFromLayout(index);
+                                            }}
+                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                                        >
+                                            <MdDelete size={20} />
+                                        </button>
+                                    </Reorder.Item>
+                                );
+                            })}
+                        </Reorder.Group>
                     )}
                 </div>
             </div>

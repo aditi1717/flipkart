@@ -59,8 +59,8 @@ const ReturnRequests = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-black text-gray-900 tracking-tight">Returns & Replacements</h1>
-                    <p className="text-sm text-gray-500 font-medium italic">Manage lifecycle of return/replacement requests</p>
+                    <h1 className="text-2xl font-black text-gray-900 tracking-tight">Returns & Cancellations</h1>
+                    <p className="text-sm text-gray-500 font-medium italic">Manage lifecycle of return, replacement, and cancellation requests</p>
                 </div>
             </div>
 
@@ -71,7 +71,7 @@ const ReturnRequests = () => {
                     <input
                         type="text"
                         placeholder="Search by ID, Order #, or Customer..."
-                        className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all text-sm font-medium"
+                        className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-blue-500 outline-none transition-all text-sm text-gray-900 placeholder:text-gray-900 font-bold"
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
                             setCurrentPage(1);
@@ -80,7 +80,7 @@ const ReturnRequests = () => {
                 </div>
                 <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                     <select
-                        className="flex-1 lg:flex-none px-4 py-2.5 bg-gray-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-blue-500 text-sm font-bold min-w-[130px]"
+                        className="flex-1 lg:flex-none px-4 py-2.5 bg-gray-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-blue-500 text-sm font-black text-gray-900 min-w-[130px]"
                         value={typeFilter}
                         onChange={(e) => {
                             setTypeFilter(e.target.value);
@@ -90,9 +90,10 @@ const ReturnRequests = () => {
                         <option value="All">All Types</option>
                         <option value="Return">Return</option>
                         <option value="Replacement">Replacement</option>
+                        <option value="Cancellation">Cancellation</option>
                     </select>
                     <select
-                        className="flex-1 lg:flex-none px-4 py-2.5 bg-gray-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-blue-500 text-sm font-bold min-w-[150px]"
+                        className="flex-1 lg:flex-none px-4 py-2.5 bg-gray-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-blue-500 text-sm font-black text-gray-900 min-w-[150px]"
                         value={statusFilter}
                         onChange={(e) => {
                             setStatusFilter(e.target.value);
@@ -132,11 +133,15 @@ const ReturnRequests = () => {
                                         <div className="flex flex-col">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-xs font-black text-gray-900">{ret.id}</span>
-                                                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${ret.type === 'Return' ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'}`}>
+                                                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${
+                                                    ret.type === 'Return' ? 'bg-orange-100 text-orange-600' : 
+                                                    ret.type === 'Replacement' ? 'bg-purple-100 text-purple-600' : 
+                                                    'bg-red-100 text-red-600'
+                                                }`}>
                                                     {ret.type}
                                                 </span>
                                             </div>
-                                            <span className="text-[10px] font-bold text-blue-600 mt-1 uppercase tracking-tighter">Order: {ret.orderId}</span>
+                                            <span className="text-[10px] font-bold text-blue-600 mt-1 uppercase tracking-tighter">Order: {ret.orderDisplayId || ret.orderId}</span>
                                             <span className="text-[9px] text-gray-400 font-medium mt-0.5">{ret.customer}</span>
                                         </div>
                                     </td>
@@ -219,8 +224,12 @@ const ReturnRequests = () => {
                         {/* Left Side: Info */}
                         <div className="md:w-1/2 p-8 border-b md:border-b-0 md:border-r border-gray-100 overflow-y-auto">
                             <div className="flex items-center justify-between mb-6">
-                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${selectedReturn.type === 'Return' ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'}`}>
-                                    {selectedReturn.type} Request
+                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
+                                    selectedReturn.type === 'Return' ? 'bg-orange-100 text-orange-600' : 
+                                    selectedReturn.type === 'Replacement' ? 'bg-purple-100 text-purple-600' : 
+                                    'bg-red-100 text-red-600'
+                                }`}>
+                                    {selectedReturn.type} {selectedReturn.type === 'Cancellation' ? 'Request' : 'Order'}
                                 </span>
                                 <button onClick={() => setSelectedReturn(null)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 md:hidden"><MdCancel size={24} /></button>
                             </div>
@@ -255,7 +264,7 @@ const ReturnRequests = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-blue-50/50 p-4 rounded-2xl">
                                         <p className="text-[9px] font-black text-blue-400 uppercase mb-1">Order Ref</p>
-                                        <p className="text-xs font-black text-blue-700">#{selectedReturn.orderId}</p>
+                                        <p className="text-xs font-black text-blue-700">#{selectedReturn.orderDisplayId || selectedReturn.orderId}</p>
                                     </div>
                                     <div className="bg-gray-50 p-4 rounded-2xl">
                                         <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Customer</p>
@@ -298,33 +307,43 @@ const ReturnRequests = () => {
                                 <div className="p-6 bg-white border-t border-gray-200 space-y-4">
                                     <textarea
                                         placeholder="Add a status update note..."
-                                        className="w-full bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl p-4 outline-none text-xs font-bold transition-all h-20 resize-none"
+                                        className="w-full bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl p-4 outline-none text-xs font-black text-gray-900 placeholder:text-gray-900 transition-all h-20 resize-none"
                                         value={actionNote}
                                         onChange={(e) => setActionNote(e.target.value)}
                                     />
                                     <div className="grid grid-cols-2 gap-3">
                                         {selectedReturn.status === 'Pending' && (
                                             <>
-                                                <button onClick={() => handleStatusUpdate(selectedReturn.id, 'Approved')} className="py-3 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">Approve Request</button>
-                                                <button onClick={() => handleStatusUpdate(selectedReturn.id, 'Rejected')} className="py-3 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition">Reject Request</button>
+                                                <button 
+                                                    onClick={() => handleStatusUpdate(selectedReturn._id, 'Approved')} 
+                                                    className="py-3 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100"
+                                                >
+                                                    {selectedReturn.type === 'Cancellation' ? 'Approve Cancellation' : 'Approve Request'}
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleStatusUpdate(selectedReturn._id, 'Rejected')} 
+                                                    className="py-3 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition"
+                                                >
+                                                    {selectedReturn.type === 'Cancellation' ? 'Reject Cancellation' : 'Reject Request'}
+                                                </button>
                                             </>
                                         )}
                                         {selectedReturn.status === 'Approved' && (
-                                            <button onClick={() => handleStatusUpdate(selectedReturn.id, 'Pickup Scheduled')} className="col-span-2 py-3 bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-purple-700 transition shadow-lg shadow-purple-100 flex items-center justify-center gap-2"><MdLocalShipping size={16} /> Schedule Pickup</button>
+                                            <button onClick={() => handleStatusUpdate(selectedReturn._id, 'Pickup Scheduled')} className="col-span-2 py-3 bg-purple-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-purple-700 transition shadow-lg shadow-purple-100 flex items-center justify-center gap-2"><MdLocalShipping size={16} /> Schedule Pickup</button>
                                         )}
                                         {selectedReturn.status === 'Pickup Scheduled' && (
-                                            <button onClick={() => handleStatusUpdate(selectedReturn.id, 'Received at Warehouse')} className="col-span-2 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2"><MdInventory size={16} /> Confirm Item Received</button>
+                                            <button onClick={() => handleStatusUpdate(selectedReturn._id, 'Received at Warehouse')} className="col-span-2 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2"><MdInventory size={16} /> Confirm Item Received</button>
                                         )}
                                         {selectedReturn.status === 'Received at Warehouse' && (
                                             <button
-                                                onClick={() => handleStatusUpdate(selectedReturn.id, selectedReturn.type === 'Return' ? 'Refund Initiated' : 'Replacement Dispatched')}
+                                                onClick={() => handleStatusUpdate(selectedReturn._id, selectedReturn.type === 'Return' ? 'Refund Initiated' : 'Replacement Dispatched')}
                                                 className="col-span-2 py-3 bg-cyan-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-cyan-700 transition shadow-lg shadow-cyan-100 flex items-center justify-center gap-2"
                                             >
                                                 <MdAssignmentReturn size={16} /> {selectedReturn.type === 'Return' ? 'Initiate Refund' : 'Dispatch Replacement'}
                                             </button>
                                         )}
                                         {(selectedReturn.status === 'Refund Initiated' || selectedReturn.status === 'Replacement Dispatched') && (
-                                            <button onClick={() => handleStatusUpdate(selectedReturn.id, 'Completed')} className="col-span-2 py-3 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-100 flex items-center justify-center gap-2"><MdCheckCircle size={16} /> Mark as Completed</button>
+                                            <button onClick={() => handleStatusUpdate(selectedReturn._id, 'Completed')} className="col-span-2 py-3 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-100 flex items-center justify-center gap-2"><MdCheckCircle size={16} /> Mark as Completed</button>
                                         )}
                                     </div>
                                 </div>

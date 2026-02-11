@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCategories } from '../../../hooks/useData';
+import { useHeaderStore } from '../../admin/store/headerStore';
 import { IoSearch } from 'react-icons/io5';
 import {
     MdGridView,
@@ -16,23 +17,40 @@ import {
 
 const AllCategories = () => {
     const navigate = useNavigate();
-    const { categories, loading } = useCategories();
+    const { categories, loading: categoriesLoading } = useCategories();
+    const { headerCategories, fetchHeaderConfig, isLoading: headerLoading } = useHeaderStore();
+
+    useEffect(() => {
+        fetchHeaderConfig();
+    }, []);
     
-    // Filter out "For You" category
-    const displayCategories = categories.filter(cat => cat.name !== "For You");
-    
-    // Use the first category ID as default if none selected or selected one not in current list
+    // Reorder categories to match header pinned items first
+    const displayCategories = useMemo(() => {
+        if (categoriesLoading) return [];
+        
+        // Filter out "For You" category and ensure they are active
+        const allActive = categories.filter(cat => cat.name !== "For You" && cat.active !== false);
+        const pinned = headerCategories.filter(cat => cat.name !== "For You" && cat.active !== false);
+        
+        const pinnedIds = new Set(pinned.map(cat => cat.id || cat._id));
+        const remaining = allActive.filter(cat => !pinnedIds.has(cat.id || cat._id));
+        
+        return [...pinned, ...remaining];
+    }, [categories, headerCategories, categoriesLoading]);
+
     const [selectedCategory, setSelectedCategory] = useState(null);
 
     // Update selected category when categories load
-    React.useEffect(() => {
-        if (categories.length > 0 && !selectedCategory) {
-            setSelectedCategory(displayCategories[0]?.id || categories[0].id || displayCategories[0]?._id);
+    useEffect(() => {
+        if (displayCategories.length > 0 && !selectedCategory) {
+            setSelectedCategory(displayCategories[0]?.id || displayCategories[0]?._id);
         }
-    }, [categories, selectedCategory, displayCategories]);
+    }, [displayCategories, selectedCategory]);
 
     // Filter categories to show content based on selection
-    const activeData = categories.find(cat => (cat.id || cat._id) === selectedCategory);
+    const activeData = useMemo(() => {
+        return categories.find(cat => (cat.id || cat._id) === selectedCategory);
+    }, [categories, selectedCategory]);
 
     const iconMap = {
         'grid_view': MdGridView,
@@ -44,7 +62,7 @@ const AllCategories = () => {
         'shopping_basket': MdShoppingBasket,
     };
 
-    if (loading) {
+    if (categoriesLoading) {
         return <div className="p-10 text-center">Loading categories...</div>;
     }
 
@@ -57,26 +75,26 @@ const AllCategories = () => {
                 </div>
             </div>
 
-            <div className="flex flex-1 overflow-hidden h-[calc(100vh-120px)]">
+            <div className="flex flex-1">
                 {/* Left Sidebar - Categories List */}
-                <div className="w-1/4 max-w-[100px] bg-gray-50 h-full overflow-y-auto border-r border-gray-200 no-scrollbar pb-20">
+                <div className="w-1/4 max-w-[100px] bg-gray-50 border-r border-gray-200 no-scrollbar">
                     {displayCategories.map((cat) => {
                         const IconComponent = iconMap[cat.icon] || MdGridView;
                         return (
                             <div
-                                key={cat.id}
-                                onClick={() => setSelectedCategory(cat.id)}
-                                className={`flex flex-col items-center justify-center py-4 px-1 cursor-pointer relative ${selectedCategory === cat.id ? 'bg-white' : ''}`}
+                                key={cat.id || cat._id}
+                                onClick={() => setSelectedCategory(cat.id || cat._id)}
+                                className={`flex flex-col items-center justify-center py-4 px-1 cursor-pointer relative ${selectedCategory === (cat.id || cat._id) ? 'bg-white' : ''}`}
                             >
                                 {/* Active Indicator Strip */}
-                                {selectedCategory === cat.id && (
+                                {selectedCategory === (cat.id || cat._id) && (
                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-full"></div>
                                 )}
 
-                                <div className={`relative w-10 h-10 rounded-full flex items-center justify-center mb-1 ${selectedCategory === cat.id ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                                <div className={`relative w-10 h-10 rounded-full flex items-center justify-center mb-1 ${selectedCategory === (cat.id || cat._id) ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
                                     <IconComponent className="text-xl" />
                                 </div>
-                                <span className={`text-[10px] text-center font-medium leading-tight ${selectedCategory === cat.id ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>
+                                <span className={`text-[10px] text-center font-medium leading-tight ${selectedCategory === (cat.id || cat._id) ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>
                                     {cat.name}
                                 </span>
                             </div>
@@ -85,7 +103,7 @@ const AllCategories = () => {
                 </div>
 
                 {/* Right Content Area - Subcategories ONLY */}
-                <div className="flex-1 h-full overflow-y-auto bg-white p-4 pb-20">
+                <div className="flex-1 bg-white p-4">
                     <div className="animate-in slide-in-from-bottom-2 duration-300">
                         {/* Subcategories Grid */}
                         <h3 className="font-bold text-gray-800 mb-3 text-sm">Shop by Category</h3>

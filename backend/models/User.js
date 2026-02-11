@@ -4,7 +4,8 @@ import bcrypt from 'bcryptjs';
 const userSchema = mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: false,
+        default: ''
     },
     email: {
         type: String,
@@ -14,11 +15,6 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
         required: true,
-    },
-    isAdmin: {
-        type: Boolean,
-        required: true,
-        default: false,
     },
     phone: { // Added to support OTP flow if needed directly in schema
         type: String

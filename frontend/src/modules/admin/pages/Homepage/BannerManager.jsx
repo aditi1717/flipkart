@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MdAdd, MdEdit, MdDelete, MdToggleOn, MdToggleOff } from 'react-icons/md';
 import useBannerStore from '../../store/bannerStore';
 import BannerForm from './BannerForm';
+import { confirmToast } from '../../../../utils/toastUtils.jsx';
 
 const BannerManager = () => {
     const { banners, deleteBanner, toggleBannerStatus, fetchBanners } = useBannerStore();
@@ -25,9 +26,13 @@ const BannerManager = () => {
     };
 
     const handleDelete = (id) => {
-        if (window.confirm('Delete this banner collection?')) {
-            deleteBanner(id);
-        }
+        confirmToast({
+            message: 'Are you sure you want to delete this banner collection?',
+            type: 'danger',
+            icon: 'delete_forever',
+            confirmText: 'Delete Collection',
+            onConfirm: () => deleteBanner(id)
+        });
     };
 
     const handleClose = () => {

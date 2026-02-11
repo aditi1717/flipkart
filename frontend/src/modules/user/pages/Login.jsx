@@ -10,12 +10,15 @@ const Login = () => {
     const location = useLocation();
     const { sendOtp, verifyOtp, loading, error } = useAuthStore();
     const [mobile, setMobile] = useState(location.state?.mobile || '');
+    const [name, setName] = useState(location.state?.name || '');
+    const [email, setEmail] = useState(location.state?.email || '');
     const [otp, setOtp] = useState(''); // State for OTP
-    const [step, setStep] = useState(1); // 1: Mobile, 2: OTP
+    const [step, setStep] = useState(location.state?.mobile ? 2 : 1); // 1: Mobile, 2: OTP
     const from = location.state?.from?.pathname || '/';
 
     const handleSendOtp = async () => {
-        if (mobile.length === 10) {
+        const mobileRegex = /^[6-9]\d{9}$/;
+        if (mobileRegex.test(mobile)) {
             try {
                 await sendOtp(mobile);
                 toast.success(`OTP sent to ${mobile}`);
@@ -25,14 +28,14 @@ const Login = () => {
                 toast.error(error || 'Failed to send OTP');
             }
         } else {
-            toast.error('Please enter a valid 10-digit mobile number');
+            toast.error('Please enter a valid 10-digit Indian mobile number (starting with 6-9)');
         }
     };
 
     const handleVerifyOtp = async () => {
         if (otp.length === 4) {
             try {
-                await verifyOtp(mobile, otp);
+                await verifyOtp(mobile, otp, 'Customer', name, email);
                 toast.success('Login successful!');
                 navigate(from, { replace: true });
             } catch (err) {
@@ -51,7 +54,7 @@ const Login = () => {
 
             <div className="flex-1 flex flex-col pt-0">
                 <div className="mb-4 flex flex-col items-center">
-                    <div className="w-40 h-40 bg-white flex items-center justify-center mb-2">
+                    <div className="w-56 h-56 bg-white flex items-center justify-center mb-2">
                         <img src={logo} alt="logo" className="w-full h-full object-contain" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">

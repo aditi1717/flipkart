@@ -7,7 +7,7 @@ const Wishlist = () => {
     const { wishlist, toggleWishlist, moveToCart } = useCartStore();
 
     return (
-        <div className="bg-white min-h-screen pb-20 md:bg-[#f1f3f6] md:pb-10">
+        <div className="bg-white min-h-screen md:bg-[#f1f3f6]">
 
             {/* Mobile Header - Hidden on Desktop */}
             <div className="bg-white sticky top-0 z-10 px-4 py-4 flex items-center gap-4 border-b md:hidden">
@@ -29,7 +29,9 @@ const Wishlist = () => {
             <div className="px-2 md:px-4">
                 {wishlist.length === 0 ? (
                     <div className="flex flex-col items-center justify-center pt-20 px-10 text-center md:bg-white md:shadow-sm md:rounded-sm md:py-32 md:max-w-4xl md:mx-auto">
-                        <img src="https://rukminim2.flixcart.com/www/800/800/promos/16/05/2019/d405a710-1043-4977-88f2-fdc95bede36f.png?q=90" alt="empty" className="w-48 mb-6" />
+                        <div className="w-24 h-24 md:w-32 md:h-32 bg-red-50 rounded-full flex items-center justify-center mb-6 shadow-inner ring-8 ring-red-50/50">
+                            <span className="material-icons text-red-500 text-6xl md:text-7xl">favorite_border</span>
+                        </div>
                         <h2 className="text-xl font-bold mb-2">Empty Wishlist!</h2>
                         <p className="text-gray-500 text-sm mb-6">You have no items in your wishlist. Start adding!</p>
                         <button onClick={() => navigate('/')} className="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:shadow-lg transition-all">Shop Now</button>

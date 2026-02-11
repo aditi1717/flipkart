@@ -10,21 +10,26 @@ const Signup = () => {
     const location = useLocation();
     const { sendOtp, loading, error } = useAuthStore();
     const [mobile, setMobile] = useState('');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
     const from = location.state?.from?.pathname || '/';
 
     const handleSignup = async () => {
-        if (mobile.length === 10) {
+        if (!name.trim()) return toast.error('Please enter your name');
+        if (!email.trim() || !email.includes('@')) return toast.error('Please enter a valid email');
+        const mobileRegex = /^[6-9]\d{9}$/;
+        if (mobileRegex.test(mobile)) {
             try {
                 await sendOtp(mobile);
                 toast.success(`OTP sent to ${mobile}`);
-                // Navigate to login to verify OTP, passing mobile number
-                navigate('/login', { state: { mobile } }); 
+                // Navigate to login to verify OTP, passing mobile, name, and email
+                navigate('/login', { state: { mobile, name, email } }); 
             } catch (err) {
                  // Error handled by store/hook, but we can also show it
                  toast.error(error || 'Failed to send OTP');
             }
         } else {
-            toast.error('Please enter a valid 10-digit mobile number');
+            toast.error('Please enter a valid 10-digit Indian mobile number (starting with 6-9)');
         }
     };
 
@@ -38,14 +43,40 @@ const Signup = () => {
 
             <div className="p-8 flex-1 flex flex-col">
                 <div className="mb-8 mt-4">
-                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 overflow-hidden border border-gray-100 p-1">
-                        <img src={logo} alt="logo" className="w-full h-full object-contain" />
+                    <div className="w-24 h-24 bg-white rounded-2xl flex items-center justify-center mb-6 overflow-hidden border border-gray-100 p-1">
+                        <img src="/indiankart-logo.png" alt="logo" className="w-full h-full object-contain" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Looks like you're new here!</h2>
                     <p className="text-sm text-gray-500">Sign up with your mobile number to get started</p>
                 </div>
 
                 <div className="space-y-6">
+                    <div className="relative">
+                        <label className="text-[10px] uppercase text-blue-600 font-bold absolute -top-1.5 left-3 bg-white px-1">Full Name</label>
+                        <div className="flex items-center border border-blue-600 rounded-lg overflow-hidden h-12">
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="flex-1 h-full px-4 outline-none text-gray-900 font-medium"
+                                placeholder="Enter your full name"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="relative">
+                        <label className="text-[10px] uppercase text-blue-600 font-bold absolute -top-1.5 left-3 bg-white px-1">Email Address</label>
+                        <div className="flex items-center border border-blue-600 rounded-lg overflow-hidden h-12">
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="flex-1 h-full px-4 outline-none text-gray-900 font-medium"
+                                placeholder="Enter your email"
+                            />
+                        </div>
+                    </div>
+
                     <div className="relative">
                         <label className="text-[10px] uppercase text-blue-600 font-bold absolute -top-1.5 left-3 bg-white px-1">Mobile Number</label>
                         <div className="flex items-center border border-blue-600 rounded-lg overflow-hidden h-12">

@@ -17,6 +17,7 @@ const HomeSections = () => {
     const {
         homeSections,
         updateSectionTitle,
+        updateHomeSection,
         createHomeSection,
         deleteHomeSection,
         addProductToSection,
@@ -33,25 +34,45 @@ const HomeSections = () => {
     // Navigation State
     const [selectedSectionId, setSelectedSectionId] = useState(null);
 
-    // Creates State
-    const [showCreateForm, setShowCreateForm] = useState(false);
-    const [newSectionData, setNewSectionData] = useState({ title: '', id: '' });
+    // Creates/Edit State
+    const [showForm, setShowForm] = useState(false);
+    const [formData, setFormData] = useState({ title: '', id: '', subtitle: '' });
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingSectionId, setEditingSectionId] = useState(null);
 
     // UI State
     const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [isEditingSubtitle, setIsEditingSubtitle] = useState(false);
     const [newTitle, setNewTitle] = useState('');
+    const [newSubtitle, setNewSubtitle] = useState('');
     const [showProductModal, setShowProductModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
     const activeSection = homeSections.find(s => s.id === selectedSectionId);
 
-    const handleCreate = async () => {
-        if (!newSectionData.title || !newSectionData.id) return;
-        // Simple sanitization for ID
-        const finalId = newSectionData.id.toLowerCase().replace(/\s+/g, '_');
-        await createHomeSection({ ...newSectionData, id: finalId });
-        setShowCreateForm(false);
-        setNewSectionData({ title: '', id: '' });
+    const handleSubmit = async () => {
+        if (!formData.title || !formData.id) return;
+        const finalId = formData.id.toLowerCase().replace(/\s+/g, '_');
+        const data = { ...formData, id: finalId };
+
+        if (isEditing) {
+            await updateHomeSection(editingSectionId, data);
+        } else {
+            await createHomeSection(data);
+        }
+        
+        setShowForm(false);
+        setFormData({ title: '', id: '', subtitle: '' });
+        setIsEditing(false);
+        setEditingSectionId(null);
+    };
+
+    const handleEditOpen = (section, e) => {
+        e.stopPropagation();
+        setFormData({ title: section.title, id: section.id, subtitle: section.subtitle || '' });
+        setEditingSectionId(section.id);
+        setIsEditing(true);
+        setShowForm(true);
     };
 
     const handleDeleteSection = async (id, e) => {
@@ -67,9 +88,19 @@ const HomeSections = () => {
         setIsEditingTitle(true);
     };
 
+    const handleEditSubtitleOpen = () => {
+        setNewSubtitle(activeSection.subtitle || '');
+        setIsEditingSubtitle(true);
+    };
+
     const handleSaveTitle = () => {
-        updateSectionTitle(activeSection.id, newTitle);
+        updateHomeSection(activeSection.id, { title: newTitle });
         setIsEditingTitle(false);
+    };
+
+    const handleSaveSubtitle = () => {
+        updateHomeSection(activeSection.id, { subtitle: newSubtitle });
+        setIsEditingSubtitle(false);
     };
 
     const filteredProducts = products.filter(p =>
@@ -81,35 +112,53 @@ const HomeSections = () => {
     if (!selectedSectionId) {
         return (
             <div className="space-y-4">
-                 {/* Create Form */}
-                 {showCreateForm && (
-                     <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm animate-in slide-in-from-top-2">
-                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Create New Section</h3>
-                         <div className="flex gap-4">
-                             <div className="flex-1 space-y-1">
-                                 <label className="text-[10px] font-bold text-gray-400 uppercase">Section ID (Unique)</label>
-                                 <input 
-                                    type="text" 
-                                    placeholder="e.g. summer_sale" 
-                                    value={newSectionData.id} 
-                                    onChange={(e) => setNewSectionData({...newSectionData, id: e.target.value})}
-                                    className="w-full px-3 py-2 bg-gray-50 rounded-lg text-sm font-normal text-gray-800 outline-none focus:bg-white focus:ring-2 ring-blue-100 transition"
-                                 />
-                             </div>
-                             <div className="flex-[2] space-y-1">
-                                 <label className="text-[10px] font-bold text-gray-400 uppercase">Display Title</label>
-                                 <input 
-                                    type="text" 
-                                    placeholder="e.g. Summer Sale 50% Off" 
-                                    value={newSectionData.title} 
-                                    onChange={(e) => setNewSectionData({...newSectionData, title: e.target.value})}
-                                    className="w-full px-3 py-2 bg-gray-50 rounded-lg text-sm font-normal text-gray-800 outline-none focus:bg-white focus:ring-2 ring-blue-100 transition"
-                                 />
-                             </div>
-                             <div className="flex items-end gap-2">
-                                 <button onClick={handleCreate} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-black uppercase hover:bg-blue-700 transition">Create</button>
-                                 <button onClick={() => setShowCreateForm(false)} className="px-4 py-2 bg-gray-100 text-gray-500 rounded-lg text-xs font-black uppercase hover:bg-gray-200 transition">Cancel</button>
-                             </div>
+                 {/* Create/Edit Modal */}
+                 {showForm && (
+                     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowForm(false)}></div>
+                         <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 animate-in zoom-in duration-200">
+                            <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest mb-6">
+                                {isEditing ? 'Edit Section' : 'Create New Section'}
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Section ID (Unique)</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="e.g. summer_sale" 
+                                        value={formData.id} 
+                                        onChange={(e) => setFormData({...formData, id: e.target.value})}
+                                        className="w-full px-3 py-2 bg-gray-50 rounded-lg text-sm font-normal text-gray-800 outline-none focus:bg-white focus:ring-2 ring-blue-100 transition"
+                                    />
+                                    {isEditing && <p className="text-[9px] text-orange-500 font-bold mt-1 uppercase">Warning: Changing ID may break external links.</p>}
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Display Title</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="e.g. Summer Sale 50% Off" 
+                                        value={formData.title} 
+                                        onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                        className="w-full px-3 py-2 bg-gray-50 rounded-lg text-sm font-normal text-gray-800 outline-none focus:bg-white focus:ring-2 ring-blue-100 transition"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase">Subtitle (Optional)</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Small description text" 
+                                        value={formData.subtitle} 
+                                        onChange={(e) => setFormData({...formData, subtitle: e.target.value})}
+                                        className="w-full px-3 py-2 bg-gray-50 rounded-lg text-sm font-normal text-gray-800 outline-none focus:bg-white focus:ring-2 ring-blue-100 transition"
+                                    />
+                                </div>
+                                <div className="flex gap-2 pt-4">
+                                    <button onClick={handleSubmit} className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-xs font-black uppercase hover:bg-blue-700 transition">
+                                        {isEditing ? 'Update Section' : 'Create Section'}
+                                    </button>
+                                    <button onClick={() => setShowForm(false)} className="px-6 py-2 bg-gray-100 text-gray-500 rounded-lg text-xs font-black uppercase hover:bg-gray-200 transition">Cancel</button>
+                                </div>
+                            </div>
                          </div>
                      </div>
                  )}
@@ -117,8 +166,8 @@ const HomeSections = () => {
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-in fade-in duration-300">
                     <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
                         <h3 className="text-sm font-black text-gray-800 uppercase tracking-tight">All Sections</h3>
-                        {!showCreateForm && (
-                            <button onClick={() => setShowCreateForm(true)} className="flex items-center gap-2 text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition">
+                        {!showForm && (
+                            <button onClick={() => { setIsEditing(false); setFormData({title: '', id: '', subtitle: ''}); setShowForm(true); }} className="flex items-center gap-2 text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition">
                                 <MdAdd size={14} /> NEW SECTION
                             </button>
                         )}
@@ -148,6 +197,12 @@ const HomeSections = () => {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex justify-end gap-2">
+                                                 <button
+                                                    onClick={(e) => handleEditOpen(section, e)}
+                                                    className="p-1.5 text-blue-400 hover:bg-blue-50 rounded-lg transition"
+                                                >
+                                                    <MdEdit size={16} />
+                                                </button>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setSelectedSectionId(section.id); }}
                                                     className="px-3 py-1.5 bg-gray-900 text-white rounded-lg text-[10px] font-black hover:bg-black transition shadow-sm"
@@ -184,14 +239,30 @@ const HomeSections = () => {
                     <button onClick={() => setSelectedSectionId(null)} className="p-2 text-gray-400 hover:text-gray-900 transition"><MdArrowBack size={20} /></button>
                     {isEditingTitle ? (
                         <div className="flex items-center gap-2">
-                            <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="text-sm font-bold text-gray-900 border-b border-blue-500 outline-none w-48" autoFocus />
+                            <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="text-sm font-bold text-gray-900 border-b border-blue-500 outline-none w-48 bg-transparent" autoFocus />
                             <button onClick={handleSaveTitle} className="text-blue-600"><MdSave size={18} /></button>
                             <button onClick={() => setIsEditingTitle(false)} className="text-gray-400"><MdClose size={18} /></button>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-2 group">
-                            <h2 className="text-sm font-black text-gray-900 uppercase tracking-tight">{activeSection.title}</h2>
-                            <button onClick={handleEditTitleOpen} className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-blue-600 transition"><MdEdit size={14} /></button>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2 group">
+                                <h2 className="text-sm font-black text-gray-900 uppercase tracking-tight">{activeSection.title}</h2>
+                                <button onClick={handleEditTitleOpen} className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-blue-600 transition"><MdEdit size={14} /></button>
+                            </div>
+                            {isEditingSubtitle ? (
+                                <div className="flex items-center gap-2 mt-1">
+                                    <input type="text" value={newSubtitle} onChange={(e) => setNewSubtitle(e.target.value)} className="text-[10px] font-bold text-gray-400 border-b border-blue-300 outline-none w-64 bg-transparent" autoFocus placeholder="Enter subtitle..." />
+                                    <button onClick={handleSaveSubtitle} className="text-blue-400"><MdSave size={14} /></button>
+                                    <button onClick={() => setIsEditingSubtitle(false)} className="text-gray-300"><MdClose size={14} /></button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 group mt-0.5">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
+                                        {activeSection.subtitle || 'No subtitle set'}
+                                    </p>
+                                    <button onClick={handleEditSubtitleOpen} className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-300 hover:text-blue-400 transition"><MdEdit size={12} /></button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

@@ -7,16 +7,23 @@ import generateToken from '../utils/generateToken.js';
 export const authAdmin = async (req, res) => {
     const { password } = req.body;
     const email = req.body.email?.toLowerCase().trim();
+    console.log('Admin login attempt:', { email });
 
-    const admin = await Admin.findOne({ email });
+    const adminQuery = await Admin.findOne({ email });
+    if (!adminQuery) {
+        console.log('Admin not found with email:', email);
+    } else {
+        const isMatch = await adminQuery.matchPassword(password);
+        console.log('Admin found. Password match:', isMatch);
+    }
 
-    if (admin && (await admin.matchPassword(password))) {
-        const token = generateToken(res, admin._id);
+    if (adminQuery && (await adminQuery.matchPassword(password))) {
+        const token = generateToken(res, adminQuery._id);
         res.json({
-            _id: admin._id,
-            name: admin.name,
-            email: admin.email,
-            role: admin.role,
+            _id: adminQuery._id,
+            name: adminQuery.name,
+            email: adminQuery.email,
+            role: adminQuery.role,
             isAdmin: true,
             token
         });

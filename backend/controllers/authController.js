@@ -24,7 +24,7 @@ export const sendLoginOtp = async (req, res) => {
 };
 
 export const verifyLoginOtp = async (req, res) => {
-    const { mobile, otp, userType, name } = req.body;
+    const { mobile, otp, userType, name, email } = req.body;
     if (!mobile || !otp) return res.status(400).json({ message: 'Mobile and OTP are required' });
     try {
         const isValid = await verifyOTP(mobile, otp, userType || 'Customer');
@@ -33,19 +33,24 @@ export const verifyLoginOtp = async (req, res) => {
         if (!user) {
             user = await User.create({
                 name: name || 'New User',
-                email: mobile,
+                email: email || mobile,
                 phone: mobile,
                 password: await bcrypt.hash(Math.random().toString(36), 10),
             });
+        } else {
+            // Update name and email if provided (handles case where user had only mobile/first name before)
+            if (name) user.name = name;
+            if (email) user.email = email;
+            await user.save();
         }
-        generateToken(res, user._id);
+        const token = generateToken(res, user._id);
         res.json({ 
             _id: user._id, 
             name: user.name, 
             email: user.email, 
             phone: user.phone,
             gender: user.gender,
-            isAdmin: user.isAdmin 
+            token
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -57,14 +62,14 @@ export const authUser = async (req, res) => {
     const email = req.body.email?.toLowerCase().trim();
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
-        generateToken(res, user._id);
+        const token = generateToken(res, user._id);
         res.json({ 
             _id: user._id, 
             name: user.name, 
             email: user.email, 
             phone: user.phone,
             gender: user.gender,
-            isAdmin: user.isAdmin 
+            token
         });
     } else {
         res.status(401).json({ message: 'Invalid email or password' });
@@ -80,14 +85,14 @@ export const registerUser = async (req, res) => {
     }
     const user = await User.create({ name, email, password });
     if (user) {
-        generateToken(res, user._id);
+        const token = generateToken(res, user._id);
         res.status(201).json({ 
             _id: user._id, 
             name: user.name, 
             email: user.email, 
             phone: user.phone,
             gender: user.gender,
-            isAdmin: user.isAdmin 
+            token
         });
     } else {
         res.status(400).json({ message: 'Invalid user data' });
@@ -105,8 +110,7 @@ export const getUserProfile = async (req, res) => {
         name: req.user.name, 
         email: req.user.email, 
         phone: req.user.phone,
-        gender: req.user.gender,
-        isAdmin: req.user.isAdmin 
+        gender: req.user.gender
     };
     res.status(200).json(user);
 };
@@ -133,7 +137,7 @@ export const updateUserProfile = async (req, res) => {
 
             const updatedUser = await user.save();
 
-            generateToken(res, updatedUser._id);
+            const token = generateToken(res, updatedUser._id);
 
             res.json({
                 _id: updatedUser._id,
@@ -141,7 +145,7 @@ export const updateUserProfile = async (req, res) => {
                 email: updatedUser.email,
                 phone: updatedUser.phone,
                 gender: updatedUser.gender,
-                isAdmin: updatedUser.isAdmin,
+                token
             });
         } else {
             res.status(404).json({ message: 'User not found' });
@@ -159,7 +163,57 @@ export const updateUserProfile = async (req, res) => {
 // @access  Private/Admin
 export const getUsers = async (req, res) => {
     try {
-        const users = await User.find({}).select('-password');
+        const { pageNumber, limit, search, status } = req.query;
+        let filter = {};
+
+        // Search Implementation
+        if (search) {
+            const searchRegex = { $regex: search, $options: 'i' };
+            filter.$or = [
+                { name: searchRegex },
+                { email: searchRegex },
+                { phone: searchRegex }
+            ];
+        }
+
+        if (status && status !== 'All') {
+            const statusValue = status.toLowerCase(); // frontend likely sends 'Active'/'Disabled'
+            filter.status = statusValue === 'active' ? { $in: ['active', undefined] } : statusValue;
+        }
+
+        // --- Pagination Logic ---
+        if (pageNumber || limit) {
+             const pageSize = Number(limit) || 12;
+             const page = Number(pageNumber) || 1;
+             
+             const count = await User.countDocuments(filter);
+             const users = await User.find(filter)
+                 .select('-password')
+                 .sort({ createdAt: -1 })
+                 .limit(pageSize)
+                 .skip(pageSize * (page - 1));
+
+             // Fetch stats for paginated users
+             const usersWithStats = await Promise.all(users.map(async (user) => {
+                 const orderCount = await Order.countDocuments({ user: user._id });
+                 return {
+                     ...user._doc,
+                     joinedDate: user.createdAt,
+                     status: user.status || 'active',
+                     orderStats: { total: orderCount }
+                 };
+             }));
+                 
+             return res.json({ 
+                 users: usersWithStats, 
+                 page, 
+                 pages: Math.ceil(count / pageSize), 
+                 total: count 
+             });
+        }
+        
+        // --- Fallback for non-paginated requests ---
+        const users = await User.find(filter).select('-password').sort({ createdAt: -1 });
         
         // Fetch order counts for each user
         const usersWithStats = await Promise.all(users.map(async (user) => {
@@ -201,10 +255,9 @@ export const updateUser = async (req, res) => {
     if (user) {
         user.name = req.body.name || user.name;
         user.email = req.body.email || user.email;
-        user.isAdmin = req.body.isAdmin !== undefined ? req.body.isAdmin : user.isAdmin;
         user.status = req.body.status || user.status;
         const updatedUser = await user.save();
-        res.json({ _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, isAdmin: updatedUser.isAdmin, status: updatedUser.status });
+        res.json({ _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, status: updatedUser.status });
     } else {
         res.status(404).json({ message: 'User not found' });
     }

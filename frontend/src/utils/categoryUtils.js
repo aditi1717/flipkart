@@ -24,21 +24,26 @@ export const resolveCategoryPath = (categories, products, baseCategoryName, subP
 
     // 3. Filter Products
     const filteredProducts = products.filter(p => {
-        const matchesBase = p.category === breadcrumbs[0].name || 
-                           (p.tags && p.tags.some(tag => tag.toLowerCase() === breadcrumbs[0].name.toLowerCase()));
+        const normalize = (s) => (s || '').toLowerCase().replace(/s$/, ''); // Basic singularization
+        
+        const baseNameNorm = normalize(breadcrumbs[0].name);
+        const productCatNorm = normalize(p.category);
+        
+        const matchesBase = productCatNorm === baseNameNorm || 
+                           (p.tags && p.tags.some(tag => normalize(tag) === baseNameNorm));
         
         if (!matchesBase) return false;
 
         if (breadcrumbs.length > 1) {
-            const currentName = current.name.toLowerCase();
+            const currentNameNorm = normalize(current.name);
             // Check new subCategories field (populated)
-            if (p.subCategories && p.subCategories.some(sub => (sub.name || '').toLowerCase() === currentName)) return true;
-            if (p.subCategory?.name?.toLowerCase() === currentName) return true; // Fallback for old data
+            if (p.subCategories && p.subCategories.some(sub => normalize(sub.name) === currentNameNorm)) return true;
+            if (normalize(p.subCategory?.name) === currentNameNorm) return true; // Fallback for old data
             
             if (p.tags) {
-                return p.tags.some(tag => tag.toLowerCase() === currentName);
+                return p.tags.some(tag => normalize(tag) === currentNameNorm);
             }
-            return p.name?.toLowerCase().includes(currentName);
+            return p.name?.toLowerCase().includes(currentNameNorm);
         }
         
         return true;

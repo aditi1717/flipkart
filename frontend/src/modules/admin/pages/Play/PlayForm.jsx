@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MdClose, MdCloudUpload, MdVideoLibrary } from 'react-icons/md';
+import toast from 'react-hot-toast';
 import usePlayStore from '../../store/playStore';
 
 const PlayForm = ({ reel, onClose }) => {
@@ -34,7 +35,7 @@ const PlayForm = ({ reel, onClose }) => {
         e.preventDefault();
 
         if (!formData.videoUrl && !formData.file) {
-            alert('Please upload a video');
+            toast.error('Please upload a video');
             return;
         }
 

@@ -27,13 +27,27 @@ import subCategoryRoutes from './routes/subCategoryRoutes.js';
 import homeLayoutRoutes from './routes/homeLayoutRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+import pinCodeRoutes from './routes/pinCodeRoutes.js';
+import bankOfferRoutes from './routes/bankOfferRoutes.js';
+import settingRoutes from './routes/settingRoutes.js';
+import offerRoutes from './routes/offerRoutes.js';
+
+import notificationRoutes from './routes/notificationRoutes.js';
+import sellerRequestRoutes from './routes/sellerRequestRoutes.js';
+import footerRoutes from './routes/footerRoutes.js';
+import headerRoutes from './routes/headerRoutes.js';
 
 
 const app = express();
 
-// Middleware
+// CORS configuration
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()) 
+    : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Allow both localhost and IP
+    origin: allowedOrigins,
     credentials: true, // Allow cookies
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -59,6 +73,15 @@ app.use('/api/subcategories', subCategoryRoutes);
 app.use('/api/home-layout', homeLayoutRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/pincodes', pinCodeRoutes);
+app.use('/api/bank-offers', bankOfferRoutes);
+app.use('/api/settings', settingRoutes);
+app.use('/api/offers', offerRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/seller-requests', sellerRequestRoutes);
+app.use('/api/footer', footerRoutes);
+app.use('/api/header', headerRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');
@@ -66,6 +89,6 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });

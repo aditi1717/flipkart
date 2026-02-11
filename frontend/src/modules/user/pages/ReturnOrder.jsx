@@ -1,22 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
+import API from '../../../services/api';
+import { toast } from 'react-hot-toast';
+import Loader from '../../../components/common/Loader';
 
 const ReturnOrder = () => {
     const { orderId, productId } = useParams();
     const navigate = useNavigate();
-    const orders = useCartStore(state => state.orders);
-    const order = orders.find(o => o.id === orderId);
+    // const orders = useCartStore(state => state.orders); // Removed dependency on store orders
+    const [order, setOrder] = useState(null);
+    const [loadingOrder, setLoadingOrder] = useState(true);
 
     const [step, setStep] = useState(1);
     const [reason, setReason] = useState('');
     const [selectedReplacementSize, setSelectedReplacementSize] = useState('M');
     const [selectedReplacementColor, setSelectedReplacementColor] = useState('Black');
     const [returnMode, setReturnMode] = useState('REFUND'); // REFUND or REPLACEMENT
-
-    if (!order) return <div className="p-10 text-center">Order not found.</div>;
-
     const [subReason, setSubReason] = useState('');
+    const [comment, setComment] = useState('');
+    const [loading, setLoading] = useState(false);
+    const updateItemStatus = useCartStore(state => state.updateItemStatus);
+
+    useEffect(() => {
+        const fetchOrder = async () => {
+            try {
+                const { data } = await API.get(`/orders/${orderId}`);
+                // Normalize items to match expected structure if needed, or just use orderItems
+                // The component below uses 'items', let's map orderItems to items for compatibility
+                // or update the component to use orderItems. 
+                // Updating component to use orderItems is cleaner but 'items' is used in logic.
+                // Let's normalize here.
+                const normalizedOrder = {
+                    ...data,
+                    id: data._id, 
+                    items: data.orderItems.map(item => ({
+                        ...item,
+                        id: item.product || item._id // Ensure we have a consistent ID.
+                    }))
+                };
+                setOrder(normalizedOrder);
+            } catch (error) {
+                console.error("Failed to fetch order", error);
+            } finally {
+                setLoadingOrder(false);
+            }
+        };
+        fetchOrder();
+    }, [orderId]);
 
     const reasons = [
         {
@@ -41,21 +72,54 @@ const ReturnOrder = () => {
         }
     ];
 
+    if (loadingOrder) return <div className="p-10 text-center">Loading...</div>;
+    if (!order) return <div className="p-10 text-center">Order not found.</div>;
+
     // Filter items based on productId if it exists, and only include items that can be returned/replaced
     const targetItems = (productId
         ? order.items.filter(i => String(i.id) === String(productId))
         : order.items).filter(item => !item.status || item.status === 'DELIVERED');
 
-    const updateItemStatus = useCartStore(state => state.updateItemStatus);
+    const handleReturnSubmit = async () => {
+        setLoading(true);
+        try {
+            // We need to submit a request for each item, or one request for multiple?
+            // The backend controller seems to handle one request per call, taking `productId`.
+            // The UI allows selecting multiple items implicitly if `targetItems` has more than one?
+            // The UI loop `targetItems.forEach` suggests multiple.
+            // But wait, the UI flow (Step 1, 2, 3) seems to focus on "Reasons" which applies to the return as a whole?
+            // If `targetItems` has multiple items, do they all share the same reason? Yes.
+            
+            // However, the backend expects `productId`.
+            // Let's loop through targetItems and send a request for each.
+            
+            for (const item of targetItems) {
+                const payload = {
+                    orderId: order.id,
+                    productId: item.id, // Ensure this is the product ID or item ID expected by backend
+                    type: returnMode === 'REFUND' ? 'Return' : 'Replacement',
+                    reason: reason,
+                    comment: `${subReason}. ${comment}`, // Combine subReason and comment
+                    images: [], // Images not handled in UI yet, sending empty
+                    selectedReplacementSize: returnMode === 'REPLACEMENT' ? selectedReplacementSize : undefined,
+                    selectedReplacementColor: returnMode === 'REPLACEMENT' ? selectedReplacementColor : undefined
+                };
+                
+                await API.post('/returns', payload);
+                
+                // Optimistic Update (Optional, but good for UX)
+                const itemStatus = returnMode === 'REFUND' ? 'Return Requested' : 'Replacement Requested';
+                updateItemStatus(order.id, item.id, itemStatus);
+            }
 
-    const handleReturnSubmit = () => {
-        const itemStatus = returnMode === 'REFUND' ? 'RETURN_REQUESTED' : 'REPLACEMENT_REQUESTED';
-
-        targetItems.forEach(item => {
-            updateItemStatus(order.id, item.id, itemStatus);
-        });
-
-        navigate(`/my-orders/${order.id}`);
+            toast.success('Return Request Submitted Successfully!');
+            navigate(`/my-orders/${order.id}`);
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || 'Failed to submit return request.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -78,7 +142,7 @@ const ReturnOrder = () => {
                 <span className="material-icons text-[10px]">chevron_right</span>
                 <span onClick={() => navigate('/my-orders')} className="cursor-pointer hover:text-blue-600">My Orders</span>
                 <span className="material-icons text-[10px]">chevron_right</span>
-                <span onClick={() => navigate(`/my-orders/${orderId}`)} className="cursor-pointer hover:text-blue-600">Order Details</span>
+                <span onClick={() => navigate(`/my-orders/${orderId}`)} className="cursor-pointer hover:text-blue-600">Order #{order?.displayId || orderId.slice(-8).toUpperCase()}</span>
                 <span className="material-icons text-[10px]">chevron_right</span>
                 <span className="text-gray-800 font-bold">Return</span>
             </div>
@@ -302,6 +366,8 @@ const ReturnOrder = () => {
                                     <textarea
                                         placeholder="Tell us more about the issue... (e.g. Broken screen, Wrong color)"
                                         className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-600/20 outline-none h-24 transition-all text-gray-900"
+                                        value={comment}
+                                        onChange={(e) => setComment(e.target.value)}
                                     ></textarea>
                                 </div>
 

@@ -18,7 +18,7 @@ export const getSubCategories = async (req, res) => {
 // @access  Public
 export const getSubCategoriesByCategory = async (req, res) => {
     try {
-        const subCategories = await SubCategory.find({ category: req.params.categoryId });
+        const subCategories = await SubCategory.find({ category: req.params.categoryId }).populate('category', 'name');
         res.json(subCategories);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -30,7 +30,7 @@ export const getSubCategoriesByCategory = async (req, res) => {
 // @access  Private/Admin
 export const createSubCategory = async (req, res) => {
     try {
-        const { name, category, parent, description, image } = req.body;
+        const { name, category, description, image } = req.body;
 
         const categoryExists = await Category.findById(category);
         if (!categoryExists) {
@@ -40,12 +40,12 @@ export const createSubCategory = async (req, res) => {
         const subCategory = new SubCategory({
             name,
             category,
-            parent: parent || null,
             description,
             image
         });
 
         const createdSubCategory = await subCategory.save();
+        await createdSubCategory.populate('category', 'name');
         res.status(201).json(createdSubCategory);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -75,7 +75,7 @@ export const deleteSubCategory = async (req, res) => {
 // @access  Private/Admin
 export const updateSubCategory = async (req, res) => {
     try {
-        const { name, description, image, isActive, parent, category } = req.body;
+        const { name, description, image, isActive, category } = req.body;
         const subCategory = await SubCategory.findById(req.params.id);
 
         if (subCategory) {
@@ -83,10 +83,10 @@ export const updateSubCategory = async (req, res) => {
             subCategory.description = description || subCategory.description;
             subCategory.image = image || subCategory.image;
             if (isActive !== undefined) subCategory.isActive = isActive;
-            if (parent !== undefined) subCategory.parent = parent || null;
             if (category !== undefined) subCategory.category = category;
 
             const updatedSubCategory = await subCategory.save();
+            await updatedSubCategory.populate('category', 'name');
             res.json(updatedSubCategory);
         } else {
             res.status(404).json({ message: 'Subcategory not found' });

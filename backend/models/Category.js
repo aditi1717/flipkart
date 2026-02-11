@@ -12,6 +12,16 @@ const categorySchema = mongoose.Schema({
     // subCategories removed - now using separate SubCategory model
 }, {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+
+// Reverse populate with virtuals
+categorySchema.virtual('subCategories', {
+    ref: 'SubCategory',
+    localField: '_id',
+    foreignField: 'category',
+    justOne: false
 });
 
 const Category = mongoose.model('Category', categorySchema);

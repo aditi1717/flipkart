@@ -5,27 +5,67 @@ import Product from '../models/Product.js';
 // @access  Public
 export const getProducts = async (req, res) => {
     try {
-        const { category, subcategory } = req.query;
-        
-        // Build filter object
+        const { category, subcategory, all, pageNumber, limit } = req.query;
         let filter = {};
-        
+
+        if (all !== 'true') {
+            // Always filter by active categories and subcategories for public requests
+            const Category = (await import('../models/Category.js')).default;
+            const SubCategory = (await import('../models/SubCategory.js')).default;
+
+            const activeCategories = await Category.find({ active: true }).select('id');
+            const activeCategoryIds = activeCategories.map(c => c.id);
+
+            filter.categoryId = { $in: activeCategoryIds };
+
+            if (subcategory) {
+                const subCat = await SubCategory.findOne({ name: subcategory, isActive: true });
+                if (subCat) {
+                    filter.subCategories = subCat._id;
+                } else {
+                    return res.json([]);
+                }
+            } else {
+                 const activeSubCategories = await SubCategory.find({ isActive: true }).select('_id');
+                 const activeSubCategoryIds = activeSubCategories.map(s => s._id);
+                 
+                 filter.$or = [
+                     { subCategories: { $exists: false } },
+                     { subCategories: { $size: 0 } },
+                     { subCategories: { $in: activeSubCategoryIds } }
+                 ];
+            }
+        }
+
         if (category) {
             filter.category = category;
         }
-        
-        if (subcategory) {
-            // Search for products that have this subcategory
-            const SubCategory = (await import('../models/SubCategory.js')).default;
-            const subCat = await SubCategory.findOne({ name: subcategory });
-            if (subCat) {
-                filter.subCategories = subCat._id;
-            }
-        }
-        
+
+        // Pagination Logic
+        if (pageNumber || limit) {
+            const pageSize = Number(limit) || 12;
+            const page = Number(pageNumber) || 1;
+
+            const count = await Product.countDocuments(filter);
+            const products = await Product.find(filter)
+                .populate('subCategories', 'name isActive')
+                .sort({ createdAt: -1 })
+                .limit(pageSize)
+                .skip(pageSize * (page - 1));
+
+            return res.json({ 
+                products, 
+                page, 
+                pages: Math.ceil(count / pageSize), 
+                total: count 
+            });
+        } 
+
+        // Default behavior (No pagination) - Backward Compatibility
         const products = await Product.find(filter)
-            .populate('subCategories', 'name')
+            .populate('subCategories', 'name isActive')
             .sort({ createdAt: -1 });
+            
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -37,8 +77,26 @@ export const getProducts = async (req, res) => {
 // @access  Public
 export const getProductById = async (req, res) => {
     try {
-        const product = await Product.findOne({ id: req.params.id }).populate('subCategories', 'name');
+        const { all } = req.query;
+        const product = await Product.findOne({ id: req.params.id }).populate('subCategories', 'name isActive');
+        
         if (product) {
+            if (all !== 'true') {
+                const Category = (await import('../models/Category.js')).default;
+                const category = await Category.findOne({ id: product.categoryId });
+                
+                if (!category || !category.active) {
+                    return res.status(404).json({ message: 'Product not found (category inactive)' });
+                }
+
+                if (product.subCategories && product.subCategories.length > 0) {
+                    const hasActiveSub = product.subCategories.some(sub => sub.isActive);
+                    if (!hasActiveSub) {
+                        return res.status(404).json({ message: 'Product not found (subcategories inactive)' });
+                    }
+                }
+            }
+
             res.json(product);
         } else {
             res.status(404).json({ message: 'Product not found' });
@@ -70,6 +128,13 @@ export const createProduct = async (req, res) => {
         images = images.filter(img => img);
 
         const parseJSON = (data) => {
+            if (Array.isArray(data)) {
+                // Handle duplicate FormData entries (strings representing JSON)
+                if (data.length > 0 && typeof data[0] === 'string' && (data[0].trim().startsWith('[') || data[0].trim().startsWith('{'))) {
+                    return parseJSON(data[data.length - 1]);
+                }
+                return data;
+            }
             if (typeof data === 'string') {
                 try { return JSON.parse(data); } catch (e) { return data; }
             }
@@ -82,19 +147,47 @@ export const createProduct = async (req, res) => {
         if (req.files && req.files.variant_images) {
              const variantFiles = req.files.variant_images;
              if (Array.isArray(variantHeadings)) {
-                 variantHeadings = variantHeadings.map(vh => ({
-                     ...vh,
-                     options: vh.options.map(opt => {
-                         if (opt.image && typeof opt.image === 'string' && opt.image.startsWith('VARIANT_INDEX::')) {
-                             const idx = parseInt(opt.image.split('::')[1]);
-                             if (variantFiles[idx]) {
-                                 return { ...opt, image: variantFiles[idx].path };
-                             }
-                         }
-                         return opt;
-                     })
-                 }));
+                variantHeadings = variantHeadings.map(vh => ({
+                    ...vh,
+                    options: vh.options.map(opt => {
+                        const newOpt = { ...opt };
+                        // Handle single primary background image
+                        if (opt.image && typeof opt.image === 'string' && opt.image.startsWith('VARIANT_INDEX::')) {
+                            const idx = parseInt(opt.image.split('::')[1]);
+                            if (variantFiles[idx]) {
+                                newOpt.image = variantFiles[idx].path;
+                            }
+                        }
+                        // Handle multiple images array
+                        if (Array.isArray(opt.images)) {
+                            newOpt.images = opt.images.map(img => {
+                                if (typeof img === 'string' && img.startsWith('VARIANT_INDEX::')) {
+                                    const idx = parseInt(img.split('::')[1]);
+                                    return variantFiles[idx] ? variantFiles[idx].path : img;
+                                }
+                                return img;
+                            });
+                        }
+                        return newOpt;
+                    })
+                }));
              }
+        }
+
+        let description = parseJSON(body.description);
+        if (req.files && req.files.description_images) {
+            const descFiles = req.files.description_images;
+            if (Array.isArray(description)) {
+                description = description.map(desc => {
+                    if (desc.image && typeof desc.image === 'string' && desc.image.startsWith('DESCRIPTION_INDEX::')) {
+                        const idx = parseInt(desc.image.split('::')[1]);
+                        if (descFiles[idx]) {
+                             return { ...desc, image: descFiles[idx].path };
+                        }
+                    }
+                    return desc;
+                });
+            }
         }
 
         const product = new Product({
@@ -106,20 +199,19 @@ export const createProduct = async (req, res) => {
             discount: body.discount,
             image,
             images,
-            image,
-            images,
             category: body.category || 'Uncategorized',
             categoryId: body.categoryId ? Number(body.categoryId) : undefined,
             subCategories: parseJSON(body.subCategories) || [], // Handle multiple subcategories
             categoryPath: parseJSON(body.categoryPath),
-            shortDescription: body.shortDescription,
             highlights: parseJSON(body.highlights),
-            specifications: parseJSON(body.specifications),
-            features: parseJSON(body.features),
+            description,
             stock: Number(body.stock),
             variantHeadings,
             skus: parseJSON(body.skus),
-            deliveryDays: Number(body.deliveryDays)
+            deliveryDays: Number(body.deliveryDays),
+            specifications: parseJSON(body.specifications) || [],
+            warranty: parseJSON(body.warranty),
+            returnPolicy: parseJSON(body.returnPolicy)
         });
 
 
@@ -157,6 +249,13 @@ export const updateProduct = async (req, res) => {
             }
              
             const parseJSON = (data) => {
+                if (Array.isArray(data)) {
+                    // Handle duplicate FormData entries (strings representing JSON)
+                    if (data.length > 0 && typeof data[0] === 'string' && (data[0].trim().startsWith('[') || data[0].trim().startsWith('{'))) {
+                        return parseJSON(data[data.length - 1]);
+                    }
+                    return data;
+                }
                 if (typeof data === 'string') {
                     try { return JSON.parse(data); } catch (e) { return data; }
                 }
@@ -168,32 +267,72 @@ export const updateProduct = async (req, res) => {
             
             // Parse complex fields
             if (updateData.categoryPath) updateData.categoryPath = parseJSON(updateData.categoryPath);
-            if (updateData.highlights) updateData.highlights = parseJSON(updateData.highlights);
-            if (updateData.specifications) updateData.specifications = parseJSON(updateData.specifications);
-            if (updateData.features) updateData.features = parseJSON(updateData.features);
+            if (updateData.highlights) {
+                let highlights = parseJSON(updateData.highlights);
+                // Filter to ensure only valid highlights with heading and points
+                if (Array.isArray(highlights)) {
+                    highlights = highlights.map(h => ({
+                        ...h,
+                        points: h.points ? h.points.filter(p => p && p.toString().trim().length > 0) : []
+                    })).filter(h => (h.heading && h.heading.trim().length > 0) || h.points.length > 0);
+                }
+                updateData.highlights = highlights;
+            }
             if (updateData.skus) updateData.skus = parseJSON(updateData.skus);
+            if (updateData.warranty) updateData.warranty = parseJSON(updateData.warranty);
+            if (updateData.returnPolicy) updateData.returnPolicy = parseJSON(updateData.returnPolicy);
             
             if (updateData.variantHeadings) {
                 let variantHeadings = parseJSON(updateData.variantHeadings);
                 if (req.files && req.files.variant_images) {
-                    // ... (Variant image logic - kept same)
                      const variantFiles = req.files.variant_images;
                      if (Array.isArray(variantHeadings)) {
                          variantHeadings = variantHeadings.map(vh => ({
                              ...vh,
                              options: vh.options.map(opt => {
+                                 const newOpt = { ...opt };
+                                 // Handle single primary background image
                                  if (opt.image && typeof opt.image === 'string' && opt.image.startsWith('VARIANT_INDEX::')) {
                                      const idx = parseInt(opt.image.split('::')[1]);
                                      if (variantFiles[idx]) {
-                                         return { ...opt, image: variantFiles[idx].path };
+                                         newOpt.image = variantFiles[idx].path;
                                      }
                                  }
-                                 return opt;
+                                 // Handle multiple images array
+                                 if (Array.isArray(opt.images)) {
+                                     newOpt.images = opt.images.map(img => {
+                                         if (typeof img === 'string' && img.startsWith('VARIANT_INDEX::')) {
+                                             const idx = parseInt(img.split('::')[1]);
+                                             return variantFiles[idx] ? variantFiles[idx].path : img;
+                                         }
+                                         return img;
+                                     });
+                                 }
+                                 return newOpt;
                              })
                          }));
                      }
                 }
                 updateData.variantHeadings = variantHeadings;
+            }
+
+            if (updateData.description) {
+                let description = parseJSON(updateData.description);
+                if (req.files && req.files.description_images) {
+                    const descFiles = req.files.description_images;
+                    if (Array.isArray(description)) {
+                        description = description.map(desc => {
+                            if (desc.image && typeof desc.image === 'string' && desc.image.startsWith('DESCRIPTION_INDEX::')) {
+                                const idx = parseInt(desc.image.split('::')[1]);
+                                if (descFiles[idx]) {
+                                    return { ...desc, image: descFiles[idx].path };
+                                }
+                            }
+                            return desc;
+                        });
+                    }
+                }
+                updateData.description = description;
             }
 
             // Safe Number Casting
@@ -216,6 +355,10 @@ export const updateProduct = async (req, res) => {
 
             if (updateData.subCategories !== undefined) {
                  updateData.subCategories = parseJSON(updateData.subCategories) || [];
+            }
+
+            if (updateData.specifications !== undefined) {
+                updateData.specifications = parseJSON(updateData.specifications) || [];
             }
 
             if (image) updateData.image = image;
@@ -253,5 +396,37 @@ export const deleteProduct = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+// @desc    Update product stock
+// @route   PUT /api/products/:id/stock
+// @access  Private/Admin
+export const updateProductStock = async (req, res) => {
+    try {
+        const product = await Product.findOne({ id: req.params.id });
+
+        if (product) {
+            const { stock, skus } = req.body;
+
+            if (stock !== undefined) {
+                product.stock = Number(stock);
+            }
+
+            if (skus !== undefined && Array.isArray(skus)) {
+                // In Mongoose, replacing a Map-based subdocument array requires caution.
+                // However, since we are sending the full skus array from frontend, 
+                // we can update it. We need to mark it modified if it's a complex type.
+                product.skus = skus;
+                product.markModified('skus');
+            }
+
+            const updatedProduct = await product.save();
+            res.json(updatedProduct);
+        } else {
+            res.status(404).json({ message: 'Product not found' });
+        }
+    } catch (error) {
+        console.error('Update Stock Error:', error);
+        res.status(400).json({ message: error.message });
     }
 };

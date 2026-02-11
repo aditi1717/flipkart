@@ -6,6 +6,7 @@ import { useAuthStore } from './modules/user/store/authStore';
 import './App.css';
 
 import { Toaster } from 'react-hot-toast';
+import ScrollToTop from './components/common/ScrollToTop';
 
 function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
@@ -16,6 +17,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <Toaster position="top-right" reverseOrder={false} />
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />

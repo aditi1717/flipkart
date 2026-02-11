@@ -7,15 +7,26 @@ import Order from '../models/Order.js';
 // @access  Private
 export const createRazorpayOrder = async (req, res) => {
     const { amount } = req.body;
+    console.log(`Processing Razorpay order request - Amount: ₹${amount}`);
+    
+    // Debug Logging
+    console.log('Razorpay Config Check:', {
+        keyIdPresent: !!process.env.RAZORPAY_KEY_ID,
+        keySecretPresent: !!process.env.RAZORPAY_KEY_SECRET
+    });
 
     try {
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            throw new Error("Razorpay credentials missing in backend environment");
+        }
+
         const instance = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_KEY_SECRET,
+            key_id: process.env.RAZORPAY_KEY_ID.trim(),
+            key_secret: process.env.RAZORPAY_KEY_SECRET.trim(),
         });
 
         const options = {
-            amount: amount * 100, // amount in the smallest currency unit (paise)
+            amount: Math.round(amount * 100), // Ensure integer paise
             currency: "INR",
             receipt: `receipt_${Date.now()}`,
         };
@@ -28,7 +39,8 @@ export const createRazorpayOrder = async (req, res) => {
 
         res.json(order);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Razorpay Order Creation Error:', error);
+        res.status(500).json({ message: error.message, details: error.error });
     }
 };
 
@@ -53,10 +65,27 @@ export const verifyPayment = async (req, res) => {
         const isAuthentic = expectedSignature === razorpay_signature;
 
         if (isAuthentic) {
-            // Success
+            // Success - Fetch full payment details from Razorpay to get card info
+            const instance = new Razorpay({
+                key_id: process.env.RAZORPAY_KEY_ID,
+                key_secret: process.env.RAZORPAY_KEY_SECRET,
+            });
+
+            const payment = await instance.payments.fetch(razorpay_payment_id);
+            
+            let cardInfo = null;
+            if (payment.method === 'card' && payment.card) {
+                cardInfo = {
+                    network: payment.card.network,
+                    last4: payment.card.last4,
+                    type: payment.card.type
+                };
+            }
+
             res.json({
                 message: "Payment verified successfully",
-                paymentId: razorpay_payment_id
+                paymentId: razorpay_payment_id,
+                cardInfo
             });
         } else {
             res.status(400).json({ message: "Invalid signature" });

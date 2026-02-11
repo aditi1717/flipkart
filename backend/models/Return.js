@@ -12,7 +12,7 @@ const returnSchema = mongoose.Schema({
     type: { 
         type: String, 
         required: true, 
-        enum: ['Return', 'Replacement'] 
+        enum: ['Return', 'Replacement', 'Cancellation'] 
     },
     reason: { type: String, required: true },
     comment: { type: String },

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import API from '../../../services/api';
+import { toast } from 'react-hot-toast';
+import { confirmToast } from '../../../utils/toastUtils.jsx';
+import Loader from '../../../components/common/Loader';
 
 const OrderDetails = () => {
     const { orderId } = useParams();
@@ -8,10 +11,21 @@ const OrderDetails = () => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [settings, setSettings] = useState(null);
 
     useEffect(() => {
         fetchOrderDetails();
+        fetchSettings();
     }, [orderId]);
+
+    const fetchSettings = async () => {
+        try {
+            const { data } = await API.get('/settings');
+            setSettings(data);
+        } catch (err) {
+            console.error('Fetch settings error:', err);
+        }
+    };
 
     const fetchOrderDetails = async () => {
         try {
@@ -27,6 +41,30 @@ const OrderDetails = () => {
         }
     };
 
+    const handleCancelOrder = async () => {
+        confirmToast({
+            message: 'Are you sure you want to cancel this order?\nIt will be sent to the admin for approval.',
+            type: 'warning',
+            icon: 'report_problem',
+            confirmText: 'Cancel Order',
+            onConfirm: async () => {
+                try {
+                    toast.loading('Requesting cancellation...', { id: 'cancel-order' });
+                    await API.post(`/returns`, { 
+                        orderId: order._id,
+                        type: 'Cancellation',
+                        reason: 'User requested cancellation'
+                    });
+                    toast.success('Cancellation request sent!', { id: 'cancel-order' });
+                    fetchOrderDetails(); // Refresh details
+                } catch (err) {
+                    console.error('Cancel order error:', err);
+                    toast.error(err.response?.data?.message || 'Failed to request cancellation', { id: 'cancel-order' });
+                }
+            }
+        });
+    };
+
     const getStatusColor = (status) => {
         const colors = {
             'Pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -35,7 +73,18 @@ const OrderDetails = () => {
             'Dispatched': 'bg-purple-100 text-purple-800 border-purple-200',
             'Out for Delivery': 'bg-orange-100 text-orange-800 border-orange-200',
             'Delivered': 'bg-green-100 text-green-800 border-green-200',
-            'Cancelled': 'bg-red-100 text-red-800 border-red-200'
+            'Cancelled': 'bg-red-100 text-red-800 border-red-200',
+            'Cancellation Requested': 'bg-orange-100 text-orange-800 border-orange-200',
+            'Return Requested': 'bg-orange-100 text-orange-800 border-orange-200',
+            'Replacement Requested': 'bg-blue-100 text-blue-800 border-blue-200',
+            'Approved': 'bg-teal-100 text-teal-800 border-teal-200',
+            'Pickup Scheduled': 'bg-purple-100 text-purple-800 border-purple-200',
+            'Received at Warehouse': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+            'Refund Initiated': 'bg-cyan-100 text-cyan-800 border-cyan-200',
+            'Replacement Dispatched': 'bg-pink-100 text-pink-800 border-pink-200',
+            'Returned': 'bg-gray-100 text-gray-800 border-gray-200',
+            'Replaced': 'bg-green-100 text-green-800 border-green-200',
+            'Return Rejected': 'bg-red-50 text-red-800 border-red-200'
         };
         return colors[status] || 'bg-gray-100 text-gray-800 border-gray-200';
     };
@@ -48,7 +97,18 @@ const OrderDetails = () => {
             'Dispatched': 'local_shipping',
             'Out for Delivery': 'delivery_dining',
             'Delivered': 'done_all',
-            'Cancelled': 'cancel'
+            'Cancelled': 'cancel',
+            'Cancellation Requested': 'hourglass_empty',
+            'Return Requested': 'assignment_return',
+            'Replacement Requested': 'sync',
+            'Approved': 'thumb_up',
+            'Pickup Scheduled': 'local_shipping',
+            'Received at Warehouse': 'warehouse',
+            'Refund Initiated': 'currency_rupee',
+            'Replacement Dispatched': 'local_shipping',
+            'Returned': 'keyboard_return',
+            'Replaced': 'published_with_changes',
+            'Return Rejected': 'cancel'
         };
         return icons[status] || 'info';
     };
@@ -107,7 +167,7 @@ const OrderDetails = () => {
                     </button>
                     <div className="flex-1">
                         <h1 className="text-lg font-bold">Order Details</h1>
-                        <p className="text-xs text-white/80">#{order._id.slice(-8).toUpperCase()}</p>
+                        <p className="text-xs text-white/80">#{order.displayId || order._id.slice(-8).toUpperCase()}</p>
                     </div>
                     <span className={`px-3 py-1.5 rounded-full text-xs font-bold border flex items-center gap-1 ${getStatusColor(order.status)}`}>
                         <span className="material-icons text-sm">{getStatusIcon(order.status)}</span>
@@ -122,7 +182,7 @@ const OrderDetails = () => {
                     {/* Left Column */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Order Status Timeline */}
-                        {order.status !== 'Cancelled' && (
+                        {order.status !== 'Cancelled' && order.status !== 'Cancellation Requested' && (
                             <div className="bg-white p-6 rounded-xl shadow-md border-2 border-blue-100">
                                 <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
                                     <span className="material-icons text-blue-600">local_shipping</span>
@@ -164,6 +224,108 @@ const OrderDetails = () => {
                             </div>
                         )}
 
+                        {/* Return Status Timeline */}
+                        {order.orderItems.some(item => ['Return Requested', 'Replacement Requested', 'Approved', 'Pickup Scheduled', 'Received at Warehouse', 'Refund Initiated', 'Replacement Dispatched', 'Returned', 'Replaced', 'Return Rejected'].includes(item.status)) && (
+                            <div className="bg-white p-6 rounded-xl shadow-md border-2 border-orange-100 mt-6">
+                                <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    <span className="material-icons text-orange-600">assignment_return</span>
+                                    Return / Replacement Status
+                                </h2>
+                                
+                                {(() => {
+                                    // Determine the most advanced return status
+                                    const returnStatuses = order.orderItems.map(item => item.status).filter(s => s && ['Return Requested', 'Replacement Requested', 'Approved', 'Pickup Scheduled', 'Received at Warehouse', 'Refund Initiated', 'Replacement Dispatched', 'Returned', 'Replaced', 'Return Rejected'].includes(s));
+                                    
+                                    // Prioritize the "most active" status for the timeline
+                                    // Steps: Request -> Approved -> Pickup -> Warehouse -> Processed -> Completed
+                                    const steps = [
+                                        { name: 'Request Sent', status: ['Return Requested', 'Replacement Requested'], icon: 'assignment_return' },
+                                        { name: 'Approved', status: ['Approved'], icon: 'thumb_up' },
+                                        { name: 'Pickup', status: ['Pickup Scheduled'], icon: 'local_shipping' },
+                                        { name: 'In Warehouse', status: ['Received at Warehouse'], icon: 'warehouse' },
+                                        { name: 'Processing', status: ['Refund Initiated', 'Replacement Dispatched'], icon: 'cached' },
+                                        { name: 'Completed', status: ['Returned', 'Replaced'], icon: 'check_circle' }
+                                    ];
+
+                                    // Find current step index
+                                    // If multiple items, we pick the one that matches the "latest" stage found in the order items? 
+                                    // Or just pick the first one found for simplicity as usually 1 return per order or batch.
+                                    // Let's iterate backwards through steps to find the latest active one.
+                                    let currentStepIndex = 0;
+                                    for (let i = steps.length - 1; i >= 0; i--) {
+                                        if (returnStatuses.some(s => steps[i].status.includes(s))) {
+                                            currentStepIndex = i;
+                                            break;
+                                        }
+                                    }
+                                    
+                                    // Safety: If rejected, show red
+                                    const isRejected = returnStatuses.includes('Return Rejected');
+
+                                    if (isRejected) {
+                                        return (
+                                            <div className="bg-red-50 border-2 border-red-200 p-4 rounded-xl flex items-center gap-3">
+                                                 <span className="material-icons text-red-600 text-3xl">cancel</span>
+                                                 <div>
+                                                     <p className="font-bold text-red-800">Return Request Rejected</p>
+                                                     <p className="text-xs text-red-600">Your return request has been reviewed and rejected.</p>
+                                                 </div>
+                                            </div>
+                                        )
+                                    }
+
+                                    return (
+                                        <div className="relative">
+                                            {/* Progress Bar */}
+                                            <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 hidden md:block">
+                                                <div
+                                                    className="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-500"
+                                                    style={{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }}
+                                                ></div>
+                                            </div>
+
+                                            {/* Steps */}
+                                            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-0">
+                                                {steps.map((step, index) => {
+                                                    const isCompleted = index <= currentStepIndex;
+                                                    const isCurrent = index === currentStepIndex;
+                                                    return (
+                                                        <div key={step.name} className="flex flex-col items-center relative z-10">
+                                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${isCompleted
+                                                                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                                                                    : 'bg-white border-2 border-gray-300 text-gray-400'
+                                                                } ${isCurrent ? 'ring-4 ring-orange-200 scale-110' : ''}`}>
+                                                                <span className="material-icons text-lg">{step.icon}</span>
+                                                            </div>
+                                                            <p className={`text-xs font-bold text-center ${isCompleted ? 'text-gray-800' : 'text-gray-400'}`}>
+                                                                {step.name}
+                                                            </p>
+                                                            {isCurrent && (
+                                                                <span className="text-[10px] text-orange-600 font-bold mt-1">Current</span>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        )}
+
+                        {/* Cancellation Requested status */}
+                        {order.status === 'Cancellation Requested' && (
+                            <div className="bg-orange-50 border-2 border-orange-200 p-6 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                    <span className="material-icons text-orange-600 text-4xl animate-pulse">hourglass_empty</span>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-orange-800">Cancellation Requested</h3>
+                                        <p className="text-sm text-orange-600 mt-1">Your request is being reviewed by our team. You'll be notified once it's approved.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Cancelled Status */}
                         {order.status === 'Cancelled' && (
                             <div className="bg-red-50 border-2 border-red-200 p-6 rounded-xl">
@@ -191,19 +353,34 @@ const OrderDetails = () => {
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="text-sm font-bold text-gray-800 line-clamp-2">{item.name}</h3>
-                                            {item.variant && (
-                                                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
-                                                    {Object.entries(item.variant).map(([key, value]) => (
-                                                        <span key={key} className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">
-                                                            {key}: <span className="text-blue-600">{value}</span>
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            )}
+                                                    {item.variant && (
+                                                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                                                            {Object.entries(item.variant).map(([key, value]) => (
+                                                                <span key={key} className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">
+                                                                    {key}: <span className="text-blue-600">{value}</span>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {(item.serialNumber && (order.status === 'Delivered' || order.isDelivered)) && (
+                                                        <div className="mt-2">
+                                                            <span className="text-sm bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold font-mono border border-blue-200 shadow-sm flex items-center gap-2 w-max select-all">
+                                                    <span className="text-blue-400 select-none">{item.serialType === 'IMEI' ? 'IMEI:' : 'SN:'}</span> {item.serialNumber}
+                                                </span>
+                                                        </div>
+                                                    )}
                                             <p className="text-xs text-gray-500 mt-1">Quantity: {item.qty}</p>
                                             <p className="text-lg font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mt-1">
                                                 ₹{item.price.toLocaleString()}
                                             </p>
+
+                                            {/* Item Status Badge */}
+                                            {item.status && item.status !== order.status && (
+                                                <div className={`mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(item.status)}`}>
+                                                    <span className="material-icons text-[14px]">{getStatusIcon(item.status)}</span>
+                                                    {item.status}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -329,11 +506,33 @@ const OrderDetails = () => {
                             </div>
                         </div>
 
+                        {/* Request Return Button */}
+                        {(order.status === 'Delivered' || order.status === 'Partially Returned') && order.orderItems.some(item => !['Return Requested', 'Replacement Requested', 'Pickup Scheduled', 'Received at Warehouse', 'Refund Initiated', 'Replacement Dispatched', 'Returned', 'Replaced', 'Approved', 'Completed'].includes(item.status)) && (
+                            <button
+                                onClick={() => navigate(`/my-orders/${order._id}/return`)}
+                                className="w-full bg-white border-2 border-orange-100 text-orange-600 px-6 py-4 rounded-xl font-bold hover:bg-orange-50 transition-all flex items-center justify-center gap-2"
+                            >
+                                <span className="material-icons">assignment_return</span>
+                                Request Return / Replacement
+                            </button>
+                        )}
+
+                        {/* Cancel Order Button */}
+                        {['Pending', 'Confirmed'].includes(order.status) && (
+                            <button
+                                onClick={handleCancelOrder}
+                                className="w-full bg-red-50 border-2 border-red-100 text-red-600 px-6 py-4 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center justify-center gap-2"
+                            >
+                                <span className="material-icons">cancel</span>
+                                Request Cancellation
+                            </button>
+                        )}
+
                         {/* Download Invoice Button */}
                         <button
                             onClick={() => {
                                 import('../../../utils/invoiceGenerator').then(({ generateInvoice }) => {
-                                    generateInvoice(order);
+                                    generateInvoice(order, settings);
                                 });
                             }}
                             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl font-bold hover:shadow-lg transition-all flex items-center justify-center gap-2"

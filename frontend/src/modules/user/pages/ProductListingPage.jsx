@@ -98,6 +98,13 @@ const ProductListingPage = () => {
         setSelectedCategories(prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]);
     };
 
+    const handlePriceInputChange = (index, value) => {
+        const numValue = parseInt(value) || 0;
+        const newRange = [...filterRange];
+        newRange[index] = numValue;
+        setFilterRange(newRange);
+    };
+
     return (
         <div className="bg-gray-50 min-h-screen pb-20 pt-2">
             {/* Header / Back Navigation */}
@@ -261,14 +268,30 @@ const ProductListingPage = () => {
                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-6">Price Range</h4>
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between px-2">
-                                        <div className="bg-gray-50 px-4 py-2 rounded-lg border">
+                                    <div className="bg-gray-50 px-4 py-2 rounded-lg border focus-within:border-blue-500 transition-colors">
                                             <span className="text-[10px] text-gray-400 block uppercase font-bold">Min</span>
-                                            <span className="font-black text-sm">₹{filterRange[0].toLocaleString()}</span>
+                                            <div className="flex items-center gap-0.5">
+                                                <span className="font-black text-sm text-gray-900">₹</span>
+                                                <input
+                                                    type="number"
+                                                    value={filterRange[0]}
+                                                    onChange={(e) => handlePriceInputChange(0, e.target.value)}
+                                                    className="w-full bg-transparent font-black text-sm text-gray-900 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                />
+                                            </div>
                                         </div>
                                         <div className="w-8 h-[2px] bg-gray-200"></div>
-                                        <div className="bg-gray-50 px-4 py-2 rounded-lg border">
+                                        <div className="bg-gray-50 px-4 py-2 rounded-lg border focus-within:border-blue-500 transition-colors">
                                             <span className="text-[10px] text-gray-400 block uppercase font-bold">Max</span>
-                                            <span className="font-black text-sm">₹{filterRange[1].toLocaleString()}</span>
+                                            <div className="flex items-center gap-0.5">
+                                                <span className="font-black text-sm text-gray-900">₹</span>
+                                                <input
+                                                    type="number"
+                                                    value={filterRange[1]}
+                                                    onChange={(e) => handlePriceInputChange(1, e.target.value)}
+                                                    className="w-full bg-transparent font-black text-sm text-gray-900 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">

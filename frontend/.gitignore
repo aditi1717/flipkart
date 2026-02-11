@@ -25,7 +25,7 @@ backend/package-lock.jsons
 *.sln
 *.sw?
 backend/.env
-frontend/.env
+.env
 frontend/node_modules
 backend/node_modules
 

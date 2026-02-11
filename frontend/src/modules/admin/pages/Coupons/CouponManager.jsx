@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { MdAdd, MdClose, MdLocalOffer, MdDelete, MdToggleOn, MdToggleOff, MdContentCopy } from 'react-icons/md';
 import useCouponStore from '../../store/couponStore';
+import { confirmToast } from '../../../../utils/toastUtils.jsx';
 
 const CouponManager = () => {
     const {
@@ -52,16 +54,25 @@ const CouponManager = () => {
     };
 
     const handleDelete = (id) => {
-        if (activeTab === 'coupons') {
-            if (window.confirm('Delete this coupon?')) deleteCoupon(id);
-        } else {
-            if (window.confirm('Delete this offer?')) deleteOffer(id);
-        }
+        const typeStr = activeTab === 'coupons' ? 'coupon' : 'offer';
+        confirmToast({
+            message: `Are you sure you want to delete this ${typeStr}?`,
+            type: 'danger',
+            icon: 'delete_forever',
+            confirmText: 'Delete',
+            onConfirm: () => {
+                if (activeTab === 'coupons') {
+                    deleteCoupon(id);
+                } else {
+                    deleteOffer(id);
+                }
+            }
+        });
     };
 
     const copyCode = (code) => {
         navigator.clipboard.writeText(code);
-        alert('Copied: ' + code);
+        toast.success('Copied: ' + code);
     };
 
     const getSegmentLabel = (segment) => {
@@ -113,7 +124,7 @@ const CouponManager = () => {
                         </div>
                     ) : (
                         coupons.map(coupon => (
-                            <div key={coupon.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition">
+                            <div key={coupon._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition">
                                 {/* Left Decoration Border */}
                                 <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${coupon.active ? 'bg-green-500' : 'bg-gray-300'}`}></div>
 
@@ -134,7 +145,7 @@ const CouponManager = () => {
                                                 </span>
                                             </div>
                                         </div>
-                                        <button onClick={() => toggleCouponStatus(coupon.id)}>
+                                        <button onClick={() => toggleCouponStatus(coupon._id)}>
                                             {coupon.active ? (
                                                 <MdToggleOn size={32} className="text-green-500 hover:text-green-600" />
                                             ) : (
@@ -184,7 +195,7 @@ const CouponManager = () => {
                                             Used {coupon.usageCount} times
                                         </div>
                                         <button
-                                            onClick={() => handleDelete(coupon.id)}
+                                            onClick={() => handleDelete(coupon._id)}
                                             className="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-50 transition"
                                         >
                                             <MdDelete size={18} />
@@ -208,7 +219,7 @@ const CouponManager = () => {
                         </div>
                     ) : (
                         offers.map(offer => (
-                            <div key={offer.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition">
+                            <div key={offer._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition">
                                 <div className="p-5">
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-2">
@@ -219,7 +230,7 @@ const CouponManager = () => {
                                         </div>
 
                                         <div className="flex items-center gap-2">
-                                            <button onClick={() => toggleOfferStatus(offer.id)}>
+                                            <button onClick={() => toggleOfferStatus(offer._id)}>
                                                 {offer.active ? (
                                                     <MdToggleOn size={32} className="text-green-500 hover:text-green-600" />
                                                 ) : (
@@ -227,7 +238,7 @@ const CouponManager = () => {
                                                 )}
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(offer.id)}
+                                                onClick={() => handleDelete(offer._id)}
                                                 className="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-red-50 transition"
                                             >
                                                 <MdDelete size={18} />
@@ -273,7 +284,7 @@ const CouponManager = () => {
                                             type="text"
                                             value={couponData.code}
                                             onChange={(e) => setCouponData({ ...couponData, code: e.target.value.toUpperCase() })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none font-mono text-base text-gray-800 uppercase placeholder-gray-300"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none font-mono text-base text-gray-800 uppercase placeholder:text-gray-500"
                                             placeholder="e.g. SAVE20"
                                             required
                                         />
@@ -284,7 +295,7 @@ const CouponManager = () => {
                                             type="text"
                                             value={couponData.title}
                                             onChange={(e) => setCouponData({ ...couponData, title: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800 placeholder:text-gray-500"
                                             placeholder="e.g. Summer Sale"
                                             required
                                         />
@@ -296,7 +307,7 @@ const CouponManager = () => {
                                     <textarea
                                         value={couponData.description}
                                         onChange={(e) => setCouponData({ ...couponData, description: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800 placeholder:text-gray-500"
                                         placeholder="Brief terms or benefits..."
                                         required
                                     />
@@ -340,7 +351,7 @@ const CouponManager = () => {
                                                 type="number"
                                                 value={couponData.minPurchase}
                                                 onChange={(e) => setCouponData({ ...couponData, minPurchase: e.target.value })}
-                                                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-sm font-normal text-gray-800"
+                                                className="w-full px-2 py-1.5 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-sm font-normal text-gray-800 placeholder:text-gray-500"
                                                 placeholder="₹"
                                                 required
                                             />
@@ -376,7 +387,7 @@ const CouponManager = () => {
                                             type="number"
                                             value={couponData.value}
                                             onChange={(e) => setCouponData({ ...couponData, value: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800 placeholder:text-gray-500"
                                             placeholder={couponData.type === 'percentage' ? "e.g. 20" : "e.g. 200"}
                                             required
                                         />
@@ -390,7 +401,7 @@ const CouponManager = () => {
                                             type="number"
                                             value={couponData.maxDiscount}
                                             onChange={(e) => setCouponData({ ...couponData, maxDiscount: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800 placeholder:text-gray-500"
                                             placeholder="e.g. 100"
                                         />
                                     </div>
@@ -426,7 +437,7 @@ const CouponManager = () => {
                                         type="text"
                                         value={offerData.title}
                                         onChange={(e) => setOfferData({ ...offerData, title: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none text-base text-gray-800 placeholder:text-gray-500"
                                         placeholder="e.g. 10% off on HDFC Cards"
                                         required
                                     />
@@ -437,7 +448,7 @@ const CouponManager = () => {
                                     <textarea
                                         value={offerData.description}
                                         onChange={(e) => setOfferData({ ...offerData, description: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800 placeholder:text-gray-500"
                                         placeholder="Details shown on product page..."
                                         required
                                     />
@@ -448,7 +459,7 @@ const CouponManager = () => {
                                     <textarea
                                         value={offerData.terms}
                                         onChange={(e) => setOfferData({ ...offerData, terms: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-pink-500 outline-none h-20 resize-none text-base text-gray-800 placeholder:text-gray-500"
                                         placeholder="Minimum purchase limits etc..."
                                     />
                                 </div>

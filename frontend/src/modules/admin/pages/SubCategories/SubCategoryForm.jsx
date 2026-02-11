@@ -13,7 +13,6 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
         description: '',
         image: '',
         category: '', // Primary Category ID
-        parent: '',   // Parent SubCategory ID (optional)
         isActive: true,
         file: null
     });
@@ -31,7 +30,6 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                 description: subCategory.description || '',
                 image: subCategory.image || '',
                 category: subCategory.category?._id || subCategory.category || '',
-                parent: subCategory.parent?._id || subCategory.parent || '',
                 isActive: subCategory.isActive ?? true,
                 file: null
             });
@@ -59,7 +57,7 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
 
         // Basic validation
         if (!formData.category) {
-            alert("Please select a parent category.");
+            toast.error("Please select a parent category.");
             return;
         }
 
@@ -67,30 +65,9 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
             name: formData.name,
             description: formData.description,
             category: formData.category,
-            parent: formData.parent || null,
             isActive: formData.isActive,
             image: formData.image 
         };
-        // Controller: const { name, category, description, image } = req.body;
-        // It seems it expects a JSON body. If we want file upload, we need to upload first or change controller.
-        // For now, let's assume we are sending a direct URL or base64 or maybe the user just inputs a URL if we don't have upload logic here.
-        // BUT, CategoryForm used FormData? No, CategoryController handles req.file?
-        
-        // Let's stick to what we see. CategoryForm uses FormData. 
-        // SubCategoryController seems to expect JSON: req.body.image. 
-        // If we want real file upload, we should probably modify the controller to support multer or upload elsewhere first.
-        // For this task, I will assume we might be restricted to existing controller logic, so I will send what I can.
-        // If the user wants to upload a file, we might need a separate upload endpoint or fix the controller.
-        // However, I see `image` in `req.body`, suggesting it might be a text URL.
-        
-        // Wait, `CategoryForm` does `data.append('icon', formData.file)`. 
-        // `productController` handles `req.files`.
-        // `subCategoryController` does NOT seem to use multer/req.file.
-        // So for now, I will treat image as a string (URL) input or base64 if I implement that. 
-        // I'll stick to string URL input + file selection that just sets a preview for now to be safe, 
-        // or check if I can fix the controller for upload. 
-        // Given the prompt is just "make a separate section", I should probably stick to existing capabilities.
-        // I will assume for now `image` is a URL string. I'll pass `formData.image`.
 
         if (subCategory?.id || subCategory?._id) {
             try {
@@ -134,7 +111,8 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 caret-black placeholder:text-gray-500"
+                            placeholder="e.g. Mobile Accessories"
                             required
                         />
                     </div>
@@ -145,12 +123,12 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 caret-black placeholder:text-gray-500"
+                            placeholder="Brief description of the subcategory..."
                             rows="3"
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">Primary Category *</label>
                             <select
@@ -166,24 +144,7 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                                 ))}
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Parent Subcategory</label>
-                            <select
-                                name="parent"
-                                value={formData.parent}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
-                            >
-                                <option value="">-- None (Top Level) --</option>
-                                {useSubCategoryStore.getState().subCategories
-                                    .filter(sub => String(sub.category?._id || sub.category) === String(formData.category) && 
-                                                 String(sub._id || sub.id) !== String(subCategory?._id || subCategory?.id))
-                                    .map(sub => (
-                                        <option key={sub._id || sub.id} value={sub._id || sub.id}>{sub.name}</option>
-                                    ))}
-                            </select>
-                        </div>
-                    </div>
+
 
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Image URL</label>
@@ -194,7 +155,7 @@ const SubCategoryForm = ({ subCategory, onClose }) => {
                             value={formData.image}
                             onChange={handleChange}
                             placeholder="https://..."
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 caret-black placeholder:text-gray-500"
                         />
                     </div>
 

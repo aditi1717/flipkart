@@ -8,7 +8,6 @@ const Layout = () => {
     const location = useLocation();
     const isPDP = location.pathname.includes('/product/');
     const isCategory = location.pathname.includes('/category/');
-    const isSpecialPage = isPDP || isCategory;
 
     // Pages that provide their own header/navigation and should hide the global header
     const isStandalonePage = [
@@ -26,10 +25,12 @@ const Layout = () => {
         '/login',
         '/signup',
         '/play',
-        '/categories'
+        '/categories',
+        '/wishlist'
     ].some(path => location.pathname.includes(path));
 
     const isAccountPage = location.pathname === '/account';
+    const isHome = location.pathname === '/';
 
     return (
         <div className="w-full min-h-screen flex flex-col relative bg-background-light overflow-x-hidden">
@@ -38,9 +39,13 @@ const Layout = () => {
                     <Header />
                 </div>
             )}
-            <main className={`flex-1 flex flex-col ${!isPDP && 'pb-20'} md:pb-0 w-full transition-all duration-300
-                ${isStandalonePage ? 'pt-0' : isSpecialPage ? 'pt-[64px] md:pt-[110px]' : 'pt-[220px] md:pt-[180px]'}`}>
-                <AnimatePresence mode="wait">
+            <main className={`flex flex-col md:pb-0 w-full transition-all duration-300 bg-white
+                ${isStandalonePage ? 'pt-0' : 
+                   isPDP ? 'pt-[64px] md:pt-[130px]' : 
+                   isCategory ? 'pt-[82px] md:pt-[140px]' :
+                  isHome ? 'pt-[260px] md:pt-[240px]' : 
+                  'pt-[110px] md:pt-[160px]'}`}>
+                <AnimatePresence mode="popLayout">
                     <motion.div
                         key={location.pathname}
                         initial={{ opacity: 0, x: 20 }}
@@ -63,7 +68,7 @@ const Layout = () => {
                 !location.pathname.includes('/category/') &&
                 !location.pathname.includes('/play') && <BottomNav />
             }
-            <Footer />
+            {!isCategory && <Footer />}
         </div >
     );
 };

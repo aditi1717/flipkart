@@ -15,6 +15,22 @@
   body {
     @apply bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-sans;
   }
+
+  input,
+  textarea,
+  select,
+  [contenteditable] {
+    caret-color: black !important;
+  }
+
+  /* Force black cursor everywhere just in case */
+  * {
+    caret-color: inherit;
+  }
+
+  html {
+    caret-color: black !important;
+  }
 }
 
 @utility no-scrollbar {
@@ -44,19 +60,22 @@
   animation: bounce-subtle 2s infinite;
 }
 
-/* Swiper Custom Styling for Flipkart Look */
+/* Swiper Custom Styling for Modern Look */
 .home-banner-swiper .swiper-button-next,
 .home-banner-swiper .swiper-button-prev {
-  background-color: white;
-  width: 40px !important;
-  height: 100px !important;
+  background-color: transparent;
+  width: 48px !important;
+  height: 48px !important;
   top: 50%;
   transform: translateY(-50%);
   margin-top: 0;
-  box-shadow: 0 1px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 20;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .home-banner-swiper:hover .swiper-button-next,
@@ -65,20 +84,54 @@
 }
 
 .home-banner-swiper .swiper-button-next {
-  right: 0 !important;
-  border-radius: 10px 0 0 10px;
+  right: 20px !important;
 }
 
 .home-banner-swiper .swiper-button-prev {
-  left: 0 !important;
-  border-radius: 0 10px 10px 0;
+  left: 20px !important;
 }
 
 .home-banner-swiper .swiper-button-next::after,
 .home-banner-swiper .swiper-button-prev::after {
-  font-size: 24px !important;
+  font-size: 32px !important;
   font-weight: 900 !important;
-  color: #212121;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+
+  .home-banner-swiper .swiper-button-next,
+  .home-banner-swiper .swiper-button-prev {
+    width: 32px !important;
+    height: 32px !important;
+    background-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    display: flex !important;
+    top: 50% !important;
+    margin-top: 0 !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .home-banner-swiper .swiper-button-next::after,
+  .home-banner-swiper .swiper-button-prev::after {
+    font-size: 24px !important;
+    color: #fff !important;
+    font-weight: 900 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .home-banner-swiper .swiper-button-next {
+    right: 8px !important;
+    left: auto !important;
+  }
+
+  .home-banner-swiper .swiper-button-prev {
+    left: 8px !important;
+    right: auto !important;
+  }
 }
 
 .home-banner-swiper .swiper-pagination-bullet {
@@ -95,4 +148,9 @@
 
 .home-banner-swiper .swiper-button-disabled {
   display: none !important;
+}
+
+.footer-copyright-html p {
+  margin: 0 !important;
+  display: inline;
 }

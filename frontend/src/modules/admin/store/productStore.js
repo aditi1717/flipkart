@@ -10,7 +10,7 @@ const useProductStore = create((set) => ({
     fetchProducts: async () => {
         set({ isLoading: true });
         try {
-            const { data } = await API.get('/products');
+            const { data } = await API.get('/products?all=true');
             set({ products: data, isLoading: false });
         } catch (error) {
             set({ 
@@ -83,7 +83,7 @@ const useProductStore = create((set) => ({
     fetchProduct: async (id) => {
         set({ isLoading: true });
         try {
-            const { data } = await API.get(`/products/${id}`);
+            const { data } = await API.get(`/products/${id}?all=true`);
              // Check if already in store, if so replace, else add
              set((state) => {
                 const exists = state.products.find(p => p.id === parseInt(id));

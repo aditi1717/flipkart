@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
+import { confirmToast } from '../../../utils/toastUtils.jsx';
 
 const TrackOrder = () => {
     const { orderId, productId } = useParams();
@@ -70,9 +71,13 @@ const TrackOrder = () => {
     // Auto-cancellation for testing purposes
     const updateStatus = useCartStore(state => state.updateOrderStatus);
     const handleCancel = () => {
-        if (window.confirm('Are you sure you want to cancel this order?')) {
-            updateStatus(order.id, 'CANCELLED');
-        }
+        confirmToast({
+            message: 'Are you sure you want to cancel this order?',
+            type: 'danger',
+            icon: 'cancel',
+            confirmText: 'Cancel Order',
+            onConfirm: () => updateStatus(order.id, 'CANCELLED')
+        });
     };
 
     return (
@@ -96,7 +101,7 @@ const TrackOrder = () => {
                 </button>
                 <div className="flex flex-col">
                     <h1 className="text-sm font-bold uppercase tracking-tight">Tracking {productId ? (currentStatus?.includes('RETURN') ? 'Return' : 'Replacement') : 'Order'}</h1>
-                    <span className="text-[10px] text-white/80 uppercase">#{order.id}</span>
+                    <span className="text-[10px] text-white/80 uppercase">#{order.displayId || order.id}</span>
                 </div>
             </div>
 
@@ -124,7 +129,7 @@ const TrackOrder = () => {
                             <div className="flex-1">
                                 <h2 className="text-sm font-bold text-gray-800 line-clamp-1 md:text-base">{targetItem?.name}</h2>
                                 <p className="text-xs text-gray-500 mt-1 md:text-sm">Status: <span className="text-blue-600 font-bold uppercase tracking-tighter">{currentStatus?.replace(/_/g, ' ')}</span></p>
-                                <p className="text-[10px] text-gray-400 mt-1 hidden md:block">Order ID: {order.id}</p>
+                                <p className="text-[10px] text-gray-400 mt-1 hidden md:block">Order ID: {order.displayId || order.id}</p>
                             </div>
                         </div>
                     </div>

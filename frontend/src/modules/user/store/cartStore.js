@@ -119,7 +119,7 @@ export const useCartStore = create()(
                 }));
             },
 
-            placeOrder: (order) => {
+            placeOrder: (order, shouldClearCart = true) => {
                 const normalizedOrder = {
                     ...order,
                     id: order._id || order.id,
@@ -133,7 +133,7 @@ export const useCartStore = create()(
                 };
                 set((state) => ({
                     orders: [normalizedOrder, ...state.orders],
-                    cart: []
+                    cart: shouldClearCart ? [] : state.cart
                 }));
             },
 
@@ -282,7 +282,17 @@ export const useCartStore = create()(
                 const original = cart.reduce((total, item) => total + (item.originalPrice || item.price) * item.quantity, 0);
                 const current = cart.reduce((total, item) => total + item.price * item.quantity, 0);
                 return original - current;
-            }
+            },
+
+            clearStore: () => set({
+                cart: [],
+                wishlist: [],
+                savedForLater: [],
+                orders: [],
+                addresses: [],
+                appliedCoupon: null,
+                userProfile: null
+            })
         }),
         {
             name: 'cart-storage',

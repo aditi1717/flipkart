@@ -33,15 +33,22 @@ const useUserStore = create((set) => ({
     },
 
     toggleUserStatus: async (id) => {
+        set({ isLoading: true });
         try {
             const { data } = await API.patch(`/auth/users/${id}/toggle-status`);
             set((state) => ({
                 users: state.users.map(u => 
-                    u._id === id ? { ...u, status: data.status } : u
-                )
+                    (u._id === id || u.id === id) ? { ...u, status: data.status } : u
+                ),
+                isLoading: false
             }));
+            return data;
         } catch (error) {
-            set({ error: error.response?.data?.message || error.message });
+            set({ 
+                error: error.response?.data?.message || error.message,
+                isLoading: false 
+            });
+            throw error;
         }
     },
     

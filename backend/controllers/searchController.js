@@ -25,23 +25,47 @@ export const globalSearch = async (req, res) => {
                     { shortDescription: regex }
                 ]
             })
-            .select('id name image price brand category subCategories discount')
+            .populate('subCategories', 'isActive')
+            .select('id name image price brand category categoryId subCategories discount')
             .limit(5),
 
-            Category.find({ name: regex })
-            .select('id name icon')
+            Category.find({ name: regex, active: true })
+            .select('id name icon active')
             .limit(3),
 
-            SubCategory.find({ name: regex })
-            .populate('category', 'name')
-            .select('name category')
+            SubCategory.find({ name: regex, isActive: true })
+            .populate('category', 'name active')
+            .select('name category isActive')
             .limit(3)
         ]);
 
+        // Filter products locally to ensure their category and subcategories are active
+        // This is necessary because some products might have inactive categories but match the search query
+        const activeCategories = await Category.find({ active: true }).select('id');
+        const activeCategoryIds = new Set(activeCategories.map(c => c.id));
+        
+        const activeSubCategories = await SubCategory.find({ isActive: true }).select('_id');
+        const activeSubCategoryIds = new Set(activeSubCategories.map(s => s._id.toString()));
+
+        const filteredProducts = products.filter(p => {
+            // Check category
+            if (!activeCategoryIds.has(p.categoryId)) return false;
+            
+            // Check subcategories (if any)
+            if (p.subCategories && p.subCategories.length > 0) {
+                return p.subCategories.some(sub => activeSubCategoryIds.has(sub._id?.toString() || sub.toString()));
+            }
+            
+            return true;
+        });
+
+        // Filter subcategories locally to ensure their parent category is active
+        const filteredSubCategories = subCategories.filter(s => s.category && s.category.active);
+
         res.json({
-            products,
+            products: filteredProducts,
             categories,
-            subCategories
+            subCategories: filteredSubCategories
         });
 
     } catch (error) {

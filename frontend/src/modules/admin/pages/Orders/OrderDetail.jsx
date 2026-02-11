@@ -1,16 +1,52 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MdArrowBack, MdPrint, MdLocalShipping, MdCheckCircle, MdPendingActions, MdCancel, MdPerson, MdEmail, MdPhone, MdLocationOn, MdPayment, MdSchedule } from 'react-icons/md';
+import toast from 'react-hot-toast';
 import useOrderStore from '../../store/orderStore';
+import InvoiceGenerator from '../../components/orders/InvoiceGenerator';
+import API from '../../../../services/api';
 
 const OrderDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { orders, updateOrderStatus, cancelOrder } = useOrderStore();
+    const { orders, updateOrderStatus, cancelOrder, getOrderDetails, isLoading } = useOrderStore();
     const order = orders.find(o => o.id === id);
 
     const [updating, setUpdating] = useState(false);
     const [actionNote, setActionNote] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState('');
+    const [serialInputs, setSerialInputs] = useState({});
+    const [serialTypes, setSerialTypes] = useState({});
+    const [showSerialModal, setShowSerialModal] = useState(false);
+
+    // Initialize selected status when modal opens
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const [settings, setSettings] = useState(null);
+
+    React.useEffect(() => {
+        if (!order) {
+            getOrderDetails(id);
+        }
+        // Fetch settings for invoice
+        const fetchSettings = async () => {
+            try {
+                const { data } = await API.get('/settings');
+                setSettings(data);
+            } catch (error) {
+                console.error('Error fetching settings for invoice:', error);
+            }
+        };
+        fetchSettings();
+    }, [id, order, getOrderDetails]);
+
+    if (isLoading && !order) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen">
+                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <p className="mt-4 text-gray-500 font-medium animate-pulse">Loading order details...</p>
+            </div>
+        );
+    }
 
     if (!order) {
         return (
@@ -24,9 +60,86 @@ const OrderDetail = () => {
         );
     }
 
-    const handleStatusUpdate = (newStatus) => {
-        updateOrderStatus(id, newStatus, actionNote);
+    const openUpdateModal = () => {
+        setUpdating(true);
+        setShowCancelConfirm(false);
         setActionNote('');
+        // Set next logical status or current status
+        const statuses = ['Confirmed', 'Packed', 'Dispatched', 'Out for Delivery', 'Delivered'];
+        const currentIdx = statuses.indexOf(order.status);
+        if (currentIdx !== -1 && currentIdx < statuses.length - 1) {
+            setSelectedStatus(statuses[currentIdx + 1]);
+        } else {
+            setSelectedStatus(order.status);
+        }
+    };
+
+    const openSerialModal = () => {
+        // Pre-fill serial inputs
+        const initialInputs = {};
+        const initialTypes = {};
+        order.items.forEach(item => {
+            if (item.serialNumber) initialInputs[item._id] = item.serialNumber;
+            if (item.serialType) initialTypes[item._id] = item.serialType;
+        });
+        setSerialInputs(initialInputs);
+        setSerialTypes(initialTypes);
+        setShowSerialModal(true);
+    };
+
+    const handleSerialSave = () => {
+        const serialNumbers = order.items.map(item => ({
+            itemId: item._id,
+            serial: serialInputs[item._id] !== undefined ? serialInputs[item._id] : item.serialNumber,
+            type: serialTypes[item._id] !== undefined ? serialTypes[item._id] : (item.serialType || 'Serial Number')
+        })).filter(s => s.serial);
+
+        // Update with CURRENT status to just save serials
+        updateOrderStatus(id, order.status, '', serialNumbers);
+        setShowSerialModal(false);
+        setSerialInputs({});
+    };
+
+    const handleUpdateClick = () => {
+        handleStatusUpdate(selectedStatus);
+    };
+
+    const handleStatusUpdate = (newStatus) => {
+        // Validation for Packed status
+        if (newStatus === 'Packed') {
+            // Check if serial is present in input OR already exists in item
+            const missingSerials = order.items.some(item => !serialInputs[item._id] && !item.serialNumber);
+            if (missingSerials) {
+                toast.error('Please enter Serial Number / IMEI for all items before packing.');
+                return;
+            }
+            
+            const serialNumbers = order.items.map(item => ({
+                itemId: item._id,
+                // Use input value if present, otherwise fallback to existing value
+                serial: serialInputs[item._id] !== undefined ? serialInputs[item._id] : item.serialNumber,
+                type: serialTypes[item._id] !== undefined ? serialTypes[item._id] : (item.serialType || 'Serial Number')
+            })).filter(s => s.serial); // Only send if we have a serial number
+            
+            updateOrderStatus(id, newStatus, actionNote, serialNumbers);
+        } else {
+            // Also send serial numbers if they were edited in other statuses
+            const hasEdits = Object.keys(serialInputs).length > 0 || Object.keys(serialTypes).length > 0;
+            if (hasEdits) {
+                 const serialNumbers = order.items.map(item => ({
+                    itemId: item._id,
+                    serial: serialInputs[item._id] !== undefined ? serialInputs[item._id] : item.serialNumber,
+                    type: serialTypes[item._id] !== undefined ? serialTypes[item._id] : (item.serialType || 'Serial Number')
+                 })).filter(s => s.serial); // Only send valid ones
+
+                 updateOrderStatus(id, newStatus, actionNote, serialNumbers);
+            } else {
+                 updateOrderStatus(id, newStatus, actionNote);
+            }
+        }
+        
+        setActionNote('');
+        setSerialInputs({});
         setUpdating(false);
     };
 
@@ -53,7 +166,7 @@ const OrderDetail = () => {
                     </button>
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{order.id}</h1>
+                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{order.displayId || order.id}</h1>
                             <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${order.status === 'Delivered' ? 'bg-green-100 text-green-600' :
                                     order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
                                         'bg-blue-100 text-blue-600 animate-pulse'
@@ -66,12 +179,30 @@ const OrderDetail = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 text-gray-600 font-black text-xs rounded-2xl hover:bg-gray-50 transition-all shadow-sm uppercase tracking-widest">
-                        <MdPrint size={18} /> Print Invoice
-                    </button>
+                    <InvoiceGenerator 
+                        order={order} 
+                        items={order.items} 
+                        settings={settings} 
+                        customTrigger={
+                            <button className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 text-gray-600 font-black text-xs rounded-2xl hover:bg-gray-50 transition-all shadow-sm uppercase tracking-widest">
+                                <MdPrint size={18} /> Print Invoice
+                            </button>
+                        }
+                    />
+                    
+                    {/* Separate Serial/IMEI Button */}
+                     {order.status !== 'Cancelled' && (
+                        <button
+                            onClick={openSerialModal}
+                            className="flex items-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 border border-indigo-100 font-black text-xs rounded-2xl hover:bg-indigo-100 transition-all shadow-sm uppercase tracking-widest"
+                        >
+                            <MdPendingActions size={18} /> Manage Serials
+                        </button>
+                    )}
+
                     {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
                         <button
-                            onClick={() => setUpdating(true)}
+                            onClick={openUpdateModal}
                             className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-black text-xs rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 uppercase tracking-widest"
                         >
                             Update Status
@@ -99,6 +230,16 @@ const OrderDetail = () => {
                                         <div className="flex items-center gap-4 mt-2">
                                             <span className="text-[10px] font-black text-gray-400 uppercase bg-gray-100 px-2 py-0.5 rounded">ID: {item.id}</span>
                                             <span className="text-[10px] font-black text-gray-400 uppercase">Quantity: {item.quantity}</span>
+                                        </div>
+                                        {item.serialNumber && (
+                                            <div className="mt-2">
+                                                <span className="text-sm bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold font-mono border border-blue-200 shadow-sm flex items-center gap-2 w-max select-all">
+                                                    <span className="text-blue-400 select-none">{item.serialType === 'IMEI' ? 'IMEI:' : 'SN:'}</span> {item.serialNumber}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div className="mt-3">
+                                            <InvoiceGenerator order={order} item={item} settings={settings} />
                                         </div>
                                     </div>
                                     <div className="text-right">
@@ -161,18 +302,17 @@ const OrderDetail = () => {
                                 {order.user?.name?.charAt(0) || 'U'}
                             </div>
                             <div className="min-w-0">
-                                <h4 className="text-sm font-black text-gray-900 truncate">{order.user?.name || 'Unknown User'}</h4>
-                                <p className="text-[10px] text-blue-600 font-black uppercase tracking-tighter">Gold Member</p>
+                                <h4 className="text-sm font-black text-gray-900 truncate">{order.user?.name || order.shippingAddress?.name || 'Unknown User'}</h4>
                             </div>
                         </div>
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 text-gray-600">
                                 <MdEmail className="text-gray-300" size={18} />
-                                <span className="text-xs font-medium truncate">{order.user?.email || 'N/A'}</span>
+                                <span className="text-xs font-medium truncate">{order.user?.email || order.shippingAddress?.email || 'N/A'}</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-600">
                                 <MdPhone className="text-gray-300" size={18} />
-                                <span className="text-xs font-medium">{order.user?.phone || 'N/A'}</span>
+                                <span className="text-xs font-medium">{order.shippingAddress?.phone || order.user?.phone || 'N/A'}</span>
                             </div>
                         </div>
                     </div>
@@ -186,7 +326,7 @@ const OrderDetail = () => {
                         <div className="flex gap-4">
                             <MdLocationOn className="text-blue-500 flex-shrink-0 mt-1" size={20} />
                             <div className="text-xs text-gray-600 leading-relaxed font-medium">
-                                <p className="font-black text-gray-900 mb-1">{order.address?.name || order.user?.name || 'N/A'}</p>
+                                <p className="font-black text-gray-900 mb-1">{order.shippingAddress?.name || order.address?.name || order.user?.name || 'N/A'}</p>
                                 <p>{order.address?.line || order.shippingAddress?.street || 'N/A'}</p>
                                 <p>{order.address?.city || order.shippingAddress?.city || 'N/A'}, {order.address?.state || order.shippingAddress?.state || 'N/A'}</p>
                                 <p className="font-black mt-1 text-gray-400">{order.address?.pincode || order.shippingAddress?.postalCode || 'N/A'}</p>
@@ -213,6 +353,23 @@ const OrderDetail = () => {
                                     <p className="text-[11px] font-bold text-gray-600 font-mono break-all bg-gray-50 p-2 rounded-lg">{order.payment.transactionId}</p>
                                 </div>
                             )}
+
+                            {order.payment?.cardNetwork && (
+                                <div className="pt-4 border-t border-gray-50 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Card Network</p>
+                                        <p className="text-[11px] font-black text-gray-800 uppercase tracking-wider">{order.payment.cardNetwork}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Card Type</p>
+                                        <p className="text-[11px] font-black text-gray-800 uppercase tracking-wider">{order.payment.cardType || 'N/A'}</p>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Card Number</p>
+                                        <p className="text-[11px] font-bold text-gray-600 font-mono">**** **** **** {order.payment.cardLast4}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -222,49 +379,186 @@ const OrderDetail = () => {
             {updating && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
                     <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
+                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
+                        {!showCancelConfirm ? (
+                            <div className="p-8 space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-black text-gray-900">Update fulfillment status</h3>
+                                    <button onClick={() => setUpdating(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400"><MdCancel size={24} /></button>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Select New Status</p>
+                                    <div className="space-y-2">
+                                        <div className="relative">
+                                            <select
+                                                value={selectedStatus}
+                                                onChange={(e) => setSelectedStatus(e.target.value)}
+                                                className="w-full bg-gray-50 text-gray-900 border-2 border-transparent focus:border-blue-500 rounded-2xl p-4 outline-none text-sm font-bold appearance-none cursor-pointer"
+                                            >
+                                                <option value="" disabled>Select Status</option>
+                                                {['Confirmed', 'Packed', 'Dispatched', 'Out for Delivery', 'Delivered'].map(status => (
+                                                    <option key={status} value={status} disabled={order.status === status}>
+                                                        {status}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Serial Number Input for Packed Status and above (Edit Mode) */}
+                                    {(selectedStatus === 'Packed' || order.status === 'Confirmed' || order.status === 'Packed' || order.status === 'Dispatched' || order.status === 'Out for Delivery') && (
+                                        <div className="space-y-3 mt-4 animate-in fade-in slide-in-from-top-2">
+                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                                <MdLocalShipping size={14} /> 
+                                                {order.status === 'Confirmed' ? 'Enter Serial/IMEI for Items' : 'Edit Serial/IMEI Numbers'}
+                                            </p>
+                                            <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100 max-h-60 overflow-y-auto">
+                                                {order.items.map(item => (
+                                                <div key={item._id} className="space-y-1">
+                                                    <label className="text-xs font-bold text-gray-700 truncate block">{item.name}</label>
+                                                    <div className="flex gap-2">
+                                                        <select
+                                                            className="bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-3 py-3 text-xs font-bold outline-none transition-all text-gray-700 shadow-sm w-1/3 appearance-none"
+                                                            value={serialTypes[item._id] || (item.serialType || 'Serial Number')}
+                                                            onChange={(e) => setSerialTypes(prev => ({ ...prev, [item._id]: e.target.value }))}
+                                                        >
+                                                            <option>Serial Number</option>
+                                                            <option>IMEI</option>
+                                                        </select>
+                                                        <input 
+                                                            type="text"
+                                                            list={`serials-${item._id}`}
+                                                            placeholder={`Enter Number...`}
+                                                            className="flex-1 bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-gray-400 font-mono text-gray-900 shadow-sm"
+                                                            value={serialInputs[item._id] !== undefined ? serialInputs[item._id] : (item.serialNumber || '')}
+                                                            onChange={(e) => setSerialInputs(prev => ({ ...prev, [item._id]: e.target.value }))}
+                                                        />
+                                                    </div>
+                                                    <datalist id={`serials-${item._id}`}>
+                                                        {/* Placeholder for future inventory integration */}
+                                                        <option value="SN-EXAMPLE-01" />
+                                                        <option value="SN-EXAMPLE-02" />
+                                                        <option value="IMEI-TEST-123456789012345" />
+                                                    </datalist>
+                                                </div>
+                                            ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={() => setShowCancelConfirm(true)}
+                                        className="w-full mt-2 px-4 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white text-xs font-black uppercase tracking-widest transition-all shadow-sm"
+                                    >
+                                        Cancel Order
+                                    </button>
+                                    
+                                    <button
+                                        onClick={handleUpdateClick}
+                                        className="w-full mt-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] transition-all"
+                                    >
+                                        Update Status
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="p-8 space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-black text-red-600">Cancel Order?</h3>
+                                    <button onClick={() => setShowCancelConfirm(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400"><MdCancel size={24} /></button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <p className="text-sm text-gray-600">Are you sure you want to cancel this order? This action cannot be undone.</p>
+                                    
+                                    <div className="space-y-2">
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Cancellation Reason (Required)</p>
+                                        <textarea
+                                            placeholder="Please provide a reason for cancellation..."
+                                            className="w-full bg-gray-50 border-2 border-transparent focus:border-red-500 rounded-2xl p-4 outline-none text-sm transition-all h-32 font-medium text-gray-900 placeholder:text-gray-400"
+                                            value={actionNote}
+                                            onChange={(e) => setActionNote(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-3 pt-2">
+                                        <button
+                                            onClick={() => setShowCancelConfirm(false)}
+                                            className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition-all font-black uppercase tracking-tight"
+                                        >
+                                            Back
+                                        </button>
+                                        <button
+                                            disabled={!actionNote.trim()}
+                                            onClick={() => {
+                                                cancelOrder(id, actionNote);
+                                                setUpdating(false);
+                                            }}
+                                            className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-200 disabled:opacity-50 disabled:cursor-not-allowed font-black uppercase tracking-tight"
+                                        >
+                                            Confirm Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Serial Only Modal */}
+            {showSerialModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
                         <div className="p-8 space-y-6">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-black text-gray-900">Update fulfillment status</h3>
-                                <button onClick={() => setUpdating(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400"><MdCancel size={24} /></button>
-                            </div>
-
-                            <div className="space-y-4">
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Action Note (Optional)</p>
-                                <textarea
-                                    placeholder="e.g. Dispatched via Express Couriers..."
-                                    className="w-full bg-gray-50 border-2 border-transparent focus:border-blue-500 rounded-2xl p-4 outline-none text-sm transition-all h-24 font-medium"
-                                    value={actionNote}
-                                    onChange={(e) => setActionNote(e.target.value)}
-                                />
+                                <h3 className="text-xl font-black text-gray-900">Manage Serial/IMEI Numbers</h3>
+                                <button onClick={() => setShowSerialModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400"><MdCancel size={24} /></button>
                             </div>
 
                             <div className="space-y-3">
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Select New Status</p>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {['Confirmed', 'Packed', 'Dispatched', 'Out for Delivery', 'Delivered'].map(status => (
-                                        <button
-                                            key={status}
-                                            disabled={order.status === status}
-                                            onClick={() => handleStatusUpdate(status)}
-                                            className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${order.status === status
-                                                    ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white shadow-sm'
-                                                }`}
-                                        >
-                                            {status}
-                                        </button>
+                                <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                        <MdLocalShipping size={14} /> 
+                                        Update Product Identification
+                                    </p>
+                                    <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100 max-h-[60vh] overflow-y-auto">
+                                        {order.items.map(item => (
+                                        <div key={item._id} className="space-y-1">
+                                            <label className="text-xs font-bold text-gray-700 truncate block">{item.name}</label>
+                                            <div className="flex gap-2">
+                                                <select
+                                                    className="bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-3 py-3 text-xs font-bold outline-none transition-all text-gray-700 shadow-sm w-1/3 appearance-none"
+                                                    value={serialTypes[item._id] || (item.serialType || 'Serial Number')}
+                                                    onChange={(e) => setSerialTypes(prev => ({ ...prev, [item._id]: e.target.value }))}
+                                                >
+                                                    <option>Serial Number</option>
+                                                    <option>IMEI</option>
+                                                </select>
+                                                <input 
+                                                    type="text"
+                                                    placeholder={`Enter Number...`}
+                                                    className="flex-1 bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-gray-400 font-mono text-gray-900 shadow-sm"
+                                                    value={serialInputs[item._id] !== undefined ? serialInputs[item._id] : (item.serialNumber || '')}
+                                                    onChange={(e) => setSerialInputs(prev => ({ ...prev, [item._id]: e.target.value }))}
+                                                />
+                                            </div>
+                                        </div>
                                     ))}
+                                    </div>
                                 </div>
+                                
                                 <button
-                                    onClick={() => {
-                                        if (window.confirm('Are you sure you want to cancel this order?')) {
-                                            cancelOrder(id, actionNote);
-                                            setUpdating(false);
-                                        }
-                                    }}
-                                    className="w-full mt-2 px-4 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white text-xs font-black uppercase tracking-widest transition-all shadow-sm"
+                                    onClick={handleSerialSave}
+                                    className="w-full mt-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] transition-all"
                                 >
-                                    Cancel Order
+                                    Save Changes
                                 </button>
                             </div>
                         </div>

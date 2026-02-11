@@ -25,6 +25,8 @@ import ProtectedRoute from './ProtectedRoute';
 import ProductListingPage from '../pages/ProductListingPage';
 import AllCategories from '../pages/AllCategories';
 import InfoPage from '../pages/InfoPage';
+import OfferPage from '../pages/OfferPage';
+import BecomeSeller from '../pages/BecomeSeller';
 
 const UserRoutes = () => {
     return (
@@ -56,7 +58,9 @@ const UserRoutes = () => {
                 <Route path="product/:id" element={<ProductDetails />} />
                 <Route path="login" element={<Login />} />
                 <Route path="signup" element={<Signup />} />
+                <Route path="offers/:id" element={<OfferPage />} />
                 <Route path="info" element={<InfoPage />} />
+                <Route path="become-seller" element={<BecomeSeller />} />
             </Route>
         </Routes>
     );

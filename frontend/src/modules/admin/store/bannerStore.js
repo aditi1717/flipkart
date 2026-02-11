@@ -8,7 +8,7 @@ const useBannerStore = create((set) => ({
     fetchBanners: async () => {
         set({ isLoading: true });
         try {
-            const { data } = await API.get('/banners');
+            const { data } = await API.get('/banners?all=true');
             set({ banners: data, isLoading: false });
         } catch (error) {
             set({ isLoading: false });

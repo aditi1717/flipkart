@@ -2,34 +2,60 @@ import React, { useState, useEffect } from 'react';
 import { MdSearch, MdFilterList, MdVisibility, MdBlock, MdCheckCircle, MdMoreVert, MdChevronLeft, MdChevronRight, MdMail, MdPhone, MdShoppingBag } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from '../../store/userStore';
-import Pagination from '../../components/common/Pagination';
+import Pagination from '../../../../components/Pagination';
+import API from '../../../../services/api';
 
 const UserList = () => {
     const navigate = useNavigate();
-    const { users, toggleUserStatus, fetchUsers } = useUserStore();
+    const { users, toggleUserStatus } = useUserStore();
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('All');
+    
+    // Server-side Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalUsers, setTotalUsers] = useState(0);
+    const itemsPerPage = 12;
+
+    const [localUsers, setLocalUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        fetchUsers();
-    }, [fetchUsers]);
-    const [statusFilter, setStatusFilter] = useState('All');
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+        const fetchPaginatedUsers = async () => {
+             setLoading(true);
+             try {
+                 const params = {
+                     pageNumber: currentPage,
+                     limit: itemsPerPage
+                 };
+                 if (searchTerm) params.search = searchTerm;
+                 if (statusFilter !== 'All') params.status = statusFilter;
 
-    const filteredUsers = users.filter(user => {
-        const matchesSearch =
-            user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (user.phone || '').includes(searchTerm);
+                 const { data } = await API.get('/auth/users', { params });
+                 
+                 if (data.users) {
+                     setLocalUsers(data.users);
+                     setTotalPages(data.pages);
+                     setTotalUsers(data.total);
+                 } else {
+                     setLocalUsers(data);
+                     setTotalPages(1);
+                 }
+             } catch (error) {
+                 console.error(error);
+             } finally {
+                 setLoading(false);
+             }
+        };
 
-        const matchesStatus = statusFilter === 'All' || user.status === statusFilter.toLowerCase();
+        const timer = setTimeout(() => {
+            fetchPaginatedUsers();
+        }, 300);
 
-        return matchesSearch && matchesStatus;
-    });
+        return () => clearTimeout(timer);
+    }, [currentPage, searchTerm, statusFilter]);
 
-    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedUsers = localUsers;
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -60,7 +86,7 @@ const UserList = () => {
                     <input
                         type="text"
                         placeholder="Search by name, email or phone..."
-                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all text-sm font-medium"
+                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all text-sm text-gray-900 placeholder:text-gray-900 font-bold"
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
@@ -70,7 +96,7 @@ const UserList = () => {
                 </div>
                 <div className="flex items-center gap-3 w-full lg:w-auto">
                     <select
-                        className="flex-1 lg:flex-none px-6 py-3 bg-gray-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-500 text-sm font-bold min-w-[150px]"
+                        className="flex-1 lg:flex-none px-6 py-3 bg-gray-50 border border-transparent rounded-2xl outline-none focus:bg-white focus:border-blue-500 text-sm font-black text-gray-900 min-w-[150px]"
                         value={statusFilter}
                         onChange={(e) => {
                             setStatusFilter(e.target.value);
@@ -180,9 +206,9 @@ const UserList = () => {
             {/* Pagination */}
             {totalPages > 1 && (
                 <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
+                    page={currentPage}
+                    pages={totalPages}
+                    changePage={handlePageChange}
                 />
             )}
         </div>
