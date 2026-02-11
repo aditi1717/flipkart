@@ -68,7 +68,7 @@ const Layout = () => {
                 !location.pathname.includes('/category/') &&
                 !location.pathname.includes('/play') && <BottomNav />
             }
-            <Footer />
+            {!isCategory && <Footer />}
         </div >
     );
 };

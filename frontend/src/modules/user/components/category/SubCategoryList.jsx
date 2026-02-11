@@ -37,7 +37,7 @@ const SubCategoryList = ({ subCategories }) => {
             </div>
 
             {/* DESKTOP VIEW: New responsive layout */}
-            <div className="hidden lg:block bg-white dark:bg-zinc-900 py-4">
+            <div className="hidden lg:block bg-white py-4">
                 <div className="flex flex-wrap justify-start gap-8 px-4 no-scrollbar">
                     {subCategories.map((sub, index) => {
                         const currentPath = location.pathname.endsWith('/') ? location.pathname.slice(0, -1) : location.pathname;
@@ -45,7 +45,7 @@ const SubCategoryList = ({ subCategories }) => {
 
                         return (
                             <Link key={index} to={targetPath} className="flex flex-col items-center cursor-pointer group shrink-0">
-                                <div className="w-24 h-24 bg-[#f8f9fb] dark:bg-zinc-800 rounded-full border border-gray-100 dark:border-zinc-700 flex items-center justify-center overflow-hidden mb-2 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:border-blue-400">
+                                <div className="w-24 h-24 bg-[#f8f9fb] rounded-full border border-gray-100 flex items-center justify-center overflow-hidden mb-2 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:border-blue-400">
                                     <img
                                         src={sub.image}
                                         alt={sub.name}
@@ -56,7 +56,7 @@ const SubCategoryList = ({ subCategories }) => {
                                         }}
                                     />
                                 </div>
-                                <span className="text-sm font-bold text-center text-gray-700 dark:text-gray-300 leading-tight w-28 line-clamp-1 tracking-tight group-hover:text-blue-600 transition-colors">
+                                <span className="text-sm font-bold text-center text-gray-700 leading-tight w-28 line-clamp-1 tracking-tight group-hover:text-blue-600 transition-colors">
                                     {sub.name}
                                 </span>
                             </Link>
