@@ -8,7 +8,6 @@ const Layout = () => {
     const location = useLocation();
     const isPDP = location.pathname.includes('/product/');
     const isCategory = location.pathname.includes('/category/');
-    const isSpecialPage = isPDP || isCategory;
 
     // Pages that provide their own header/navigation and should hide the global header
     const isStandalonePage = [
@@ -43,6 +42,7 @@ const Layout = () => {
             <main className={`flex flex-col md:pb-0 w-full transition-all duration-300 bg-white
                 ${isStandalonePage ? 'pt-0' : 
                    isPDP ? 'pt-[64px] md:pt-[130px]' : 
+                   isCategory ? 'pt-[82px] md:pt-[140px]' :
                   isHome ? 'pt-[260px] md:pt-[240px]' : 
                   'pt-[110px] md:pt-[160px]'}`}>
                 <AnimatePresence mode="popLayout">
