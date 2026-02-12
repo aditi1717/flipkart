@@ -56,7 +56,7 @@ const CategoryList = () => {
         const categoryId = category.id || category._id;
         const isExpanded = expandedIds.has(categoryId);
         const indent = level * 32;
-        
+
         return (
             <div key={categoryId}>
                 <div

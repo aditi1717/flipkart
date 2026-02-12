@@ -14,12 +14,12 @@ const AdminHeader = () => {
     // Initial Fetch and Polling
     useEffect(() => {
         fetchNotifications();
-        
+
         // Poll every 30 seconds
         const interval = setInterval(() => {
             fetchNotifications().then(() => {
-                 // Check if unreadCount increased? 
-                 // The store updates state. We can track previous count in a ref here to play sound
+                // Check if unreadCount increased? 
+                // The store updates state. We can track previous count in a ref here to play sound
             });
         }, 30000);
 
@@ -79,7 +79,7 @@ const AdminHeader = () => {
             <div className="flex items-center gap-4">
                 {/* Notifications */}
                 <div className="relative" ref={notificationRef}>
-                    <button 
+                    <button
                         className="relative p-2 hover:bg-gray-800 rounded-xl transition-all duration-300 group"
                         onClick={() => setShowNotifications(!showNotifications)}
                     >
@@ -95,7 +95,7 @@ const AdminHeader = () => {
                             <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                                 <h3 className="font-bold text-gray-800">Notifications</h3>
                                 {unreadCount > 0 && (
-                                    <button 
+                                    <button
                                         onClick={markAllAsRead}
                                         className="text-xs text-blue-600 font-bold hover:text-blue-700 hover:underline"
                                     >
@@ -103,7 +103,7 @@ const AdminHeader = () => {
                                     </button>
                                 )}
                             </div>
-                            
+
                             <div className="max-h-[400px] overflow-y-auto">
                                 {notifications.length === 0 ? (
                                     <div className="p-8 text-center text-gray-500">
@@ -112,8 +112,8 @@ const AdminHeader = () => {
                                     </div>
                                 ) : (
                                     notifications.map(notification => (
-                                        <div 
-                                            key={notification._id} 
+                                        <div
+                                            key={notification._id}
                                             className={`p-4 border-b last:border-0 hover:bg-gray-50 transition-colors cursor-pointer ${notification.isRead ? 'opacity-60' : 'bg-blue-50/50'}`}
                                             onClick={() => markAsRead(notification._id)}
                                         >

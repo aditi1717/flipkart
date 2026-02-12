@@ -44,10 +44,10 @@ export const verifyLoginOtp = async (req, res) => {
             await user.save();
         }
         const token = generateToken(res, user._id);
-        res.json({ 
-            _id: user._id, 
-            name: user.name, 
-            email: user.email, 
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
             phone: user.phone,
             gender: user.gender,
             token
@@ -63,10 +63,10 @@ export const authUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
         const token = generateToken(res, user._id);
-        res.json({ 
-            _id: user._id, 
-            name: user.name, 
-            email: user.email, 
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
             phone: user.phone,
             gender: user.gender,
             token
@@ -86,10 +86,10 @@ export const registerUser = async (req, res) => {
     const user = await User.create({ name, email, password });
     if (user) {
         const token = generateToken(res, user._id);
-        res.status(201).json({ 
-            _id: user._id, 
-            name: user.name, 
-            email: user.email, 
+        res.status(201).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
             phone: user.phone,
             gender: user.gender,
             token
@@ -100,15 +100,20 @@ export const registerUser = async (req, res) => {
 };
 
 export const logoutUser = (req, res) => {
-    res.cookie('jwt', '', { httpOnly: true, expires: new Date(0) });
+    res.cookie('jwt', '', {
+        httpOnly: true,
+        expires: new Date(0),
+        secure: process.env.NODE_ENV !== 'development',
+        sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none'
+    });
     res.status(200).json({ message: 'Logged out successfully' });
 };
 
 export const getUserProfile = async (req, res) => {
-    const user = { 
-        _id: req.user._id, 
-        name: req.user.name, 
-        email: req.user.email, 
+    const user = {
+        _id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
         phone: req.user.phone,
         gender: req.user.gender
     };
@@ -183,38 +188,38 @@ export const getUsers = async (req, res) => {
 
         // --- Pagination Logic ---
         if (pageNumber || limit) {
-             const pageSize = Number(limit) || 12;
-             const page = Number(pageNumber) || 1;
-             
-             const count = await User.countDocuments(filter);
-             const users = await User.find(filter)
-                 .select('-password')
-                 .sort({ createdAt: -1 })
-                 .limit(pageSize)
-                 .skip(pageSize * (page - 1));
+            const pageSize = Number(limit) || 12;
+            const page = Number(pageNumber) || 1;
 
-             // Fetch stats for paginated users
-             const usersWithStats = await Promise.all(users.map(async (user) => {
-                 const orderCount = await Order.countDocuments({ user: user._id });
-                 return {
-                     ...user._doc,
-                     joinedDate: user.createdAt,
-                     status: user.status || 'active',
-                     orderStats: { total: orderCount }
-                 };
-             }));
-                 
-             return res.json({ 
-                 users: usersWithStats, 
-                 page, 
-                 pages: Math.ceil(count / pageSize), 
-                 total: count 
-             });
+            const count = await User.countDocuments(filter);
+            const users = await User.find(filter)
+                .select('-password')
+                .sort({ createdAt: -1 })
+                .limit(pageSize)
+                .skip(pageSize * (page - 1));
+
+            // Fetch stats for paginated users
+            const usersWithStats = await Promise.all(users.map(async (user) => {
+                const orderCount = await Order.countDocuments({ user: user._id });
+                return {
+                    ...user._doc,
+                    joinedDate: user.createdAt,
+                    status: user.status || 'active',
+                    orderStats: { total: orderCount }
+                };
+            }));
+
+            return res.json({
+                users: usersWithStats,
+                page,
+                pages: Math.ceil(count / pageSize),
+                total: count
+            });
         }
-        
+
         // --- Fallback for non-paginated requests ---
         const users = await User.find(filter).select('-password').sort({ createdAt: -1 });
-        
+
         // Fetch order counts for each user
         const usersWithStats = await Promise.all(users.map(async (user) => {
             const orderCount = await Order.countDocuments({ user: user._id });

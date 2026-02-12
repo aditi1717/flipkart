@@ -7,7 +7,7 @@ import { MdStore, MdEmail, MdPhone, MdLocationOn, MdDescription, MdBusiness, MdA
 const BecomeSeller = () => {
     const navigate = useNavigate();
     const { user, isAuthenticated } = useAuthStore();
-    
+
     const [formData, setFormData] = useState({
         storeName: '',
         businessEmail: '',
@@ -77,7 +77,7 @@ const BecomeSeller = () => {
 
     if (status === 'Pending' || success) {
         return (
-            <div className="min-h-screen pt-24 pb-12 px-4 bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen pt-4 pb-12 px-4 bg-gray-50 flex items-center justify-center">
                 <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center border border-blue-50">
                     <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <MdAssignment className="text-4xl text-blue-600" />
@@ -86,7 +86,7 @@ const BecomeSeller = () => {
                     <p className="text-gray-600 mb-8 font-medium">
                         Your request to become a seller is currently under review by our admin team. We will notify you via email once approved.
                     </p>
-                    <button 
+                    <button
                         onClick={() => navigate('/')}
                         className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
                     >
@@ -99,7 +99,7 @@ const BecomeSeller = () => {
 
     if (status === 'Approved') {
         return (
-            <div className="min-h-screen pt-24 pb-12 px-4 bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen pt-4 pb-12 px-4 bg-gray-50 flex items-center justify-center">
                 <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center border border-green-50">
                     <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <MdStore className="text-4xl text-green-600" />
@@ -108,7 +108,7 @@ const BecomeSeller = () => {
                     <p className="text-gray-600 mb-8 font-medium">
                         Your seller account has been approved. You can now start listing your products and growing your business with us.
                     </p>
-                    <button 
+                    <button
                         onClick={() => navigate('/admin/dashboard')}
                         className="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-200"
                     >
@@ -120,7 +120,7 @@ const BecomeSeller = () => {
     }
 
     return (
-        <div className="min-h-screen pt-24 pb-12 px-4 bg-gradient-to-b from-blue-50/50 to-white">
+        <div className="min-h-screen pt-4 pb-12 px-4 bg-gradient-to-b from-blue-50/50 to-white">
             <div className="max-w-3xl mx-auto">
                 <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
                     {/* Header */}

@@ -45,17 +45,17 @@ const Header = () => {
     const location = useLocation();
     const { categories, loading: categoriesLoading } = useCategories();
     const { headerCategories, fetchHeaderConfig, isLoading: headerLoading } = useHeaderStore();
-    
+
     useEffect(() => {
         fetchHeaderConfig();
     }, []);
 
     // Use configured header categories if available, otherwise fallback to first 8 active categories
-    const displayCategories = headerCategories?.length > 0 
-        ? headerCategories 
+    const displayCategories = headerCategories?.length > 0
+        ? headerCategories
         : categories.filter(c => c.active).slice(0, 8);
 
-    
+
     // Mega menu state
     const [hoveredCategory, setHoveredCategory] = useState(null);
     const [hoveredSubcategory, setHoveredSubcategory] = useState(null);
@@ -132,7 +132,7 @@ const Header = () => {
                 setSubcategoryProducts([]);
                 return;
             }
-            
+
             setLoadingProducts(true);
             try {
                 const { data } = await API.get(`/products?category=${hoveredCategory}&subcategory=${hoveredSubcategory}`);
@@ -166,7 +166,7 @@ const Header = () => {
     const categoriesText = useGoogleTranslation('Categories');
 
     return (
-        <header className={`${isPDP ? 'bg-[#D4EDFF]' : 'bg-white/95 backdrop-blur-md'} px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border-b transition-all duration-300 ${isPDP ? 'md:border-gray-100 py-1.5' : isCategory ? 'py-2 border-blue-50/50 md:border-gray-100' : 'py-0.5 md:py-0 border-blue-50/50 md:border-gray-100'}`}>
+        <header className={`${isPDP ? 'bg-gradient-to-b from-blue-100 to-blue-200' : 'bg-gradient-to-b from-blue-200 via-blue-100 to-blue-50'} px-3 fixed top-0 w-full left-0 right-0 z-50 shadow-[0_4px_25px_rgba(0,0,0,0.1)] border-b border-blue-200 transition-all duration-300 ${isPDP ? 'md:border-blue-100 py-1.5' : isCategory ? 'py-2 border-blue-200/50 md:border-gray-100' : 'py-0.5 md:py-0 border-blue-200/50 md:border-gray-100'}`}>
             <div className={`max-w-[1440px] mx-auto flex ${isPDP ? 'flex-row items-center gap-2' : 'flex-col'} md:flex-row md:items-center md:gap-8`}>
 
                 {/* Mobile Top Row: Logo (Left) + Seller Button (Right) - Hidden on mobile PDP to match single row design */}
@@ -188,41 +188,41 @@ const Header = () => {
                     >
                         <img src="/indiankart-logo.png" alt="IndianKart" className="h-[80px] lg:h-[130px] object-contain" />
                     </div>
-                    
+
                     {/* Mobile Header Actions (Seller + Language) */}
                     <div className="md:hidden flex items-center gap-2">
-                            {/* Become a Seller Button (Mobile) - Only on Homepage */}
-                            {location.pathname === '/' && (
-                                <div 
-                                    onClick={() => navigate('/become-seller')}
-                                    className="flex items-center gap-1.5 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100 shadow-sm active:scale-95 transition-all"
-                                >
-                                    <MdStore className="text-blue-600" size={16} />
-                                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Become a Seller</span>
-                                </div>
-                            )}
-
-                            {/* Language Switcher (Mobile) */}
-                            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-100">
-                                    <button 
-                                        onClick={() => setLanguage('en')} 
-                                        className={`text-[9px] font-black px-2 py-1 rounded transition-all ${language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
-                                    >
-                                        EN
-                                    </button>
-                                    <button 
-                                        onClick={() => setLanguage('hi')} 
-                                        className={`text-[9px] font-black px-2 py-1 rounded transition-all ${language === 'hi' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
-                                    >
-                                        HI
-                                    </button>
+                        {/* Become a Seller Button (Mobile) - Only on Homepage */}
+                        {location.pathname === '/' && (
+                            <div
+                                onClick={() => navigate('/become-seller')}
+                                className="flex items-center gap-1.5 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100 shadow-sm active:scale-95 transition-all"
+                            >
+                                <MdStore className="text-blue-600" size={16} />
+                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Become a Seller</span>
                             </div>
+                        )}
+
+                        {/* Language Switcher (Mobile) */}
+                        <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-100">
+                            <button
+                                onClick={() => setLanguage('en')}
+                                className={`text-[9px] font-black px-2 py-1 rounded transition-all ${language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
+                            >
+                                EN
+                            </button>
+                            <button
+                                onClick={() => setLanguage('hi')}
+                                className={`text-[9px] font-black px-2 py-1 rounded transition-all ${language === 'hi' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
+                            >
+                                HI
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {/* Mobile Address - Moved Above Search */}
                 {!isSpecialPage && (
-                    <div 
+                    <div
                         onClick={() => navigate('/addresses')}
                         className="flex md:hidden w-full mb-2 items-center gap-1 bg-blue-50/50 p-1.5 rounded-lg border border-blue-100 cursor-pointer active:bg-blue-100 transition-colors"
                     >
@@ -276,7 +276,7 @@ const Header = () => {
                             </div>
                         )}
                         {searchQuery && (
-                            <button 
+                            <button
                                 onClick={() => {
                                     setSearchQuery('');
                                     setSearchResults({ products: [], categories: [], subCategories: [] });
@@ -344,9 +344,9 @@ const Header = () => {
                                                 className="flex items-center gap-4 p-2 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors group"
                                             >
                                                 <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 border border-gray-100">
-                                                    <img 
-                                                        src={product.image} 
-                                                        alt={product.name} 
+                                                    <img
+                                                        src={product.image}
+                                                        alt={product.name}
                                                         className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform"
                                                     />
                                                 </div>
@@ -393,23 +393,23 @@ const Header = () => {
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center gap-6 ml-auto">
                     {/* Language Switcher (Desktop) */}
-                    <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg">
-                            <button 
-                                onClick={() => { console.log('Clicked EN'); setLanguage('en'); }} 
-                                className={`text-[10px] font-bold px-2 py-1 rounded transition-colors ${language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-                            >
-                                <span className="font-sans">EN</span>
-                            </button>
-                            <button 
-                                onClick={() => { console.log('Clicked HI'); setLanguage('hi'); }} 
-                                className={`text-[10px] font-bold px-2 py-1 rounded transition-colors ${language === 'hi' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-                            >
-                                <span className="font-serif">HI</span>
-                            </button>
+                    <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-100">
+                        <button
+                            onClick={() => { console.log('Clicked EN'); setLanguage('en'); }}
+                            className={`text-[10px] font-bold px-2 py-1 rounded transition-colors ${language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            <span className="font-sans">EN</span>
+                        </button>
+                        <button
+                            onClick={() => { console.log('Clicked HI'); setLanguage('hi'); }}
+                            className={`text-[10px] font-bold px-2 py-1 rounded transition-colors ${language === 'hi' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            <span className="font-serif">HI</span>
+                        </button>
                     </div>
 
                     {/* Become a Seller */}
-                    <div 
+                    <div
                         onClick={() => navigate('/become-seller')}
                         className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors border border-gray-100 shadow-sm bg-white group ring-1 ring-black/5 hover:ring-blue-100"
                     >
@@ -449,7 +449,7 @@ const Header = () => {
                             const IconComponent = iconMap[cat.icon] || MdGridView;
                             const isHovered = hoveredCategory === cat.name;
                             const isRightSide = index > displayCategories.length / 2;
-                            
+
                             return (
                                 <div
                                     key={cat.id}
@@ -477,7 +477,7 @@ const Header = () => {
                                     }}
                                     className={`relative flex flex-col items-center gap-1 min-w-[60px] cursor-pointer group ${cat.name === 'For You' ? 'md:hidden' : ''}`}
                                 >
-                                    <div className={`w-10 h-10 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all ${active ? 'bg-blue-600 text-white scale-105 shadow-md' : 'bg-gray-100 text-gray-600 group-hover:bg-blue-50 group-hover:text-blue-600'}`}>
+                                    <div className={`w-10 h-10 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all ${active ? 'bg-blue-600 text-white scale-105 shadow-md' : 'bg-white text-gray-600 group-hover:bg-blue-50 group-hover:text-blue-600 border border-gray-100 shadow-sm'}`}>
                                         <IconComponent className="text-[20px] md:text-2xl" />
                                     </div>
                                     <span className={`text-[10px] md:text-sm font-bold transition-colors ${active ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-600'}`}>
@@ -486,7 +486,7 @@ const Header = () => {
 
                                     {/* Mega Menu - Positioned under specific item */}
                                     {isHovered && (cat.children?.length > 0 || cat.subCategories?.length > 0) && (
-                                        <div 
+                                        <div
                                             className={`absolute top-full ${isRightSide ? 'right-0' : 'left-0'} pt-2 bg-transparent hidden md:block z-[100] animate-in fade-in slide-in-from-top-2`}
                                             style={{ minWidth: '700px' }} // Ensure enough width for columns
                                         >
@@ -494,28 +494,27 @@ const Header = () => {
                                                 {/* Subcategories Column */}
                                                 <div className="w-64 py-2 border-r border-gray-100 bg-gray-50/30">
                                                     <h3 className="px-4 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 mb-1">
-                                                {categoriesText}
-                                            </h3>
-                                            {(cat.children || cat.subCategories).map((sub) => (
-                                                        <div 
+                                                        {categoriesText}
+                                                    </h3>
+                                                    {(cat.children || cat.subCategories).map((sub) => (
+                                                        <div
                                                             key={sub.id || sub._id}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 navigate(`/category/${cat.name}/${sub.name}`);
                                                             }}
                                                             onMouseEnter={() => setHoveredSubcategory(sub.name)}
-                                                            className={`px-4 py-2.5 text-sm font-medium transition-all cursor-pointer flex items-center justify-between group/sub ${
-                                                                hoveredSubcategory === sub.name 
-                                                                    ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' 
-                                                                    : 'text-gray-700 hover:bg-gray-50'
-                                                            }`}
+                                                            className={`px-4 py-2.5 text-sm font-medium transition-all cursor-pointer flex items-center justify-between group/sub ${hoveredSubcategory === sub.name
+                                                                ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
+                                                                : 'text-gray-700 hover:bg-gray-50'
+                                                                }`}
                                                         >
                                                             <span><TranslatedText text={sub.name} /></span>
                                                             <MdKeyboardArrowRight className={`text-lg transition-transform ${hoveredSubcategory === sub.name ? 'translate-x-1' : ''}`} />
                                                         </div>
                                                     ))}
                                                 </div>
-                                                
+
                                                 {/* Products Panel */}
                                                 <div className="flex-1 p-6 bg-white overflow-y-auto max-h-[500px]">
                                                     <div className="flex items-center justify-between mb-5 border-b border-gray-100 pb-3">
@@ -535,7 +534,7 @@ const Header = () => {
                                                             Explore All →
                                                         </button>
                                                     </div>
-                                                    
+
                                                     {loadingProducts ? (
                                                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                                                             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -559,8 +558,8 @@ const Header = () => {
                                                                     className="bg-white rounded-xl p-3 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group/product border border-gray-100 hover:border-blue-100"
                                                                 >
                                                                     <div className="aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden relative">
-                                                                        <img 
-                                                                            src={product.images?.[0]?.url || product.image} 
+                                                                        <img
+                                                                            src={product.images?.[0]?.url || product.image}
                                                                             alt={product.name}
                                                                             className="w-full h-full object-contain p-2 group-hover/product:scale-110 transition-transform duration-500"
                                                                         />

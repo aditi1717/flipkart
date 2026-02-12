@@ -90,7 +90,7 @@ const DeliverySlip = () => {
                         </div>
                     </div>
                     {selectedOrders.length > 0 && (
-                        <BulkInvoiceGenerator 
+                        <BulkInvoiceGenerator
                             orders={orders.filter(order => selectedOrders.includes(order.id))}
                             settings={settings}
                             customTrigger={
@@ -228,14 +228,13 @@ const DeliverySlip = () => {
                                             <p className="text-sm text-gray-600">{order.user?.phone || 'N/A'}</p>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-tight ${
-                                                    order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
+                                            <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-tight ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
                                                     order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                                                    order.status === 'Pending' ? 'bg-gray-100 text-gray-700' :
-                                                    order.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' :
-                                                    order.status === 'Packed' ? 'bg-indigo-100 text-indigo-700' :
-                                                    order.status === 'Dispatched' ? 'bg-purple-100 text-purple-700' :
-                                                    'bg-orange-100 text-orange-700'
+                                                        order.status === 'Pending' ? 'bg-gray-100 text-gray-700' :
+                                                            order.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' :
+                                                                order.status === 'Packed' ? 'bg-indigo-100 text-indigo-700' :
+                                                                    order.status === 'Dispatched' ? 'bg-purple-100 text-purple-700' :
+                                                                        'bg-orange-100 text-orange-700'
                                                 }`}>
                                                 {order.status}
                                             </span>
@@ -251,9 +250,9 @@ const DeliverySlip = () => {
                                             )}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <InvoiceGenerator 
-                                                order={order} 
-                                                items={order.items} 
+                                            <InvoiceGenerator
+                                                order={order}
+                                                items={order.items}
                                                 settings={settings}
                                                 customTrigger={
                                                     <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition-all mx-auto shadow-sm">

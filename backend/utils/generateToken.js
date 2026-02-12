@@ -7,11 +7,11 @@ const generateToken = (res, userId) => {
 
     res.cookie('jwt', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV !== 'development',
-        sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'strict', // Lax for dev to allow localhost/127.0.0.1 mix
+        secure: process.env.NODE_ENV !== 'development', // Secure must be true for SameSite: none
+        sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none', // 'none' required for cross-site cookies
         maxAge: 30 * 24 * 60 * 60 * 1000,
     });
-    
+
     return token;
 };
 

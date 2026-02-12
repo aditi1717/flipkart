@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useProducts } from '../../../hooks/useData';
 import ProductCard from '../components/product/ProductCard';
-import { MdArrowBack, MdFilterList, MdSort, MdClose } from 'react-icons/md';
+import { MdArrowBack, MdFilterList, MdSort, MdClose, MdExpandMore } from 'react-icons/md';
 
 const ProductListingPage = () => {
     const [searchParams] = useSearchParams();
@@ -20,6 +20,7 @@ const ProductListingPage = () => {
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [selectedRam, setSelectedRam] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState([]);
+    const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -108,13 +109,70 @@ const ProductListingPage = () => {
     return (
         <div className="bg-gray-50 min-h-screen pb-20 pt-2">
             {/* Header / Back Navigation */}
-            <div className="bg-white sticky top-0 z-10 shadow-sm px-3 py-3 flex items-center gap-3 mb-2">
-                <MdArrowBack onClick={() => navigate(-1)} className="text-2xl text-gray-700 cursor-pointer" />
-                <div className="flex flex-col">
-                    <h1 className="text-sm font-bold text-gray-800 capitalize leading-none">
-                        {title || subcategory || category || 'Products'}
-                    </h1>
-                    <span className="text-xs text-gray-500">{sortedProducts.length} items</span>
+            <div className="bg-white sticky top-0 z-10 shadow-sm px-4 py-3 flex items-center justify-between mb-2">
+                <div className="flex items-center gap-4">
+                    <MdArrowBack onClick={() => navigate(-1)} className="text-2xl text-gray-700 cursor-pointer" />
+                    <div className="flex flex-col">
+                        <h1 className="text-sm font-bold text-gray-800 capitalize leading-none">
+                            {title || subcategory || category || 'Products'}
+                        </h1>
+                        <span className="text-xs text-gray-500">{sortedProducts.length} items</span>
+                    </div>
+                </div>
+
+                {/* Desktop Sort Dropdown */}
+                <div className="hidden md:flex items-center gap-4 relative">
+                    <span className="text-[12px] font-black text-gray-400 uppercase tracking-widest">Sort By:</span>
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                            className="flex items-center gap-3 bg-gray-50 border border-gray-100 px-4 py-2 rounded-lg hover:border-blue-500 transition-all shadow-sm group"
+                        >
+                            <span className="text-sm font-bold text-gray-700 capitalize">
+                                {[
+                                    { id: 'popularity', label: 'Popularity' },
+                                    { id: 'price-low', label: 'Price: Low to High' },
+                                    { id: 'price-high', label: 'Price: High to Low' },
+                                    { id: 'newest', label: 'Newest First' },
+                                ].find(opt => opt.id === sortBy)?.label}
+                            </span>
+                            <MdExpandMore className={`text-xl text-gray-400 group-hover:text-blue-500 transition-transform duration-300 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {isSortDropdownOpen && (
+                            <>
+                                <div
+                                    className="fixed inset-0 z-10"
+                                    onClick={() => setIsSortDropdownOpen(false)}
+                                ></div>
+                                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-2xl py-2 z-20 animate-in fade-in zoom-in duration-200">
+                                    {[
+                                        { id: 'popularity', label: 'Popularity', desc: 'Highest rated first' },
+                                        { id: 'price-low', label: 'Price: Low to High', desc: 'Budget friendly first' },
+                                        { id: 'price-high', label: 'Price: High to Low', desc: 'Premium first' },
+                                        { id: 'newest', label: 'Newest First', desc: 'Freshly arrival first' },
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => {
+                                                setSortBy(opt.id);
+                                                setIsSortDropdownOpen(false);
+                                            }}
+                                            className={`w-full text-left px-5 py-3 transition-colors hover:bg-blue-50 group ${sortBy === opt.id ? 'bg-blue-50/50' : ''
+                                                }`}
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className={`text-sm font-bold ${sortBy === opt.id ? 'text-blue-600' : 'text-gray-700'}`}>
+                                                    {opt.label}
+                                                </span>
+                                                <span className="text-[10px] text-gray-400 font-medium">{opt.desc}</span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -268,7 +326,7 @@ const ProductListingPage = () => {
                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] mb-6">Price Range</h4>
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between px-2">
-                                    <div className="bg-gray-50 px-4 py-2 rounded-lg border focus-within:border-blue-500 transition-colors">
+                                        <div className="bg-gray-50 px-4 py-2 rounded-lg border focus-within:border-blue-500 transition-colors">
                                             <span className="text-[10px] text-gray-400 block uppercase font-bold">Min</span>
                                             <div className="flex items-center gap-0.5">
                                                 <span className="font-black text-sm text-gray-900">₹</span>

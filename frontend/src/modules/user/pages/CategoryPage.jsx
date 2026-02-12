@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdArrowBack } from 'react-icons/md';
+import { MdArrowBack, MdExpandMore } from 'react-icons/md';
 import { useProducts, useCategories } from '../../../hooks/useData';
 import { resolveCategoryPath } from '../../../utils/categoryUtils';
 import CategoryBanner from '../components/category/CategoryBanner';
@@ -14,7 +14,7 @@ const CategoryPage = () => {
     const { categoryName, "*": subPath } = useParams();
     const { products, loading: productsLoading } = useProducts();
     const { categories, loading: categoriesLoading } = useCategories();
-    
+
     const [categoryData, setCategoryData] = useState(null);
     const [breadcrumbs, setBreadcrumbs] = useState([]);
     const [categoryProducts, setCategoryProducts] = useState([]);
@@ -34,6 +34,7 @@ const CategoryPage = () => {
     const [showAllRam, setShowAllRam] = useState(false);
     const [showAllCategories, setShowAllCategories] = useState(false);
     const [collapsedSections, setCollapsedSections] = useState({});
+    const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -171,14 +172,14 @@ const CategoryPage = () => {
                         >
                             <MdArrowBack className="text-xl text-gray-700" />
                         </button>
-                        
+
                         <div className="hidden md:block">
                             <nav className="flex items-center gap-2 text-[12px] text-gray-400 font-medium mb-1">
                                 <span className="hover:text-blue-600 cursor-pointer" onClick={() => navigate('/')}>Home</span>
                                 {breadcrumbs.map((crumb, i) => (
                                     <React.Fragment key={i}>
                                         <span className="material-icons text-[14px]">chevron_right</span>
-                                        <span 
+                                        <span
                                             className={`hover:text-blue-600 cursor-pointer ${i === breadcrumbs.length - 1 ? 'text-gray-900 font-bold' : ''}`}
                                             onClick={() => navigate(`/category/${breadcrumbs.slice(0, i + 1).map(b => b.name).join('/')}`)}
                                         >
@@ -202,28 +203,58 @@ const CategoryPage = () => {
                         </div>
                     </div>
 
-                    {/* Desktop Sort Options (Header Style) */}
-                    <div className="hidden md:flex items-center gap-6">
-                        <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Sort By:</span>
-                        <div className="flex items-center gap-4">
-                            {[
-                                { id: 'popularity', label: 'Popularity' },
-                                { id: 'price-low', label: 'Price: Low to High' },
-                                { id: 'price-high', label: 'Price: High to Low' },
-                                { id: 'rating', label: 'Rating' }
-                            ].map(opt => (
-                                <button
-                                    key={opt.id}
-                                    onClick={() => setSortBy(opt.id)}
-                                    className={`text-sm font-bold transition-all border-b-2 pb-1 ${
-                                        sortBy === opt.id 
-                                            ? 'text-blue-600 border-blue-600' 
-                                            : 'text-gray-500 border-transparent hover:text-gray-800'
-                                    }`}
-                                >
-                                    {opt.label}
-                                </button>
-                            ))}
+                    {/* Desktop Sort Dropdown */}
+                    <div className="hidden md:flex items-center gap-4 relative">
+                        <span className="text-[12px] font-black text-gray-400 uppercase tracking-widest">Sort By:</span>
+                        <div className="relative">
+                            <button
+                                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                                className="flex items-center gap-3 bg-white border border-gray-200 px-4 py-2 rounded-lg hover:border-blue-500 transition-all shadow-sm"
+                            >
+                                <span className="text-sm font-bold text-gray-700 capitalize">
+                                    {[
+                                        { id: 'popularity', label: 'Popularity' },
+                                        { id: 'price-low', label: 'Price: Low to High' },
+                                        { id: 'price-high', label: 'Price: High to Low' },
+                                        { id: 'rating', label: 'Rating' }
+                                    ].find(opt => opt.id === sortBy)?.label}
+                                </span>
+                                <MdExpandMore className={`text-xl text-gray-400 transition-transform duration-300 ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {isSortDropdownOpen && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-10"
+                                        onClick={() => setIsSortDropdownOpen(false)}
+                                    ></div>
+                                    <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-2xl py-2 z-20 animate-in fade-in zoom-in duration-200">
+                                        {[
+                                            { id: 'popularity', label: 'Popularity', desc: 'Highest rated first' },
+                                            { id: 'price-low', label: 'Price: Low to High', desc: 'Budget friendly first' },
+                                            { id: 'price-high', label: 'Price: High to Low', desc: 'Premium first' },
+                                            { id: 'rating', label: 'Customer Rating', desc: 'Trust verified first' }
+                                        ].map(opt => (
+                                            <button
+                                                key={opt.id}
+                                                onClick={() => {
+                                                    setSortBy(opt.id);
+                                                    setIsSortDropdownOpen(false);
+                                                }}
+                                                className={`w-full text-left px-5 py-3 transition-colors hover:bg-blue-50 group ${sortBy === opt.id ? 'bg-blue-50/50' : ''
+                                                    }`}
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span className={`text-sm font-bold ${sortBy === opt.id ? 'text-blue-600' : 'text-gray-700'}`}>
+                                                        {opt.label}
+                                                    </span>
+                                                    <span className="text-[10px] text-gray-400 font-medium">{opt.desc}</span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -293,11 +324,10 @@ const CategoryPage = () => {
                                                 <button
                                                     key={r.label}
                                                     onClick={() => setFilterRange(r.range)}
-                                                    className={`px-2 py-1 text-[10px] font-bold rounded border transition-all ${
-                                                        JSON.stringify(filterRange) === JSON.stringify(r.range)
+                                                    className={`px-2 py-1 text-[10px] font-bold rounded border transition-all ${JSON.stringify(filterRange) === JSON.stringify(r.range)
                                                             ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-100'
                                                             : 'bg-white border-gray-200 text-gray-600 hover:border-blue-400'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {r.label}
                                                 </button>
@@ -323,13 +353,12 @@ const CategoryPage = () => {
                                         <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
                                             {displayedBrands.map(brand => (
                                                 <label key={brand} className="flex items-center gap-3 cursor-pointer group">
-                                                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                                                        selectedBrands.includes(brand) ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white group-hover:border-blue-400'
-                                                    }`}>
+                                                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${selectedBrands.includes(brand) ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white group-hover:border-blue-400'
+                                                        }`}>
                                                         {selectedBrands.includes(brand) && <span className="material-icons text-white text-[12px] font-bold">check</span>}
-                                                        <input 
-                                                            type="checkbox" 
-                                                            className="hidden" 
+                                                        <input
+                                                            type="checkbox"
+                                                            className="hidden"
                                                             checked={selectedBrands.includes(brand)}
                                                             onChange={() => toggleBrand(brand)}
                                                         />
@@ -341,7 +370,7 @@ const CategoryPage = () => {
                                             ))}
                                         </div>
                                         {filteredBrands.length > 6 && (
-                                            <button 
+                                            <button
                                                 onClick={() => setShowAllBrands(!showAllBrands)}
                                                 className="mt-3 text-[10px] font-black text-blue-600 uppercase tracking-wider flex items-center gap-1 hover:gap-2 transition-all"
                                             >
@@ -357,12 +386,11 @@ const CategoryPage = () => {
                                     <div className="space-y-2.5">
                                         {[20, 30, 40, 50].map(val => (
                                             <label key={val} className="flex items-center gap-3 cursor-pointer group">
-                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                                                    selectedDiscount === val ? 'border-blue-600 border-[5px]' : 'border-gray-300 bg-white group-hover:border-blue-400'
-                                                }`}>
-                                                    <input 
-                                                        type="radio" 
-                                                        name="discount" 
+                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${selectedDiscount === val ? 'border-blue-600 border-[5px]' : 'border-gray-300 bg-white group-hover:border-blue-400'
+                                                    }`}>
+                                                    <input
+                                                        type="radio"
+                                                        name="discount"
                                                         className="hidden"
                                                         checked={selectedDiscount === val}
                                                         onChange={() => setSelectedDiscount(val)}
@@ -475,9 +503,8 @@ const CategoryPage = () => {
                                 <button
                                     key={opt.id}
                                     onClick={() => { setSortBy(opt.id); setShowSortModal(false); }}
-                                    className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${
-                                        sortBy === opt.id ? 'bg-blue-50 text-blue-600' : 'active:bg-gray-50 text-gray-700'
-                                    }`}
+                                    className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${sortBy === opt.id ? 'bg-blue-50 text-blue-600' : 'active:bg-gray-50 text-gray-700'
+                                        }`}
                                 >
                                     <div className="text-left">
                                         <p className="font-bold text-sm tracking-tight">{opt.label}</p>
@@ -500,7 +527,7 @@ const CategoryPage = () => {
                                 <button onClick={() => setShowFilterModal(false)} className="material-icons text-gray-900">arrow_back</button>
                                 <h3 className="font-black text-gray-900 uppercase text-xs tracking-widest">Filters</h3>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => {
                                     setFilterRange([0, 100000]);
                                     setSelectedBrands([]);
@@ -511,7 +538,7 @@ const CategoryPage = () => {
                                 Clear all
                             </button>
                         </div>
-                        
+
                         <div className="flex-1 overflow-y-auto bg-gray-50/50">
                             {/* Price */}
                             <div className="bg-white p-5 mb-2">
@@ -552,11 +579,10 @@ const CategoryPage = () => {
                                         <button
                                             key={r.label}
                                             onClick={() => setFilterRange(r.range)}
-                                            className={`px-4 py-2 rounded-full border text-[11px] font-bold transition-all ${
-                                                JSON.stringify(filterRange) === JSON.stringify(r.range)
+                                            className={`px-4 py-2 rounded-full border text-[11px] font-bold transition-all ${JSON.stringify(filterRange) === JSON.stringify(r.range)
                                                     ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-100'
                                                     : 'bg-white border-gray-200 text-gray-600'
-                                            }`}
+                                                }`}
                                         >
                                             {r.label}
                                         </button>
@@ -573,11 +599,10 @@ const CategoryPage = () => {
                                             <button
                                                 key={brand}
                                                 onClick={() => toggleBrand(brand)}
-                                                className={`px-4 py-2 rounded-lg border text-[11px] font-bold transition-all ${
-                                                    selectedBrands.includes(brand)
+                                                className={`px-4 py-2 rounded-lg border text-[11px] font-bold transition-all ${selectedBrands.includes(brand)
                                                         ? 'bg-blue-50 border-blue-600 text-blue-600'
                                                         : 'bg-white border-gray-100 text-gray-600'
-                                                }`}
+                                                    }`}
                                             >
                                                 {brand}
                                             </button>
@@ -591,15 +616,14 @@ const CategoryPage = () => {
                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Discount Offers</h4>
                                 <div className="space-y-3">
                                     {[20, 30, 40, 50].map(val => (
-                                        <div 
+                                        <div
                                             key={val}
                                             onClick={() => setSelectedDiscount(val)}
                                             className="flex items-center justify-between p-4 border border-gray-50 rounded-xl active:bg-blue-50 transition-colors"
                                         >
                                             <span className="text-sm font-bold text-gray-700">{val}% or more</span>
-                                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                                selectedDiscount === val ? 'bg-blue-600 border-blue-600' : 'border-gray-200'
-                                            }`}>
+                                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${selectedDiscount === val ? 'bg-blue-600 border-blue-600' : 'border-gray-200'
+                                                }`}>
                                                 {selectedDiscount === val && <span className="material-icons text-white text-xs">check</span>}
                                             </div>
                                         </div>
