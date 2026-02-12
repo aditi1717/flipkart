@@ -47,9 +47,9 @@ const Home = () => {
     }
 
     return (
-        <div className="bg-gradient-to-b from-white to-blue-100 pt-4 flex-1 flex flex-col">
-            <div className="w-full space-y-4 md:space-y-6 px-3 md:px-5 lg:px-6">
-                
+        <div className="bg-gradient-to-b from-white to-blue-100 pt-2 flex-1 flex flex-col">
+            <div className="w-full space-y-2 md:space-y-6 px-3 md:px-5 lg:px-6">
+
                 {/* Dynamic Content Stream */}
                 {layout.map((item, index) => {
                     const isFirstItem = index === 0;
@@ -57,7 +57,7 @@ const Home = () => {
                     if (item.type === 'banner') {
                         const banner = banners.find(b => String(b._id) === String(item.referenceId) || String(b.id) === String(item.referenceId));
                         if (!banner) return null;
-                        
+
                         const bannerComponent = (
                             <Suspense fallback={<BannerSkeleton />}>
                                 <HomeBanner banner={banner} />
@@ -81,7 +81,7 @@ const Home = () => {
 
                         const isDeal = section.title.toLowerCase().includes('deal') || section.title.toLowerCase().includes('find');
                         const productCount = section.products?.length || 0;
-                        
+
                         const sectionContent = isDeal && productCount <= 4 ? (
                             <Suspense fallback={<SectionSkeleton />}>
                                 <DealGrid

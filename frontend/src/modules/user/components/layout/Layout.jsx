@@ -33,18 +33,19 @@ const Layout = () => {
     const isHome = location.pathname === '/';
 
     return (
-        <div className="w-full min-h-screen flex flex-col relative bg-background-light overflow-x-hidden">
+        <div className="w-full min-h-screen flex flex-col relative bg-background-light">
             {!isStandalonePage && (
-                <div>
+                <div className={isAccountPage ? 'hidden md:block' : ''}>
                     <Header />
                 </div>
             )}
-            <main className={`flex flex-col md:pb-0 w-full transition-all duration-300 bg-white
-                ${isStandalonePage ? 'pt-0' : 
-                   isPDP ? 'pt-[64px] md:pt-[130px]' : 
-                   isCategory ? 'pt-[82px] md:pt-[140px]' :
-                  isHome ? 'pt-[260px] md:pt-[240px]' : 
-                  'pt-[110px] md:pt-[160px]'}`}>
+            <main className={`flex flex-col pb-[80px] md:pb-0 w-full transition-all duration-300 bg-white
+                ${isStandalonePage ? 'pt-0' :
+                    isPDP ? 'pt-[0px] md:pt-[130px]' :
+                        isCategory ? 'pt-[80px] md:pt-[160px]' :
+                            isHome ? 'pt-[260px] md:pt-[240px]' :
+                                isAccountPage ? 'pt-0 md:pt-[160px]' :
+                                    'pt-[110px] md:pt-[160px]'}`}>
                 <AnimatePresence mode="popLayout">
                     <motion.div
                         key={location.pathname}
@@ -68,7 +69,11 @@ const Layout = () => {
                 !location.pathname.includes('/category/') &&
                 !location.pathname.includes('/play') && <BottomNav />
             }
-            {!isCategory && <Footer />}
+            {!isCategory && (
+                <div className="hidden md:block">
+                    <Footer />
+                </div>
+            )}
         </div >
     );
 };

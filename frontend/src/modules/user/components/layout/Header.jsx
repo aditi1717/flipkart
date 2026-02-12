@@ -198,10 +198,10 @@ const Header = () => {
                         <img src="/indiankart-logo.png" alt="IndianKart" className="h-[80px] lg:h-[130px] object-contain" />
                     </div>
 
-                    {/* Mobile Header Actions (Seller + Language) */}
-                    <div className="md:hidden flex items-center gap-2">
-                        {/* Become a Seller Button (Mobile) - Only on Homepage */}
-                        {location.pathname === '/' && (
+                    {/* Mobile Header Actions (Seller + Language) - Only on Homepage */}
+                    {location.pathname === '/' && (
+                        <div className="md:hidden flex items-center gap-2">
+                            {/* Become a Seller Button (Mobile) */}
                             <div
                                 onClick={() => navigate('/become-seller')}
                                 className="flex items-center gap-1.5 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100 shadow-sm active:scale-95 transition-all"
@@ -209,24 +209,24 @@ const Header = () => {
                                 <MdStore className="text-blue-600" size={16} />
                                 <span className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Become a Seller</span>
                             </div>
-                        )}
 
-                        {/* Language Switcher (Mobile) */}
-                        <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-100">
-                            <button
-                                onClick={() => setLanguage('en')}
-                                className={`text-[9px] font-black px-2 py-1 rounded transition-all ${language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
-                            >
-                                EN
-                            </button>
-                            <button
-                                onClick={() => setLanguage('hi')}
-                                className={`text-[9px] font-black px-2 py-1 rounded transition-all ${language === 'hi' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
-                            >
-                                HI
-                            </button>
+                            {/* Language Switcher (Mobile) */}
+                            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-100">
+                                <button
+                                    onClick={() => setLanguage('en')}
+                                    className={`text-[9px] font-black px-2 py-1 rounded transition-all ${language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
+                                >
+                                    EN
+                                </button>
+                                <button
+                                    onClick={() => setLanguage('hi')}
+                                    className={`text-[9px] font-black px-2 py-1 rounded transition-all ${language === 'hi' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
+                                >
+                                    HI
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Mobile Address - Moved Above Search */}
@@ -249,20 +249,9 @@ const Header = () => {
                 )}
 
                 {/* Search Bar Row */}
-                <div className="flex items-center gap-2 flex-1 mt-0 md:gap-3 md:mt-0 relative search-container">
+                <div className={`flex items-center gap-2 flex-1 mt-0 md:gap-3 md:mt-0 relative search-container`}>
                     {/* Mobile Back Button (Only on PDP) */}
-                    {isPDP && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleBackNavigation();
-                            }}
-                            className="md:hidden flex items-center justify-center p-2 -ml-2 text-gray-700 active:scale-90 transition-all flex-shrink-0 z-[100] cursor-pointer"
-                        >
-                            <MdArrowBack size={26} />
-                        </button>
-                    )}
+
 
                     <div className={`flex-1 bg-white rounded-lg flex items-center px-3 md:px-4 shadow-sm md:shadow-none overflow-hidden h-10 md:h-11 border transition-all ${isPDP ? 'border-blue-400 md:border-gray-200' : 'border-gray-200'} focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-100`}>
                         <IoSearch className={`text-gray-400 md:text-gray-500 text-[18px] md:text-[20px] mr-2 md:mr-3 ${isSearching ? 'animate-pulse' : ''}`} />

@@ -9,7 +9,7 @@ import { useGoogleTranslation } from '../../../../hooks/useGoogleTranslation';
 
 const HomeBanner = ({ banner }) => {
     const navigate = useNavigate();
-    
+
     // Debugging Banner Data
     if (banner?.active && banner?.type === 'hero') {
         console.log('Banner Debug:', {
@@ -19,7 +19,7 @@ const HomeBanner = ({ banner }) => {
             imagePosition: banner.content?.imagePosition
         });
     }
-    
+
     if (!banner || !banner.active) return null;
 
     // Translation Hook for Content
@@ -32,7 +32,7 @@ const HomeBanner = ({ banner }) => {
     const handleSlideClick = (slide) => {
         const offerId = slide.linkedOffer?._id || slide.linkedOffer;
         const productId = slide.linkedProduct?._id || slide.linkedProduct;
-        
+
         if (offerId) {
             navigate(`/offers/${offerId}`);
         } else if (productId) {
@@ -47,7 +47,7 @@ const HomeBanner = ({ banner }) => {
         const { content } = banner;
         const offerId = content?.linkedOffer?._id || content?.linkedOffer;
         const productId = content?.linkedProduct?._id || content?.linkedProduct;
-        
+
         if (offerId) {
             navigate(`/offers/${offerId}`);
         } else if (productId) {
@@ -66,7 +66,7 @@ const HomeBanner = ({ banner }) => {
 
         return (
             <section className="w-full">
-                <div 
+                <div
                     onClick={handleBannerContentClick}
                     className="relative md:rounded-2xl overflow-hidden shadow-lg border border-white/5 group cursor-pointer"
                     style={{ backgroundColor: bgColor }}
@@ -74,10 +74,10 @@ const HomeBanner = ({ banner }) => {
                     {/* Background Image Layer */}
                     {(content.backgroundImageUrl || content.imageUrl) && (
                         <div className="relative w-full h-auto">
-                            <img 
-                                src={content.backgroundImageUrl || content.imageUrl} 
-                                className="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-1000" 
-                                alt="" 
+                            <img
+                                src={content.backgroundImageUrl || content.imageUrl}
+                                className="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-1000"
+                                alt=""
                             />
                         </div>
                     )}
@@ -90,7 +90,7 @@ const HomeBanner = ({ banner }) => {
     if (banner.type === 'card') {
         return (
             <section className="w-full">
-                <div 
+                <div
                     onClick={handleBannerContentClick}
                     className="md:rounded-2xl overflow-hidden border border-gray-100 shadow-sm cursor-pointer active:scale-[0.98] transition-transform group relative"
                 >
@@ -122,12 +122,12 @@ const HomeBanner = ({ banner }) => {
     if (banner.type === 'product_feature') {
         return (
             <section className="w-full">
-                 <div className="flex items-center gap-2 mb-3 px-2">
+                <div className="flex items-center gap-2 mb-3 px-2">
                     <h3 className="text-lg md:text-2xl font-bold text-gray-900">Sponsored</h3>
                 </div>
-                <div 
+                <div
                     onClick={handleBannerContentClick}
-                    className={`relative md:rounded-3xl overflow-hidden min-h-[140px] md:h-[300px] cursor-pointer group hover:shadow-xl transition-shadow ${banner.content.backgroundColor || 'bg-gradient-to-b from-white to-blue-100'} border-y md:border border-blue-200`}
+                    className={`relative md:rounded-3xl overflow-hidden md:h-[300px] cursor-pointer group hover:shadow-xl transition-shadow ${banner.content.backgroundColor || 'bg-gradient-to-b from-white to-blue-100'} border-y md:border border-blue-200`}
                 >
                     <div className="absolute inset-0 p-4 md:p-12 flex items-center">
                         <div className="w-1/2 md:w-1/3 z-10">
@@ -184,14 +184,14 @@ const HomeBanner = ({ banner }) => {
                 >
                     {banner.slides.map((slide, index) => (
                         <SwiperSlide key={index}>
-                            <div 
+                            <div
                                 className="relative w-full h-auto bg-gray-100 cursor-pointer"
                                 onClick={() => handleSlideClick(slide)}
                             >
-                                <img 
-                                    src={slide.imageUrl} 
-                                    className="w-full h-auto block" 
-                                    alt={`Slide ${index + 1}`} 
+                                <img
+                                    src={slide.imageUrl}
+                                    className="w-full h-auto block"
+                                    alt={`Slide ${index + 1}`}
                                 />
                             </div>
                         </SwiperSlide>

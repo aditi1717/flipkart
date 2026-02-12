@@ -7,16 +7,16 @@ const SubCategoryList = ({ subCategories }) => {
 
     return (
         <>
-            {/* MOBILE VIEW: Identical to original 2-row grid */}
-            <div className="lg:hidden bg-white py-4 mb-2">
-                <div className="flex overflow-x-auto gap-x-6 gap-y-4 px-4 no-scrollbar pb-2 min-h-max">
+            {/* MOBILE VIEW: Identical to original 2-row grid - COMPACT */}
+            <div className="lg:hidden bg-white py-2 mb-1">
+                <div className="flex overflow-x-auto gap-x-3 gap-y-2 px-3 no-scrollbar pb-2 min-h-max">
                     {subCategories.map((sub, index) => {
                         const currentPath = location.pathname.endsWith('/') ? location.pathname.slice(0, -1) : location.pathname;
                         const targetPath = `${currentPath}/${encodeURIComponent(sub.name)}`;
 
                         return (
-                            <Link key={index} to={targetPath} className="flex flex-col items-center cursor-pointer hover:opacity-80 shrink-0 w-[85px]">
-                                <div className="w-[70px] h-[70px] bg-blue-50/50 rounded-2xl border border-blue-100/50 flex items-center justify-center overflow-hidden mb-2 transition-transform active:scale-95 shadow-sm">
+                            <Link key={index} to={targetPath} className="flex flex-col items-center cursor-pointer hover:opacity-80 shrink-0 w-[64px]">
+                                <div className="w-[50px] h-[50px] bg-blue-50/50 rounded-2xl border border-blue-100/50 flex items-center justify-center overflow-hidden mb-1.5 transition-transform active:scale-95 shadow-sm">
                                     <img
                                         src={sub.image}
                                         alt={sub.name}
@@ -27,7 +27,7 @@ const SubCategoryList = ({ subCategories }) => {
                                         }}
                                     />
                                 </div>
-                                <span className="text-[11px] font-black text-center text-gray-900 leading-tight w-full line-clamp-2 tracking-tight px-1">
+                                <span className="text-[9px] font-black text-center text-gray-900 leading-tight w-full line-clamp-2 tracking-tight px-0.5">
                                     {sub.name}
                                 </span>
                             </Link>

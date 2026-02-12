@@ -30,7 +30,7 @@ const LazySection = ({ children, threshold = 0.1, placeholder }) => {
     }, [threshold]);
 
     return (
-        <div ref={sectionRef} className="min-h-[200px]">
+        <div ref={sectionRef}>
             {isVisible ? children : placeholder}
         </div>
     );
