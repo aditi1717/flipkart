@@ -65,7 +65,7 @@ const HomeBanner = ({ banner }) => {
         const bgColor = content.backgroundColor || '#1e3a5f';
 
         return (
-            <section className="w-full px-2 md:px-4">
+            <section className="w-full">
                 <div 
                     onClick={handleBannerContentClick}
                     className="relative md:rounded-2xl overflow-hidden shadow-lg border border-white/5 group cursor-pointer"
@@ -89,7 +89,7 @@ const HomeBanner = ({ banner }) => {
     // --- Card Style (Visual Image with Text Overlay) ---
     if (banner.type === 'card') {
         return (
-            <section className="w-full px-2 md:px-4">
+            <section className="w-full">
                 <div 
                     onClick={handleBannerContentClick}
                     className="md:rounded-2xl overflow-hidden border border-gray-100 shadow-sm cursor-pointer active:scale-[0.98] transition-transform group relative"
@@ -121,7 +121,7 @@ const HomeBanner = ({ banner }) => {
     // --- Product Feature Style (Sponsored / Special Layout) ---
     if (banner.type === 'product_feature') {
         return (
-            <section className="w-full px-2 md:px-4">
+            <section className="w-full">
                  <div className="flex items-center gap-2 mb-3 px-2">
                     <h3 className="text-lg md:text-2xl font-bold text-gray-900">Sponsored</h3>
                 </div>
@@ -172,7 +172,7 @@ const HomeBanner = ({ banner }) => {
     // --- Slideshow Style ---
     if (banner.type === 'slides' && banner.slides?.length > 0) {
         return (
-            <section className="w-full px-2 md:px-4">
+            <section className="w-full">
                 <Swiper
                     modules={[Autoplay, Pagination, Navigation]}
                     autoplay={{ delay: 4000, disableOnInteraction: false }}

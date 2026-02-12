@@ -158,6 +158,15 @@ const Header = () => {
     const isCategory = location.pathname.includes('/category/');
     const isSpecialPage = isPDP || isCategory;
 
+    const handleBackNavigation = () => {
+        // Use React Router history index when available; fallback to home.
+        if (window.history.state?.idx > 0) {
+            navigate(-1);
+            return;
+        }
+        navigate('/');
+    };
+
     // Translation State
     const { language, setLanguage } = useLanguageStore();
     const searchPlaceholder = useGoogleTranslation('Search for products, brands and more');
@@ -247,12 +256,7 @@ const Header = () => {
                             onClick={(e) => {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                console.log('Mobile back button triggered');
-                                if (window.history.length > 1) {
-                                    navigate(-1);
-                                } else {
-                                    navigate('/');
-                                }
+                                handleBackNavigation();
                             }}
                             className="md:hidden flex items-center justify-center p-2 -ml-2 text-gray-700 active:scale-90 transition-all flex-shrink-0 z-[100] cursor-pointer"
                         >

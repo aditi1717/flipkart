@@ -36,6 +36,15 @@ const CategoryPage = () => {
     const [collapsedSections, setCollapsedSections] = useState({});
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
+    const handleBackNavigation = () => {
+        // React Router sets history.state.idx for in-app entries.
+        if (window.history.state?.idx > 0) {
+            navigate(-1);
+            return;
+        }
+        navigate('/');
+    };
+
     useEffect(() => {
         window.scrollTo(0, 0);
 
@@ -167,7 +176,7 @@ const CategoryPage = () => {
                 <div className="max-w-[1440px] mx-auto px-4 py-2.5 md:py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3 md:gap-6">
                         <button
-                            onClick={() => navigate(-1)}
+                            onClick={handleBackNavigation}
                             className="bg-gray-50 p-2 rounded-full hover:bg-gray-100 transition-colors group md:hidden"
                         >
                             <MdArrowBack className="text-xl text-gray-700" />

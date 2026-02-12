@@ -48,16 +48,18 @@ const Footer = () => {
     return (
         <>
             {/* ================= WHY CHOOSE US (SEO TEXT) - DESKTOP ONLY ================= */}
-            <div className="hidden md:block bg-[#f1f3f6] border-t border-gray-200 py-10 px-4">
-                <div className="max-w-[1440px] mx-auto text-[#565656] text-xs leading-relaxed space-y-4">
-                    {seoContent?.split('\n').filter(line => line.trim() !== '').map((line, index) => {
-                        if (line.length < 100 && !line.includes('.')) {
-                            return <h2 key={index} className="text-[#878787] uppercase font-bold mb-1 mt-4 text-xs">{line}</h2>;
-                        }
-                        return <p key={index}>{line}</p>;
-                    })}
+            {seoContent?.trim() && (
+                <div className="hidden md:block bg-[#f1f3f6] border-t border-gray-200 py-10 px-4">
+                    <div className="max-w-[1440px] mx-auto text-[#565656] text-xs leading-relaxed space-y-4">
+                        {seoContent.split('\n').filter(line => line.trim() !== '').map((line, index) => {
+                            if (line.length < 100 && !line.includes('.')) {
+                                return <h2 key={index} className="text-[#878787] uppercase font-bold mb-1 mt-4 text-xs">{line}</h2>;
+                            }
+                            return <p key={index}>{line}</p>;
+                        })}
+                    </div>
                 </div>
-            </div>
+            )}
 
             <footer className="w-full bg-[#212121] text-white overflow-hidden text-[12px] font-sans border-t border-gray-700">
                 {/* ================= DESKTOP VIEW ================= */}
