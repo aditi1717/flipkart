@@ -79,15 +79,15 @@ const SupportRequests = () => {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <table className="w-full text-left">
-                    <thead className="bg-gray-50 border-b">
-                        <tr>
-                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">ID / Date</th>
-                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Customer</th>
-                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Issue</th>
-                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Status</th>
-                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-right">Actions</th>
+                    <thead>
+                        <tr className="bg-gray-50/50 border-b border-gray-100">
+                            <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">ID / Date</th>
+                            <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Customer</th>
+                            <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Issue</th>
+                            <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Status</th>
+                            <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -158,14 +158,16 @@ const SupportRequests = () => {
                 </table>
             </div>
 
-            {totalPages > 1 && (
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                />
-            )}
-        </div>
+            {
+                totalPages > 1 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                )
+            }
+        </div >
     );
 };
 

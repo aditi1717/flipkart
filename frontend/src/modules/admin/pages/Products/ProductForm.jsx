@@ -7,7 +7,7 @@ import useSubCategoryStore from '../../store/subCategoryStore';
 import RichTextEditor from '../../components/RichTextEditor';
 import toast from 'react-hot-toast';
 
-    const ProductForm = () => {
+const ProductForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addProduct, updateProduct, products, fetchProduct, isLoading } = useProductStore();
@@ -62,18 +62,18 @@ import toast from 'react-hot-toast';
             image: null, // { type: 'url'|'file', content: string|File, preview: string }
             points: ['']
         }],
-        
+
         // Specifications (Optional grouped specs)
         specifications: [{ groupName: '', specs: [{ key: '', value: '' }] }],
-        
+
         // Warranty & Returns
         warranty: { summary: '', covered: '', notCovered: '' },
         returnPolicy: { days: 7, description: '' }
     });
 
     // Detect if category is Electronics for conditional warranty display
-    const selectedCategory = React.useMemo(() => 
-        categories.find(c => c._id === formData.categoryPath[0]), 
+    const selectedCategory = React.useMemo(() =>
+        categories.find(c => c._id === formData.categoryPath[0]),
         [categories, formData.categoryPath]
     );
     const isElectronics = selectedCategory?.name?.toLowerCase() === 'electronics';
@@ -83,7 +83,7 @@ import toast from 'react-hot-toast';
         if (product) {
             // Logic to separate primary image from gallery
             // Backend model: image (string), images (array of strings)
-            
+
             const initThumbnail = product.image ? { type: 'url', content: product.image, preview: product.image } : null;
             const initGallery = (product.images || []).map(url => ({ type: 'url', content: url, preview: url }));
 
@@ -103,8 +103,8 @@ import toast from 'react-hot-toast';
                     }))
                 })),
                 categoryPath: product.categoryPath || (
-                    product.categoryId 
-                        ? (product.subCategory ? [product.categoryId, (product.subCategory._id || product.subCategory)] : [product.categoryId]) 
+                    product.categoryId
+                        ? (product.subCategory ? [product.categoryId, (product.subCategory._id || product.subCategory)] : [product.categoryId])
                         : []
                 ),
                 subCategories: product.subCategories?.map(s => s._id || s) || (product.subCategory ? [product.subCategory._id || product.subCategory] : []),
@@ -131,7 +131,7 @@ import toast from 'react-hot-toast';
     const handleThumbnailUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        
+
         const previewUrl = URL.createObjectURL(file);
         setFormData(prev => ({
             ...prev,
@@ -212,10 +212,10 @@ import toast from 'react-hot-toast';
     const parseHighlightsFromText = (text) => {
         const lines = text.split('\n').map(line => line.trim()).filter(line => line);
         if (lines.length === 0) return;
-        
+
         const heading = lines[0];
         const points = lines.slice(1);
-        
+
         // Add as new highlight section
         setFormData(prev => ({
             ...prev,
@@ -284,7 +284,7 @@ import toast from 'react-hot-toast';
     const handleDescriptionImageUpload = (e, idx) => {
         const file = e.target.files[0];
         if (!file) return;
-        
+
         const previewUrl = URL.createObjectURL(file);
         const newDesc = [...formData.description];
         newDesc[idx].image = { type: 'file', content: file, preview: previewUrl };
@@ -451,14 +451,14 @@ import toast from 'react-hot-toast';
             toast.error("Please add a product thumbnail!");
             return;
         }
-        
+
         const data = new FormData();
         data.append('name', formData.name);
         data.append('brand', formData.brand);
         data.append('price', String(formData.price));
         data.append('originalPrice', String(formData.originalPrice));
 
-        
+
         // Calculated fields
         const stock = formData.skus.length > 0
             ? formData.skus.reduce((acc, curr) => acc + (Number(curr.stock) || 0), 0)
@@ -469,33 +469,33 @@ import toast from 'react-hot-toast';
         // 1. Primary Category (Legacy ID - Number)
         const primaryCategoryId = formData.categoryPath[0] || '';
         data.append('categoryId', String(primaryCategoryId)); // Parent ID
-        
+
         // Find Category Name for display/legacy
         const selectedCategory = categories.find(c => String(c.id) === String(primaryCategoryId));
         data.append('category', selectedCategory ? selectedCategory.name : 'Uncategorized');
 
         // 2. SubCategories (New ObjectIds - Array)
         data.append('subCategories', JSON.stringify(formData.subCategories));
-        
+
         // Backward compatibility for old controllers/fields
         if (formData.subCategories.length > 0) {
             data.append('subCategory', String(formData.subCategories[0]));
         } else {
             data.append('subCategory', '');
         }
-        
+
         const discount = formData.originalPrice > formData.price
-             ? `${Math.round(((formData.originalPrice - formData.price) / formData.originalPrice) * 100)}% off`
-             : '';
-        if(discount) data.append('discount', discount);
-        
+            ? `${Math.round(((formData.originalPrice - formData.price) / formData.originalPrice) * 100)}% off`
+            : '';
+        if (discount) data.append('discount', discount);
+
         data.append('deliveryDays', String(formData.deliveryDays));
 
         // Complex objects
         data.append('categoryPath', JSON.stringify(formData.categoryPath));
         data.append('highlights', JSON.stringify(formData.highlights));
         data.append('highlights', JSON.stringify(formData.highlights));
-        
+
         // Process Description Images
         const descriptionImages = [];
         const processedDescription = formData.description.map(desc => {
@@ -506,13 +506,13 @@ import toast from 'react-hot-toast';
             } else if (newDesc.image && newDesc.image.type === 'url') {
                 newDesc.image = newDesc.image.content;
             }
-             // Handle cleanup of null/undefined images
-             if (!newDesc.image) newDesc.image = '';
-             return newDesc;
+            // Handle cleanup of null/undefined images
+            if (!newDesc.image) newDesc.image = '';
+            return newDesc;
         });
 
         data.append('description', JSON.stringify(processedDescription));
-        
+
         descriptionImages.forEach(file => {
             data.append('description_images', file);
         });
@@ -528,7 +528,7 @@ import toast from 'react-hot-toast';
             ...vh,
             options: vh.options.map(opt => {
                 const newOpt = { ...opt };
-                
+
                 // Handle single primary image
                 if (opt.image && opt.image.type === 'file') {
                     variantImages.push(opt.image.content);
@@ -554,13 +554,13 @@ import toast from 'react-hot-toast';
             })
         }));
         data.append('variantHeadings', JSON.stringify(processedHeadings));
-        
+
         variantImages.forEach(file => {
             data.append('variant_images', file);
         });
 
         // --- Handle Main Images ---
-        
+
         // 1. Thumbnail
         if (formData.thumbnail.type === 'file') {
             data.append('image', formData.thumbnail.content);
@@ -579,7 +579,7 @@ import toast from 'react-hot-toast';
             }
         });
 
-// ... (inside ProductForm component)
+        // ... (inside ProductForm component)
 
         try {
             if (isEdit) {
@@ -617,90 +617,88 @@ import toast from 'react-hot-toast';
 
     return (
         <>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => navigate('/admin/products')}
-                        className="p-3 hover:bg-gray-100 rounded-xl transition-all text-gray-500 hover:text-gray-800 border border-transparent hover:border-gray-200"
-                    >
-                        <MdArrowBack size={24} />
-                    </button>
-                    <div>
-                        <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-                            {isEdit ? 'Update Product' : 'Create New Listing'}
-                        </h1>
-                        <p className="text-sm text-gray-500 font-medium italic">Status: {isEdit ? 'Editing Draft' : 'New Draft'}</p>
+            <div className="max-w-7xl mx-auto px-2 md:px-4 sm:px-6 lg:px-8 py-2 md:py-8">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 mb-2 md:mb-8 bg-white p-3 md:p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-2 md:gap-4">
+                        <button
+                            onClick={() => navigate('/admin/products')}
+                            className="p-2 md:p-3 hover:bg-gray-100 rounded-xl transition-all text-gray-500 hover:text-gray-800 border border-transparent hover:border-gray-200"
+                        >
+                            <MdArrowBack size={20} className="w-5 h-5 md:w-6 md:h-6" />
+                        </button>
+                        <div>
+                            <h1 className="text-lg md:text-2xl font-black text-gray-900 tracking-tight">
+                                {isEdit ? 'Update Product' : 'Create New Listing'}
+                            </h1>
+                            <p className="text-sm text-gray-500 font-medium italic">Status: {isEdit ? 'Editing Draft' : 'New Draft'}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <button
+                            onClick={() => navigate('/admin/products')}
+                            className="px-3 py-2 md:px-6 md:py-2.5 rounded-xl text-xs md:text-sm font-bold text-gray-500 hover:text-gray-800 border border-gray-200 hover:bg-gray-50 transition-all"
+                        >
+                            Discard Changes
+                        </button>
+                        <button
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                            className={`px-4 py-2 md:px-10 md:py-2.5 rounded-xl text-xs md:text-sm font-bold text-white transition-all shadow-lg shadow-blue-200 flex items-center gap-2 ${isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                                }`}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                isEdit ? 'Save Changes' : 'Publish to Store'
+                            )}
+                        </button>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => navigate('/admin/products')}
-                        className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-500 hover:text-gray-800 border border-gray-200 hover:bg-gray-50 transition-all"
-                    >
-                        Discard Changes
-                    </button>
-                    <button
-                        onClick={handleSubmit}
-                        disabled={isLoading}
-                        className={`px-10 py-2.5 rounded-xl text-sm font-bold text-white transition-all shadow-lg shadow-blue-200 flex items-center gap-2 ${
-                            isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                        }`}
-                    >
-                        {isLoading ? (
-                            <>
-                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Saving...
-                            </>
-                        ) : (
-                            isEdit ? 'Save Changes' : 'Publish to Store'
-                        )}
-                    </button>
-                </div>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Left Side: Product Configuration */}
-                <div className="lg:col-span-8 space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-8">
+                    {/* Left Side: Product Configuration */}
+                    <div className="lg:col-span-8 space-y-3 md:space-y-8">
 
-                    {/* Basic Info Card */}
-                    <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-                        <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
-                            <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">1</span>
-                            <h2 className="text-lg font-bold text-gray-800">Basic Information</h2>
-                        </div>
+                        {/* Basic Info Card */}
+                        <section className="bg-white p-3 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-3 md:space-y-6">
+                            <div className="flex items-center gap-2 md:gap-3 border-b border-gray-50 pb-2 md:pb-4">
+                                <span className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm md:text-base">1</span>
+                                <h2 className="text-base md:text-lg font-bold text-gray-800">Basic Information</h2>
+                            </div>
 
-                            
-                            {/* Improved Image Selection UI */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-8 mb-3 md:mb-6">
                                 {/* Thumbnail Selection */}
-                                <div className="space-y-3">
-                                    <label className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                                        <MdImage className="text-blue-500" size={16} />
+                                <div className="space-y-2 md:space-y-3">
+                                    <label className="flex items-center gap-1 md:gap-2 text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                        <MdImage className="text-blue-500" size={14} />
                                         Primary Thumbnail
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    
-                                    <div className="relative group w-full h-64 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all hover:border-blue-400 hover:bg-blue-50/30">
+
+                                    <div className="relative group w-full h-48 md:h-64 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all hover:border-blue-400 hover:bg-blue-50/30">
                                         {formData.thumbnail ? (
                                             <>
-                                                <img 
-                                                    src={formData.thumbnail.preview} 
-                                                    alt="Thumbnail" 
-                                                    className="w-full h-full object-contain p-2" 
+                                                <img
+                                                    src={formData.thumbnail.preview}
+                                                    alt="Thumbnail"
+                                                    className="w-full h-full object-contain p-2"
                                                 />
                                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                                                     <label className="p-3 bg-white rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
                                                         <MdImage className="text-blue-600" size={24} />
-                                                        <input 
-                                                            type="file" 
-                                                            className="hidden" 
+                                                        <input
+                                                            type="file"
+                                                            className="hidden"
                                                             accept="image/*"
-                                                            onChange={handleThumbnailUpload} 
+                                                            onChange={handleThumbnailUpload}
                                                         />
                                                     </label>
-                                                    <button 
+                                                    <button
                                                         type="button"
                                                         onClick={removeThumbnail}
                                                         className="p-3 bg-white rounded-full hover:scale-110 transition-transform shadow-lg"
@@ -716,11 +714,11 @@ import toast from 'react-hot-toast';
                                                 </div>
                                                 <span className="text-sm font-bold text-gray-600">Click to upload Thumbnail</span>
                                                 <span className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Supports JPG, PNG, WEBP</span>
-                                                <input 
-                                                    type="file" 
-                                                    className="hidden" 
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
                                                     accept="image/*"
-                                                    onChange={handleThumbnailUpload} 
+                                                    onChange={handleThumbnailUpload}
                                                 />
                                             </label>
                                         )}
@@ -742,22 +740,22 @@ import toast from 'react-hot-toast';
                                         <label className="min-h-[100px] border-2 border-dashed border-gray-200 bg-gray-50 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50/10 transition-all">
                                             <MdAdd className="text-gray-400 group-hover:text-purple-500" size={24} />
                                             <span className="text-[10px] font-bold text-gray-400 mt-1">Add</span>
-                                            <input 
-                                                type="file" 
-                                                multiple 
-                                                className="hidden" 
+                                            <input
+                                                type="file"
+                                                multiple
+                                                className="hidden"
                                                 accept="image/*"
-                                                onChange={handleGalleryUpload} 
+                                                onChange={handleGalleryUpload}
                                             />
                                         </label>
 
                                         {/* Gallery Items */}
                                         {formData.galleryImages.map((img, idx) => (
                                             <div key={idx} className="relative group rounded-xl overflow-hidden border border-gray-100 bg-white h-[100px] shadow-sm">
-                                                <img 
-                                                    src={img.preview} 
-                                                    alt={`Gallery ${idx}`} 
-                                                    className="w-full h-full object-cover" 
+                                                <img
+                                                    src={img.preview}
+                                                    alt={`Gallery ${idx}`}
+                                                    className="w-full h-full object-cover"
                                                 />
                                                 <button
                                                     type="button"
@@ -772,974 +770,974 @@ import toast from 'react-hot-toast';
                                 </div>
                             </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Brand / Manufacturer</label>
-                                <input
-                                    type="text"
-                                    name="brand"
-                                    value={formData.brand}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 caret-black placeholder:text-gray-500"
-                                    placeholder="e.g. NIKE, ADIDAS"
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                                <div className="space-y-1 md:space-y-1.5">
+                                    <label className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Brand / Manufacturer</label>
+                                    <input
+                                        type="text"
+                                        name="brand"
+                                        value={formData.brand}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 caret-black placeholder:text-gray-500 text-sm md:text-base"
+                                        placeholder="e.g. NIKE, ADIDAS"
+                                    />
+                                </div>
+                                <div className="space-y-1 md:space-y-1.5">
+                                    <label className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Product Title</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 caret-black placeholder:text-gray-500 text-sm md:text-base"
+                                        placeholder="Full product name..."
+                                    />
+                                </div>
                             </div>
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Product Title</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 caret-black placeholder:text-gray-500"
-                                    placeholder="Full product name..."
-                                />
-                            </div>
-                        </div>
 
-                        <div className="space-y-4 p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                            <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-2">
-                                <span className="material-icons text-sm text-blue-500">category</span>
-                                Category Attachment
-                            </label>
-                            <div className="grid grid-cols-1 gap-4">
-                                <select
-                                    value={formData.categoryPath[0] || ''}
-                                    onChange={(e) => {
-                                        const val = e.target.value; 
-                                        
-                                        // Auto-populate variants based on category
-                                        const selectedCat = categories.find(c => String(c.id) === String(val));
-                                        let newHeadings = [];
-                                        
-                                        if (selectedCat) {
-                                            const catName = selectedCat.name.toLowerCase();
-                                            
-                                            // Fashion: Color + Size
-                                            if (catName.includes('fashion') || catName.includes('clothing') || catName.includes('shirt') || catName.includes('shoe')) {
-                                                newHeadings = [
-                                                    { id: Date.now(), name: 'Color', hasImage: true, options: [{ name: '', image: '' }] },
-                                                    { id: Date.now() + 1, name: 'Size', hasImage: false, options: [{ name: '' }] }
-                                                ];
-                                            } 
-                                            // Mobile/Electronics: Color + Storage
-                                            else if (catName.includes('mobile') || catName.includes('phone') || catName.includes('electronics')) {
-                                                newHeadings = [
-                                                    { id: Date.now(), name: 'Color', hasImage: true, options: [{ name: '', image: '' }] },
-                                                    { id: Date.now() + 1, name: 'Storage', hasImage: false, options: [{ name: '' }] }
-                                                ];
-                                            }
-                                            // Food/Grocery: Weight or Quantity
-                                            else if (catName.includes('food') || catName.includes('grocery') || catName.includes('vegetable') || catName.includes('fruit')) {
-                                                newHeadings = [
-                                                    { id: Date.now(), name: 'Weight/Quantity', hasImage: false, options: [{ name: '' }] }
-                                                ];
-                                            }
-                                        }
+                            <div className="space-y-2 md:space-y-4 p-3 md:p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                                <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-2">
+                                    <span className="material-icons text-sm text-blue-500">category</span>
+                                    Category Attachment
+                                </label>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <select
+                                        value={formData.categoryPath[0] || ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
 
-                                        setFormData(prev => ({ 
-                                            ...prev, 
-                                            categoryPath: val ? [val] : [],
-                                            subCategories: [], // Reset subcategories
-                                            // Apply new template if match found, otherwise keep existing (or clear if we want strict mode, but keeping existing is safer for unknown cats)
-                                            variantHeadings: newHeadings.length > 0 ? newHeadings : prev.variantHeadings
-                                        }));
-                                    }}
-                                    className="w-full px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium text-gray-900"
-                                >
-                                    <option value="">Select Primary Category</option>
-                                    {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-                                </select>
+                                            // Auto-populate variants based on category
+                                            const selectedCat = categories.find(c => String(c.id) === String(val));
+                                            let newHeadings = [];
 
-                                {formData.categoryPath[0] && (
-                                    <div className="mt-4">
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Sub Category</label>
-                                        <select
-                                            value={formData.subCategories[0] || ''}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    subCategories: val ? [val] : []
-                                                }));
-                                            }}
-                                            className="w-full px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium text-gray-900"
-                                        >
-                                            <option value="">Select Sub Category</option>
-                                            {(function() {
-                                                const primaryCat = categories.find(c => String(c.id) === String(formData.categoryPath[0]));
-                                                if (!primaryCat) {
-                                                    console.log('ProductForm: No primary category found');
-                                                    return null;
+                                            if (selectedCat) {
+                                                const catName = selectedCat.name.toLowerCase();
+
+                                                // Fashion: Color + Size
+                                                if (catName.includes('fashion') || catName.includes('clothing') || catName.includes('shirt') || catName.includes('shoe')) {
+                                                    newHeadings = [
+                                                        { id: Date.now(), name: 'Color', hasImage: true, options: [{ name: '', image: '' }] },
+                                                        { id: Date.now() + 1, name: 'Size', hasImage: false, options: [{ name: '' }] }
+                                                    ];
                                                 }
-
-                                                console.log('Primary Category:', primaryCat.name, 'ID:', primaryCat.id, '_id:', primaryCat._id);
-                                                console.log('Total SubCategories:', subCategories.length);
-                                                
-                                                // Debug: Show first 5 subcategories and their category IDs
-                                                if (subCategories.length > 0) {
-                                                    console.log('Sample SubCategories (first 5):');
-                                                    subCategories.slice(0, 5).forEach(sub => {
-                                                        const catId = sub.category?._id || sub.category;
-                                                        console.log(`  - ${sub.name}: category=${catId}`);
-                                                    });
+                                                // Mobile/Electronics: Color + Storage
+                                                else if (catName.includes('mobile') || catName.includes('phone') || catName.includes('electronics')) {
+                                                    newHeadings = [
+                                                        { id: Date.now(), name: 'Color', hasImage: true, options: [{ name: '', image: '' }] },
+                                                        { id: Date.now() + 1, name: 'Storage', hasImage: false, options: [{ name: '' }] }
+                                                    ];
                                                 }
+                                                // Food/Grocery: Weight or Quantity
+                                                else if (catName.includes('food') || catName.includes('grocery') || catName.includes('vegetable') || catName.includes('fruit')) {
+                                                    newHeadings = [
+                                                        { id: Date.now(), name: 'Weight/Quantity', hasImage: false, options: [{ name: '' }] }
+                                                    ];
+                                                }
+                                            }
 
-                                                const filtered = subCategories.filter(sub => {
-                                                    // Handle both populated (object) and unpopulated (ObjectId) category field
-                                                    const subCategoryId = sub.category?._id || sub.category;
-                                                    const primaryCategoryId = primaryCat._id;
-                                                    
-                                                    const match = String(subCategoryId) === String(primaryCategoryId);
-                                                    
-                                                    if (match) {
-                                                        console.log('Matched SubCategory:', sub.name, 'for category', primaryCat.name);
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                categoryPath: val ? [val] : [],
+                                                subCategories: [], // Reset subcategories
+                                                // Apply new template if match found, otherwise keep existing (or clear if we want strict mode, but keeping existing is safer for unknown cats)
+                                                variantHeadings: newHeadings.length > 0 ? newHeadings : prev.variantHeadings
+                                            }));
+                                        }}
+                                        className="w-full px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium text-gray-900"
+                                    >
+                                        <option value="">Select Primary Category</option>
+                                        {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                                    </select>
+
+                                    {formData.categoryPath[0] && (
+                                        <div className="mt-4">
+                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Sub Category</label>
+                                            <select
+                                                value={formData.subCategories[0] || ''}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        subCategories: val ? [val] : []
+                                                    }));
+                                                }}
+                                                className="w-full px-4 py-2.5 rounded-lg bg-white border border-gray-200 outline-none focus:ring-2 ring-blue-100 text-sm font-medium text-gray-900"
+                                            >
+                                                <option value="">Select Sub Category</option>
+                                                {(function () {
+                                                    const primaryCat = categories.find(c => String(c.id) === String(formData.categoryPath[0]));
+                                                    if (!primaryCat) {
+                                                        console.log('ProductForm: No primary category found');
+                                                        return null;
                                                     }
-                                                    
-                                                    return match;
-                                                });
 
-                                                console.log('Filtered SubCategories:', filtered.length);
+                                                    console.log('Primary Category:', primaryCat.name, 'ID:', primaryCat.id, '_id:', primaryCat._id);
+                                                    console.log('Total SubCategories:', subCategories.length);
 
-                                                return filtered.map(sub => (
-                                                    <option key={sub._id} value={sub._id}>{sub.name}</option>
-                                                ));
-                                            })()}
-                                        </select>
+                                                    // Debug: Show first 5 subcategories and their category IDs
+                                                    if (subCategories.length > 0) {
+                                                        console.log('Sample SubCategories (first 5):');
+                                                        subCategories.slice(0, 5).forEach(sub => {
+                                                            const catId = sub.category?._id || sub.category;
+                                                            console.log(`  - ${sub.name}: category=${catId}`);
+                                                        });
+                                                    }
+
+                                                    const filtered = subCategories.filter(sub => {
+                                                        // Handle both populated (object) and unpopulated (ObjectId) category field
+                                                        const subCategoryId = sub.category?._id || sub.category;
+                                                        const primaryCategoryId = primaryCat._id;
+
+                                                        const match = String(subCategoryId) === String(primaryCategoryId);
+
+                                                        if (match) {
+                                                            console.log('Matched SubCategory:', sub.name, 'for category', primaryCat.name);
+                                                        }
+
+                                                        return match;
+                                                    });
+
+                                                    console.log('Filtered SubCategories:', filtered.length);
+
+                                                    return filtered.map(sub => (
+                                                        <option key={sub._id} value={sub._id}>{sub.name}</option>
+                                                    ));
+                                                })()}
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Product Highlights (Dynamic Sections) */}
+                        <section className="bg-white p-3 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-3 md:space-y-6">
+                            <div className="flex items-center justify-between border-b border-gray-50 pb-2 md:pb-4">
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <span className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold"><span className="material-icons text-sm md:text-[18px]">star</span></span>
+                                    <h2 className="text-base md:text-lg font-bold text-gray-800">Product Highlights</h2>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPasteModal(true)}
+                                    className="px-2 py-1 md:px-3 md:py-1.5 bg-amber-100 text-amber-700 rounded-lg text-[9px] md:text-[10px] font-bold uppercase tracking-wider hover:bg-amber-200 transition-colors flex items-center gap-1"
+                                >
+                                    <span className="material-icons text-xs md:text-sm">content_paste</span>
+                                    Paste & Parse
+                                </button>
+                            </div>
+                            <div className="space-y-4">
+                                <p className="text-[11px] text-gray-500 font-bold uppercase">Create multiple highlight sections (e.g., Specifications, Easy Payment Options)</p>
+
+                                {formData.highlights.map((section, sectionIdx) => (
+                                    <div key={sectionIdx} className="border border-gray-200 rounded-2xl p-3 md:p-6 bg-gray-50/50 space-y-2 md:space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="text"
+                                                value={section.heading}
+                                                onChange={(e) => {
+                                                    const newHighlights = [...formData.highlights];
+                                                    newHighlights[sectionIdx].heading = e.target.value;
+                                                    setFormData(prev => ({ ...prev, highlights: newHighlights }));
+                                                }}
+                                                placeholder="Section Heading (e.g., Specifications)"
+                                                className="flex-1 px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-white border border-gray-300 focus:border-amber-500 outline-none transition-all font-bold text-gray-900 caret-black placeholder:text-gray-500 text-xs md:text-base"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData(prev => ({
+                                                    ...prev,
+                                                    highlights: prev.highlights.filter((_, i) => i !== sectionIdx)
+                                                }))}
+                                                className="px-3 py-2 md:px-4 md:py-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all font-bold text-xs md:text-sm"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold text-gray-500 uppercase">Bullet Points</label>
+                                            {section.points.map((point, pointIdx) => (
+                                                <div key={pointIdx} className="flex items-center gap-2">
+                                                    <span className="text-gray-400">•</span>
+                                                    <input
+                                                        type="text"
+                                                        value={point}
+                                                        onChange={(e) => {
+                                                            const newHighlights = [...formData.highlights];
+                                                            newHighlights[sectionIdx].points[pointIdx] = e.target.value;
+                                                            setFormData(prev => ({ ...prev, highlights: newHighlights }));
+                                                        }}
+                                                        placeholder="Bullet point..."
+                                                        className="flex-1 px-4 py-2 rounded-lg bg-white border border-gray-200 focus:border-amber-500 outline-none transition-all text-sm text-gray-900 caret-black placeholder:text-gray-500"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const newHighlights = [...formData.highlights];
+                                                            newHighlights[sectionIdx].points.splice(pointIdx, 1);
+                                                            if (newHighlights[sectionIdx].points.length === 0) {
+                                                                newHighlights[sectionIdx].points = [''];
+                                                            }
+                                                            setFormData(prev => ({ ...prev, highlights: newHighlights }));
+                                                        }}
+                                                        className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-all text-sm font-bold"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newHighlights = [...formData.highlights];
+                                                    newHighlights[sectionIdx].points.push('');
+                                                    setFormData(prev => ({ ...prev, highlights: newHighlights }));
+                                                }}
+                                                className="mt-2 px-4 py-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-all text-sm font-bold"
+                                            >
+                                                + Add Bullet Point
+                                            </button>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                    </section>
+                                ))}
 
-                    {/* Product Highlights (Dynamic Sections) */}
-                    <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-                        <div className="flex items-center justify-between border-b border-gray-50 pb-4">
-                            <div className="flex items-center gap-3">
-                                <span className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold"><span className="material-icons text-[18px]">star</span></span>
-                                <h2 className="text-lg font-bold text-gray-800">Product Highlights</h2>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({
+                                        ...prev,
+                                        highlights: [...prev.highlights, { heading: '', points: [''] }]
+                                    }))}
+                                    className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:shadow-lg transition-all font-bold"
+                                >
+                                    + Add Highlight Section
+                                </button>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => setShowPasteModal(true)}
-                                className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-amber-200 transition-colors flex items-center gap-1"
-                            >
-                                <span className="material-icons text-sm">content_paste</span>
-                                Paste & Parse
-                            </button>
-                        </div>
-                        <div className="space-y-4">
-                            <p className="text-[11px] text-gray-500 font-bold uppercase">Create multiple highlight sections (e.g., Specifications, Easy Payment Options)</p>
-                            
-                            {formData.highlights.map((section, sectionIdx) => (
-                                <div key={sectionIdx} className="border border-gray-200 rounded-2xl p-6 bg-gray-50/50 space-y-4">
-                                    <div className="flex items-center gap-3">
+                        </section>
+
+
+                        {/* Warranty & Returns Policy Card */}
+                        <section className="bg-white p-3 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-3 md:space-y-6">
+                            <div className="flex items-center gap-2 md:gap-3 border-b border-gray-50 pb-2 md:pb-4">
+                                <span className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm md:text-base">2</span>
+                                <h2 className="text-base md:text-lg font-bold text-gray-800">Warranty & Returns Policy</h2>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                                {/* Warranty Section */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b pb-2">Warranty Details</h3>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Warranty Summary</label>
                                         <input
                                             type="text"
-                                            value={section.heading}
-                                            onChange={(e) => {
-                                                const newHighlights = [...formData.highlights];
-                                                newHighlights[sectionIdx].heading = e.target.value;
-                                                setFormData(prev => ({ ...prev, highlights: newHighlights }));
-                                            }}
-                                            placeholder="Section Heading (e.g., Specifications)"
-                                            className="flex-1 px-4 py-2.5 rounded-xl bg-white border border-gray-300 focus:border-amber-500 outline-none transition-all font-bold text-gray-900 caret-black placeholder:text-gray-500"
+                                            value={formData.warranty.summary}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, summary: e.target.value } }))}
+                                            className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-xs md:text-sm font-bold text-gray-900 caret-black placeholder:text-gray-500"
+                                            placeholder="e.g. 1 Year Brand Warranty"
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormData(prev => ({
-                                                ...prev,
-                                                highlights: prev.highlights.filter((_, i) => i !== sectionIdx)
-                                            }))}
-                                            className="px-4 py-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all font-bold text-sm"
-                                        >
-                                            Remove Section
-                                        </button>
                                     </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase">Bullet Points</label>
-                                        {section.points.map((point, pointIdx) => (
-                                            <div key={pointIdx} className="flex items-center gap-2">
-                                                <span className="text-gray-400">•</span>
-                                                <input
-                                                    type="text"
-                                                    value={point}
-                                                    onChange={(e) => {
-                                                        const newHighlights = [...formData.highlights];
-                                                        newHighlights[sectionIdx].points[pointIdx] = e.target.value;
-                                                        setFormData(prev => ({ ...prev, highlights: newHighlights }));
-                                                    }}
-                                                    placeholder="Bullet point..."
-                                                    className="flex-1 px-4 py-2 rounded-lg bg-white border border-gray-200 focus:border-amber-500 outline-none transition-all text-sm text-gray-900 caret-black placeholder:text-gray-500"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const newHighlights = [...formData.highlights];
-                                                        newHighlights[sectionIdx].points.splice(pointIdx, 1);
-                                                        if (newHighlights[sectionIdx].points.length === 0) {
-                                                            newHighlights[sectionIdx].points = [''];
-                                                        }
-                                                        setFormData(prev => ({ ...prev, highlights: newHighlights }));
-                                                    }}
-                                                    className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-all text-sm font-bold"
-                                                >
-                                                    ✕
-                                                </button>
-                                            </div>
-                                        ))}
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                const newHighlights = [...formData.highlights];
-                                                newHighlights[sectionIdx].points.push('');
-                                                setFormData(prev => ({ ...prev, highlights: newHighlights }));
-                                            }}
-                                            className="mt-2 px-4 py-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-all text-sm font-bold"
-                                        >
-                                            + Add Bullet Point
-                                        </button>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Covered in Warranty</label>
+                                        <input
+                                            type="text"
+                                            value={formData.warranty.covered}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, covered: e.target.value } }))}
+                                            className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-xs md:text-sm font-bold text-gray-900 caret-black placeholder:text-gray-500"
+                                            placeholder="e.g. Manufacturing Defects"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Not Covered in Warranty</label>
+                                        <input
+                                            type="text"
+                                            value={formData.warranty.notCovered}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, notCovered: e.target.value } }))}
+                                            className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-xs md:text-sm font-bold text-gray-900 caret-black placeholder:text-gray-500"
+                                            placeholder="e.g. Physical Damage"
+                                        />
                                     </div>
                                 </div>
-                            ))}
 
-                            <button
-                                type="button"
-                                onClick={() => setFormData(prev => ({
-                                    ...prev,
-                                    highlights: [...prev.highlights, { heading: '', points: [''] }]
-                                }))}
-                                className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:shadow-lg transition-all font-bold"
-                            >
-                                + Add Highlight Section
-                            </button>
-                        </div>
-                    </section>
-
-
-                    {/* Warranty & Returns Policy Card */}
-                    <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-                        <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
-                            <span className="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold">2</span>
-                            <h2 className="text-lg font-bold text-gray-800">Warranty & Returns Policy</h2>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Warranty Section */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b pb-2">Warranty Details</h3>
-                                <div className="space-y-1.5">
-                                    <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Warranty Summary</label>
-                                    <input
-                                        type="text"
-                                        value={formData.warranty.summary}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, summary: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 caret-black placeholder:text-gray-500"
-                                        placeholder="e.g. 1 Year Brand Warranty"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Covered in Warranty</label>
-                                    <input
-                                        type="text"
-                                        value={formData.warranty.covered}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, covered: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 caret-black placeholder:text-gray-500"
-                                        placeholder="e.g. Manufacturing Defects"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Not Covered in Warranty</label>
-                                    <input
-                                        type="text"
-                                        value={formData.warranty.notCovered}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, notCovered: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 caret-black placeholder:text-gray-500"
-                                        placeholder="e.g. Physical Damage"
-                                    />
+                                {/* Return Policy Section */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b pb-2">Return Policy</h3>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Return Window (Days)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.returnPolicy.days}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, days: e.target.value } }))}
+                                            className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-xs md:text-sm font-bold text-gray-900 caret-black"
+                                            placeholder="e.g. 7"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Return Description</label>
+                                        <textarea
+                                            value={formData.returnPolicy.description}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, description: e.target.value } }))}
+                                            className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-xs md:text-sm font-bold text-gray-900 h-24 md:h-32 resize-none caret-black placeholder:text-gray-500"
+                                            placeholder="e.g. Returns accepted..."
+                                        />
+                                    </div>
                                 </div>
                             </div>
+                        </section>
 
-                            {/* Return Policy Section */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b pb-2">Return Policy</h3>
-                                <div className="space-y-1.5">
-                                    <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Return Window (Days)</label>
-                                    <input
-                                        type="number"
-                                        value={formData.returnPolicy.days}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, days: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 caret-black"
-                                        placeholder="e.g. 7"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[11px] font-black text-gray-500 uppercase tracking-wider mb-1 block">Return Description</label>
-                                    <textarea
-                                        value={formData.returnPolicy.description}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, description: e.target.value } }))}
-                                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-orange-500 focus:bg-white outline-none transition-all text-sm font-bold text-gray-900 h-32 resize-none caret-black placeholder:text-gray-500"
-                                        placeholder="e.g. Returns accepted for damaged, defective, or wrong items only."
-                                    />
-                                </div>
+                        {/* Pricing & Inventory Card */}
+                        <section className="bg-white p-3 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-3 md:space-y-6">
+                            <div className="flex items-center gap-2 md:gap-3 border-b border-gray-50 pb-2 md:pb-4">
+                                <span className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center font-bold text-sm md:text-base">3</span>
+                                <h2 className="text-base md:text-lg font-bold text-gray-800">Pricing & Inventory</h2>
                             </div>
-                        </div>
-                    </section>
 
-                    {/* Pricing & Inventory Card */}
-                    <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-                        <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
-                            <span className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center font-bold">3</span>
-                            <h2 className="text-lg font-bold text-gray-800">Pricing & Inventory</h2>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-green-600 uppercase tracking-wider">Selling Price (₹)</label>
-                                <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400">₹</span>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-green-600 uppercase tracking-wider">Selling Price (₹)</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm md:text-base">₹</span>
+                                        <input
+                                            type="number"
+                                            name="price"
+                                            value={formData.price}
+                                            onChange={handleChange}
+                                            className="w-full pl-8 pr-4 py-2 md:py-3 rounded-xl bg-green-50/30 border border-green-200 focus:border-green-500 focus:bg-white outline-none transition-all font-black text-green-900 caret-black text-lg md:text-xl placeholder:text-gray-500"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">List Price/MRP (₹)</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-sm md:text-base">₹</span>
+                                        <input
+                                            type="number"
+                                            name="originalPrice"
+                                            value={formData.originalPrice}
+                                            onChange={handleChange}
+                                            className="w-full pl-8 pr-4 py-2 md:py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 caret-black line-through placeholder:text-gray-500 text-sm md:text-base"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Available Stock</label>
                                     <input
                                         type="number"
-                                        name="price"
-                                        value={formData.price}
+                                        name="stock"
+                                        value={formData.skus.length > 0
+                                            ? formData.skus.reduce((acc, curr) => acc + (Number(curr.stock) || 0), 0)
+                                            : formData.stock || 0}
                                         onChange={handleChange}
-                                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-green-50/30 border border-green-200 focus:border-green-500 focus:bg-white outline-none transition-all font-black text-green-900 caret-black text-xl placeholder:text-gray-500"
+                                        disabled={formData.skus.length > 0 || formData.variantHeadings.length > 0}
+                                        className="w-full px-3 py-2 md:px-4 md:py-3 rounded-xl bg-gray-50 border border-gray-200 font-black text-gray-900 caret-black text-base md:text-lg disabled:opacity-60"
                                         placeholder="0"
                                     />
+                                    {(formData.skus.length > 0 || formData.variantHeadings.length > 0) && (
+                                        <p className="text-[10px] text-blue-500 font-bold flex items-center gap-1 mt-1 uppercase tracking-tighter">
+                                            <span className="material-icons text-[12px]">auto_fix_high</span>
+                                            Synced from Variants
+                                        </p>
+                                    )}
                                 </div>
                             </div>
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">List Price/MRP (₹)</label>
-                                <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400">₹</span>
-                                    <input
-                                        type="number"
-                                        name="originalPrice"
-                                        value={formData.originalPrice}
-                                        onChange={handleChange}
-                                        className="w-full pl-8 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-gray-900 caret-black line-through placeholder:text-gray-500"
-                                        placeholder="0"
-                                    />
+                        </section>
+
+                        {/* Dynamic Variants Card */}
+                        <section className="bg-white p-3 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-4 md:space-y-8">
+                            <div className="flex items-center justify-between border-b border-gray-50 pb-2 md:pb-4">
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <span className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm md:text-base">4</span>
+                                    <h2 className="text-base md:text-lg font-bold text-gray-800">Dynamic Variants & Stock</h2>
                                 </div>
+                                <button
+                                    type="button"
+                                    onClick={addVariantHeading}
+                                    className="px-3 py-1.5 md:px-4 md:py-2 bg-blue-600 text-white text-[10px] md:text-xs font-bold rounded-xl hover:bg-blue-700 transition flex items-center gap-1 md:gap-2"
+                                >
+                                    <MdAdd size={16} /> Add Variant
+                                </button>
                             </div>
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Available Stock</label>
-                                <input
-                                    type="number"
-                                    name="stock"
-                                    value={formData.skus.length > 0
-                                        ? formData.skus.reduce((acc, curr) => acc + (Number(curr.stock) || 0), 0)
-                                        : formData.stock || 0}
-                                    onChange={handleChange}
-                                    disabled={formData.skus.length > 0 || formData.variantHeadings.length > 0}
-                                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 font-black text-gray-900 caret-black text-lg disabled:opacity-60"
-                                    placeholder="0"
-                                />
-                                {(formData.skus.length > 0 || formData.variantHeadings.length > 0) && (
-                                    <p className="text-[10px] text-blue-500 font-bold flex items-center gap-1 mt-1 uppercase tracking-tighter">
-                                        <span className="material-icons text-[12px]">auto_fix_high</span>
-                                        Synced from Variants
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </section>
 
-                    {/* Dynamic Variants Card */}
-                    <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-8">
-                        <div className="flex items-center justify-between border-b border-gray-50 pb-4">
-                            <div className="flex items-center gap-3">
-                                <span className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold">4</span>
-                                <h2 className="text-lg font-bold text-gray-800">Dynamic Variants & Stock</h2>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={addVariantHeading}
-                                className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition flex items-center gap-2"
-                            >
-                                <MdAdd size={18} /> Add Variant Heading
-                            </button>
-                        </div>
+                            {/* Variant Headings List */}
+                            <div className="space-y-4 md:space-y-8">
+                                {formData.variantHeadings.map(vh => (
+                                    <div key={vh.id} className="bg-gray-50/50 p-3 md:p-6 rounded-2xl border border-gray-100 relative group animate-in slide-in-from-top-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => removeVariantHeading(vh.id)}
+                                            className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition"
+                                        >
+                                            <MdDelete size={20} />
+                                        </button>
 
-                        {/* Variant Headings List */}
-                        <div className="space-y-8">
-                            {formData.variantHeadings.map(vh => (
-                                <div key={vh.id} className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 relative group animate-in slide-in-from-top-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => removeVariantHeading(vh.id)}
-                                        className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition"
-                                    >
-                                        <MdDelete size={20} />
-                                    </button>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Variant Heading (e.g. Color, Size, Storage)</label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 mb-3 md:mb-6">
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Variant Heading (e.g. Color, Size, Storage)</label>
                                                 <input
                                                     type="text"
                                                     value={vh.name}
                                                     onChange={(e) => updateVariantHeading(vh.id, 'name', e.target.value)}
-                                                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-200 outline-none focus:border-blue-500 font-bold text-gray-900 caret-black placeholder:text-gray-500"
+                                                    className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-white border border-gray-200 outline-none focus:border-blue-500 font-bold text-gray-900 caret-black placeholder:text-gray-500 text-sm md:text-base"
                                                     placeholder="Enter heading..."
                                                 />
+                                            </div>
+                                            <div className="flex items-end pb-1">
+                                                <label className="flex items-center gap-3 cursor-pointer group/toggle">
+                                                    <div className="relative">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="sr-only peer"
+                                                            checked={vh.hasImage}
+                                                            onChange={(e) => updateVariantHeading(vh.id, 'hasImage', e.target.checked)}
+                                                        />
+                                                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                    </div>
+                                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover/toggle:text-gray-800 transition-colors">Has Image Options</span>
+                                                </label>
+                                            </div>
                                         </div>
-                                        <div className="flex items-end pb-1">
-                                            <label className="flex items-center gap-3 cursor-pointer group/toggle">
-                                                <div className="relative">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="sr-only peer"
-                                                        checked={vh.hasImage}
-                                                        onChange={(e) => updateVariantHeading(vh.id, 'hasImage', e.target.checked)}
-                                                    />
-                                                    <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                                </div>
-                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover/toggle:text-gray-800 transition-colors">Has Image Options</span>
-                                            </label>
+
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{vh.name || 'Variant'} Options</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => addVariantOption(vh.id)}
+                                                    className="text-[10px] font-black text-blue-600 hover:underline px-2"
+                                                >
+                                                    + ADD OPTION
+                                                </button>
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
+                                                {vh.options.map((opt, optIdx) => (
+                                                    <div key={optIdx} className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm relative group/opt transition-all hover:border-blue-200">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeVariantOption(vh.id, optIdx)}
+                                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 z-10"
+                                                        >
+                                                            <MdClose size={12} />
+                                                        </button>
+                                                        <div className="flex flex-col gap-2">
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Option (e.g. Red, XL)"
+                                                                value={opt.name}
+                                                                onChange={(e) => updateVariantOption(vh.id, optIdx, 'name', e.target.value)}
+                                                                className="text-xs font-bold border-b border-gray-200 outline-none p-1 focus:border-blue-500 text-gray-900 caret-black placeholder:text-gray-500"
+                                                            />
+                                                            {vh.hasImage && (
+                                                                <div className="space-y-2">
+                                                                    <div className="flex flex-wrap gap-2">
+                                                                        {/* Existing Variant Images */}
+                                                                        {(opt.images || []).map((img, imgIdx) => (
+                                                                            <div key={imgIdx} className="relative group/vimg w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
+                                                                                <img src={img.preview} alt="" className="w-full h-full object-cover" />
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        const newImages = opt.images.filter((_, i) => i !== imgIdx);
+                                                                                        updateVariantOption(vh.id, optIdx, 'images', newImages);
+                                                                                    }}
+                                                                                    className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-vimg/hover:opacity-100 transition-opacity"
+                                                                                >
+                                                                                    <MdClose size={12} />
+                                                                                </button>
+                                                                            </div>
+                                                                        ))}
+
+                                                                        {/* Add More Images Button */}
+                                                                        <label className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-200 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
+                                                                            <MdAdd className="text-gray-400" size={16} />
+                                                                            <input
+                                                                                type="file"
+                                                                                multiple
+                                                                                className="hidden"
+                                                                                accept="image/*"
+                                                                                onChange={(e) => handleVariantMultiFileUpload(e, opt.images, (data) => updateVariantOption(vh.id, optIdx, 'images', data))}
+                                                                            />
+                                                                        </label>
+                                                                    </div>
+                                                                    <div className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">
+                                                                        {(opt.images || []).length} images added
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
+                                ))}
 
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{vh.name || 'Variant'} Options</label>
+                                {formData.variantHeadings.length === 0 && (
+                                    <div className="text-center py-12 border-2 border-dashed border-gray-100 rounded-3xl">
+                                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <span className="material-icons text-gray-300 text-3xl">style</span>
+                                        </div>
+                                        <h3 className="text-sm font-bold text-gray-400 italic">No variants added yet.</h3>
+                                        <p className="text-[10px] text-gray-300 mt-1 uppercase font-bold tracking-widest">Add Color, Size, or Storage options</p>
+                                    </div>
+                                )}
+
+                                {/* Combinations Matrix */}
+                                {formData.variantHeadings.some(vh => vh.options.some(opt => opt.name)) && (
+                                    <div className="mt-6 md:mt-12 p-3 md:p-8 bg-gradient-to-br from-gray-50 to-white rounded-3xl border border-gray-200 shadow-inner">
+                                        <div className="flex justify-between items-center mb-4 md:mb-8">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-xl shadow-blue-200">
+                                                    <span className="material-icons text-2xl">grid_view</span>
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest leading-tight">Combinations Matrix</h4>
+                                                    <p className="text-[10px] text-gray-500 font-bold uppercase mt-0.5">Manage stock for unique pairs</p>
+                                                </div>
+                                            </div>
                                             <button
                                                 type="button"
-                                                onClick={() => addVariantOption(vh.id)}
-                                                className="text-[10px] font-black text-blue-600 hover:underline px-2"
+                                                onClick={generateCombinations}
+                                                className="px-3 py-2 md:px-6 md:py-2.5 bg-white text-blue-600 border border-blue-200 rounded-xl text-[10px] md:text-xs font-black shadow-sm hover:shadow-md transition-all flex items-center gap-1 md:gap-2"
                                             >
-                                                + ADD OPTION
+                                                <span className="material-icons text-sm">refresh</span>
+                                                GENERATE ALL
                                             </button>
                                         </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                            {vh.options.map((opt, optIdx) => (
-                                                <div key={optIdx} className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm relative group/opt transition-all hover:border-blue-200">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeVariantOption(vh.id, optIdx)}
-                                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 z-10"
-                                                    >
-                                                        <MdClose size={12} />
-                                                    </button>
-                                                    <div className="flex flex-col gap-2">
+
+                                        {formData.skus.length > 0 ? (
+                                            <div className="space-y-2 md:space-y-4">
+                                                <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm overflow-x-auto">
+                                                    <table className="w-full text-left border-collapse min-w-[300px]">
+                                                        <thead>
+                                                            <tr className="bg-gray-50 border-b border-gray-100">
+                                                                {formData.variantHeadings.map(vh => (
+                                                                    <th key={vh.id} className="px-3 py-2 md:px-6 md:py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest whitespace-nowrap">{vh.name || 'Variant'}</th>
+                                                                ))}
+                                                                <th className="px-3 py-2 md:px-6 md:py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest text-right whitespace-nowrap">Stock Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-50">
+                                                            {formData.skus.slice((variantPage - 1) * variantsPerPage, variantPage * variantsPerPage).map((sku, idx) => {
+                                                                const originalIdx = (variantPage - 1) * variantsPerPage + idx;
+                                                                return (
+                                                                    <tr key={originalIdx} className="hover:bg-blue-50/20 transition-colors">
+                                                                        {formData.variantHeadings.map(vh => (
+                                                                            <td key={vh.id} className="px-3 py-2 md:px-6 md:py-4 text-[10px] md:text-xs font-bold text-gray-700 whitespace-nowrap">
+                                                                                {sku.combination[vh.name] || '-'}
+                                                                            </td>
+                                                                        ))}
+                                                                        <td className="px-3 py-2 md:px-6 md:py-4 text-right">
+                                                                            <div className="flex items-center justify-end gap-3 group/input">
+                                                                                {sku.stock <= 5 && sku.stock > 0 && (
+                                                                                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest animate-pulse">Low Stock</span>
+                                                                                )}
+                                                                                <input
+                                                                                    type="number"
+                                                                                    min="0"
+                                                                                    value={sku.stock}
+                                                                                    onChange={(e) => updateSkuStock(originalIdx, Math.max(0, parseInt(e.target.value) || 0))}
+                                                                                    className="w-20 text-right px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 outline-none text-sm font-black text-gray-900 transition-all shadow-inner caret-black"
+                                                                                />
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                {/* Variant Table Pagination */}
+                                                {formData.skus.length > variantsPerPage && (
+                                                    <div className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-xl border border-gray-100">
+                                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                            Showing {(variantPage - 1) * variantsPerPage + 1} - {Math.min(variantPage * variantsPerPage, formData.skus.length)} of {formData.skus.length}
+                                                        </span>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                type="button"
+                                                                disabled={variantPage === 1}
+                                                                onClick={() => setVariantPage(p => p - 1)}
+                                                                className="p-1 px-3 bg-white border border-gray-200 rounded-lg text-xs font-bold disabled:opacity-30"
+                                                            >
+                                                                Prev
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                disabled={variantPage * variantsPerPage >= formData.skus.length}
+                                                                onClick={() => setVariantPage(p => p + 1)}
+                                                                className="p-1 px-3 bg-white border border-gray-200 rounded-lg text-xs font-bold disabled:opacity-30"
+                                                            >
+                                                                Next
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-12 opacity-40">
+                                                <p className="text-xs font-bold italic">Click "Generate All" to see the inventory matrix</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    </div>
+
+                    {/* Right Side: Media & Enhanced Metadata */}
+                    <div className="lg:col-span-4 space-y-8">
+
+
+
+                        {/* Metadata Card - Simplified */}
+                        <section className="space-y-4">
+                            {/* Description (Headings with Points) */}
+                            <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
+                                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('description')}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-icons text-indigo-500">description</span>
+                                        <h3 className="font-bold text-gray-800 text-sm">Product Description</h3>
+                                    </div>
+                                    {sections.description ? <MdExpandLess /> : <MdExpandMore />}
+                                </div>
+                                {sections.description && (
+                                    <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-4 animate-in fade-in slide-in-from-top-2">
+                                        <p className="text-[11px] text-gray-500 font-bold uppercase mb-3">Add headings with bullet points for product details</p>
+                                        <div className="space-y-6">
+                                            {formData.description.map((section, sectionIdx) => (
+                                                <div key={sectionIdx} className="bg-white p-4 rounded-xl border border-gray-200 relative group/section">
+                                                    {/* Remove Section Button */}
+                                                    {formData.description.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeDescriptionSection(sectionIdx)}
+                                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover/section:opacity-100 transition-all scale-75 group-hover/section:scale-100 z-10"
+                                                        >
+                                                            <MdClose size={12} />
+                                                        </button>
+                                                    )}
+
+                                                    {/* Heading Input */}
+                                                    <div className="mb-3">
+                                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Section Heading</label>
                                                         <input
                                                             type="text"
-                                                            placeholder="Option (e.g. Red, XL)"
-                                                            value={opt.name}
-                                                            onChange={(e) => updateVariantOption(vh.id, optIdx, 'name', e.target.value)}
-                                                            className="text-xs font-bold border-b border-gray-200 outline-none p-1 focus:border-blue-500 text-gray-900 caret-black placeholder:text-gray-500"
+                                                            placeholder="e.g. Display, Camera, Battery"
+                                                            value={section.heading}
+                                                            onChange={(e) => updateDescriptionHeading(sectionIdx, e.target.value)}
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-black text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all caret-black placeholder:text-gray-500"
                                                         />
-                                                        {vh.hasImage && (
-                                                            <div className="space-y-2">
-                                                                <div className="flex flex-wrap gap-2">
-                                                                    {/* Existing Variant Images */}
-                                                                    {(opt.images || []).map((img, imgIdx) => (
-                                                                        <div key={imgIdx} className="relative group/vimg w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
-                                                                            <img src={img.preview} alt="" className="w-full h-full object-cover" />
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => {
-                                                                                    const newImages = opt.images.filter((_, i) => i !== imgIdx);
-                                                                                    updateVariantOption(vh.id, optIdx, 'images', newImages);
-                                                                                }}
-                                                                                className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-vimg/hover:opacity-100 transition-opacity"
-                                                                            >
-                                                                                <MdClose size={12} />
-                                                                            </button>
-                                                                        </div>
-                                                                    ))}
-                                                                    
-                                                                    {/* Add More Images Button */}
-                                                                    <label className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-200 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all">
-                                                                        <MdAdd className="text-gray-400" size={16} />
-                                                                        <input
-                                                                            type="file"
-                                                                            multiple
-                                                                            className="hidden"
-                                                                            accept="image/*"
-                                                                            onChange={(e) => handleVariantMultiFileUpload(e, opt.images, (data) => updateVariantOption(vh.id, optIdx, 'images', data))}
-                                                                        />
-                                                                    </label>
-                                                                </div>
-                                                                <div className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">
-                                                                    {(opt.images || []).length} images added
-                                                                </div>
+                                                    </div>
+
+                                                    {/* Points */}
+                                                    <div className="space-y-3">
+                                                        <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">Bullet Points</label>
+                                                        {section.points.map((point, pointIdx) => (
+                                                            <div key={pointIdx} className="flex gap-2 group/point">
+                                                                <span className="text-indigo-500 py-2.5 text-[20px] leading-none">•</span>
+                                                                <input
+                                                                    value={point}
+                                                                    onChange={(e) => updateDescriptionPoint(sectionIdx, pointIdx, e.target.value)}
+                                                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all caret-black placeholder:text-gray-500"
+                                                                    placeholder="e.g. 16.97 cm (6.68 inch) Full HD+ Display"
+                                                                />
+                                                                {section.points.length > 1 && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => removeDescriptionPoint(sectionIdx, pointIdx)}
+                                                                        className="text-red-400 opacity-0 group-hover/point:opacity-100 transition-all"
+                                                                    >
+                                                                        <MdDelete size={16} />
+                                                                    </button>
+                                                                )}
                                                             </div>
-                                                        )}
+                                                        ))}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => addDescriptionPoint(sectionIdx)}
+                                                            className="text-[11px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-800 flex items-center gap-1 mt-1"
+                                                        >
+                                                            <MdAdd size={14} /> Add Point
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Description Content */}
+                                                    <div className="mt-4">
+                                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Paragraph Content <span className="text-gray-300 font-medium normal-case tracking-normal">(Optional)</span></label>
+                                                        <textarea
+                                                            value={section.content || ''}
+                                                            onChange={(e) => updateDescriptionContent(sectionIdx, e.target.value)}
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all min-h-[100px] caret-black placeholder:text-gray-500"
+                                                            placeholder="Detailed description paragraph..."
+                                                        />
+                                                    </div>
+
+                                                    {/* Description Image */}
+                                                    <div className="mt-4">
+                                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Section Image <span className="text-gray-300 font-medium normal-case tracking-normal">(Optional)</span></label>
+                                                        <div className="relative group w-full h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all hover:border-indigo-400 hover:bg-indigo-50/30">
+                                                            {section.image ? (
+                                                                <>
+                                                                    <img
+                                                                        src={section.image.preview}
+                                                                        alt="Description"
+                                                                        className="w-full h-full object-contain p-2"
+                                                                    />
+                                                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                                                                        <label className="p-2 bg-white rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
+                                                                            <MdImage className="text-indigo-600" size={20} />
+                                                                            <input
+                                                                                type="file"
+                                                                                className="hidden"
+                                                                                accept="image/*"
+                                                                                onChange={(e) => handleDescriptionImageUpload(e, sectionIdx)}
+                                                                            />
+                                                                        </label>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => removeDescriptionImage(sectionIdx)}
+                                                                            className="p-2 bg-white rounded-full hover:scale-110 transition-transform shadow-lg"
+                                                                        >
+                                                                            <MdDelete className="text-red-600" size={20} />
+                                                                        </button>
+                                                                    </div>
+                                                                </>
+                                                            ) : (
+                                                                <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                                                                    <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-1 md:mb-2 shadow-sm group-hover:scale-110 transition-transform">
+                                                                        <MdAdd size={16} className="w-4 h-4 md:w-5 md:h-5" />
+                                                                    </div>
+                                                                    <span className="text-[10px] md:text-xs font-bold text-gray-600">Upload Image</span>
+                                                                    <input
+                                                                        type="file"
+                                                                        className="hidden"
+                                                                        accept="image/*"
+                                                                        onChange={(e) => handleDescriptionImageUpload(e, sectionIdx)}
+                                                                    />
+                                                                </label>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>
-                                </div>
-                            ))}
-
-                            {formData.variantHeadings.length === 0 && (
-                                <div className="text-center py-12 border-2 border-dashed border-gray-100 rounded-3xl">
-                                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <span className="material-icons text-gray-300 text-3xl">style</span>
-                                    </div>
-                                    <h3 className="text-sm font-bold text-gray-400 italic">No variants added yet.</h3>
-                                    <p className="text-[10px] text-gray-300 mt-1 uppercase font-bold tracking-widest">Add Color, Size, or Storage options</p>
-                                </div>
-                            )}
-
-                            {/* Combinations Matrix */}
-                            {formData.variantHeadings.some(vh => vh.options.some(opt => opt.name)) && (
-                                <div className="mt-12 p-8 bg-gradient-to-br from-gray-50 to-white rounded-3xl border border-gray-200 shadow-inner">
-                                    <div className="flex justify-between items-center mb-8">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-xl shadow-blue-200">
-                                                <span className="material-icons text-2xl">grid_view</span>
-                                            </div>
-                                            <div>
-                                                <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest leading-tight">Combinations Matrix</h4>
-                                                <p className="text-[10px] text-gray-500 font-bold uppercase mt-0.5">Manage stock for unique pairs</p>
-                                            </div>
-                                        </div>
                                         <button
                                             type="button"
-                                            onClick={generateCombinations}
-                                            className="px-6 py-2.5 bg-white text-blue-600 border border-blue-200 rounded-xl text-xs font-black shadow-sm hover:shadow-md transition-all flex items-center gap-2"
+                                            onClick={addDescriptionSection}
+                                            className="w-full py-3 bg-indigo-50 text-indigo-600 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
                                         >
-                                            <span className="material-icons text-sm">refresh</span>
-                                            GENERATE ALL
+                                            <MdAdd size={16} /> Add New Section
                                         </button>
                                     </div>
+                                )}
+                            </div>
 
-                                    {formData.skus.length > 0 ? (
-                                        <div className="space-y-4">
-                                            <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm">
-                                                <table className="w-full text-left border-collapse">
-                                                    <thead>
-                                                        <tr className="bg-gray-50 border-b border-gray-100">
-                                                            {formData.variantHeadings.map(vh => (
-                                                                <th key={vh.id} className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">{vh.name || 'Variant'}</th>
-                                                            ))}
-                                                            <th className="px-6 py-4 text-[10px] font-black text-blue-500 uppercase tracking-widest text-right">Stock Count</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-gray-50">
-                                                        {formData.skus.slice((variantPage - 1) * variantsPerPage, variantPage * variantsPerPage).map((sku, idx) => {
-                                                            const originalIdx = (variantPage - 1) * variantsPerPage + idx;
-                                                            return (
-                                                                <tr key={originalIdx} className="hover:bg-blue-50/20 transition-colors">
-                                                                    {formData.variantHeadings.map(vh => (
-                                                                        <td key={vh.id} className="px-6 py-4 text-xs font-bold text-gray-700">
-                                                                            {sku.combination[vh.name] || '-'}
-                                                                        </td>
-                                                                    ))}
-                                                                    <td className="px-6 py-4 text-right">
-                                                                        <div className="flex items-center justify-end gap-3 group/input">
-                                                                            {sku.stock <= 5 && sku.stock > 0 && (
-                                                                                <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest animate-pulse">Low Stock</span>
-                                                                            )}
-                                                                            <input
-                                                                                type="number"
-                                                                                min="0"
-                                                                                value={sku.stock}
-                                                                                onChange={(e) => updateSkuStock(originalIdx, Math.max(0, parseInt(e.target.value) || 0))}
-                                                                                className="w-20 text-right px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 outline-none text-sm font-black text-gray-900 transition-all shadow-inner caret-black"
-                                                                            />
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            );
-                                                        })}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                            {/* Variant Table Pagination */}
-                                            {formData.skus.length > variantsPerPage && (
-                                                <div className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-xl border border-gray-100">
-                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                                        Showing {(variantPage - 1) * variantsPerPage + 1} - {Math.min(variantPage * variantsPerPage, formData.skus.length)} of {formData.skus.length}
-                                                    </span>
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            type="button"
-                                                            disabled={variantPage === 1}
-                                                            onClick={() => setVariantPage(p => p - 1)}
-                                                            className="p-1 px-3 bg-white border border-gray-200 rounded-lg text-xs font-bold disabled:opacity-30"
-                                                        >
-                                                            Prev
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            disabled={variantPage * variantsPerPage >= formData.skus.length}
-                                                            onClick={() => setVariantPage(p => p + 1)}
-                                                            className="p-1 px-3 bg-white border border-gray-200 rounded-lg text-xs font-bold disabled:opacity-30"
-                                                        >
-                                                            Next
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
+                            {/* Warranty - Only for Electronics */}
+                            {isElectronics && (
+                                <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
+                                    <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('warranty')}>
+                                        <div className="flex items-center gap-3">
+                                            <span className="material-icons text-green-500">verified_user</span>
+                                            <h3 className="font-bold text-gray-800 text-sm">Warranty Information</h3>
                                         </div>
-                                    ) : (
-                                        <div className="text-center py-12 opacity-40">
-                                            <p className="text-xs font-bold italic">Click "Generate All" to see the inventory matrix</p>
+                                        {sections.warranty ? <MdExpandLess /> : <MdExpandMore />}
+                                    </div>
+                                    {sections.warranty && (
+                                        <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-3 animate-in fade-in slide-in-from-top-2">
+                                            <div>
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Warranty Summary</label>
+                                                <input
+                                                    type="text"
+                                                    value={formData.warranty.summary}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, summary: e.target.value } }))}
+                                                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-blue-500 outline-none caret-black placeholder:text-gray-500"
+                                                    placeholder="e.g. 1 Year Manufacturer Warranty"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">What's Covered</label>
+                                                <textarea
+                                                    value={formData.warranty.covered}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, covered: e.target.value } }))}
+                                                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20 font-bold text-gray-900 focus:border-blue-500 outline-none caret-black placeholder:text-gray-500"
+                                                    placeholder="Manufacturing defects, parts replacement..."
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">What's Not Covered</label>
+                                                <textarea
+                                                    value={formData.warranty.notCovered}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, notCovered: e.target.value } }))}
+                                                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20 font-bold text-gray-900 focus:border-blue-500 outline-none caret-black placeholder:text-gray-500"
+                                                    placeholder="Physical damage, water damage..."
+                                                />
+                                            </div>
                                         </div>
                                     )}
                                 </div>
                             )}
-                        </div>
-                    </section>
-                </div>
 
-                {/* Right Side: Media & Enhanced Metadata */}
-                <div className="lg:col-span-4 space-y-8">
-
-
-
-                    {/* Metadata Card - Simplified */}
-                    <section className="space-y-4">
-                        {/* Description (Headings with Points) */}
-                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
-                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('description')}>
-                                <div className="flex items-center gap-3">
-                                    <span className="material-icons text-indigo-500">description</span>
-                                    <h3 className="font-bold text-gray-800 text-sm">Product Description</h3>
-                                </div>
-                                {sections.description ? <MdExpandLess /> : <MdExpandMore />}
-                            </div>
-                            {sections.description && (
-                                <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-4 animate-in fade-in slide-in-from-top-2">
-                                    <p className="text-[11px] text-gray-500 font-bold uppercase mb-3">Add headings with bullet points for product details</p>
-                                    <div className="space-y-6">
-                                        {formData.description.map((section, sectionIdx) => (
-                                            <div key={sectionIdx} className="bg-white p-4 rounded-xl border border-gray-200 relative group/section">
-                                                {/* Remove Section Button */}
-                                                {formData.description.length > 1 && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeDescriptionSection(sectionIdx)}
-                                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover/section:opacity-100 transition-all scale-75 group-hover/section:scale-100 z-10"
-                                                    >
-                                                        <MdClose size={12} />
-                                                    </button>
-                                                )}
-                                                
-                                                {/* Heading Input */}
-                                                <div className="mb-3">
-                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Section Heading</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="e.g. Display, Camera, Battery"
-                                                        value={section.heading}
-                                                        onChange={(e) => updateDescriptionHeading(sectionIdx, e.target.value)}
-                                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-black text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all caret-black placeholder:text-gray-500"
-                                                    />
-                                                </div>
-
-                                                {/* Points */}
-                                                <div className="space-y-3">
-                                                    <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">Bullet Points</label>
-                                                    {section.points.map((point, pointIdx) => (
-                                                        <div key={pointIdx} className="flex gap-2 group/point">
-                                                            <span className="text-indigo-500 py-2.5 text-[20px] leading-none">•</span>
-                                                            <input
-                                                                value={point}
-                                                                onChange={(e) => updateDescriptionPoint(sectionIdx, pointIdx, e.target.value)}
-                                                                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all caret-black placeholder:text-gray-500"
-                                                                placeholder="e.g. 16.97 cm (6.68 inch) Full HD+ Display"
-                                                            />
-                                                            {section.points.length > 1 && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => removeDescriptionPoint(sectionIdx, pointIdx)}
-                                                                    className="text-red-400 opacity-0 group-hover/point:opacity-100 transition-all"
-                                                                >
-                                                                    <MdDelete size={16} />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => addDescriptionPoint(sectionIdx)}
-                                                        className="text-[11px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-800 flex items-center gap-1 mt-1"
-                                                    >
-                                                        <MdAdd size={14} /> Add Point
-                                                    </button>
-                                                </div>
-
-                                                {/* Description Content */}
-                                                <div className="mt-4">
-                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Paragraph Content <span className="text-gray-300 font-medium normal-case tracking-normal">(Optional)</span></label>
-                                                    <textarea
-                                                        value={section.content || ''}
-                                                        onChange={(e) => updateDescriptionContent(sectionIdx, e.target.value)}
-                                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-900 focus:border-indigo-600 focus:bg-white outline-none transition-all min-h-[100px] caret-black placeholder:text-gray-500"
-                                                        placeholder="Detailed description paragraph..."
-                                                    />
-                                                </div>
-
-                                                {/* Description Image */}
-                                                <div className="mt-4">
-                                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Section Image <span className="text-gray-300 font-medium normal-case tracking-normal">(Optional)</span></label>
-                                                    <div className="relative group w-full h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center overflow-hidden transition-all hover:border-indigo-400 hover:bg-indigo-50/30">
-                                                        {section.image ? (
-                                                            <>
-                                                                <img 
-                                                                    src={section.image.preview} 
-                                                                    alt="Description" 
-                                                                    className="w-full h-full object-contain p-2" 
-                                                                />
-                                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                                                                    <label className="p-2 bg-white rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
-                                                                        <MdImage className="text-indigo-600" size={20} />
-                                                                        <input 
-                                                                            type="file" 
-                                                                            className="hidden" 
-                                                                            accept="image/*"
-                                                                            onChange={(e) => handleDescriptionImageUpload(e, sectionIdx)} 
-                                                                        />
-                                                                    </label>
-                                                                    <button 
-                                                                        type="button"
-                                                                        onClick={() => removeDescriptionImage(sectionIdx)}
-                                                                        className="p-2 bg-white rounded-full hover:scale-110 transition-transform shadow-lg"
-                                                                    >
-                                                                        <MdDelete className="text-red-600" size={20} />
-                                                                    </button>
-                                                                </div>
-                                                            </>
-                                                        ) : (
-                                                            <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-                                                                <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-2 shadow-sm group-hover:scale-110 transition-transform">
-                                                                    <MdAdd size={20} />
-                                                                </div>
-                                                                <span className="text-xs font-bold text-gray-600">Upload Image</span>
-                                                                <input 
-                                                                    type="file" 
-                                                                    className="hidden" 
-                                                                    accept="image/*"
-                                                                    onChange={(e) => handleDescriptionImageUpload(e, sectionIdx)} 
-                                                                />
-                                                            </label>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={addDescriptionSection}
-                                        className="w-full py-3 bg-indigo-50 text-indigo-600 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <MdAdd size={16} /> Add New Section
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Warranty - Only for Electronics */}
-                        {isElectronics && (
+                            {/* Return Policy - Always shown */}
                             <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
-                                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('warranty')}>
+                                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('returnPolicy')}>
                                     <div className="flex items-center gap-3">
-                                        <span className="material-icons text-green-500">verified_user</span>
-                                        <h3 className="font-bold text-gray-800 text-sm">Warranty Information</h3>
+                                        <span className="material-icons text-orange-500">sync_alt</span>
+                                        <h3 className="font-bold text-gray-800 text-sm">Return Policy</h3>
                                     </div>
-                                    {sections.warranty ? <MdExpandLess /> : <MdExpandMore />}
+                                    {sections.returnPolicy ? <MdExpandLess /> : <MdExpandMore />}
                                 </div>
-                                {sections.warranty && (
+                                {sections.returnPolicy && (
                                     <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-3 animate-in fade-in slide-in-from-top-2">
                                         <div>
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Warranty Summary</label>
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Return Window (Days)</label>
                                             <input
-                                                type="text"
-                                                value={formData.warranty.summary}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, summary: e.target.value } }))}
+                                                type="number"
+                                                value={formData.returnPolicy.days}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, days: parseInt(e.target.value) || 0 } }))}
                                                 className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-blue-500 outline-none caret-black placeholder:text-gray-500"
-                                                placeholder="e.g. 1 Year Manufacturer Warranty"
+                                                placeholder="7"
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">What's Covered</label>
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Policy Description</label>
                                             <textarea
-                                                value={formData.warranty.covered}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, covered: e.target.value } }))}
-                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20 font-bold text-gray-900 focus:border-blue-500 outline-none caret-black placeholder:text-gray-500"
-                                                placeholder="Manufacturing defects, parts replacement..."
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">What's Not Covered</label>
-                                            <textarea
-                                                value={formData.warranty.notCovered}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, warranty: { ...prev.warranty, notCovered: e.target.value } }))}
-                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-20 font-bold text-gray-900 focus:border-blue-500 outline-none caret-black placeholder:text-gray-500"
-                                                placeholder="Physical damage, water damage..."
+                                                value={formData.returnPolicy.description}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, description: e.target.value } }))}
+                                                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-24 font-bold text-gray-900 focus:border-blue-500 outline-none caret-black placeholder:text-gray-500"
+                                                placeholder="Easy returns within 7 days. Product must be unused with original tags..."
                                             />
                                         </div>
                                     </div>
                                 )}
                             </div>
-                        )}
 
-                        {/* Return Policy - Always shown */}
-                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
-                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('returnPolicy')}>
-                                <div className="flex items-center gap-3">
-                                    <span className="material-icons text-orange-500">sync_alt</span>
-                                    <h3 className="font-bold text-gray-800 text-sm">Return Policy</h3>
-                                </div>
-                                {sections.returnPolicy ? <MdExpandLess /> : <MdExpandMore />}
-                            </div>
-                            {sections.returnPolicy && (
-                                <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-3 animate-in fade-in slide-in-from-top-2">
-                                    <div>
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Return Window (Days)</label>
-                                        <input
-                                            type="number"
-                                            value={formData.returnPolicy.days}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, days: parseInt(e.target.value) || 0 } }))}
-                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-blue-500 outline-none caret-black placeholder:text-gray-500"
-                                            placeholder="7"
-                                        />
+                            {/* Specifications - Optional */}
+                            <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
+                                <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('specifications')}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-icons text-purple-500">fact_check</span>
+                                        <h3 className="font-bold text-gray-800 text-sm">Specifications (Optional)</h3>
                                     </div>
-                                    <div>
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Policy Description</label>
-                                        <textarea
-                                            value={formData.returnPolicy.description}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, returnPolicy: { ...prev.returnPolicy, description: e.target.value } }))}
-                                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs h-24 font-bold text-gray-900 focus:border-blue-500 outline-none caret-black placeholder:text-gray-500"
-                                            placeholder="Easy returns within 7 days. Product must be unused with original tags..."
-                                        />
-                                    </div>
+                                    {sections.specifications ? <MdExpandLess /> : <MdExpandMore />}
                                 </div>
-                            )}
-                        </div>
-
-                        {/* Specifications - Optional */}
-                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm transition-all">
-                            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => toggleSection('specifications')}>
-                                <div className="flex items-center gap-3">
-                                    <span className="material-icons text-purple-500">fact_check</span>
-                                    <h3 className="font-bold text-gray-800 text-sm">Specifications (Optional)</h3>
-                                </div>
-                                {sections.specifications ? <MdExpandLess /> : <MdExpandMore />}
-                            </div>
-                            {sections.specifications && (
-                                <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-4 animate-in fade-in slide-in-from-top-2">
-                                    {formData.specifications.map((group, groupIdx) => (
-                                        <div key={groupIdx} className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
-                                            <div className="flex items-center gap-3">
-                                                <input
-                                                    type="text"
-                                                    value={group.groupName}
-                                                    onChange={(e) => updateSpecificationGroupName(groupIdx, e.target.value)}
-                                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 focus:border-purple-500 outline-none caret-black placeholder:text-gray-500"
-                                                    placeholder="Group Name (e.g., Warranty, Battery Features)"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeSpecificationGroup(groupIdx)}
-                                                    className="p-2 hover:bg-red-50 rounded-lg text-red-500 transition-colors"
-                                                    title="Remove Group"
-                                                >
-                                                    <MdDelete size={20} />
-                                                </button>
-                                            </div>
-                                            
-                                            {group.specs.map((spec, specIdx) => (
-                                                <div key={specIdx} className="flex items-center gap-2">
+                                {sections.specifications && (
+                                    <div className="p-3 md:p-4 bg-gray-50/50 border-t border-gray-100 space-y-3 md:space-y-4 animate-in fade-in slide-in-from-top-2">
+                                        {formData.specifications.map((group, groupIdx) => (
+                                            <div key={groupIdx} className="bg-white rounded-2xl border border-gray-200 p-3 md:p-4 space-y-2 md:space-y-3">
+                                                <div className="flex items-center gap-3">
                                                     <input
                                                         type="text"
-                                                        value={spec.key}
-                                                        onChange={(e) => updateSpec(groupIdx, specIdx, 'key', e.target.value)}
-                                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold text-gray-900 focus:border-purple-500 outline-none caret-black placeholder:text-gray-500"
-                                                        placeholder="Key (e.g., Battery Capacity)"
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        value={spec.value}
-                                                        onChange={(e) => updateSpec(groupIdx, specIdx, 'value', e.target.value)}
-                                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-purple-500 outline-none caret-black placeholder:text-gray-500"
-                                                        placeholder="Value (e.g., 6500 mAh)"
+                                                        value={group.groupName}
+                                                        onChange={(e) => updateSpecificationGroupName(groupIdx, e.target.value)}
+                                                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 focus:border-purple-500 outline-none caret-black placeholder:text-gray-500"
+                                                        placeholder="Group Name (e.g., Warranty, Battery Features)"
                                                     />
                                                     <button
                                                         type="button"
-                                                        onClick={() => removeSpecFromGroup(groupIdx, specIdx)}
-                                                        className="p-1.5 hover:bg-red-50 rounded-lg text-red-400 transition-colors"
+                                                        onClick={() => removeSpecificationGroup(groupIdx)}
+                                                        className="p-2 hover:bg-red-50 rounded-lg text-red-500 transition-colors"
+                                                        title="Remove Group"
                                                     >
-                                                        <MdDelete size={16} />
+                                                        <MdDelete size={20} />
                                                     </button>
                                                 </div>
-                                            ))}
-                                            
-                                            <button
-                                                type="button"
-                                                onClick={() => addSpecToGroup(groupIdx)}
-                                                className="w-full py-2 border border-dashed border-purple-300 rounded-lg text-purple-600 text-xs font-bold hover:bg-purple-50 transition-colors flex items-center justify-center gap-1"
-                                            >
-                                                <MdAdd size={16} /> Add Specification
-                                            </button>
-                                        </div>
-                                    ))}
-                                    
-                                    <button
-                                        type="button"
-                                        onClick={addSpecificationGroup}
-                                        className="w-full py-2.5 bg-purple-100 text-purple-600 rounded-xl font-bold hover:bg-purple-200 transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        <MdAdd size={20} /> Add Specification Group
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </section>
-                </div>
-            </div>
-        </div>
 
-        {/* Paste Highlights Modal */}
-        {showPasteModal && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-gray-900">Paste Highlights</h3>
-                        <button
-                            type="button"
-                            onClick={() => { setShowPasteModal(false); setPasteText(''); }}
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                        >
-                            <MdClose size={20} />
-                        </button>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                        Paste text with <strong>first line as heading</strong> and <strong>subsequent lines as bullet points</strong>.
-                    </p>
-                    <textarea
-                        value={pasteText}
-                        onChange={(e) => setPasteText(e.target.value)}
-                        className="w-full h-40 border border-gray-200 rounded-xl p-3 text-sm resize-none focus:border-yellow-500 outline-none text-gray-900 caret-black placeholder:text-gray-500"
-                        placeholder={`Easy Payment Options\nNo cost EMI starting from ₹6,667/month\nCash on Delivery\nNet banking & Credit/ Debit/ ATM card`}
-                    />
-                    <div className="flex gap-3">
-                        <button
-                            type="button"
-                            onClick={() => { setShowPasteModal(false); setPasteText(''); }}
-                            className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handlePasteHighlights}
-                            className="flex-1 py-2.5 bg-yellow-500 text-white rounded-xl text-sm font-bold hover:bg-yellow-600"
-                        >
-                            Parse & Add
-                        </button>
+                                                {group.specs.map((spec, specIdx) => (
+                                                    <div key={specIdx} className="flex items-center gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={spec.key}
+                                                            onChange={(e) => updateSpec(groupIdx, specIdx, 'key', e.target.value)}
+                                                            className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold text-gray-900 focus:border-purple-500 outline-none caret-black placeholder:text-gray-500"
+                                                            placeholder="Key (e.g., Battery Capacity)"
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            value={spec.value}
+                                                            onChange={(e) => updateSpec(groupIdx, specIdx, 'value', e.target.value)}
+                                                            className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 focus:border-purple-500 outline-none caret-black placeholder:text-gray-500"
+                                                            placeholder="Value (e.g., 6500 mAh)"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeSpecFromGroup(groupIdx, specIdx)}
+                                                            className="p-1.5 hover:bg-red-50 rounded-lg text-red-400 transition-colors"
+                                                        >
+                                                            <MdDelete size={16} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => addSpecToGroup(groupIdx)}
+                                                    className="w-full py-2 border border-dashed border-purple-300 rounded-lg text-purple-600 text-xs font-bold hover:bg-purple-50 transition-colors flex items-center justify-center gap-1"
+                                                >
+                                                    <MdAdd size={16} /> Add Specification
+                                                </button>
+                                            </div>
+                                        ))}
+
+                                        <button
+                                            type="button"
+                                            onClick={addSpecificationGroup}
+                                            className="w-full py-2.5 bg-purple-100 text-purple-600 rounded-xl font-bold hover:bg-purple-200 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <MdAdd size={20} /> Add Specification Group
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
                     </div>
                 </div>
             </div>
-        )}
+
+            {/* Paste Highlights Modal */}
+            {showPasteModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-4 md:p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-bold text-gray-900">Paste Highlights</h3>
+                            <button
+                                type="button"
+                                onClick={() => { setShowPasteModal(false); setPasteText(''); }}
+                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                                <MdClose size={20} />
+                            </button>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                            Paste text with <strong>first line as heading</strong> and <strong>subsequent lines as bullet points</strong>.
+                        </p>
+                        <textarea
+                            value={pasteText}
+                            onChange={(e) => setPasteText(e.target.value)}
+                            className="w-full h-40 border border-gray-200 rounded-xl p-3 text-sm resize-none focus:border-yellow-500 outline-none text-gray-900 caret-black placeholder:text-gray-500"
+                            placeholder={`Easy Payment Options\nNo cost EMI starting from ₹6,667/month\nCash on Delivery\nNet banking & Credit/ Debit/ ATM card`}
+                        />
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => { setShowPasteModal(false); setPasteText(''); }}
+                                className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handlePasteHighlights}
+                                className="flex-1 py-2.5 bg-yellow-500 text-white rounded-xl text-sm font-bold hover:bg-yellow-600"
+                            >
+                                Parse & Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

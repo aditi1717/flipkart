@@ -285,3 +285,24 @@ export const toggleUserStatus = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+// @desc    Update FCM Token
+// @route   POST /api/auth/fcm-token
+// @access  Private
+export const updateFcmToken = async (req, res) => {
+    console.log('Update FCM Token request received:', req.body);
+    try {
+        const { fcmToken } = req.body;
+        if (!fcmToken) return res.status(400).json({ message: 'FCM Token is required' });
+
+        const user = await User.findById(req.user._id);
+        if (user) {
+            user.fcmToken = fcmToken;
+            await user.save();
+            res.json({ message: 'FCM Token updated successfully' });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

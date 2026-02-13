@@ -29,7 +29,7 @@ const UserDetail = () => {
 
     if (!user && !isUserLoading) {
         return (
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col items-center justify-center h-[60vh] text-gray-500"
@@ -39,11 +39,11 @@ const UserDetail = () => {
                 </div>
                 <h2 className="text-2xl font-black uppercase tracking-widest text-gray-900 mb-2">User Not Found</h2>
                 <p className="text-sm font-medium text-gray-400 mb-6 italic px-8 text-center max-w-md">
-                    The requested account could not be located in our secure directory. 
+                    The requested account could not be located in our secure directory.
                     It may have been permanently removed or the ID is incorrect.
                 </p>
-                <button 
-                    onClick={() => navigate('/admin/users')} 
+                <button
+                    onClick={() => navigate('/admin/users')}
                     className="px-8 py-3 bg-gray-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl hover:bg-black transition-all active:scale-95"
                 >
                     Back to Directory
@@ -116,11 +116,11 @@ const UserDetail = () => {
     };
 
     return (
-        <div className="space-y-6 max-w-[1400px] mx-auto relative pb-20">
+        <div className="space-y-4 md:space-y-6 max-w-[1400px] mx-auto relative pb-10 md:pb-20">
             {/* Loading Overlay */}
             <AnimatePresence>
                 {isUserLoading && user && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -135,27 +135,27 @@ const UserDetail = () => {
             </AnimatePresence>
 
             {/* Header / Back Navigation */}
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex items-center gap-6 mb-2"
+                className="flex items-center gap-3 md:gap-6 mb-1 md:mb-2"
             >
                 <button
                     onClick={() => navigate('/admin/users')}
-                    className="w-12 h-12 flex items-center justify-center bg-white hover:bg-gray-900 rounded-2xl transition-all text-gray-400 hover:text-white border border-gray-100 shadow-sm active:scale-90"
+                    className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white hover:bg-gray-900 rounded-xl md:rounded-2xl transition-all text-gray-400 hover:text-white border border-gray-100 shadow-sm active:scale-90"
                 >
-                    <MdArrowBack size={24} />
+                    <MdArrowBack size={20} className="md:w-[24px] md:h-[24px]" />
                 </button>
                 <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight leading-none uppercase italic">Profile View</h1>
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <h1 className="text-xl md:text-3xl font-black text-gray-900 tracking-tight leading-none uppercase italic">Profile View</h1>
                         <span className="hidden md:block w-12 h-0.5 bg-blue-600 rounded-full"></span>
                         <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-blue-50/50 rounded-full border border-blue-100">
-                           <MdVerifiedUser size={14} className="text-blue-600" />
-                           <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 italic">Verified Identity</span>
+                            <MdVerifiedUser size={14} className="text-blue-600" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 italic">Verified Identity</span>
                         </div>
                     </div>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em] mt-2 italic flex items-center gap-2">
+                    <p className="text-[8px] md:text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em] mt-1 md:mt-2 italic flex items-center gap-2">
                         System Reference <span className="text-gray-900">{user?.id || user?._id}</span>
                     </p>
                 </div>
@@ -163,29 +163,27 @@ const UserDetail = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 {/* Profile Information */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="lg:col-span-4 bg-white/80 backdrop-blur-xl rounded-[2.5rem] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col group sticky top-6"
+                    className="lg:col-span-4 bg-white/80 backdrop-blur-xl rounded-[2rem] md:rounded-[2.5rem] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col group sticky top-6"
                 >
-                    <div className="p-10 pb-6 text-center">
+                    <div className="p-6 md:p-10 md:pb-6 text-center">
                         <div className="relative inline-block group-hover:scale-105 transition-transform duration-500">
-                            <div className="w-36 h-36 rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl mx-auto rotate-6 group-hover:rotate-0 transition-transform">
+                            <div className="w-24 h-24 md:w-36 md:h-36 rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 border-white shadow-2xl mx-auto rotate-6 group-hover:rotate-0 transition-transform">
                                 <img src={user?.avatar || 'https://www.w3schools.com/howto/img_avatar.png'} className="w-full h-full object-cover -rotate-6 group-hover:rotate-0 transition-transform scale-110" alt="" />
                             </div>
-                            <span className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center ${
-                                user?.status === 'active' ? 'bg-green-500' : 'bg-red-500'
-                            }`}>
-                                <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
+                            <span className={`absolute -bottom-2 -right-2 w-6 h-6 md:w-8 md:h-8 rounded-xl md:rounded-2xl border-2 md:border-4 border-white shadow-xl flex items-center justify-center ${user?.status === 'active' ? 'bg-green-500' : 'bg-red-500'
+                                }`}>
+                                <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white rounded-full animate-ping"></span>
                             </span>
                         </div>
-                        <h2 className="text-2xl font-black text-gray-900 mt-8 tracking-tighter italic uppercase">{user?.name}</h2>
-                        <div className={`mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-2xl border text-[10px] font-black uppercase tracking-[0.2em] ${
-                            user?.status === 'active' 
-                                ? 'bg-green-50/50 text-green-600 border-green-100' 
-                                : 'bg-red-50/50 text-red-600 border-red-100'
-                        }`}>
+                        <h2 className="text-xl md:text-2xl font-black text-gray-900 mt-6 md:mt-8 tracking-tighter italic uppercase">{user?.name}</h2>
+                        <div className={`mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-2xl border text-[10px] font-black uppercase tracking-[0.2em] ${user?.status === 'active'
+                            ? 'bg-green-50/50 text-green-600 border-green-100'
+                            : 'bg-red-50/50 text-red-600 border-red-100'
+                            }`}>
                             Account {user?.status}
                         </div>
                     </div>
@@ -210,11 +208,10 @@ const UserDetail = () => {
 
                         <button
                             onClick={handleToggleStatus}
-                            className={`w-full py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 mt-6 shadow-2xl active:scale-95 border ${
-                                user?.status === 'active'
-                                    ? 'bg-red-500 text-white border-red-600 hover:bg-black hover:border-black shadow-red-200'
-                                    : 'bg-green-600 text-white border-green-700 hover:bg-black hover:border-black shadow-green-200'
-                            }`}
+                            className={`w-full py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 mt-6 shadow-2xl active:scale-95 border ${user?.status === 'active'
+                                ? 'bg-red-500 text-white border-red-600 hover:bg-black hover:border-black shadow-red-200'
+                                : 'bg-green-600 text-white border-green-700 hover:bg-black hover:border-black shadow-green-200'
+                                }`}
                         >
                             {user?.status === 'active' ? <><MdBlock size={18} /> Disable Policy</> : <><MdCheckCircle size={18} /> Restore Access</>}
                         </button>
@@ -224,42 +221,42 @@ const UserDetail = () => {
                 {/* Stats & History */}
                 <div className="lg:col-span-8 space-y-6">
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                         {stats.map((stat, idx) => (
-                            <motion.div 
-                                key={idx} 
+                            <motion.div
+                                key={idx}
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.2 + idx * 0.05 }}
-                                className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center group hover:bg-gray-900 transition-all cursor-default overflow-hidden relative"
+                                className="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center group hover:bg-gray-900 transition-all cursor-default overflow-hidden relative"
                             >
-                                <div className={`absolute -right-4 -top-4 w-20 h-20 rounded-full bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-10 blur-xl transition-opacity`}></div>
-                                <div className={`w-14 h-14 rounded-2xl mb-4 flex items-center justify-center bg-${stat.color}-50 text-${stat.color}-500 group-hover:bg-white/10 group-hover:text-white transition-all duration-500 rotate-3 group-hover:rotate-0`}>
-                                    <stat.icon size={28} />
+                                <div className={`absolute -right-4 -top-4 w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-10 blur-xl transition-opacity`}></div>
+                                <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl mb-3 md:mb-4 flex items-center justify-center bg-${stat.color}-50 text-${stat.color}-500 group-hover:bg-white/10 group-hover:text-white transition-all duration-500 rotate-3 group-hover:rotate-0`}>
+                                    <stat.icon size={20} className="md:w-[28px] md:h-[28px]" />
                                 </div>
-                                <p className="text-2xl font-black text-gray-900 group-hover:text-white leading-none tracking-tighter transition-colors italic">{stat.value}</p>
-                                <p className="text-[9px] font-black text-gray-400 group-hover:text-gray-100/50 uppercase tracking-widest mt-3 transition-colors">{stat.label}</p>
+                                <p className="text-lg md:text-2xl font-black text-gray-900 group-hover:text-white leading-none tracking-tighter transition-colors italic">{stat.value}</p>
+                                <p className="text-[8px] md:text-[9px] font-black text-gray-400 group-hover:text-gray-100/50 uppercase tracking-widest mt-2 md:mt-3 transition-colors">{stat.label}</p>
                             </motion.div>
                         ))}
                     </div>
 
                     {/* Activity Section */}
-                    <motion.div 
-                         initial={{ opacity: 0, y: 20 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         transition={{ delay: 0.4 }}
-                         className="bg-white rounded-[2.5rem] border border-gray-100 shadow-2xl overflow-hidden flex flex-col h-full min-h-[600px]"
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="bg-white rounded-[2rem] md:rounded-[2.5rem] border border-gray-100 shadow-2xl overflow-hidden flex flex-col h-full min-h-[500px] md:min-h-[600px]"
                     >
-                        <div className="p-8 border-b border-gray-50 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 shadow-inner">
-                                    <MdHistory size={24} />
+                        <div className="p-4 md:p-8 border-b border-gray-50 flex flex-col xl:flex-row xl:items-center justify-between gap-4 md:gap-6">
+                            <div className="flex items-center gap-3 md:gap-4">
+                                <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-50 rounded-xl md:rounded-2xl flex items-center justify-center text-gray-400 shadow-inner">
+                                    <MdHistory size={20} className="md:w-[24px] md:h-[24px]" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-black text-gray-900 tracking-tight uppercase italic">
+                                    <h3 className="text-lg md:text-xl font-black text-gray-900 tracking-tight uppercase italic">
                                         {activeTab === 'Returns' ? 'Returns Ledger' : 'Trade Activity'}
                                     </h3>
-                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-1 italic">Audit history for all interactions</p>
+                                    <p className="text-[9px] md:text-[10px] font-black text-gray-300 uppercase tracking-widest mt-0.5 md:mt-1 italic">Audit history for all interactions</p>
                                 </div>
                             </div>
 
@@ -268,11 +265,10 @@ const UserDetail = () => {
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
-                                        className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap active:scale-90 ${
-                                            activeTab === tab
-                                                ? 'bg-gray-900 text-white shadow-2xl shadow-gray-400 rotate-1'
-                                                : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600'
-                                        }`}
+                                        className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap active:scale-90 ${activeTab === tab
+                                            ? 'bg-gray-900 text-white shadow-2xl shadow-gray-400 rotate-1'
+                                            : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                                            }`}
                                     >
                                         {tab}
                                     </button>
@@ -280,16 +276,18 @@ const UserDetail = () => {
                             </div>
                         </div>
 
-                        <div className="p-8 flex-1 overflow-y-auto max-h-[800px] space-y-4">
+
+
+                        <div className="p-4 md:p-8 flex-1 overflow-y-auto max-h-[600px] md:max-h-[800px] space-y-3 md:space-y-4">
                             <AnimatePresence mode="popLayout">
                                 {filteredItems.length === 0 ? (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 0.4 }}
                                         className="flex flex-col items-center justify-center py-32 text-center"
                                     >
                                         <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                                           <MdShoppingBag size={48} className="text-gray-300" />
+                                            <MdShoppingBag size={48} className="text-gray-300" />
                                         </div>
                                         <p className="text-xs font-black uppercase tracking-[0.3em] italic text-gray-900">End of records</p>
                                         <p className="text-[9px] font-bold text-gray-400 mt-2">No {activeTab.toLowerCase()} items found</p>
@@ -298,13 +296,13 @@ const UserDetail = () => {
                                     filteredItems.map(item => {
                                         const isReturn = item.type === 'Return' || item.type === 'Replacement';
                                         return (
-                                            <motion.div 
+                                            <motion.div
                                                 layout
                                                 initial={{ opacity: 0, x: 20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 exit={{ opacity: 0, scale: 0.95 }}
-                                                key={item.id} 
-                                                className="p-6 bg-gray-50/50 rounded-[2rem] border border-gray-100 flex flex-col md:flex-row gap-8 hover:bg-white hover:shadow-2xl hover:scale-[1.01] transition-all group overflow-hidden relative cursor-default"
+                                                key={item.id}
+                                                className="p-4 md:p-6 bg-gray-50/50 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 flex flex-col md:flex-row gap-4 md:gap-8 hover:bg-white hover:shadow-2xl hover:scale-[1.01] transition-all group overflow-hidden relative cursor-default"
                                             >
                                                 <div className="flex-1 space-y-4 relative z-10">
                                                     <div className="flex justify-between items-start">
@@ -383,8 +381,8 @@ const UserDetail = () => {
                         </div>
                     </motion.div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

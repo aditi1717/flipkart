@@ -154,137 +154,137 @@ const Dashboard = () => {
     }, [orders]);
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-4 animate-in fade-in duration-500">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-black text-gray-900 tracking-tight">Dashboard Overview</h1>
+                <h1 className="text-xl md:text-3xl font-black text-gray-900 tracking-tight">Dashboard Overview</h1>
                 <p className="text-gray-500 mt-2 font-medium">Welcome back! Here's what's happening today.</p>
             </div>
 
             {/* 1. Key Metrics Grid (Old Stats + Revenue) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Standard Counts */}
-                <div 
+                <div
                     onClick={() => navigate('/admin/products')}
-                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
                 >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Products</p>
-                        <h3 className="text-2xl font-black text-gray-900">{products.length.toLocaleString()}</h3>
+                        <h3 className="text-xl font-black text-gray-900">{products.length.toLocaleString()}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                    <div className="w-10 h-10 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
                         <MdInventory size={24} />
                     </div>
                 </div>
 
-                <div 
+                <div
                     onClick={() => navigate('/admin/orders')}
-                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
                 >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Orders</p>
-                        <h3 className="text-2xl font-black text-gray-900">{orders.length.toLocaleString()}</h3>
+                        <h3 className="text-xl font-black text-gray-900">{orders.length.toLocaleString()}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                    <div className="w-10 h-10 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
                         <MdShoppingCart size={24} />
                     </div>
                 </div>
 
-                <div 
+                <div
                     onClick={() => navigate('/admin/users')}
-                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
                 >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Users</p>
-                        <h3 className="text-2xl font-black text-gray-900">{users.length.toLocaleString()}</h3>
+                        <h3 className="text-xl font-black text-gray-900">{users.length.toLocaleString()}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                    <div className="w-10 h-10 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
                         <MdPeople size={24} />
                     </div>
                 </div>
 
-                <div 
+                <div
                     onClick={() => navigate('/admin/coupons')}
-                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer"
                 >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Active Coupons</p>
-                        <h3 className="text-2xl font-black text-gray-900">{activeCoupons}</h3>
+                        <h3 className="text-xl font-black text-gray-900">{activeCoupons}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                    <div className="w-10 h-10 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
                         <MdLocalOffer size={24} />
                     </div>
                 </div>
             </div>
 
             {/* 2. Financial Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div 
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div
                     onClick={() => navigate('/admin/orders')}
-                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all cursor-pointer"
                 >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Revenue</p>
-                        <h3 className="text-2xl font-black text-gray-900">₹{totalRevenue.toLocaleString()}</h3>
+                        <h3 className="text-xl font-black text-gray-900">₹{totalRevenue.toLocaleString()}</h3>
                         <p className="text-xs font-medium text-green-600 mt-1 flex items-center gap-1">
                             <MdTrendingUp /> +12% from last month
                         </p>
                     </div>
-                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center">
                         <MdAttachMoney size={24} />
                     </div>
                 </div>
-                <div 
+                <div
                     onClick={() => navigate('/admin/orders')}
-                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all cursor-pointer"
+                    className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all cursor-pointer"
                 >
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Today's Sales</p>
-                        <h3 className="text-2xl font-black text-gray-900">₹{todayRevenue.toLocaleString()}</h3>
+                        <h3 className="text-xl font-black text-gray-900">₹{todayRevenue.toLocaleString()}</h3>
                         <p className="text-xs font-medium text-gray-500 mt-1">
                             {orders.filter(o => new Date(o.date).toDateString() === new Date().toDateString()).length} orders today
                         </p>
                     </div>
-                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center">
                         <MdAttachMoney size={24} />
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Avg. Order Value</p>
-                        <h3 className="text-2xl font-black text-gray-900">₹{Math.round(avgOrderValue).toLocaleString()}</h3>
+                        <h3 className="text-xl font-black text-gray-900">₹{Math.round(avgOrderValue).toLocaleString()}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gray-50 text-gray-600 rounded-2xl flex items-center justify-center">
                         <MdCategory size={24} />
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 {/* Left Column (2/3) */}
-                <div className="lg:col-span-2 space-y-8">
+                <div className="lg:col-span-2 space-y-4">
 
                     {/* 2. Quick Actions & Pending Tasks Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {/* Quick Actions */}
-                        <div className="bg-gray-800 rounded-3xl p-6 text-white shadow-lg shadow-gray-200">
+                        <div className="bg-gray-800 rounded-xl p-4 text-white shadow-lg shadow-gray-200">
                             <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                                 <MdAccessTime className="text-gray-300" /> Quick Actions
                             </h3>
                             <div className="grid grid-cols-2 gap-3">
-                                <button onClick={() => navigate('/admin/products')} className="bg-white/10 hover:bg-white/20 transition p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
+                                <button onClick={() => navigate('/admin/products')} className="bg-white/10 hover:bg-white/20 transition p-2 rounded-lg flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
                                     <MdAddBox size={24} className="text-gray-200" />
                                     Add Product
                                 </button>
-                                <button onClick={() => navigate('/admin/coupons')} className="bg-white/10 hover:bg-white/20 transition p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
+                                <button onClick={() => navigate('/admin/coupons')} className="bg-white/10 hover:bg-white/20 transition p-2 rounded-lg flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
                                     <MdLocalOffer size={24} className="text-gray-200" />
                                     Create Coupon
                                 </button>
-                                <button onClick={() => navigate('/admin/categories')} className="bg-white/10 hover:bg-white/20 transition p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
+                                <button onClick={() => navigate('/admin/categories')} className="bg-white/10 hover:bg-white/20 transition p-2 rounded-lg flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
                                     <MdCategory size={24} className="text-gray-200" />
                                     Add Category
                                 </button>
-                                <button onClick={() => navigate('/admin/support')} className="bg-white/10 hover:bg-white/20 transition p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
+                                <button onClick={() => navigate('/admin/support')} className="bg-white/10 hover:bg-white/20 transition p-2 rounded-lg flex flex-col items-center justify-center gap-2 text-xs font-bold border border-white/10">
                                     <MdPeople size={24} className="text-gray-200" />
                                     View Users
                                 </button>
@@ -292,12 +292,12 @@ const Dashboard = () => {
                         </div>
 
                         {/* Pending Tasks */}
-                        <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                             <h3 className="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2">
                                 <MdAssignment className="text-gray-400" /> Pending Tasks
                             </h3>
                             <div className="space-y-3">
-                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100 mb-2 cursor-pointer hover:bg-gray-100 transition" onClick={() => navigate('/admin/orders?status=Pending')}>
+                                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100 mb-2 cursor-pointer hover:bg-gray-100 transition" onClick={() => navigate('/admin/orders?status=Pending')}>
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-xs ring-2 ring-white">
                                             {pendingOrders}
@@ -306,7 +306,7 @@ const Dashboard = () => {
                                     </div>
                                     <MdChevronRight className="text-gray-400" />
                                 </div>
-                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100 mb-2 cursor-pointer hover:bg-gray-100 transition" onClick={() => navigate('/admin/returns')}>
+                                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100 mb-2 cursor-pointer hover:bg-gray-100 transition" onClick={() => navigate('/admin/returns')}>
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-xs ring-2 ring-white">
                                             {pendingReturns}
@@ -315,7 +315,7 @@ const Dashboard = () => {
                                     </div>
                                     <MdChevronRight className="text-gray-400" />
                                 </div>
-                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition" onClick={() => navigate('/admin/support')}>
+                                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100 cursor-pointer hover:bg-gray-100 transition" onClick={() => navigate('/admin/support')}>
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-xs ring-2 ring-white">
                                             {openTickets}
@@ -329,10 +329,10 @@ const Dashboard = () => {
                     </div>
 
                     {/* 3. Recent Activity Feed */}
-                    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                    <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="font-bold text-lg text-gray-800">Recent Activity</h3>
-                            <button 
+                            <button
                                 onClick={() => navigate('/admin/orders')}
                                 className="text-xs font-bold text-gray-600 hover:bg-gray-50 px-3 py-1 border border-gray-200 rounded-full transition"
                             >
@@ -344,8 +344,8 @@ const Dashboard = () => {
                             <div className="absolute top-2 left-[19px] bottom-2 w-0.5 bg-gray-100"></div>
 
                             {recentActivity.map((activity, index) => (
-                                <div 
-                                    key={index} 
+                                <div
+                                    key={index}
                                     onClick={() => {
                                         if (activity.type === 'order') navigate(`/admin/orders/${activity.id}`);
                                         else if (activity.type === 'user') navigate(`/admin/users/${activity.id}`);
@@ -367,9 +367,9 @@ const Dashboard = () => {
                 </div>
 
                 {/* Right Column (1/3) */}
-                <div className="space-y-8">
+                <div className="space-y-4">
                     {/* 4. Low Stock Alerts */}
-                    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                    <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                         <div className="flex items-center gap-2 mb-4">
                             <MdWarning className="text-gray-500" size={20} />
                             <h3 className="font-bold text-lg text-gray-800">Low Stock Alert</h3>
@@ -379,10 +379,10 @@ const Dashboard = () => {
                                 <p className="text-sm text-gray-400 italic">No low stock items.</p>
                             ) : (
                                 lowStockProducts.map(product => (
-                                    <div 
-                                        key={product.id} 
+                                    <div
+                                        key={product.id}
                                         onClick={() => navigate(`/admin/products/edit/${product.id}`)}
-                                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition"
+                                        className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-100 cursor-pointer hover:bg-gray-100 transition"
                                     >
                                         <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover bg-white" />
                                         <div className="flex-1 min-w-0">
@@ -396,15 +396,15 @@ const Dashboard = () => {
                     </div>
 
                     {/* 5. Top Customers */}
-                    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+                    <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                         <div className="flex items-center gap-2 mb-4">
                             <MdPeople className="text-gray-500" size={20} />
                             <h3 className="font-bold text-lg text-gray-800">Top Customers</h3>
                         </div>
                         <div className="space-y-4">
                             {topCustomers.map((customer, idx) => (
-                                <div 
-                                    key={idx} 
+                                <div
+                                    key={idx}
                                     onClick={() => customer.id && navigate(`/admin/users/${customer.id}`)}
                                     className={`flex items-center justify-between border-b border-gray-50 last:border-0 pb-3 last:pb-0 ${customer.id ? 'cursor-pointer group' : ''}`}
                                 >
