@@ -55,7 +55,7 @@ const Cart = () => {
         <div className="bg-gradient-to-b from-blue-50 via-white to-gray-50 min-h-screen">
             {/* Header */}
             <div className="bg-white sticky top-0 z-50 shadow-md md:shadow-sm md:static md:bg-transparent md:mb-4 border-b border-blue-100">
-                <div className="px-4 py-4 flex items-center gap-3 md:max-w-[1248px] md:mx-auto md:px-0">
+                <div className="px-4 py-4 flex items-center gap-3 w-full md:px-4">
                     <button
                         onClick={() => navigate(-1)}
                         className="material-icons p-2 -ml-2 active:bg-blue-50 rounded-full transition-all cursor-pointer relative z-[60] md:hidden text-blue-600 hover:bg-blue-100"
@@ -63,8 +63,7 @@ const Cart = () => {
                         arrow_back
                     </button>
                     <div className="flex items-center gap-3">
-                        <span className="material-icons text-blue-600 text-3xl">shopping_cart</span>
-                        <h1 className="text-xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent md:text-3xl">
+                        <h1 className="text-lg font-semibold text-gray-800 md:text-3xl">
                             My Cart ({cart.length})
                         </h1>
                     </div>
@@ -72,36 +71,36 @@ const Cart = () => {
             </div>
 
             {/* Main Content Grid */}
-            <div className="md:max-w-[1248px] md:mx-auto md:px-0">
+            <div className="w-full px-4 md:px-4">
                 {cart.length === 0 ? (
                     <div className="space-y-6">
-                        <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-white min-h-[60vh] md:rounded-2xl md:shadow-sm md:py-24 md:border border-gray-100 mx-4 md:mx-0">
-                            <div className="relative mb-8 group">
+                        <div className="flex flex-col items-center justify-center py-12 px-4 text-center bg-white min-h-[40vh] md:rounded-2xl md:shadow-sm md:py-24 md:border border-gray-100 mx-4 md:mx-0">
+                            <div className="relative mb-6 group">
                                 <div className="absolute inset-0 bg-blue-100 rounded-full animate-ping opacity-20 duration-[2s]"></div>
-                                <div className="relative w-32 h-32 bg-gradient-to-tr from-blue-50 to-blue-100 rounded-full flex items-center justify-center shadow-inner hover:scale-105 transition-transform duration-300">
-                                    <span className="material-icons text-blue-600 text-[64px] md:text-[80px] drop-shadow-sm -ml-2">remove_shopping_cart</span>
+                                <div className="relative w-24 h-24 bg-gradient-to-tr from-blue-50 to-blue-100 rounded-full flex items-center justify-center shadow-inner hover:scale-105 transition-transform duration-300">
+                                    <span className="material-icons text-blue-600 text-4xl md:text-[80px] drop-shadow-sm -ml-1">remove_shopping_cart</span>
                                 </div>
-                                <div className="absolute -bottom-2 -right-2 bg-white p-2 rounded-full shadow-md border border-gray-100">
-                                    <span className="material-icons text-orange-500 text-2xl">sentiment_dissatisfied</span>
+                                <div className="absolute -bottom-1 -right-1 bg-white p-1.5 rounded-full shadow-md border border-gray-100">
+                                    <span className="material-icons text-orange-500 text-lg">sentiment_dissatisfied</span>
                                 </div>
                             </div>
-                            
-                            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-3 tracking-tight">Your cart is feeling light</h2>
-                            <p className="text-gray-500 text-base md:text-lg mb-8 max-w-md mx-auto leading-relaxed">
+
+                            <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 tracking-tight">Your cart is feeling light</h2>
+                            <p className="text-gray-500 text-sm md:text-lg mb-6 max-w-sm mx-auto leading-relaxed">
                                 There is nothing in your bag. Let's add some items.
                             </p>
-                            
-                            <button 
-                                onClick={() => navigate('/')} 
-                                className="group relative inline-flex items-center gap-2 bg-blue-600 text-white px-10 py-4 rounded-full font-bold shadow-blue-200 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+
+                            <button
+                                onClick={() => navigate('/')}
+                                className="group relative inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-blue-200 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden text-sm"
                             >
                                 <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
-                                <span className="material-icons relative z-10 transition-transform group-hover:rotate-12">shopping_bag</span>
+                                <span className="material-icons relative z-10 text-lg transition-transform group-hover:rotate-12">shopping_bag</span>
                                 <span className="relative z-10">Start Shopping</span>
                             </button>
                         </div>
 
-                         {/* Saved for Later - Displayed even when cart is empty */}
+                        {/* Saved for Later - Displayed even when cart is empty */}
                         {savedForLater.length > 0 && (
                             <div className="bg-white md:rounded-lg md:shadow-lg border border-blue-100 mx-4 md:mx-0">
                                 <div className="px-5 py-4 border-b border-blue-100 bg-gradient-to-r from-white to-purple-50">
