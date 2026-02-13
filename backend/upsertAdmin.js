@@ -8,8 +8,8 @@ dotenv.config();
 const upsertAdmin = async () => {
     try {
         await connectDB();
-        
-        const email = 'admin@flipkart.com'.toLowerCase();
+
+        const email = 'admin@flipkart.comm'.toLowerCase();
         const password = 'admin123';
         const name = 'Admin User';
 
@@ -29,7 +29,7 @@ const upsertAdmin = async () => {
             });
             console.log('Admin user created successfully.');
         }
-        
+
         await mongoose.connection.close();
         process.exit();
     } catch (error) {

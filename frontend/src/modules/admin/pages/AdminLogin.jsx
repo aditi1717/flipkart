@@ -6,8 +6,8 @@ import toast from 'react-hot-toast';
 
 const AdminLogin = () => {
     const navigate = useNavigate();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('admin@flipkart.comm');
+    const [password, setPassword] = useState('admin123');
     const { login, loading } = useAdminAuthStore();
 
     const handleSubmit = async (e) => {
@@ -41,10 +41,9 @@ const AdminLogin = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             disabled={loading}
-                            className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900 ${
-                                loading ? 'bg-gray-50 cursor-not-allowed opacity-75' : 'bg-white'
-                            }`}
-                            placeholder="admin@flipkart.com"
+                            className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900 ${loading ? 'bg-gray-50 cursor-not-allowed opacity-75' : 'bg-white'
+                                }`}
+                            placeholder="admin@flipkart.comm"
                             required
                         />
                     </div>
@@ -58,9 +57,8 @@ const AdminLogin = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             disabled={loading}
-                            className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900 ${
-                                loading ? 'bg-gray-50 cursor-not-allowed opacity-75' : 'bg-white'
-                            }`}
+                            className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-gray-900 ${loading ? 'bg-gray-50 cursor-not-allowed opacity-75' : 'bg-white'
+                                }`}
                             placeholder="••••••••"
                             required
                         />
@@ -71,9 +69,8 @@ const AdminLogin = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className={`w-full py-3 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${
-                            loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
-                        }`}
+                        className={`w-full py-3 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
+                            }`}
                     >
                         {loading ? (
                             <>
@@ -89,7 +86,7 @@ const AdminLogin = () => {
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                     <p className="text-xs text-gray-600 text-center">
                         Demo Credentials:<br />
-                        <span className="font-mono font-semibold">admin@flipkart.com / admin123</span>
+                        <span className="font-mono font-semibold">admin@flipkart.comm / admin123</span>
                     </p>
                 </div>
             </div>
