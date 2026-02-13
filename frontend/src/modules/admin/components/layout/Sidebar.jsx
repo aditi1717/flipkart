@@ -25,7 +25,8 @@ import {
     MdLocationOn,
     MdLayers,
     MdHelpCenter,
-    MdViewCompact
+    MdViewCompact,
+    MdNotifications
 } from 'react-icons/md';
 
 import logo from '../../../../assets/indiankart-logo.png';
@@ -55,6 +56,7 @@ const Sidebar = () => {
         { name: 'Content Pages', icon: MdDescription, path: '/admin/pages' },
         { name: 'Footer Settings', icon: MdViewCompact, path: '/admin/footer-settings' },
         { name: 'Header Settings', icon: MdViewCompact, path: '/admin/header-settings' },
+        { name: 'Notifications', icon: MdNotifications, path: '/admin/notifications' },
         { name: 'Settings', icon: MdSettings, path: '/admin/settings' },
     ];
 
@@ -63,19 +65,19 @@ const Sidebar = () => {
             {/* Mobile Toggle */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg"
+                className="lg:hidden fixed top-3 left-4 z-50 p-2 text-white bg-transparent rounded-lg"
             >
-                {isOpen ? <MdClose size={24} /> : <MdMenu size={24} />}
+                {isOpen ? <MdClose size={28} /> : <MdMenu size={28} />}
             </button>
 
             {/* Sidebar */}
             <aside
                 className={`fixed left-0 top-0 h-full bg-gradient-to-b from-gray-900 to-gray-800 text-white transition-all duration-300 z-40 ${isOpen ? 'w-64' : 'w-0 lg:w-20'
-                    } overflow-y-auto overflow-x-hidden shadow-2xl custom-scrollbar`}
+                    } flex flex-col overflow-hidden shadow-2xl`}
             >
                 {/* Logo */}
                 <div className="h-20 flex items-center px-3 border-b border-gray-700/50 bg-gray-900/50 backdrop-blur-sm overflow-hidden">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 pl-12 lg:pl-0">
                         <img
                             src={logo}
                             alt="Logo"
@@ -91,7 +93,7 @@ const Sidebar = () => {
                 </div>
 
                 {/* Menu Items */}
-                <nav className="mt-4 px-2">
+                <nav className="mt-4 px-2 flex-1 overflow-y-auto custom-scrollbar pb-10">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         return (

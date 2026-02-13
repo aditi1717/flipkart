@@ -180,7 +180,7 @@ const DeliverySlip = () => {
                     </p>
                 </div>
             ) : (
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead className="bg-gray-50 border-b border-gray-100">
@@ -193,13 +193,13 @@ const DeliverySlip = () => {
                                             className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                         />
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Order ID</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Customer</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Phone</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Items</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">COD Amount</th>
-                                    <th className="px-6 py-4 text-center text-xs font-black text-gray-500 uppercase tracking-wider">Action</th>
+                                    <th className="px-6 py-4 text-left text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest whitespace-nowrap">Order ID</th>
+                                    <th className="px-6 py-4 text-left text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest whitespace-nowrap">Customer</th>
+                                    <th className="px-6 py-4 text-left text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest whitespace-nowrap">Phone</th>
+                                    <th className="px-6 py-4 text-left text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest whitespace-nowrap">Status</th>
+                                    <th className="px-6 py-4 text-left text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest whitespace-nowrap">Items</th>
+                                    <th className="px-6 py-4 text-left text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest whitespace-nowrap">COD Amount</th>
+                                    <th className="px-6 py-4 text-center text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest whitespace-nowrap">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -229,12 +229,12 @@ const DeliverySlip = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-tight ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
-                                                    order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                                                        order.status === 'Pending' ? 'bg-gray-100 text-gray-700' :
-                                                            order.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' :
-                                                                order.status === 'Packed' ? 'bg-indigo-100 text-indigo-700' :
-                                                                    order.status === 'Dispatched' ? 'bg-purple-100 text-purple-700' :
-                                                                        'bg-orange-100 text-orange-700'
+                                                order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
+                                                    order.status === 'Pending' ? 'bg-gray-100 text-gray-700' :
+                                                        order.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' :
+                                                            order.status === 'Packed' ? 'bg-indigo-100 text-indigo-700' :
+                                                                order.status === 'Dispatched' ? 'bg-purple-100 text-purple-700' :
+                                                                    'bg-orange-100 text-orange-700'
                                                 }`}>
                                                 {order.status}
                                             </span>
