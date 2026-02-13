@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MdNotifications, MdLogout, MdPerson, MdCheckCircle, MdError, MdInfo, MdClose } from 'react-icons/md';
 import useAdminAuthStore from '../../store/adminAuthStore';
 import useNotificationStore from '../../store/notificationStore';
+import logo from '../../../../assets/indiankart-logo.png';
 
 const AdminHeader = () => {
     const navigate = useNavigate();
@@ -69,21 +70,22 @@ const AdminHeader = () => {
     };
 
     return (
-        <header className="h-16 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-opacity-95">
-            <div className="flex items-center gap-4">
-                <h2 className="text-xl font-black text-white tracking-tight italic">
+        <header className="h-16 md:h-20 bg-gray-900 border-b border-gray-800 flex items-center justify-between pl-14 pr-6 lg:px-6 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-opacity-95">
+            <div className="flex items-center gap-2 md:gap-4">
+                <img src={logo} alt="Logo" className="w-14 h-14 object-contain md:hidden" />
+                <h2 className="text-base md:text-2xl font-black text-white tracking-tight italic">
                     ADMIN <span className="text-blue-500 not-italic">DASHBOARD</span>
                 </h2>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 md:gap-4">
                 {/* Notifications */}
                 <div className="relative" ref={notificationRef}>
                     <button
                         className="relative p-2 hover:bg-gray-800 rounded-xl transition-all duration-300 group"
                         onClick={() => setShowNotifications(!showNotifications)}
                     >
-                        <MdNotifications size={24} className={`group-hover:text-blue-500 ${unreadCount > 0 ? 'text-white' : 'text-gray-400'}`} />
+                        <MdNotifications size={28} className={`group-hover:text-blue-500 ${unreadCount > 0 ? 'text-white' : 'text-gray-400'}`} />
                         {unreadCount > 0 && (
                             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-gray-900 animate-pulse"></span>
                         )}
@@ -145,13 +147,13 @@ const AdminHeader = () => {
                 </div>
 
                 {/* Admin Profile */}
-                <div className="flex items-center gap-3 pl-4 border-l border-gray-800">
+                <div className="flex items-center gap-2 pl-2 border-l border-gray-800">
                     <div className="text-right hidden sm:block">
-                        <p className="text-sm font-black text-gray-100 leading-none">{adminUser?.name || 'Super Admin'}</p>
-                        <p className="text-sm text-blue-500 font-bold uppercase tracking-widest mt-1">Full Access</p>
+                        <p className="text-sm md:text-base font-black text-gray-100 leading-none">{adminUser?.name || 'Super Admin'}</p>
+                        <p className="text-xs md:text-sm text-blue-500 font-bold uppercase tracking-widest mt-1">Full Access</p>
                     </div>
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20 border border-blue-400/20">
-                        <MdPerson size={24} className="text-white" />
+                        <MdPerson size={28} className="text-white" />
                     </div>
                 </div>
 
@@ -161,7 +163,7 @@ const AdminHeader = () => {
                     className="p-2.5 bg-gray-800/50 hover:bg-red-500 text-gray-400 hover:text-white rounded-xl transition-all duration-300 shadow-inner"
                     title="Logout"
                 >
-                    <MdLogout size={20} />
+                    <MdLogout size={28} />
                 </button>
             </div>
         </header>

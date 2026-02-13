@@ -27,6 +27,10 @@ const userSchema = mongoose.Schema({
         type: String,
         enum: ['active', 'disabled'],
         default: 'active'
+    },
+    fcmToken: {
+        type: String,
+        default: null
     }
 }, {
     timestamps: true,
