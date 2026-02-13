@@ -1,4 +1,4 @@
-import express from 'express'; // Reload trigger 4
+import express from 'express'; // Reload trigger 5
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';

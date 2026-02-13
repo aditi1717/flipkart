@@ -113,31 +113,31 @@ const OrderDetail = () => {
                 toast.error('Please enter Serial Number / IMEI for all items before packing.');
                 return;
             }
-            
+
             const serialNumbers = order.items.map(item => ({
                 itemId: item._id,
                 // Use input value if present, otherwise fallback to existing value
                 serial: serialInputs[item._id] !== undefined ? serialInputs[item._id] : item.serialNumber,
                 type: serialTypes[item._id] !== undefined ? serialTypes[item._id] : (item.serialType || 'Serial Number')
             })).filter(s => s.serial); // Only send if we have a serial number
-            
+
             updateOrderStatus(id, newStatus, actionNote, serialNumbers);
         } else {
             // Also send serial numbers if they were edited in other statuses
             const hasEdits = Object.keys(serialInputs).length > 0 || Object.keys(serialTypes).length > 0;
             if (hasEdits) {
-                 const serialNumbers = order.items.map(item => ({
+                const serialNumbers = order.items.map(item => ({
                     itemId: item._id,
                     serial: serialInputs[item._id] !== undefined ? serialInputs[item._id] : item.serialNumber,
                     type: serialTypes[item._id] !== undefined ? serialTypes[item._id] : (item.serialType || 'Serial Number')
-                 })).filter(s => s.serial); // Only send valid ones
+                })).filter(s => s.serial); // Only send valid ones
 
-                 updateOrderStatus(id, newStatus, actionNote, serialNumbers);
+                updateOrderStatus(id, newStatus, actionNote, serialNumbers);
             } else {
-                 updateOrderStatus(id, newStatus, actionNote);
+                updateOrderStatus(id, newStatus, actionNote);
             }
         }
-        
+
         setActionNote('');
         setSerialInputs({});
         setUpdating(false);
@@ -154,75 +154,75 @@ const OrderDetail = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+        <div className="max-w-7xl mx-auto space-y-4 md:space-y-8 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6 bg-white p-4 md:p-8 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 md:gap-6">
                     <button
                         onClick={() => navigate('/admin/orders')}
-                        className="p-4 bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 text-gray-500 hover:text-gray-900 rounded-2xl transition-all shadow-sm group"
+                        className="p-2 md:p-4 bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 text-gray-500 hover:text-gray-900 rounded-xl md:rounded-2xl transition-all shadow-sm group"
                     >
-                        <MdArrowBack size={24} className="group-hover:-translate-x-1 transition-transform" />
+                        <MdArrowBack size={20} className="md:w-6 md:h-6 group-hover:-translate-x-1 transition-transform" />
                     </button>
                     <div>
-                        <div className="flex items-center gap-3 mb-1">
-                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{order.displayId || order.id}</h1>
-                            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${order.status === 'Delivered' ? 'bg-green-100 text-green-600' :
-                                    order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
-                                        'bg-blue-100 text-blue-600 animate-pulse'
+                        <div className="flex items-center gap-2 md:gap-3 mb-1">
+                            <h1 className="text-xl md:text-3xl font-black text-gray-900 tracking-tight">{order.displayId || order.id}</h1>
+                            <span className={`px-2 py-1 md:px-4 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-sm ${order.status === 'Delivered' ? 'bg-green-100 text-green-600' :
+                                order.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
+                                    'bg-blue-100 text-blue-600 animate-pulse'
                                 }`}>
                                 {order.status}
                             </span>
                         </div>
-                        <p className="text-sm text-gray-400 font-medium">Placed on {new Date(order.date).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })}</p>
+                        <p className="text-xs md:text-sm text-gray-400 font-medium">Placed on {new Date(order.date).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })}</p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <InvoiceGenerator 
-                        order={order} 
-                        items={order.items} 
-                        settings={settings} 
+                <div className="flex items-center gap-2 md:gap-3">
+                    <InvoiceGenerator
+                        order={order}
+                        items={order.items}
+                        settings={settings}
                         customTrigger={
-                            <button className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 text-gray-600 font-black text-xs rounded-2xl hover:bg-gray-50 transition-all shadow-sm uppercase tracking-widest">
-                                <MdPrint size={18} /> Print Invoice
+                            <button className="flex items-center gap-1 md:gap-2 px-3 py-2 md:px-6 md:py-3 bg-white border border-gray-100 text-gray-600 font-black text-[10px] md:text-xs rounded-xl md:rounded-2xl hover:bg-gray-50 transition-all shadow-sm uppercase tracking-widest">
+                                <MdPrint size={16} className="md:w-[18px] md:h-[18px]" /> <span className="hidden md:inline">Print Invoice</span><span className="md:hidden">Invoice</span>
                             </button>
                         }
                     />
-                    
+
                     {/* Separate Serial/IMEI Button */}
-                     {order.status !== 'Cancelled' && (
+                    {order.status !== 'Cancelled' && (
                         <button
                             onClick={openSerialModal}
-                            className="flex items-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 border border-indigo-100 font-black text-xs rounded-2xl hover:bg-indigo-100 transition-all shadow-sm uppercase tracking-widest"
+                            className="flex items-center gap-1 md:gap-2 px-3 py-2 md:px-6 md:py-3 bg-indigo-50 text-indigo-600 border border-indigo-100 font-black text-[10px] md:text-xs rounded-xl md:rounded-2xl hover:bg-indigo-100 transition-all shadow-sm uppercase tracking-widest"
                         >
-                            <MdPendingActions size={18} /> Manage Serials
+                            <MdPendingActions size={16} className="md:w-[18px] md:h-[18px]" /> <span className="hidden md:inline">Manage Serials</span><span className="md:hidden">Serials</span>
                         </button>
                     )}
 
                     {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
                         <button
                             onClick={openUpdateModal}
-                            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-black text-xs rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 uppercase tracking-widest"
+                            className="flex items-center gap-1 md:gap-2 px-3 py-2 md:px-6 md:py-3 bg-blue-600 text-white font-black text-[10px] md:text-xs rounded-xl md:rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 uppercase tracking-widest"
                         >
-                            Update Status
+                            <span className="hidden md:inline">Update Status</span><span className="md:hidden">Update</span>
                         </button>
                     )}
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
                 {/* Main Content */}
-                <div className="lg:col-span-8 space-y-8">
+                <div className="lg:col-span-8 space-y-4 md:space-y-8">
                     {/* Order Items */}
-                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="p-6 border-b border-gray-50 bg-gray-50/30">
-                            <h2 className="text-sm font-black text-gray-800 uppercase tracking-widest">Order Items ({order.items.length})</h2>
+                    <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="p-4 md:p-6 border-b border-gray-50 bg-gray-50/30">
+                            <h2 className="text-xs md:text-sm font-black text-gray-800 uppercase tracking-widest">Order Items ({order.items.length})</h2>
                         </div>
                         <div className="divide-y divide-gray-50">
                             {order.items.map((item, idx) => (
-                                <div key={idx} className="p-6 flex items-center gap-6 hover:bg-gray-50/50 transition-colors">
-                                    <div className="w-20 h-20 bg-gray-50 rounded-2xl border border-gray-100 p-2 overflow-hidden flex-shrink-0">
+                                <div key={idx} className="p-4 md:p-6 flex items-center gap-3 md:gap-6 hover:bg-gray-50/50 transition-colors">
+                                    <div className="w-14 h-14 md:w-20 md:h-20 bg-gray-50 rounded-xl md:rounded-2xl border border-gray-100 p-2 overflow-hidden flex-shrink-0">
                                         <img src={item.image} className="w-full h-full object-contain" alt={item.name} />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -249,16 +249,16 @@ const OrderDetail = () => {
                                 </div>
                             ))}
                         </div>
-                        <div className="p-8 bg-gray-50/30 border-t border-gray-50 flex flex-col items-end gap-3 text-right">
-                            <div className="flex justify-between w-full max-w-[200px] text-xs font-bold text-gray-400 uppercase">
+                        <div className="p-4 md:p-8 bg-gray-50/30 border-t border-gray-50 flex flex-col items-end gap-2 md:gap-3 text-right">
+                            <div className="flex justify-between w-full max-w-[160px] md:max-w-[200px] text-[10px] md:text-xs font-bold text-gray-400 uppercase">
                                 <span>Subtotal</span>
                                 <span>₹{order.total.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between w-full max-w-[200px] text-xs font-bold text-gray-400 uppercase">
+                            <div className="flex justify-between w-full max-w-[160px] md:max-w-[200px] text-[10px] md:text-xs font-bold text-gray-400 uppercase">
                                 <span>Shipping</span>
                                 <span className="text-green-500">FREE</span>
                             </div>
-                            <div className="flex justify-between w-full max-w-[200px] text-xl font-black text-gray-900 mt-2">
+                            <div className="flex justify-between w-full max-w-[160px] md:max-w-[200px] text-lg md:text-xl font-black text-gray-900 mt-1 md:mt-2">
                                 <span>TOTAL</span>
                                 <span>₹{order.total.toLocaleString()}</span>
                             </div>
@@ -266,16 +266,16 @@ const OrderDetail = () => {
                     </div>
 
                     {/* Timeline */}
-                    <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                        <h2 className="text-sm font-black text-gray-800 uppercase tracking-widest mb-8 flex items-center gap-3">
-                            <MdSchedule className="text-blue-500" size={20} /> Order Timeline
+                    <div className="bg-white p-4 md:p-8 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm">
+                        <h2 className="text-xs md:text-sm font-black text-gray-800 uppercase tracking-widest mb-6 md:mb-8 flex items-center gap-2 md:gap-3">
+                            <MdSchedule className="text-blue-500" size={18} /> Order Timeline
                         </h2>
                         <div className="relative space-y-8 before:absolute before:inset-0 before:left-[19px] before:w-0.5 before:bg-gray-100 before:pointer-events-none pb-4">
                             {order.timeline.map((event, idx) => (
                                 <div key={idx} className="relative flex gap-8">
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center relative z-10 shadow-sm transition-transform hover:scale-110 ${event.status === 'Cancelled' ? 'bg-red-100 text-red-600' :
-                                            event.status === 'Delivered' ? 'bg-green-100 text-green-600' :
-                                                'bg-blue-100 text-blue-600'
+                                        event.status === 'Delivered' ? 'bg-green-100 text-green-600' :
+                                            'bg-blue-100 text-blue-600'
                                         }`}>
                                         <div className="w-4 h-4 rounded-full bg-current"></div>
                                     </div>
@@ -293,10 +293,10 @@ const OrderDetail = () => {
                 </div>
 
                 {/* Sidebar Details */}
-                <div className="lg:col-span-4 space-y-8">
+                <div className="lg:col-span-4 space-y-4 md:space-y-8">
                     {/* User Info */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
-                        <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-4">Customer Profile</h2>
+                    <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm space-y-4 md:space-y-6">
+                        <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-3 md:pb-4">Customer Profile</h2>
                         <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-2xl">
                             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-blue-500 shadow-sm font-black text-xl">
                                 {order.user?.name?.charAt(0) || 'U'}
@@ -318,7 +318,7 @@ const OrderDetail = () => {
                     </div>
 
                     {/* Delivery Address */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+                    <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm space-y-4 md:space-y-6">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">Delivery Address</h2>
                             <span className="px-2 py-0.5 bg-gray-100 text-[8px] font-black uppercase rounded text-gray-500">{order.address?.type || 'Home'}</span>
@@ -335,7 +335,7 @@ const OrderDetail = () => {
                     </div>
 
                     {/* Payment Info */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+                    <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm space-y-4 md:space-y-6">
                         <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">Payment Metadata</h2>
                         <div className="space-y-4">
                             <div className="flex justify-between items-center text-xs">
@@ -378,10 +378,9 @@ const OrderDetail = () => {
             {/* Status Update Modal/Pop-up */}
             {updating && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
-                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
+                    <div className="bg-white w-full max-w-md rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
                         {!showCancelConfirm ? (
-                            <div className="p-8 space-y-6">
+                            <div className="p-4 md:p-8 space-y-4 md:space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xl font-black text-gray-900">Update fulfillment status</h3>
                                     <button onClick={() => setUpdating(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400"><MdCancel size={24} /></button>
@@ -415,39 +414,39 @@ const OrderDetail = () => {
                                     {(selectedStatus === 'Packed' || order.status === 'Confirmed' || order.status === 'Packed' || order.status === 'Dispatched' || order.status === 'Out for Delivery') && (
                                         <div className="space-y-3 mt-4 animate-in fade-in slide-in-from-top-2">
                                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                                <MdLocalShipping size={14} /> 
+                                                <MdLocalShipping size={14} />
                                                 {order.status === 'Confirmed' ? 'Enter Serial/IMEI for Items' : 'Edit Serial/IMEI Numbers'}
                                             </p>
                                             <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100 max-h-60 overflow-y-auto">
                                                 {order.items.map(item => (
-                                                <div key={item._id} className="space-y-1">
-                                                    <label className="text-xs font-bold text-gray-700 truncate block">{item.name}</label>
-                                                    <div className="flex gap-2">
-                                                        <select
-                                                            className="bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-3 py-3 text-xs font-bold outline-none transition-all text-gray-700 shadow-sm w-1/3 appearance-none"
-                                                            value={serialTypes[item._id] || (item.serialType || 'Serial Number')}
-                                                            onChange={(e) => setSerialTypes(prev => ({ ...prev, [item._id]: e.target.value }))}
-                                                        >
-                                                            <option>Serial Number</option>
-                                                            <option>IMEI</option>
-                                                        </select>
-                                                        <input 
-                                                            type="text"
-                                                            list={`serials-${item._id}`}
-                                                            placeholder={`Enter Number...`}
-                                                            className="flex-1 bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-gray-400 font-mono text-gray-900 shadow-sm"
-                                                            value={serialInputs[item._id] !== undefined ? serialInputs[item._id] : (item.serialNumber || '')}
-                                                            onChange={(e) => setSerialInputs(prev => ({ ...prev, [item._id]: e.target.value }))}
-                                                        />
+                                                    <div key={item._id} className="space-y-1">
+                                                        <label className="text-xs font-bold text-gray-700 truncate block">{item.name}</label>
+                                                        <div className="flex gap-2">
+                                                            <select
+                                                                className="bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-3 py-3 text-xs font-bold outline-none transition-all text-gray-700 shadow-sm w-1/3 appearance-none"
+                                                                value={serialTypes[item._id] || (item.serialType || 'Serial Number')}
+                                                                onChange={(e) => setSerialTypes(prev => ({ ...prev, [item._id]: e.target.value }))}
+                                                            >
+                                                                <option>Serial Number</option>
+                                                                <option>IMEI</option>
+                                                            </select>
+                                                            <input
+                                                                type="text"
+                                                                list={`serials-${item._id}`}
+                                                                placeholder={`Enter Number...`}
+                                                                className="flex-1 bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-gray-400 font-mono text-gray-900 shadow-sm"
+                                                                value={serialInputs[item._id] !== undefined ? serialInputs[item._id] : (item.serialNumber || '')}
+                                                                onChange={(e) => setSerialInputs(prev => ({ ...prev, [item._id]: e.target.value }))}
+                                                            />
+                                                        </div>
+                                                        <datalist id={`serials-${item._id}`}>
+                                                            {/* Placeholder for future inventory integration */}
+                                                            <option value="SN-EXAMPLE-01" />
+                                                            <option value="SN-EXAMPLE-02" />
+                                                            <option value="IMEI-TEST-123456789012345" />
+                                                        </datalist>
                                                     </div>
-                                                    <datalist id={`serials-${item._id}`}>
-                                                        {/* Placeholder for future inventory integration */}
-                                                        <option value="SN-EXAMPLE-01" />
-                                                        <option value="SN-EXAMPLE-02" />
-                                                        <option value="IMEI-TEST-123456789012345" />
-                                                    </datalist>
-                                                </div>
-                                            ))}
+                                                ))}
                                             </div>
                                         </div>
                                     )}
@@ -457,7 +456,7 @@ const OrderDetail = () => {
                                     >
                                         Cancel Order
                                     </button>
-                                    
+
                                     <button
                                         onClick={handleUpdateClick}
                                         className="w-full mt-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] transition-all"
@@ -467,7 +466,7 @@ const OrderDetail = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-8 space-y-6">
+                            <div className="p-4 md:p-8 space-y-4 md:space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xl font-black text-red-600">Cancel Order?</h3>
                                     <button onClick={() => setShowCancelConfirm(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400"><MdCancel size={24} /></button>
@@ -475,7 +474,7 @@ const OrderDetail = () => {
 
                                 <div className="space-y-4">
                                     <p className="text-sm text-gray-600">Are you sure you want to cancel this order? This action cannot be undone.</p>
-                                    
+
                                     <div className="space-y-2">
                                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Cancellation Reason (Required)</p>
                                         <textarea
@@ -508,64 +507,65 @@ const OrderDetail = () => {
                             </div>
                         )}
                     </div>
-                    </div>
                 </div>
             )}
 
             {/* Serial Only Modal */}
-            {showSerialModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
-                        <div className="p-8 space-y-6">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-black text-gray-900">Manage Serial/IMEI Numbers</h3>
-                                <button onClick={() => setShowSerialModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400"><MdCancel size={24} /></button>
-                            </div>
-
-                            <div className="space-y-3">
-                                <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                        <MdLocalShipping size={14} /> 
-                                        Update Product Identification
-                                    </p>
-                                    <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100 max-h-[60vh] overflow-y-auto">
-                                        {order.items.map(item => (
-                                        <div key={item._id} className="space-y-1">
-                                            <label className="text-xs font-bold text-gray-700 truncate block">{item.name}</label>
-                                            <div className="flex gap-2">
-                                                <select
-                                                    className="bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-3 py-3 text-xs font-bold outline-none transition-all text-gray-700 shadow-sm w-1/3 appearance-none"
-                                                    value={serialTypes[item._id] || (item.serialType || 'Serial Number')}
-                                                    onChange={(e) => setSerialTypes(prev => ({ ...prev, [item._id]: e.target.value }))}
-                                                >
-                                                    <option>Serial Number</option>
-                                                    <option>IMEI</option>
-                                                </select>
-                                                <input 
-                                                    type="text"
-                                                    placeholder={`Enter Number...`}
-                                                    className="flex-1 bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-gray-400 font-mono text-gray-900 shadow-sm"
-                                                    value={serialInputs[item._id] !== undefined ? serialInputs[item._id] : (item.serialNumber || '')}
-                                                    onChange={(e) => setSerialInputs(prev => ({ ...prev, [item._id]: e.target.value }))}
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                    </div>
+            {
+                showSerialModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-md rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8">
+                            <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-black text-gray-900">Manage Serial/IMEI Numbers</h3>
+                                    <button onClick={() => setShowSerialModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400"><MdCancel size={24} /></button>
                                 </div>
-                                
-                                <button
-                                    onClick={handleSerialSave}
-                                    className="w-full mt-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] transition-all"
-                                >
-                                    Save Changes
-                                </button>
+
+                                <div className="space-y-3">
+                                    <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                            <MdLocalShipping size={14} />
+                                            Update Product Identification
+                                        </p>
+                                        <div className="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100 max-h-[60vh] overflow-y-auto">
+                                            {order.items.map(item => (
+                                                <div key={item._id} className="space-y-1">
+                                                    <label className="text-xs font-bold text-gray-700 truncate block">{item.name}</label>
+                                                    <div className="flex gap-2">
+                                                        <select
+                                                            className="bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-3 py-3 text-xs font-bold outline-none transition-all text-gray-700 shadow-sm w-1/3 appearance-none"
+                                                            value={serialTypes[item._id] || (item.serialType || 'Serial Number')}
+                                                            onChange={(e) => setSerialTypes(prev => ({ ...prev, [item._id]: e.target.value }))}
+                                                        >
+                                                            <option>Serial Number</option>
+                                                            <option>IMEI</option>
+                                                        </select>
+                                                        <input
+                                                            type="text"
+                                                            placeholder={`Enter Number...`}
+                                                            className="flex-1 bg-white border border-gray-200 focus:border-blue-500 rounded-xl px-4 py-3 text-sm outline-none transition-all placeholder:text-gray-400 font-mono text-gray-900 shadow-sm"
+                                                            value={serialInputs[item._id] !== undefined ? serialInputs[item._id] : (item.serialNumber || '')}
+                                                            onChange={(e) => setSerialInputs(prev => ({ ...prev, [item._id]: e.target.value }))}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={handleSerialSave}
+                                        className="w-full mt-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] transition-all"
+                                    >
+                                        Save Changes
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

@@ -52,17 +52,17 @@ const SubCategoryList = () => {
                 </button>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50 border-b border-gray-100">
-                            <tr>
-                                <th className="p-4 text-xs font-bold text-gray-500 uppercase">Image</th>
-                                <th className="p-4 text-xs font-bold text-gray-500 uppercase">Name</th>
-                                <th className="p-4 text-xs font-bold text-gray-500 uppercase">Parent Category</th>
-                                <th className="p-4 text-xs font-bold text-gray-500 uppercase">Description</th>
-                                <th className="p-4 text-xs font-bold text-gray-500 uppercase">Status</th>
-                                <th className="p-4 text-xs font-bold text-gray-500 uppercase text-right">Actions</th>
+                        <thead>
+                            <tr className="bg-gray-50/50 border-b border-gray-100">
+                                <th className="p-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Image</th>
+                                <th className="p-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Name</th>
+                                <th className="p-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Parent Category</th>
+                                <th className="p-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Description</th>
+                                <th className="p-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Status</th>
+                                <th className="p-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -120,21 +120,25 @@ const SubCategoryList = () => {
                 </div>
             </div>
 
-            {totalPages > 1 && (
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                />
-            )}
+            {
+                totalPages > 1 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                )
+            }
 
-            {showForm && (
-                <SubCategoryForm
-                    subCategory={editingSubCategory}
-                    onClose={handleCloseForm}
-                />
-            )}
-        </div>
+            {
+                showForm && (
+                    <SubCategoryForm
+                        subCategory={editingSubCategory}
+                        onClose={handleCloseForm}
+                    />
+                )
+            }
+        </div >
     );
 };
 

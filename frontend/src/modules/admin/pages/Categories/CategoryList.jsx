@@ -55,24 +55,24 @@ const CategoryList = () => {
         const hasChildren = category.children && category.children.length > 0;
         const categoryId = category.id || category._id;
         const isExpanded = expandedIds.has(categoryId);
-        const indent = level * 32;
+        const indent = level * (window.innerWidth < 768 ? 12 : 32);
 
         return (
             <div key={categoryId}>
                 <div
-                    className="flex items-center justify-between p-4 hover:bg-gray-50 border-b border-gray-100 transition"
-                    style={{ paddingLeft: `${indent + 16}px` }}
+                    className="flex items-center justify-between p-2 md:p-4 hover:bg-gray-50 border-b border-gray-100 transition"
+                    style={{ paddingLeft: `${indent + (window.innerWidth < 768 ? 8 : 16)}px` }}
                 >
-                    <div className="flex items-center gap-3 flex-1">
+                    <div className="flex items-center gap-2 md:gap-3 flex-1">
                         {hasChildren ? (
                             <button
                                 onClick={() => toggleExpand(categoryId)}
                                 className="p-1 hover:bg-gray-200 rounded transition"
                             >
                                 {isExpanded ? (
-                                    <MdExpandMore size={20} className="text-gray-600" />
+                                    <MdExpandMore size={20} className="text-gray-600 w-4 h-4 md:w-5 md:h-5" />
                                 ) : (
-                                    <MdChevronRight size={20} className="text-gray-600" />
+                                    <MdChevronRight size={20} className="text-gray-600 w-4 h-4 md:w-5 md:h-5" />
                                 )}
                             </button>
                         ) : (
@@ -83,33 +83,33 @@ const CategoryList = () => {
                             <img
                                 src={category.image}
                                 alt={category.name}
-                                className="w-10 h-10 rounded-lg object-cover bg-gray-100"
+                                className="w-8 h-8 md:w-10 md:h-10 rounded-lg object-cover bg-gray-100"
                             />
                         ) : (
-                            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xs uppercase">
+                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-[10px] md:text-xs uppercase">
                                 {category.name.substring(0, 2)}
                             </div>
                         )}
 
                         <div>
-                            <h4 className="font-semibold text-gray-800">{category.name}</h4>
+                            <h4 className="font-semibold text-sm md:text-base text-gray-800">{category.name}</h4>
                             {category.parentId && (
-                                <p className="text-xs text-gray-500">Level {level + 1}</p>
+                                <p className="text-[10px] md:text-xs text-gray-500">Level {level + 1}</p>
                             )}
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 md:gap-3">
                         {/* Visual Toggle Switch */}
                         <div
                             onClick={(e) => {
                                 e.stopPropagation();
                                 toggleCategoryStatus(categoryId);
                             }}
-                            className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${category.active ? 'bg-green-500' : 'bg-gray-300'}`}
+                            className={`w-8 h-5 md:w-11 md:h-6 flex items-center rounded-full p-0.5 md:p-1 cursor-pointer transition-colors duration-300 ${category.active ? 'bg-green-500' : 'bg-gray-300'}`}
                         >
                             <div
-                                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${category.active ? 'translate-x-5' : 'translate-x-0'}`}
+                                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${category.active ? 'translate-x-3 md:translate-x-5' : 'translate-x-0'}`}
                             />
                         </div>
 
@@ -118,26 +118,26 @@ const CategoryList = () => {
                                 setEditingCategory({ parentId: categoryId });
                                 setShowForm(true);
                             }}
-                            className="p-2 hover:bg-green-50 rounded-lg text-green-600 transition"
+                            className="p-1.5 md:p-2 hover:bg-green-50 rounded-lg text-green-600 transition"
                             title="Add Subcategory"
                         >
-                            <MdAdd size={18} />
+                            <MdAdd size={16} className="md:w-[18px] md:h-[18px]" />
                         </button>
 
                         <button
                             onClick={() => handleEdit(category)}
-                            className="p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition"
+                            className="p-1.5 md:p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition"
                             title="Edit"
                         >
-                            <MdEdit size={18} />
+                            <MdEdit size={16} className="md:w-[18px] md:h-[18px]" />
                         </button>
 
                         <button
                             onClick={() => handleDelete(categoryId, category.name)}
-                            className="p-2 hover:bg-red-50 rounded-lg text-red-600 transition"
+                            className="p-1.5 md:p-2 hover:bg-red-50 rounded-lg text-red-600 transition"
                             title="Delete"
                         >
-                            <MdDelete size={18} />
+                            <MdDelete size={16} className="md:w-[18px] md:h-[18px]" />
                         </button>
                     </div>
                 </div>
@@ -152,26 +152,26 @@ const CategoryList = () => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-800">Category Management</h1>
-                    <p className="text-gray-500 mt-1">Manage product categories and subcategories</p>
+                    <h1 className="text-xl md:text-3xl font-bold text-gray-800">Category Management</h1>
+                    <p className="text-xs md:text-base text-gray-500 mt-1">Manage product categories and subcategories</p>
                 </div>
                 <button
                     onClick={() => setShowForm(true)}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                    className="flex items-center gap-1 md:gap-2 bg-blue-600 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-700 transition text-xs md:text-base font-bold"
                 >
-                    <MdAdd size={20} />
+                    <MdAdd size={16} className="md:w-5 md:h-5" />
                     Add Category
                 </button>
             </div>
 
             {/* Category Tree */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div className="p-6 border-b border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-800">Category Hierarchy</h2>
+                <div className="p-4 md:p-6 border-b border-gray-100">
+                    <h2 className="text-lg md:text-xl font-bold text-gray-800">Category Hierarchy</h2>
                 </div>
 
                 {categories.length === 0 ? (

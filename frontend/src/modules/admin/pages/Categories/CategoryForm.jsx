@@ -44,11 +44,11 @@ const CategoryForm = ({ category, onClose }) => {
         data.append('name', formData.name);
         if (formData.parentId) data.append('parentId', formData.parentId);
         data.append('active', formData.active);
-        
+
         if (formData.file) {
             data.append('icon', formData.file);
         } else if (formData.image) {
-             data.append('icon', formData.image);
+            data.append('icon', formData.image);
         }
 
         try {
@@ -88,23 +88,23 @@ const CategoryForm = ({ category, onClose }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                    <h2 className="text-2xl font-bold text-gray-800">
+                <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-100">
+                    <h2 className="text-xl md:text-2xl font-bold text-gray-800">
                         {category ? 'Edit Category' : 'Add New Category'}
                     </h2>
                     <button
                         onClick={onClose}
                         className="p-2 hover:bg-gray-100 rounded-lg transition"
                     >
-                        <MdClose size={24} className="text-gray-600" />
+                        <MdClose size={20} className="md:w-6 md:h-6 text-gray-600" />
                     </button>
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 md:space-y-5">
                     {/* Category Name */}
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">
                             Category Name *
                         </label>
                         <input
@@ -112,7 +112,7 @@ const CategoryForm = ({ category, onClose }) => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 placeholder:text-gray-500"
+                            className="w-full px-3 py-2 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 placeholder:text-gray-500 text-sm md:text-base"
                             placeholder="Enter category name"
                             required
                         />
@@ -120,7 +120,7 @@ const CategoryForm = ({ category, onClose }) => {
 
                     {/* Parent Category */}
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">
                             Parent Category
                         </label>
                         <select
@@ -130,7 +130,7 @@ const CategoryForm = ({ category, onClose }) => {
                                 ...prev,
                                 parentId: e.target.value ? parseInt(e.target.value) : null
                             }))}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900"
+                            className="w-full px-3 py-2 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 text-sm md:text-base"
                         >
                             <option value="">-- Root Category --</option>
                             {allCategories
@@ -149,14 +149,14 @@ const CategoryForm = ({ category, onClose }) => {
 
                     {/* Category Image */}
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2">
                             Category Image
                         </label>
                         <input
                             type="file"
                             accept="image/*"
                             onChange={handleImageChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900"
+                            className="w-full px-3 py-2 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 text-sm md:text-base"
                         />
                         {formData.image && (
                             <div className="mt-3 border border-gray-200 rounded-lg p-2 bg-gray-50">
@@ -171,32 +171,32 @@ const CategoryForm = ({ category, onClose }) => {
                     </div>
 
                     {/* Active Status */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 md:gap-3">
                         <input
                             type="checkbox"
                             id="active"
                             name="active"
                             checked={formData.active}
                             onChange={handleChange}
-                            className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                            className="w-4 h-4 md:w-5 md:h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                         />
-                        <label htmlFor="active" className="text-sm font-medium text-gray-700">
+                        <label htmlFor="active" className="text-xs md:text-sm font-medium text-gray-700">
                             Active (Category will be visible to users)
                         </label>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex gap-2 md:gap-3 pt-2 md:pt-4">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold"
+                            className="flex-1 px-4 py-2.5 md:px-6 md:py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold text-sm md:text-base"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
+                            className="flex-1 px-4 py-2.5 md:px-6 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold text-sm md:text-base"
                         >
                             {category ? 'Update' : 'Create'} Category
                         </button>
