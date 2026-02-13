@@ -21,6 +21,15 @@ const notificationSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
+    targetAudience: {
+        type: String,
+        default: 'All Users'
+    },
+    status: {
+        type: String,
+        enum: ['sent', 'pending', 'failed'],
+        default: 'sent'
+    },
     createdAt: {
         type: Date,
         default: Date.now

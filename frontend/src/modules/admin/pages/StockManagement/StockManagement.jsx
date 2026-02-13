@@ -62,7 +62,7 @@ const StockManagement = () => {
             toast.loading('Updating stock...', { id: 'update-stock' });
             await API.put(`/products/${product.id}/stock`, payload);
             toast.success('Stock updated successfully!', { id: 'update-stock' });
-            
+
             // Update local state instead of full refetch for better UX
             setProducts(prev => prev.map(p => {
                 if (p.id === product.id) {
@@ -70,7 +70,7 @@ const StockManagement = () => {
                 }
                 return p;
             }));
-            
+
             // Clear editing state for this item
             const newEditing = { ...editingStock };
             delete newEditing[editKey];
@@ -82,7 +82,7 @@ const StockManagement = () => {
         }
     };
 
-    const filteredProducts = products.filter(p => 
+    const filteredProducts = products.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.brand?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -98,7 +98,7 @@ const StockManagement = () => {
                     </h1>
                     <p className="text-sm text-gray-500 font-medium">Update inventory levels for products and variants</p>
                 </div>
-                <button 
+                <button
                     onClick={handleRefresh}
                     className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all font-bold text-sm shadow-sm"
                 >
@@ -121,16 +121,16 @@ const StockManagement = () => {
             </div>
 
             {/* Product List */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-100">
-                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Product Info</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Category</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Variants</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Remaining Stock</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-blue-500 uppercase tracking-widest text-right">Actions</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Product Info</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Category</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest text-center">Variants</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest text-center">Remaining Stock</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -155,7 +155,7 @@ const StockManagement = () => {
                                         </td>
                                         <td className="px-6 py-5 text-center">
                                             {product.skus && product.skus.length > 0 ? (
-                                                <button 
+                                                <button
                                                     onClick={() => setExpandedProduct(expandedProduct === product.id ? null : product.id)}
                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-tighter hover:bg-blue-100 transition-all border border-blue-100 shadow-sm"
                                                 >
@@ -168,17 +168,16 @@ const StockManagement = () => {
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex items-center justify-center gap-3">
-                                                <input 
+                                                <input
                                                     type="number"
                                                     disabled={product.skus && product.skus.length > 0}
-                                                    className={`w-20 px-3 py-2 text-center rounded-xl border-2 font-black text-sm transition-all outline-none ${
-                                                        product.skus && product.skus.length > 0 
-                                                        ? 'bg-gray-100 border-transparent text-gray-400 cursor-not-allowed' 
-                                                        : 'bg-white border-blue-50 focus:border-blue-500 text-gray-900 group-hover:shadow-lg'
-                                                    }`}
+                                                    className={`w-20 px-3 py-2 text-center rounded-xl border-2 font-black text-sm transition-all outline-none ${product.skus && product.skus.length > 0
+                                                            ? 'bg-gray-100 border-transparent text-gray-400 cursor-not-allowed'
+                                                            : 'bg-white border-blue-50 focus:border-blue-500 text-gray-900 group-hover:shadow-lg'
+                                                        }`}
                                                     value={
-                                                        editingStock[product.id] ?? 
-                                                        (product.skus && product.skus.length > 0 
+                                                        editingStock[product.id] ??
+                                                        (product.skus && product.skus.length > 0
                                                             ? product.skus.reduce((acc, s) => acc + (Number(s.stock) || 0), 0)
                                                             : product.stock)
                                                     }
@@ -194,18 +193,17 @@ const StockManagement = () => {
                                                 <button
                                                     onClick={() => updateStock(product)}
                                                     disabled={editingStock[product.id] === undefined}
-                                                    className={`p-2 rounded-xl transition-all shadow-sm border ${
-                                                        editingStock[product.id] !== undefined
-                                                        ? 'bg-blue-600 text-white border-blue-700 hover:scale-105 active:scale-95'
-                                                        : 'bg-gray-50 text-gray-300 border-transparent cursor-not-allowed'
-                                                    }`}
+                                                    className={`p-2 rounded-xl transition-all shadow-sm border ${editingStock[product.id] !== undefined
+                                                            ? 'bg-blue-600 text-white border-blue-700 hover:scale-105 active:scale-95'
+                                                            : 'bg-gray-50 text-gray-300 border-transparent cursor-not-allowed'
+                                                        }`}
                                                 >
                                                     <MdSave size={20} />
                                                 </button>
                                             )}
                                         </td>
                                     </tr>
-                                    
+
                                     {/* Variant Rows */}
                                     {expandedProduct === product.id && product.skus?.map((sku, idx) => (
                                         <tr key={`${product.id}-${idx}`} className="bg-gray-50/80 animate-in slide-in-from-top-2 duration-300 border-l-4 border-blue-500">
@@ -224,7 +222,7 @@ const StockManagement = () => {
                                             <td></td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center justify-center gap-3">
-                                                    <input 
+                                                    <input
                                                         type="number"
                                                         className="w-20 px-3 py-2 text-center rounded-xl border-2 bg-white border-blue-100 focus:border-blue-500 text-gray-900 font-black text-sm transition-all outline-none"
                                                         value={editingStock[`${product.id}-${idx}`] ?? sku.stock}
@@ -236,11 +234,10 @@ const StockManagement = () => {
                                                 <button
                                                     onClick={() => updateStock(product, true, idx)}
                                                     disabled={editingStock[`${product.id}-${idx}`] === undefined}
-                                                    className={`p-2 rounded-xl transition-all shadow-sm border ${
-                                                        editingStock[`${product.id}-${idx}`] !== undefined
-                                                        ? 'bg-blue-600 text-white border-blue-700 hover:scale-105 active:scale-95'
-                                                        : 'bg-gray-50 text-gray-300 border-transparent cursor-not-allowed'
-                                                    }`}
+                                                    className={`p-2 rounded-xl transition-all shadow-sm border ${editingStock[`${product.id}-${idx}`] !== undefined
+                                                            ? 'bg-blue-600 text-white border-blue-700 hover:scale-105 active:scale-95'
+                                                            : 'bg-gray-50 text-gray-300 border-transparent cursor-not-allowed'
+                                                        }`}
                                                 >
                                                     <MdSave size={20} />
                                                 </button>

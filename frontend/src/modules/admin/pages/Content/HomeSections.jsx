@@ -60,7 +60,7 @@ const HomeSections = () => {
         } else {
             await createHomeSection(data);
         }
-        
+
         setShowForm(false);
         setFormData({ title: '', id: '', subtitle: '' });
         setIsEditing(false);
@@ -78,8 +78,8 @@ const HomeSections = () => {
     const handleDeleteSection = async (id, e) => {
         e.stopPropagation();
         if (window.confirm('Are you sure you want to delete this section?')) {
-             await deleteHomeSection(id);
-             if (selectedSectionId === id) setSelectedSectionId(null);
+            await deleteHomeSection(id);
+            if (selectedSectionId === id) setSelectedSectionId(null);
         }
     };
 
@@ -112,43 +112,43 @@ const HomeSections = () => {
     if (!selectedSectionId) {
         return (
             <div className="space-y-4">
-                 {/* Create/Edit Modal */}
-                 {showForm && (
-                     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-                         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowForm(false)}></div>
-                         <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 animate-in zoom-in duration-200">
+                {/* Create/Edit Modal */}
+                {showForm && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowForm(false)}></div>
+                        <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 animate-in zoom-in duration-200">
                             <h3 className="text-sm font-black text-gray-800 uppercase tracking-widest mb-6">
                                 {isEditing ? 'Edit Section' : 'Create New Section'}
                             </h3>
                             <div className="space-y-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-gray-400 uppercase">Section ID (Unique)</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="e.g. summer_sale" 
-                                        value={formData.id} 
-                                        onChange={(e) => setFormData({...formData, id: e.target.value})}
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. summer_sale"
+                                        value={formData.id}
+                                        onChange={(e) => setFormData({ ...formData, id: e.target.value })}
                                         className="w-full px-3 py-2 bg-gray-50 rounded-lg text-sm font-normal text-gray-800 outline-none focus:bg-white focus:ring-2 ring-blue-100 transition"
                                     />
                                     {isEditing && <p className="text-[9px] text-orange-500 font-bold mt-1 uppercase">Warning: Changing ID may break external links.</p>}
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-gray-400 uppercase">Display Title</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="e.g. Summer Sale 50% Off" 
-                                        value={formData.title} 
-                                        onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Summer Sale 50% Off"
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                         className="w-full px-3 py-2 bg-gray-50 rounded-lg text-sm font-normal text-gray-800 outline-none focus:bg-white focus:ring-2 ring-blue-100 transition"
                                     />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-gray-400 uppercase">Subtitle (Optional)</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Small description text" 
-                                        value={formData.subtitle} 
-                                        onChange={(e) => setFormData({...formData, subtitle: e.target.value})}
+                                    <input
+                                        type="text"
+                                        placeholder="Small description text"
+                                        value={formData.subtitle}
+                                        onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
                                         className="w-full px-3 py-2 bg-gray-50 rounded-lg text-sm font-normal text-gray-800 outline-none focus:bg-white focus:ring-2 ring-blue-100 transition"
                                     />
                                 </div>
@@ -159,15 +159,15 @@ const HomeSections = () => {
                                     <button onClick={() => setShowForm(false)} className="px-6 py-2 bg-gray-100 text-gray-500 rounded-lg text-xs font-black uppercase hover:bg-gray-200 transition">Cancel</button>
                                 </div>
                             </div>
-                         </div>
-                     </div>
-                 )}
+                        </div>
+                    </div>
+                )}
 
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-in fade-in duration-300">
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden animate-in fade-in duration-300">
                     <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
                         <h3 className="text-sm font-black text-gray-800 uppercase tracking-tight">All Sections</h3>
                         {!showForm && (
-                            <button onClick={() => { setIsEditing(false); setFormData({title: '', id: '', subtitle: ''}); setShowForm(true); }} className="flex items-center gap-2 text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition">
+                            <button onClick={() => { setIsEditing(false); setFormData({ title: '', id: '', subtitle: '' }); setShowForm(true); }} className="flex items-center gap-2 text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition">
                                 <MdAdd size={14} /> NEW SECTION
                             </button>
                         )}
@@ -176,9 +176,9 @@ const HomeSections = () => {
                         <table className="w-full text-left">
                             <thead className="bg-gray-50 border-b border-gray-100">
                                 <tr>
-                                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Section Heading</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Items</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Action</th>
+                                    <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Section Heading</th>
+                                    <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest text-center">Items</th>
+                                    <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -197,7 +197,7 @@ const HomeSections = () => {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex justify-end gap-2">
-                                                 <button
+                                                <button
                                                     onClick={(e) => handleEditOpen(section, e)}
                                                     className="p-1.5 text-blue-400 hover:bg-blue-50 rounded-lg transition"
                                                 >

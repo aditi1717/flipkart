@@ -114,16 +114,16 @@ const ReturnRequests = () => {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-100">
-                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Request Info</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Product</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Last Status Update</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
-                                <th className="px-6 py-4 text-[10px] font-black text-blue-500 uppercase tracking-widest text-right">Actions</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Request Info</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Product</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest">Last Status Update</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest text-center">Status</th>
+                                <th className="px-6 py-4 text-[10px] md:text-xs font-black text-gray-900 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -133,11 +133,10 @@ const ReturnRequests = () => {
                                         <div className="flex flex-col">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-xs font-black text-gray-900">{ret.id}</span>
-                                                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${
-                                                    ret.type === 'Return' ? 'bg-orange-100 text-orange-600' : 
-                                                    ret.type === 'Replacement' ? 'bg-purple-100 text-purple-600' : 
-                                                    'bg-red-100 text-red-600'
-                                                }`}>
+                                                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${ret.type === 'Return' ? 'bg-orange-100 text-orange-600' :
+                                                        ret.type === 'Replacement' ? 'bg-purple-100 text-purple-600' :
+                                                            'bg-red-100 text-red-600'
+                                                    }`}>
                                                     {ret.type}
                                                 </span>
                                             </div>
@@ -224,11 +223,10 @@ const ReturnRequests = () => {
                         {/* Left Side: Info */}
                         <div className="md:w-1/2 p-8 border-b md:border-b-0 md:border-r border-gray-100 overflow-y-auto">
                             <div className="flex items-center justify-between mb-6">
-                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
-                                    selectedReturn.type === 'Return' ? 'bg-orange-100 text-orange-600' : 
-                                    selectedReturn.type === 'Replacement' ? 'bg-purple-100 text-purple-600' : 
-                                    'bg-red-100 text-red-600'
-                                }`}>
+                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${selectedReturn.type === 'Return' ? 'bg-orange-100 text-orange-600' :
+                                        selectedReturn.type === 'Replacement' ? 'bg-purple-100 text-purple-600' :
+                                            'bg-red-100 text-red-600'
+                                    }`}>
                                     {selectedReturn.type} {selectedReturn.type === 'Cancellation' ? 'Request' : 'Order'}
                                 </span>
                                 <button onClick={() => setSelectedReturn(null)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 md:hidden"><MdCancel size={24} /></button>
@@ -314,14 +312,14 @@ const ReturnRequests = () => {
                                     <div className="grid grid-cols-2 gap-3">
                                         {selectedReturn.status === 'Pending' && (
                                             <>
-                                                <button 
-                                                    onClick={() => handleStatusUpdate(selectedReturn._id, 'Approved')} 
+                                                <button
+                                                    onClick={() => handleStatusUpdate(selectedReturn._id, 'Approved')}
                                                     className="py-3 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100"
                                                 >
                                                     {selectedReturn.type === 'Cancellation' ? 'Approve Cancellation' : 'Approve Request'}
                                                 </button>
-                                                <button 
-                                                    onClick={() => handleStatusUpdate(selectedReturn._id, 'Rejected')} 
+                                                <button
+                                                    onClick={() => handleStatusUpdate(selectedReturn._id, 'Rejected')}
                                                     className="py-3 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition"
                                                 >
                                                     {selectedReturn.type === 'Cancellation' ? 'Reject Cancellation' : 'Reject Request'}

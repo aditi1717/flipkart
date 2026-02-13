@@ -33,6 +33,7 @@ import OfferForm from '../pages/Offers/OfferForm';
 import StockManagement from '../pages/StockManagement/StockManagement';
 import FooterManager from '../pages/Settings/FooterManager';
 import HeaderManager from '../pages/Settings/HeaderManager';
+import NotificationManager from '../pages/Notifications/NotificationManager';
 
 const AdminRoutes = () => {
     return (
@@ -83,6 +84,7 @@ const AdminRoutes = () => {
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="footer-settings" element={<FooterManager />} />
                 <Route path="header-settings" element={<HeaderManager />} />
+                <Route path="notifications" element={<NotificationManager />} />
             </Route>
         </Routes>
     );
